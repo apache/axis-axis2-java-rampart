@@ -43,6 +43,12 @@
             <organization>WSO2</organization>
         </developer>
         <developer>
+             <name>Sanka Samaranayake</name>
+             <id>sanka</id>
+             <organization>WSO2 Inc.</organization>
+            <email>sanka@apache.org</email>
+        </developer>
+        <developer>
             <name>Davanum Srinivas</name>
             <id>dims</id>
             <email>dims AT wso2.com</email>
