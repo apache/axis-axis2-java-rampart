@@ -20,11 +20,9 @@
         <resources>
             <resource>
                 <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                    <include>**/*.xml</include>
-                    <include>**/*.xsl</include>
-                </includes>
+<!--                <includes>
+                    <include>**/*</include>
+                </includes>-->
             </resource>
         </resources>
         <plugins>

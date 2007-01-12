@@ -396,7 +396,7 @@
         <module>modules/rampart-policy</module>
         <module>modules/rampart-trust</module>
         <module>modules/rampart-core</module>
-<!--        <module>modules/rampart-tests</module> -->
+        <module>modules/rampart-tests</module>
     </modules>
 
     <properties>
