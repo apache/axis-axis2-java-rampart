@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>org.apache.rampart</groupId>
-        <artifactId>rampart</artifactId>
+        <artifactId>rampart-project</artifactId>
         <version>SNAPSHOT</version>
     </parent>
 

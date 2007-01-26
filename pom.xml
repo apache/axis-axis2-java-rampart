@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.rampart</groupId>
-    <artifactId>rampart</artifactId>
+    <artifactId>rampart-project</artifactId>
     <packaging>pom</packaging>
     <version>SNAPSHOT</version>
     <name>Apache Rampart</name>
@@ -397,6 +397,8 @@
         <module>modules/rampart-trust</module>
         <module>modules/rampart-core</module>
         <module>modules/rampart-tests</module>
+	<module>modules/rampart-mar</module>	
+	<module>modules/rampart-trust-mar</module>	
     </modules>
 
     <properties>

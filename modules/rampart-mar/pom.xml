@@ -2,17 +2,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <parent>
-        <groupId>org.apache.rampart</groupId>
-        <artifactId>rampart-project</artifactId>
-        <version>SNAPSHOT</version>
-    </parent>
-
+    
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>rampart-core</artifactId>
-    <packaging>jar</packaging>
+    <groupId>org.apache.rampart</groupId>
+    <artifactId>rampart</artifactId>
+    <packaging>mar</packaging>
     <version>SNAPSHOT</version>
-    <name>Rampart - Core</name>
+    <name>Rampart - Mar</name>
 
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -31,7 +27,17 @@
                     <target>1.4</target>
                 </configuration>
             </plugin>
-        </plugins>
+	    <plugin>
+        	<groupId>org.apache.axis2.maven2</groupId>
+        	<artifactId>axis2-mar-maven-plugin</artifactId>
+        	<version>SNAPSHOT</version>
+        	<extensions>true</extensions>
+        	<configuration>
+       	  		<includeDependencies>false</includeDependencies>
+			<moduleXmlFile>module.xml</moduleXmlFile>
+        	</configuration>
+      	     </plugin> 
+           </plugins>
     </build>
     
     <dependencies>
