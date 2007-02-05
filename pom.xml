@@ -410,7 +410,8 @@
         <module>modules/rampart-core</module>
         <module>modules/rampart-tests</module>
 	<module>modules/rampart-mar</module>	
-	<module>modules/rampart-trust-mar</module>	
+	<module>modules/rampart-trust-mar</module>
+	<module>modules/rampart-integration</module>
     </modules>
 
     <properties>
