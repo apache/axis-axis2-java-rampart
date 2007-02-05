@@ -18,7 +18,6 @@ package org.apache.axis2.security;
 
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axis2.Constants;
-import org.apache.axis2.rpc.MultirefTest;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
