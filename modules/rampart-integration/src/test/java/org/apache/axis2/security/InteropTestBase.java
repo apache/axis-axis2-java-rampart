@@ -144,28 +144,20 @@ public abstract class InteropTestBase extends UtilServerBasedTestCase {
      */
     public void testInteropWithConfigFiles() {
         try {
-		FileOutputStream fo = new FileOutputStream(new File("/home/muthulee/testOut.txt"));
-        	fo.write("Me here\n".getBytes());
 
             Class interopScenarioClientClass = Class
                     .forName("org.apache.axis2.security.InteropScenarioClient");
-	    fo.write("Me here1\n".getBytes());
 
             Constructor c = interopScenarioClientClass
                     .getConstructor(new Class[]{boolean.class});
             Object clientObj = c.newInstance(new Object[]{this
                     .isUseSOAP12InStaticConfigTest() ? Boolean.TRUE
                     : Boolean.FALSE});
-	fo.write("Me here2\n".getBytes());
             Method m = interopScenarioClientClass.getMethod(
                     "invokeWithStaticConfig", new Class[]{String.class,
                     String.class});
-	fo.write(Constants.TESTING_PATH.getBytes());
             m.invoke(clientObj, new Object[]{
                     Constants.TESTING_PATH + getClientRepo(), targetEpr});
-	fo.write("Me here3\n".getBytes());
-        	fo.flush();
-        	fo.close();
 
         } catch (Exception e) {
             e.printStackTrace();
