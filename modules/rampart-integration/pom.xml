@@ -59,6 +59,14 @@
                   <overWrite>true</overWrite>
                   <outputDirectory>target/artifacts</outputDirectory>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.axis2</groupId>
+                  <artifactId>addressing</artifactId>
+                  <version>SNAPSHOT</version>
+                  <type>mar</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>target/artifacts</outputDirectory>
+                </artifactItem>
 	    </artifactItems>
             </configuration>
           </execution>
@@ -77,13 +85,13 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.1</version>
                 <executions>
-		    <execution>
-			<id>generate-source</id>
-			<phase>process-resources</phase>
-			<goals>
+					<execution>
+					<id>generate-source</id>
+					<phase>process-resources</phase>
+					<goals>
                             <goal>run</goal>
-                        </goals>
-			<configuration>
+                    </goals>
+					<configuration>
                             <tasks>
 				<mkdir dir="generated-code"/>
 				<java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
@@ -115,8 +123,8 @@
                         <phase>process-test-resources</phase>
 			<configuration>
                             <tasks>
-<property name="addressing.mar" value="addressing-1.1.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-classes/modules/addressing-SNAPSHOT.mar"/>
+<property name="addressing.mar" value="addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-classes/modules/addressing-SNAPSHOT.mar"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-classes/modules/rampart-SNAPSHOT.mar"/>
 
 <mkdir dir="target/temp-ramp"/>
@@ -131,15 +139,15 @@
 <mkdir dir="target/test-resources/rampart_client_repo/conf"/>
 <mkdir dir="target/test-resources/rampart_client_repo/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rampart_client_repo/modules/rampart-SNAPSHOT.mar"/>
-<copy file="${user.home}/.m2/repository/org/apache/rampart/rampart-sts/SNAPSHOT/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_client_repo/modules/rampart-sts-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/rampart_client_repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_client_repo/modules/rampart-sts-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rampart_client_repo/modules/addressing-SNAPSHOT.mar"/>
 <mkdir dir="target/test-resources/rampart_service_repo"/>
 <mkdir dir="target/test-resources/rampart_service_repo/conf"/>
 <mkdir dir="target/test-resources/rampart_service_repo/services"/>
 <mkdir dir="target/test-resources/rampart_service_repo/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/rampart-SNAPSHOT.mar"/>
-<copy file="${user.home}/.m2/repository/org/apache/rampart/rampart-sts/SNAPSHOT/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/rampart-sts-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/rampart_service_repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/rampart-sts-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/addressing-SNAPSHOT.mar"/>
 <!-- Service 1 -->
 <copy overwrite="yes" file="resources/rampart/services-1.xml" tofile="target/temp-ramp/META-INF/services.xml"/>
 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService1.aar" basedir="target/temp-ramp"/>
@@ -190,7 +198,7 @@
 <mkdir dir="target/test-resources/sc_client_repo"/>
 <mkdir dir="target/test-resources/sc_client_repo/conf"/>
 <mkdir dir="target/test-resources/sc_client_repo/modules"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/sc_client_repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/sc_client_repo/modules/addressing-SNAPSHOT.mar"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/sc_client_repo/modules/rampart-SNAPSHOT.mar"/>
 <!-- SecConv Test - 1  -->
 <mkdir dir="target/test-resources/sc_service_repo_1"/>
@@ -199,7 +207,7 @@
 <mkdir dir="target/test-resources/sc_service_repo_1/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_1/modules/rampart-SNAPSHOT.mar"/>
 <copy file="${user.home}/.m2/repository/org/apache/rampart/rampart-sts/SNAPSHOT/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_1/modules/rahas-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/sc_service_repo_1/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_1/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="resources/security/sc/s1-services.xml" tofile="target/temp-sc/META-INF/services.xml"/>
 <jar jarfile="target/test-resources/sc_service_repo_1/services/SecureService.aar" basedir="target/temp-sc"/>
@@ -211,7 +219,7 @@
 <mkdir dir="target/test-resources/sc_service_repo_2/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_2/modules/rampart-SNAPSHOT.mar"/>
 <copy file="${user.home}/.m2/repository/org/apache/rampart/rampart-sts/SNAPSHOT/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_2/modules/rahas-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/sc_service_repo_2/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_2/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="resources/security/sc/s2-services.xml" tofile="target/temp-sc/META-INF/services.xml"/>
 <jar jarfile="target/test-resources/sc_service_repo_2/services/SecureService.aar" basedir="target/temp-sc"/>
@@ -222,7 +230,7 @@
 <mkdir dir="target/test-resources/sc_service_repo_3/services"/>
 <mkdir dir="target/test-resources/sc_service_repo_3/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_3/modules/rampart-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/sc_service_repo_3/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_3/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="resources/security/sc/s3-services.xml" tofile="target/temp-sc/META-INF/services.xml"/>
 <jar jarfile="target/test-resources/sc_service_repo_3/services/SecureService.aar" basedir="target/temp-sc"/>
@@ -234,7 +242,7 @@
 <mkdir dir="target/test-resources/sc_service_repo_4/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_4/modules/rampart-SNAPSHOT.mar"/>
 <copy file="${user.home}/.m2/repository/org/apache/rampart/rampart-sts/SNAPSHOT/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_4/modules/rahas-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/sc_service_repo_4/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_4/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="resources/security/sc/s4-services.xml" tofile="target/temp-sc/META-INF/services.xml"/>
 <jar jarfile="target/test-resources/sc_service_repo_4/services/SecureService.aar" basedir="target/temp-sc"/>
@@ -259,7 +267,7 @@
 <mkdir dir="target/test-resources/rahas_client_repo"/>
 <mkdir dir="target/test-resources/rahas_client_repo/conf"/>
 <mkdir dir="target/test-resources/rahas_client_repo/modules"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/rahas_client_repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rahas_client_repo/modules/addressing-SNAPSHOT.mar"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rahas_client_repo/modules/rampart-SNAPSHOT.mar"/>
 <!-- Copying the DOM3 stuff to the endorsed dir -->
 <mkdir dir="target/test-resources/endorsed"/>
@@ -272,7 +280,7 @@
 <mkdir dir="target/test-resources/rahas_service_repo_1/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_1/modules/rampart-SNAPSHOT.mar"/>
 <copy file="${user.home}/.m2/repository/org/apache/rampart/rampart-sts/SNAPSHOT/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_1/modules/rahas-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/rahas_service_repo_1/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_1/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="resources/rahas/s1-services.xml" tofile="target/temp-rahas/META-INF/services.xml"/>
 <jar jarfile="target/test-resources/rahas_service_repo_1/services/SecureService.aar" basedir="target/temp-rahas"/>
@@ -286,7 +294,7 @@
 <mkdir dir="target/test-resources/rahas_service_repo_3/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_3/modules/rampart-SNAPSHOT.mar"/>
 <copy file="${user.home}/.m2/repository/org/apache/rampart/rampart-sts/SNAPSHOT/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_3/modules/rahas-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/rahas_service_repo_3/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_3/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="resources/rahas/s3-services.xml" tofile="target/temp-rahas/META-INF/services.xml"/>
 <jar jarfile="target/test-resources/rahas_service_repo_3/services/SecureService.aar" basedir="target/temp-rahas"/>
@@ -297,7 +305,7 @@
 <mkdir dir="target/test-resources/default_security_client_repo/conf"/>
 <mkdir dir="target/test-resources/default_security_client_repo/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/default_security_client_repo/modules/rampart-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/default_security_client_repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/default_security_client_repo/modules/addressing-SNAPSHOT.mar"/>
 <copy file="resources/conf/axis2.xml" tofile="target/test-resources/default_security_client_repo/conf/axis2.xml"/>
 <!-- Scenario 1 --> 
 <mkdir dir="target/test-resources/scenario1_client_repo"/>
@@ -465,11 +473,11 @@
 <!-- Test with addressing and MTOM client repository-->
 <copy file="resources/security/complete.client.axis2.xml" tofile="target/test-resources/complete_client_repo/conf/axis2.xml"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/complete_client_repo/modules/rampart-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/complete_client_repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/complete_client_repo/modules/addressing-SNAPSHOT.mar"/>
 <!-- Test with addressing and MTOMservice repository-->
 <copy file="resources/security/complete.service.axis2.xml" tofile="target/test-resources/complete_service_repo/conf/axis2.xml"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/complete_service_repo/modules/rampart-SNAPSHOT.mar"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/complete_service_repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/complete_service_repo/modules/addressing-SNAPSHOT.mar"/>
 <copy file="resources/security/complete.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true"/>
 <!-- Create the .aar file -->
 <jar jarfile="target/test-resources/complete_service_repo/services/PingPort.aar" basedir="target/temp-interop"/>
@@ -478,16 +486,16 @@
 <mkdir dir="target/Repository/conf"/>
 <mkdir dir="target/Repository/services"/>
 <mkdir dir="target/Repository/modules"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/Repository/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/Repository/modules/addressing-SNAPSHOT.mar"/>
 <copy file="resources/conf/axis2.xml" tofile="target/Repository/conf/axis2.xml"/>
 <mkdir dir="target/perf2/build/repo/conf"/>
 <mkdir dir="target/perf/build/repo/conf"/>
 <copy file="resources/conf/axis2.xml" tofile="target/perf2/build/repo/conf/axis2.xml"/>
 <copy file="resources/conf/axis2.xml" tofile="target/perf/build/repo/conf/axis2.xml"/>
 <mkdir dir="target/perf2/build/repo/modules"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/perf2/build/repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/perf2/build/repo/modules/addressing-SNAPSHOT.mar"/>
 <mkdir dir="target/perf/build/repo/modules"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/perf/build/repo/modules/addressing-SNAPSHOT.mar"/>
+<copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/perf/build/repo/modules/addressing-SNAPSHOT.mar"/>
                             </tasks>
                         </configuration>
                         <goals>
@@ -574,16 +582,8 @@
             <artifactId>rampart-core</artifactId>
             <version>${pom.version}</version>
         </dependency>
-	<dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>2.8.1</version>
-	</dependency>
-	<dependency>
-	    <groupId>xml-apis</groupId>
-	    <artifactId>xml-apis</artifactId>
-            <version>1.3.03</version>
-	</dependency>
-   </dependencies>
+
+	</dependencies>
+
 
 </project>
