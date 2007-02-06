@@ -257,7 +257,7 @@
 <copy overwrite="yes" file="target/classes/org/apache/rahas/Service.class" tofile="target/temp-rahas/org/apache/rahas/Service.class"/>
 <copy overwrite="yes" file="target/classes/org/apache/rahas/PWCallback.class" tofile="target/temp-rahas/org/apache/rahas/PWCallback.class"/>
 <copy overwrite="yes" todir="target/temp-rahas">
-<fileset dir="resources/rahas">
+<fileset dir="src/test/resources/rahas">
 <include name="issuer.properties"/>
 <include name="rahas-sts.jks"/>
 </fileset>
