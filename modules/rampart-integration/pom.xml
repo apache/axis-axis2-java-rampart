@@ -462,13 +462,6 @@
 <mkdir dir="target/test-resources/complete_service_repo/conf"/>
 <mkdir dir="target/test-resources/complete_service_repo/services"/>
 <mkdir dir="target/test-resources/complete_service_repo/modules"/>
-<!-- Test with target resolver  -->
-<mkdir dir="target/test-resources/deployment_repo"/>
-<mkdir dir="target/test-resources/deployment_repo/conf"/>
-<mkdir dir="target/test-resources/deployment_repo/services"/>
-<mkdir dir="target/test-resources/deployment_repo/modules"/>
-<copy file="resources/deployment/deployment.both.axis2.xml" tofile="target/test-resources/deployment_repo/conf/axis2.xml"/>
-<copy file="resources/addressing-1.1.mar" tofile="target/test-resources/deployment_repo/modules/addressing-SNAPSHOT.mar"/>
 <!-- Test with addressing and MTOM client repository-->
 <copy file="resources/security/complete.client.axis2.xml" tofile="target/test-resources/complete_client_repo/conf/axis2.xml"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/complete_client_repo/modules/rampart-SNAPSHOT.mar"/>
