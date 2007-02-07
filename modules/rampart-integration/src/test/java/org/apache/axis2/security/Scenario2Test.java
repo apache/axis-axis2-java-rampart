@@ -16,7 +16,6 @@
 
 package org.apache.axis2.security;
 
-import org.apache.axis2.Constants;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
@@ -25,17 +24,10 @@ import org.apache.ws.security.WSConstants;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
  * WS-Security inteorp scenario 2
  */
 public class Scenario2Test extends InteropTestBase {
-
-    public static Test suite() {
-        return getTestSetup2(new TestSuite(Scenario2Test.class),Constants.TESTING_PATH + SCENARIO2_SERVICE_REPOSITORY);
-    }
     
 	protected OutflowConfiguration getOutflowConfiguration() {
 		OutflowConfiguration ofc = new OutflowConfiguration();

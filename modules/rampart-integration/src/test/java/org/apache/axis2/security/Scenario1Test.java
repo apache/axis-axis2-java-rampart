@@ -16,14 +16,10 @@
 
 package org.apache.axis2.security;
 
-import org.apache.axis2.Constants;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
 
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 /**
@@ -31,9 +27,6 @@ import junit.framework.TestSuite;
  */
 public class Scenario1Test extends InteropTestBase {
 
-    public static Test suite() {
-        return getTestSetup2(new TestSuite(Scenario1Test.class),Constants.TESTING_PATH + SCENARIO1_SERVICE_REPOSITORY);
-    }
     
 	protected OutflowConfiguration getOutflowConfiguration() {
 		OutflowConfiguration ofc = new OutflowConfiguration();

@@ -16,26 +16,20 @@
 
 package org.apache.axis2.security;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.integration.UtilServer;
-import org.apache.axis2.integration.UtilServerBasedTestCase;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.security.WSConstants;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.Hashtable;
 
-public abstract class InteropTestBase extends UtilServerBasedTestCase {
+import junit.framework.TestCase;
+
+public abstract class InteropTestBase extends TestCase {
 
     protected static final String SCENARIO1_SERVICE_REPOSITORY =
             "scenario1_service_repo";
@@ -138,6 +132,13 @@ public abstract class InteropTestBase extends UtilServerBasedTestCase {
         super(arg0);
     }
     
+    public void setUp() throws Exception {
+        UtilServer.start(Constants.TESTING_PATH + getServiceRepo());
+    }
+
+    public void tearDown() throws Exception {
+        UtilServer.stop();
+    }
     /**
      * Do test
      */

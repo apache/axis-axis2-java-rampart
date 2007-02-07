@@ -43,7 +43,7 @@
         <part name="pingResponse" element="tns:PingResponse"/>
     </message>
     <portType name="PingPort">
-        <operation name="Ping">
+        <operation name="Ping" >
             <input message="tns:PingRequest"/>
             <output message="tns:PingResponse"/>
         </operation>

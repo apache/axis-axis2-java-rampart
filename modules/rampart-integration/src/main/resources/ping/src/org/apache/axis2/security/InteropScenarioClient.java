@@ -71,6 +71,7 @@ public class InteropScenarioClient {
         stub._getServiceClient().getOptions().setSoapVersionURI(soapNsURI);
         stub._getServiceClient().engageModule(
                 new javax.xml.namespace.QName("rampart"));
+        
 
         PingResponseDocument pingResDoc = stub.Ping(pingDoc);
 
@@ -86,7 +87,7 @@ public class InteropScenarioClient {
         ticket.setId("My ticket Id");
 
         Ping ping = Ping.Factory.newInstance();
-        ping.setText("Testing axis2-wss4j module");
+        ping.setText("Testing rampart");
         ping.setTicket(ticket);
 
         PingDocument pingDoc = PingDocument.Factory.newInstance();
@@ -130,7 +131,7 @@ public class InteropScenarioClient {
         ticket.setId("My ticket Id");
 
         Ping ping = Ping.Factory.newInstance();
-        ping.setText("Testing axis2-wss4j module");
+        ping.setText("Testing rampart");
         ping.setTicket(ticket);
 
         PingDocument pingDoc = PingDocument.Factory.newInstance();

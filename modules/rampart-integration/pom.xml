@@ -103,12 +103,15 @@
 				 <!-- copy the service impl -->
 				<copy file="src/main/resources/ping/src/org/apache/axis2/oasis/ping/PingPortSkeleton.java" 
             				tofile="generated-code/src/org/apache/axis2/oasis/ping/PingPortSkeleton.java" overwrite="yes"/>
-        			<!-- Password callback class for the interop service -->
-        			<copy file="src/main/resources/ping/src/org/apache/axis2/security/PWCallback.java" 
-            				tofile="generated-code/src/org/apache/axis2/security/PWCallback.java" overwrite="yes"/>
-        			<!-- Interop client -->
-        			<copy file="src/main/resources/ping/src/org/apache/axis2/security/InteropScenarioClient.java" 
-            				tofile="generated-code/src/org/apache/axis2/security/InteropScenarioClient.java" overwrite="yes"/>
+				<!-- copy the stub to workaround the soapAction issue :-( of axis2 -->
+				<copy file="src/main/resources/ping/src/org/apache/axis2/oasis/ping/PingPortStub.java" 
+            				tofile="generated-code/src/org/apache/axis2/oasis/ping/PingPortStub.java" overwrite="yes"/>
+        		<!-- Password callback class for the interop service -->
+				<copy file="src/main/resources/ping/src/org/apache/axis2/security/PWCallback.java" 
+						tofile="generated-code/src/org/apache/axis2/security/PWCallback.java" overwrite="yes"/>
+				<!-- Interop client -->
+				<copy file="src/main/resources/ping/src/org/apache/axis2/security/InteropScenarioClient.java" 
+						tofile="generated-code/src/org/apache/axis2/security/InteropScenarioClient.java" overwrite="yes"/>
 
 				<copy overwrite="yes" todir="src/test/resources">
 					<fileset dir="generated-code/resources">
@@ -148,6 +151,7 @@
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/rampart-SNAPSHOT.mar"/>
 <copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/rampart-sts-SNAPSHOT.mar"/>
 <copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/addressing-SNAPSHOT.mar"/>
+
 <!-- Service 1 -->
 <copy overwrite="yes" file="src/test/resources/rampart/services-1.xml" tofile="target/temp-ramp/META-INF/services.xml"/>
 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService1.aar" basedir="target/temp-ramp"/>

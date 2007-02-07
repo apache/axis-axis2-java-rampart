@@ -30,10 +30,6 @@ import junit.framework.TestSuite;
 
 public class AddressingMTOMSecurityTest extends InteropTestBase {
 
-    public static Test suite() {
-        return getTestSetup2(new TestSuite(AddressingMTOMSecurityTest.class),Constants.TESTING_PATH + COMPLETE_SERVICE_REPOSITORY);
-    }
-    
     protected OutflowConfiguration getOutflowConfiguration() {
 
         OutflowConfiguration ofc = new OutflowConfiguration();
