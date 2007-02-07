@@ -53,7 +53,7 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.apache.rampart</groupId>
-                  <artifactId>rampart-sts</artifactId>
+                  <artifactId>rampart_sts</artifactId>
                   <version>${pom.version}</version>
                   <type>mar</type>
                   <overWrite>true</overWrite>
@@ -142,14 +142,14 @@
 <mkdir dir="target/test-resources/rampart_client_repo/conf"/>
 <mkdir dir="target/test-resources/rampart_client_repo/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rampart_client_repo/modules/rampart-SNAPSHOT.mar"/>
-<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_client_repo/modules/rampart-sts-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart_sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_client_repo/modules/rampart_sts-SNAPSHOT.mar"/>
 <copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rampart_client_repo/modules/addressing-SNAPSHOT.mar"/>
 <mkdir dir="target/test-resources/rampart_service_repo"/>
 <mkdir dir="target/test-resources/rampart_service_repo/conf"/>
 <mkdir dir="target/test-resources/rampart_service_repo/services"/>
 <mkdir dir="target/test-resources/rampart_service_repo/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/rampart-SNAPSHOT.mar"/>
-<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/rampart-sts-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart_sts-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/rampart_sts-SNAPSHOT.mar"/>
 <copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rampart_service_repo/modules/addressing-SNAPSHOT.mar"/>
 
 <!-- Service 1 -->
@@ -210,7 +210,7 @@
 <mkdir dir="target/test-resources/sc_service_repo_1/services"/>
 <mkdir dir="target/test-resources/sc_service_repo_1/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_1/modules/rampart-SNAPSHOT.mar"/>
-<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_1/modules/rahas-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart_sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_1/modules/rampart_sts-SNAPSHOT.mar"/>
 <copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_1/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="src/test/resources/security/sc/s1-services.xml" tofile="target/temp-sc/META-INF/services.xml"/>
@@ -222,7 +222,7 @@
 <mkdir dir="target/test-resources/sc_service_repo_2/services"/>
 <mkdir dir="target/test-resources/sc_service_repo_2/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_2/modules/rampart-SNAPSHOT.mar"/>
-<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_2/modules/rahas-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart_sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_2/modules/rampart_sts-SNAPSHOT.mar"/>
 <copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_2/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="src/test/resources/security/sc/s2-services.xml" tofile="target/temp-sc/META-INF/services.xml"/>
@@ -245,7 +245,7 @@
 <mkdir dir="target/test-resources/sc_service_repo_4/services"/>
 <mkdir dir="target/test-resources/sc_service_repo_4/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_4/modules/rampart-SNAPSHOT.mar"/>
-<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_4/modules/rahas-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart_sts-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_4/modules/rampart_sts-SNAPSHOT.mar"/>
 <copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/sc_service_repo_4/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="src/test/resources/security/sc/s4-services.xml" tofile="target/temp-sc/META-INF/services.xml"/>
@@ -283,7 +283,7 @@
 <mkdir dir="target/test-resources/rahas_service_repo_1/services"/>
 <mkdir dir="target/test-resources/rahas_service_repo_1/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_1/modules/rampart-SNAPSHOT.mar"/>
-<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_1/modules/rahas-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart_sts-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_1/modules/rampart_sts-SNAPSHOT.mar"/>
 <copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_1/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="src/test/resources/rahas/s1-services.xml" tofile="target/temp-rahas/META-INF/services.xml"/>
@@ -297,7 +297,7 @@
 <mkdir dir="target/test-resources/rahas_service_repo_3/services"/>
 <mkdir dir="target/test-resources/rahas_service_repo_3/modules"/>
 <copy file="target/artifacts/rampart-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_3/modules/rampart-SNAPSHOT.mar"/>
-<copy file="target/artifacts/rampart-sts-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_3/modules/rahas-SNAPSHOT.mar"/>
+<copy file="target/artifacts/rampart_sts-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_3/modules/rampart_sts-SNAPSHOT.mar"/>
 <copy file="target/artifacts/addressing-SNAPSHOT.mar" tofile="target/test-resources/rahas_service_repo_3/modules/addressing-SNAPSHOT.mar"/>
 <!-- copy the services.xml and create the aar -->
 <copy overwrite="yes" file="src/test/resources/rahas/s3-services.xml" tofile="target/temp-rahas/META-INF/services.xml"/>
@@ -552,7 +552,7 @@
         </dependency>
 	<dependency>
             <groupId>org.apache.rampart</groupId>
-            <artifactId>rampart-sts</artifactId>
+            <artifactId>rampart_sts</artifactId>
 	    <type>mar</type>
             <version>${pom.version}</version>
         </dependency>

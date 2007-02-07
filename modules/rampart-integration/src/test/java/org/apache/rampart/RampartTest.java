@@ -40,7 +40,7 @@ import junit.framework.TestCase;
 
 public class RampartTest extends TestCase {
     
-    public final static int PORT = UtilServer.TESTING_PORT;
+    public final static int PORT = 5556;//UtilServer.TESTING_PORT;
     
     public RampartTest(String name) {
         super(name);
@@ -96,29 +96,29 @@ public class RampartTest extends TestCase {
                 serviceClient.sendReceive(getEchoElement());
             }
 
-//            
-//            for (int i = 1; i <= 2; i++) { //<-The number of tests we have
-//
-//                Options options = new Options();
-//                System.out.println("Testing WS-SecConv: custom scenario " + i);
-//                options.setAction("urn:echo");
-//                options.setTo(new EndpointReference("http://127.0.0.1:" + PORT + "/axis2/services/SecureServiceSC" + i));
-//                options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, loadPolicy("/rampart/policy/sc-" + i + ".xml"));
-//                serviceClient.setOptions(options);
-//
-//                //Blocking invocation
-//                serviceClient.sendReceive(getEchoElement());
-//                serviceClient.sendReceive(getEchoElement());
-//                
-//                //Cancel the token
-//                options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_TRUE);
-//                serviceClient.sendReceive(getEchoElement());
-//                
-//                options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_FALSE);
-//                serviceClient.sendReceive(getEchoElement());
-//                options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_TRUE);
-//                serviceClient.sendReceive(getEchoElement());
-//            }
+            
+            for (int i = 1; i <= 2; i++) { //<-The number of tests we have
+
+                Options options = new Options();
+                System.out.println("Testing WS-SecConv: custom scenario " + i);
+                options.setAction("urn:echo");
+                options.setTo(new EndpointReference("http://127.0.0.1:" + PORT + "/axis2/services/SecureServiceSC" + i));
+                options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, loadPolicy("/rampart/policy/sc-" + i + ".xml"));
+                serviceClient.setOptions(options);
+
+                //Blocking invocation
+                serviceClient.sendReceive(getEchoElement());
+                serviceClient.sendReceive(getEchoElement());
+                
+                //Cancel the token
+                options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_TRUE);
+                serviceClient.sendReceive(getEchoElement());
+                
+                options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_FALSE);
+                serviceClient.sendReceive(getEchoElement());
+                options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_TRUE);
+                serviceClient.sendReceive(getEchoElement());
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

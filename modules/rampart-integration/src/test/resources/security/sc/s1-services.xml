@@ -1,7 +1,7 @@
 <service name="SecureService">
 
 	<module ref="rampart"/>
-	<module ref="rahas"/>
+	<module ref="rampart_sts"/>
 
 	<parameter locked="false" name="ServiceClass">org.apache.axis2.security.sc.Service</parameter>
 
