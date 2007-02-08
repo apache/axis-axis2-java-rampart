@@ -333,13 +333,21 @@ public class RampartPolicyData {
      * @param element
      *            The part's element name.
      */
-    public void setSignedParts(String namespace, String element) {
+    public void addSignedPart(String namespace, String element) {
 
         WSEncryptionPart wep = new WSEncryptionPart(element, namespace,
                 "Content");
         signedParts.add(wep);
     }
 
+    public void addSignedPart(WSEncryptionPart part) {
+        signedParts.add(part);
+    }
+    
+    public void setSignedParts(Vector signedParts) {
+        this.signedParts = signedParts;
+    }
+    
     public void setSupportingTokens(SupportingToken suppTokens)
             throws WSSPolicyException {
 
@@ -631,4 +639,5 @@ public class RampartPolicyData {
     public Policy getIssuerPolicy() {
         return issuerPolicy;
     }
+
 }

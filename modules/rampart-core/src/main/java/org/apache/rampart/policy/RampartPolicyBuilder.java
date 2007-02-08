@@ -214,7 +214,7 @@ public class RampartPolicyBuilder {
             rpd.setSignBody(sep.isBody());
             while (it.hasNext()) {
                 Header header = (Header) it.next();
-                rpd.setSignedParts(header.getNamespace(), header.getName());
+                rpd.addSignedPart(header.getNamespace(), header.getName());
             }
         } else {
             rpd.setEncryptBody(sep.isBody());

@@ -30,6 +30,8 @@ import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 public class PolicyBasedResultsValidator {
@@ -73,6 +76,8 @@ public class PolicyBasedResultsValidator {
         validateProtectionOrder(data, results);
         
         validateEncryptedParts(data, results);
+
+        validateSignedPartsHeaders(data, results);
 
         //Supporting tokens
         if(!rmd.isClientSide()) {
@@ -311,6 +316,53 @@ public class PolicyBasedResultsValidator {
         
     }
 
+    private void validateSignedPartsHeaders(ValidatorData data, Vector results) 
+    throws RampartException {
+        
+        RampartMessageData rmd = data.getRampartMessageData();
+        
+        Node envelope = rmd.getDocument().getFirstChild();
+        
+        WSSecurityEngineResult actionResult = WSSecurityUtil.fetchActionResult(
+                results, WSConstants.SIGN);
+
+        // Find elements that are signed
+        Vector actuallySigned = new Vector();
+        if( actionResult != null ) { 
+            Set signedIDs = actionResult.getSignedElements();
+            for (Iterator i = signedIDs.iterator(); i.hasNext();) {
+                String e = (String) i.next();
+                
+                Element element = WSSecurityUtil.findElementById(envelope, e, WSConstants.WSU_NS);
+                actuallySigned.add( element );
+            }
+        }
+        
+        RampartPolicyData rpd = rmd.getPolicyData();
+        
+        // Get list to check from Policy
+        Vector signedParts = rpd.getSignedParts();
+        for(int i=0; i<signedParts.size(); i++) {
+            WSEncryptionPart wsep = (WSEncryptionPart) signedParts.get( i );
+            
+            Element headerElement = (Element) WSSecurityUtil.findElement(
+                    envelope, wsep.getName(), wsep.getNamespace() );
+            if( headerElement == null ) {
+                // The signedpart header we are checking is not present in Soap header - this is allowed
+                continue;
+            }
+            
+            // header elemement present - verify that it is part of signature
+            if( actuallySigned.contains( headerElement) ) {
+                continue;
+            }
+            
+            // header defined in policy is present but not signed
+            throw new RampartException("signedPartHeaderNotSigned", new String[] { wsep.getName() });
+        }
+    }
+
+    
     private boolean isSignatureRequired(RampartPolicyData rpd) {
         return (rpd.isSymmetricBinding() && rpd.getSignatureToken() != null) ||
                 (!rpd.isSymmetricBinding() && !rpd.isTransportBinding() && 

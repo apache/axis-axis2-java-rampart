@@ -33,14 +33,12 @@ import org.apache.neethi.PolicyEngine;
 
 import javax.xml.namespace.QName;
 
-import java.io.File;
-
 import junit.framework.TestCase;
 
 
 public class RampartTest extends TestCase {
     
-    public final static int PORT = 5556;//UtilServer.TESTING_PORT;
+    public final static int PORT = UtilServer.TESTING_PORT;
     
     public RampartTest(String name) {
         super(name);
