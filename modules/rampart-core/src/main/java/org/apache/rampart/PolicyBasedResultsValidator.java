@@ -244,13 +244,17 @@ public class PolicyBasedResultsValidator {
         }
         boolean done = false;
         if(Constants.SIGN_BEFORE_ENCRYPTING.equals(protectionOrder)) {
-            boolean sigfound = false;
+            boolean sigFound = false;
             for (Iterator iter = sigEncrActions.iterator(); 
                 iter.hasNext() || !done;) {
                 Integer act = (Integer) iter.next();
+                if(act.intValue() == WSConstants.ENCR && ! sigFound ) {
+                    // We found ENCR and SIGN has not been found - break and fail
+                    break;
+                }
                 if(act.intValue() == WSConstants.SIGN) {
-                    sigfound = true;
-                } else if(sigfound) {
+                    sigFound = true;
+                } else if(sigFound) {
                     //We have an ENCR action after sig
                     done = true;
                 }
@@ -260,6 +264,10 @@ public class PolicyBasedResultsValidator {
             boolean encrFound = false;
             for (Iterator iter = sigEncrActions.iterator(); iter.hasNext();) {
                 Integer act = (Integer) iter.next();
+                if(act.intValue() == WSConstants.SIGN && ! encrFound ) {
+                    // We found SIGN and ENCR has not been found - break and fail
+                    break;
+                }
                 if(act.intValue() == WSConstants.ENCR) {
                     encrFound = true;
                 } else if(encrFound) {
