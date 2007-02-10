@@ -109,9 +109,9 @@ public class PolicyBasedResultsValidator {
         
         /*
          * Perform further checks on the timestamp that was transmitted in the
-         * header. In the following implementation the timestamp is valid if it
-         * was created after (now-ttl), where ttl is set on server side, not by
-         * the client.
+         * header. 
+         * In the following implementation the timestamp is valid if :
+         * Timestamp->Created < 'now' < Timestamp->Expires (Last test already handled by WSS4J)
          * 
          * Note: the method verifyTimestamp(Timestamp) allows custom
          * implementations with other validation algorithms for subclasses.
@@ -381,18 +381,16 @@ public class PolicyBasedResultsValidator {
     
     private boolean verifyTimestamp(Timestamp timestamp, int timeToLive) throws RampartException {
 
-        // Calculate the time that is allowed for the message to travel
-        Calendar validCreation = Calendar.getInstance();
-        long currentTime = validCreation.getTime().getTime();
-        currentTime -= timeToLive * 1000;
-        validCreation.setTime(new Date(currentTime));
+        // 'now' must be between ts->Created and ts->Expires
+        // here we test that now is after ts->Created
+        // test that now is before ts->Expires is handled earlier by WSS4J
 
-        // Validate the time it took the message to travel
-        // if (timestamp.getCreated().before(validCreation) ||
-        // !timestamp.getCreated().equals(validCreation)) {
         Calendar cre = timestamp.getCreated();
-        if (cre != null && !cre.after(validCreation)) {
-            return false;
+        if (cre != null) {
+            Calendar now = Calendar.getInstance();
+            if( now.before( cre ) ) {
+                return false;
+            }
         }
 
         return true;
