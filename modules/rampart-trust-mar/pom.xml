@@ -8,7 +8,14 @@
     <artifactId>rampart_sts</artifactId>
     <packaging>mar</packaging>
     <version>SNAPSHOT</version>
-    <name>Rampart Trust-Mar</name>
+    <name>Rampart - Trust-Mar</name>
+
+    <scm>
+        <connection>scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</developerConnection>
+        <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
+    </scm>
 
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>

@@ -10,6 +10,13 @@
     <version>SNAPSHOT</version>
     <name>Rampart - Mar</name>
 
+    <scm>
+        <connection>scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</developerConnection>
+        <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
+    </scm>
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/main/java</testSourceDirectory>
