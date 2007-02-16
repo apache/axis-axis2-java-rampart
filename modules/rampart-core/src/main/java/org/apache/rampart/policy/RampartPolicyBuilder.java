@@ -15,6 +15,7 @@
  */
 package org.apache.rampart.policy;
 
+import org.apache.axis2.policy.model.MTOMAssertion;
 import org.apache.neethi.Assertion;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.WSSPolicyException;
@@ -95,8 +96,9 @@ public class RampartPolicyBuilder {
                 processTrust10((Trust10)assertion, rpd);
             } else if (assertion instanceof RampartConfig) {
                 processRampartConfig((RampartConfig)assertion, rpd);
+            } else if (assertion instanceof MTOMAssertion){
+            	processMTOMSerialization((MTOMAssertion)assertion, rpd);
             } else {
-                
                 System.out.println("Unknown top level PED found: "
                         + assertion.getClass().getName());
             }
@@ -105,6 +107,8 @@ public class RampartPolicyBuilder {
         return rpd;
     }
 
+ 
+    
     /**
      * @param binding
      * @param rpd
@@ -305,5 +309,11 @@ public class RampartPolicyBuilder {
     private static void processSupportingTokens(SupportingToken token,
             RampartPolicyData rpd) throws WSSPolicyException {
         rpd.setSupportingTokens(token);
+    }
+    
+   
+    private static void processMTOMSerialization(MTOMAssertion mtomAssertion, RampartPolicyData rpd)
+    {
+    		rpd.setMTOMAssertion(mtomAssertion);
     }
 }

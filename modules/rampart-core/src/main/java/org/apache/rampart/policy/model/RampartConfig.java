@@ -81,6 +81,8 @@ public class RampartConfig implements Assertion {
     public final static String TS_TTL_LN = "timestampTTL";
 
     public final static String TOKEN_STORE_CLASS_LN = "tokenStoreClass";
+    
+    public final static String OPTIMISE_PARTS_LN = "OptimizeParts";
 
     private String user;
 
@@ -95,6 +97,8 @@ public class RampartConfig implements Assertion {
     private CryptoConfig decCryptoConfig;
 
     private String timestampTTL = Integer.toString(DEFAULT_TIMESTAMP_TTL);
+    
+    private String optimizeParts;
 
     private String tokenStoreClass;
 
@@ -261,5 +265,23 @@ public class RampartConfig implements Assertion {
     public void setTimestampTTL(String timestampTTL) {
         this.timestampTTL = timestampTTL;
     }
-
+    
+    /**
+     * @param strOptimizeParts 
+     * 			The xpath of elements that should be optimized
+     */
+    public void setOptimizeParts(String strOptimizeParts){
+    	optimizeParts = strOptimizeParts;
+    }
+    
+    /**
+     * 
+     * @return The Xpath string of indicating elements to be optimized or null.
+     */
+    
+    public String getOptimizeParts(){
+    	return optimizeParts;
+    }
+    
+    
 }

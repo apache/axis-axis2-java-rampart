@@ -35,6 +35,7 @@ import org.apache.rampart.builder.SymmetricBindingBuilder;
 import org.apache.rampart.builder.TransportBindingBuilder;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
+import org.apache.rampart.util.MessageOptimizer;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSSecurityException;
@@ -116,7 +117,7 @@ public class MessageBuilder {
             }
         }
         
-        if(rpd.isTransportBinding()) {
+       if(rpd.isTransportBinding()) {
             log.debug("Building transport binding");
             TransportBindingBuilder building = new TransportBindingBuilder();
             building.build(rmd);
@@ -128,6 +129,18 @@ public class MessageBuilder {
             AsymmetricBindingBuilder builder = new AsymmetricBindingBuilder();
             builder.build(rmd);
         }
+        
+       /*
+        * Checking wether MTOMSerializable is there. If so set optimizeElement.
+        * */
+        if(rpd.isMTOMSerialize()){
+        	String optimizeElement = rpd.getOptimizeParts();
+        	if(optimizeElement == null){
+        		  optimizeElement = "//xenc:EncryptedData/xenc:CipherData/xenc:CipherValue";
+        	}
+        	msgCtx.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
+	        MessageOptimizer.optimize(msgCtx.getEnvelope(),optimizeElement);
+        }
+        
     }
-
 }

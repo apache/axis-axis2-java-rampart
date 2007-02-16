@@ -16,6 +16,7 @@
 
 package org.apache.rampart.policy;
 
+import org.apache.axis2.policy.model.MTOMAssertion;
 import org.apache.neethi.Policy;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.policy.model.RampartConfig;
@@ -105,6 +106,8 @@ public class RampartPolicyData {
     private AlgorithmSuite algorithmSuite;
     
     private RampartConfig rampartConfig;
+    
+    private MTOMAssertion mtomAssertion;
     
     private Trust10 trust10;
     
@@ -639,5 +642,29 @@ public class RampartPolicyData {
     public Policy getIssuerPolicy() {
         return issuerPolicy;
     }
-
+    
+    public void setMTOMAssertion(MTOMAssertion mtomAssertion){
+    	this.mtomAssertion =  mtomAssertion;   	
+    }
+    
+    public MTOMAssertion getMTOMAssertion(){
+    	return mtomAssertion;
+    }
+    
+    public boolean isMTOMSerialize(){
+    	if(mtomAssertion == null){
+    		return false;
+    	}
+    	else if(mtomAssertion.isOptional()==false){
+    		return true;
+    	}
+    	else
+    		return false;
+    }
+    
+    public String getOptimizeParts(){
+    	return rampartConfig.getOptimizeParts();
+    }
+   
+     
 }

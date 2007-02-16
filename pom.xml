@@ -186,6 +186,11 @@
             <artifactId>axis2-adb-codegen</artifactId>
             <version>${axis2.version}</version>
         </dependency>
+	<dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-mtompolicy</artifactId>
+            <version>${axis2.version}</version>
+	</dependency>
         
 	<!-- AIOM Dependencies -->
         <dependency>
@@ -483,7 +488,7 @@
         <spring.version>1.2.6</spring.version>
 
         <xalan.version>2.7.0</xalan.version>
-		<xerces.version>2.8.1</xerces.version>
+	<xerces.version>2.8.1</xerces.version>
 	
     </properties>
 
