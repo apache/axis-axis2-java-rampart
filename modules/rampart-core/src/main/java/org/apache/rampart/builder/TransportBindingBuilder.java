@@ -61,7 +61,7 @@ public class TransportBindingBuilder extends BindingBuilder {
         /*
          * Process Supporting tokens
          */
-        if(rmd.isClientSide()) {
+        if(rmd.isInitiator()) {
             Vector signatureValues = new Vector();
             
             SupportingToken sgndSuppTokens = rpd.getSignedSupportingTokens();
@@ -101,7 +101,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 ArrayList tokens = sgndEndSuppTokens.getTokens();
                 for (Iterator iter = tokens.iterator(); iter.hasNext();) {
                     Token token = (Token) iter.next();
-                    if(token instanceof IssuedToken && rmd.isClientSide()) {
+                    if(token instanceof IssuedToken && rmd.isInitiator()) {
                         signatureValues.add(doIssuedTokenSignature(rmd, token));
                     } else if(token instanceof X509Token) {
                         signatureValues.add(doX509TokenSignature(rmd, token));
@@ -116,7 +116,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 ArrayList tokens = endSupptokens.getTokens();
                 for (Iterator iter = tokens.iterator(); iter.hasNext();) {
                     Token token = (Token) iter.next();
-                    if(token instanceof IssuedToken && rmd.isClientSide()){
+                    if(token instanceof IssuedToken && rmd.isInitiator()){
                         signatureValues.add(doIssuedTokenSignature(rmd, token));
                     } else if(token instanceof X509Token) {
                         signatureValues.add(doX509TokenSignature(rmd, token));
@@ -258,7 +258,7 @@ public class TransportBindingBuilder extends BindingBuilder {
         if(inclusion.equals(Constants.INCLUDE_ALWAYS) ||
         ((inclusion.equals(Constants.INCLUDE_ALWAYS_TO_RECIPIENT) 
                 || inclusion.equals(Constants.INCLUDE_ONCE)) 
-                && rmd.isClientSide())) {
+                && rmd.isInitiator())) {
           
             //Add the token
             rmd.getSecHeader().getSecurityHeader().appendChild(

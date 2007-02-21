@@ -61,7 +61,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             this.addTimestamp(rmd);
         }
         
-        if(rmd.isClientSide()) {
+        if(rmd.isInitiator()) {
             //Setup required tokens
             initializeTokens(rmd);
         }
@@ -129,7 +129,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             if(Constants.INCLUDE_ALWAYS.equals(encryptionToken.getInclusion()) ||
                     Constants.INCLUDE_ONCE.equals(encryptionToken.getInclusion()) ||
-                    (rmd.isClientSide() && Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(encryptionToken.getInclusion()))) {
+                    (rmd.isInitiator() && Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(encryptionToken.getInclusion()))) {
                 encrTokenElement = RampartUtil.appendChildToSecHeader(rmd, tok.getToken());
                 attached = true;
             }
@@ -198,7 +198,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             sigParts.add(new WSEncryptionPart(RampartUtil
                     .addWsuIdToElement((OMElement) this.timestampElement)));
 
-            if(rmd.isClientSide()) {
+            if(rmd.isInitiator()) {
             
     //          Now add the supporting tokens
                 SupportingToken sgndSuppTokens = rpd.getSignedSupportingTokens();
@@ -227,7 +227,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             this.mainSigId = RampartUtil.addWsuIdToElement((OMElement)this.getInsertionLocation());
             
             
-            if(rmd.isClientSide()) {
+            if(rmd.isInitiator()) {
                 //Do endorsed signatures
                 Vector endSigVals = this.doEndorsedSignatures(rmd, endSuppTokMap);
                 for (Iterator iter = endSigVals.iterator(); iter.hasNext();) {
@@ -320,7 +320,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
         if(Constants.INCLUDE_ALWAYS.equals(sigToken.getInclusion()) ||
                 Constants.INCLUDE_ONCE.equals(sigToken.getInclusion()) ||
-                (rmd.isClientSide() && 
+                (rmd.isInitiator() && 
                         Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(
                                 sigToken.getInclusion()))) {
             sigTokElem = RampartUtil.appendChildToSecHeader(rmd, 
@@ -346,7 +346,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         sigParts.add(new WSEncryptionPart(RampartUtil
                 .addWsuIdToElement((OMElement) this.timestampElement)));
 
-        if(rmd.isClientSide()) {
+        if(rmd.isInitiator()) {
     //      Now add the supporting tokens
             SupportingToken sgndSuppTokens = rpd.getSignedSupportingTokens();
             
@@ -371,7 +371,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
         this.mainSigId = RampartUtil.addWsuIdToElement((OMElement)this.getInsertionLocation());
 
-        if(rmd.isClientSide()) {
+        if(rmd.isInitiator()) {
             //Do endorsed signatures
             Vector endSigVals = this.doEndorsedSignatures(rmd, endSuppTokMap);
             for (Iterator iter = endSigVals.iterator(); iter.hasNext();) {
@@ -399,7 +399,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             if(Constants.INCLUDE_ALWAYS.equals(encrToken.getInclusion()) ||
                     Constants.INCLUDE_ONCE.equals(encrToken.getInclusion()) ||
-                    (rmd.isClientSide() && Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(encrToken.getInclusion()))) {
+                    (rmd.isInitiator() && Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(encrToken.getInclusion()))) {
                 encrTokElem = (Element)encrTok.getToken();
                 
                 //Add the encrToken element before the sigToken element

@@ -292,7 +292,7 @@ public abstract class BindingBuilder {
             for (Iterator iter = tokens.iterator(); iter.hasNext();) {
                 Token token = (Token) iter.next();
                 org.apache.rahas.Token endSuppTok = null;
-                if(token instanceof IssuedToken && rmd.isClientSide()){
+                if(token instanceof IssuedToken && rmd.isInitiator()){
                     String id = RampartUtil.getIssuedToken(rmd, (IssuedToken)token);
                     try {
                         endSuppTok = rmd.getTokenStorage().getToken(id);

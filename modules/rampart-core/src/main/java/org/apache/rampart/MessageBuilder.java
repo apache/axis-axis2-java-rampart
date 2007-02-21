@@ -63,7 +63,7 @@ public class MessageBuilder {
         }
         
         //Copy the RECV_RESULTS if available
-        if(!rmd.isClientSide()) {
+        if(!rmd.isInitiator()) {
             OperationContext opCtx = msgCtx.getOperationContext();
             MessageContext inMsgCtx;
             if(opCtx != null && 

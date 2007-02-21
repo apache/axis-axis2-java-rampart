@@ -127,7 +127,7 @@ public class RampartMessageData {
      */
     private Policy servicePolicy;
 
-    private boolean isClientSide;
+    private boolean isInitiator;
     
     private boolean sender;
     
@@ -176,6 +176,19 @@ public class RampartMessageData {
                 this.servicePolicy = (Policy)msgCtx.getProperty(KEY_RAMPART_POLICY);
             }
             
+            Parameter clientSideParam = msgCtx.getAxisService().getParameter(PARAM_CLIENT_SIDE);
+            if(clientSideParam != null) {
+                this.isInitiator = true;
+            } else {
+                this.isInitiator = !msgCtx.isServerSide();
+                if(this.isInitiator) {
+                    clientSideParam = new Parameter();
+                    clientSideParam.setName(PARAM_CLIENT_SIDE);
+                    clientSideParam.setLocked(true);
+                    msgCtx.getAxisService().addParameter(clientSideParam);
+                }
+            }
+            
             /*
              * Init policy:
              * When creating the RampartMessageData instance we 
@@ -183,7 +196,7 @@ public class RampartMessageData {
              * If it is missing then try to obtain from the configuration files.
              */
             if(this.servicePolicy == null) {
-                if(msgCtx.isServerSide()) {
+                if(!this.isInitiator) {
                     this.servicePolicy = msgCtx.getEffectivePolicy();
                 } else {
                     Parameter param = msgCtx.getParameter(RampartMessageData.KEY_RAMPART_POLICY);
@@ -199,7 +212,7 @@ public class RampartMessageData {
                 
             }
             
-            if(!msgCtx.isServerSide() && this.servicePolicy != null) {
+            if(this.isInitiator && this.servicePolicy != null) {
                 msgCtx.getServiceContext().setProperty(RampartMessageData.KEY_RAMPART_POLICY, this.servicePolicy);
             }
             
@@ -211,7 +224,7 @@ public class RampartMessageData {
             }
             
             
-            if(isClientSide && this.policyData != null && this.policyData.getRampartConfig() == null) {
+            if(isInitiator && this.policyData != null && this.policyData.getRampartConfig() == null) {
                 //We'r missing the extra info rampart needs
                 throw new RampartException("rampartConigMissing");
             }
@@ -246,26 +259,12 @@ public class RampartMessageData {
                 }
             }
             
-            Parameter clientSideParam = msgCtx.getAxisService().getParameter(PARAM_CLIENT_SIDE);
-            if(clientSideParam != null) {
-                this.isClientSide = true;
-            } else {
-                this.isClientSide = !msgCtx.isServerSide();
-                if(this.isClientSide) {
-                    clientSideParam = new Parameter();
-                    clientSideParam.setName(PARAM_CLIENT_SIDE);
-                    clientSideParam.setLocked(true);
-                    msgCtx.getAxisService().addParameter(clientSideParam);
-                }
-            }
-            
-            
             
             this.sender = sender;
             
             OperationContext opCtx = this.msgContext.getOperationContext();
             
-            if(!this.isClientSide && this.sender) {
+            if(!this.isInitiator && this.sender) {
                 //Get hold of the incoming msg ctx
                 MessageContext inMsgCtx;
                 if (opCtx != null
@@ -280,7 +279,7 @@ public class RampartMessageData {
                 }
             }
             
-            if(this.isClientSide && !this.sender) {
+            if(this.isInitiator && !this.sender) {
                 MessageContext outMsgCtx;
                 if (opCtx != null
                         && (outMsgCtx = opCtx
@@ -387,7 +386,7 @@ public class RampartMessageData {
         try {
             //if client side then check whether sig conf enabled 
             //and get hold of the stored signature values
-            if(this.isClientSide && !this.sender && policyData.isSignatureConfirmation()) {
+            if(this.isInitiator && !this.sender && policyData.isSignatureConfirmation()) {
                 OperationContext opCtx = msgContext.getOperationContext();
                 MessageContext outMsgCtx = opCtx
                         .getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
@@ -448,7 +447,7 @@ public class RampartMessageData {
     public String getSecConvTokenId() {
         String id = null;
         
-        if(this.isClientSide) {
+        if(this.isInitiator) {
             String contextIdentifierKey = RampartUtil.getContextIdentifierKey(this.msgContext);
             id = (String) RampartUtil.getContextMap(this.msgContext).get(contextIdentifierKey);
         } else {
@@ -626,8 +625,8 @@ public class RampartMessageData {
     /**
      * @return Returns the isClientSide.
      */
-    public boolean isClientSide() {
-        return isClientSide;
+    public boolean isInitiator() {
+        return isInitiator;
     }
 
     public ClassLoader getCustomClassLoader() {

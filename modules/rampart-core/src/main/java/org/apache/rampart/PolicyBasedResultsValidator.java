@@ -80,7 +80,7 @@ public class PolicyBasedResultsValidator {
         validateSignedPartsHeaders(data, results);
 
         //Supporting tokens
-        if(!rmd.isClientSide()) {
+        if(!rmd.isInitiator()) {
             validateSupportingTokens(data, results);
         }
         

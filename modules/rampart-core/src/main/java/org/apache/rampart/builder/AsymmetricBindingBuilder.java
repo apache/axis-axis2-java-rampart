@@ -174,7 +174,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             sigParts.add(new WSEncryptionPart(RampartUtil
                     .addWsuIdToElement((OMElement) this.timestampElement)));
 
-            if (rmd.isClientSide()) {
+            if (rmd.isInitiator()) {
 
                 // Now add the supporting tokens
                 SupportingToken sgndSuppTokens = rpd
@@ -205,7 +205,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 this.doSignature(rmd);
             }
 
-            if (rmd.isClientSide()) {
+            if (rmd.isInitiator()) {
                 // Do endorsed signatures
                 Vector endSigVals = this.doEndorsedSignatures(rmd,
                         endSuppTokMap);
@@ -277,7 +277,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         sigParts.add(new WSEncryptionPart(RampartUtil
                 .addWsuIdToElement((OMElement) this.timestampElement)));
 
-        if (rmd.isClientSide()) {
+        if (rmd.isInitiator()) {
             // Now add the supporting tokens
             SupportingToken sgndSuppTokens = rpd.getSignedSupportingTokens();
 
@@ -307,7 +307,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         
         //Do endorsed signature
 
-        if (rmd.isClientSide()) {
+        if (rmd.isInitiator()) {
             // Do endorsed signatures
             Vector endSigVals = this.doEndorsedSignatures(rmd,
                     endSuppTokMap);
@@ -519,7 +519,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
      */
     private void setupEncryptedKey(RampartMessageData rmd, Token token) 
     throws RampartException {
-        if(!rmd.isClientSide() && token.isDerivedKeys()) {
+        if(!rmd.isInitiator() && token.isDerivedKeys()) {
                 
                 //If we already have them, simply return
                 if(this.encryptedKeyId != null && this.encryptedKeyValue != null) {
