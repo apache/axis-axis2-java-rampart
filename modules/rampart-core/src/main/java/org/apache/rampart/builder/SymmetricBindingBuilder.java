@@ -619,7 +619,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             } else {
                 //Now we'll have to obtain the encryption token as well :-)
                 //ASSUMPTION: SecureConversationToken is used as a 
-                //ProtectionToken therfore we only have to process a issued 
+                //ProtectionToken therefore we only have to process a issued 
                 //token here
                 
                 log.debug("Obtaining the Encryption Token");

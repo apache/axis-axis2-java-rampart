@@ -71,6 +71,8 @@ public class RampartMessageData {
      * Key to hold the WS-Trust version
      */
     public final static String KEY_WST_VERSION = "wstVersion";
+    
+    private final String PARAM_CLIENT_SIDE = "CLIENT_SIDE";
 
     /**
      * Key to hold the WS-SecConv version
@@ -244,7 +246,21 @@ public class RampartMessageData {
                 }
             }
             
-            this.isClientSide = !msgCtx.isServerSide();
+            Parameter clientSideParam = msgCtx.getAxisService().getParameter(PARAM_CLIENT_SIDE);
+            if(clientSideParam != null) {
+                this.isClientSide = true;
+            } else {
+                this.isClientSide = !msgCtx.isServerSide();
+                if(this.isClientSide) {
+                    clientSideParam = new Parameter();
+                    clientSideParam.setName(PARAM_CLIENT_SIDE);
+                    clientSideParam.setLocked(true);
+                    msgCtx.getAxisService().addParameter(clientSideParam);
+                }
+            }
+            
+            
+            
             this.sender = sender;
             
             OperationContext opCtx = this.msgContext.getOperationContext();

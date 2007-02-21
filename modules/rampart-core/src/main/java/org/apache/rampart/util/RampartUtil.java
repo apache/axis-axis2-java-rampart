@@ -379,6 +379,10 @@ public class RampartUtil {
             IssuedToken issuedToken) throws RampartException {
 
         try {
+            
+            //TODO : Provide the overriding mechanism to prvide a custom way of 
+            //obtianing a token
+            
             String action = TrustUtil.getActionValue(rmd.getWstVersion(),
                     RahasConstants.RST_ACTION_ISSUE);
 
