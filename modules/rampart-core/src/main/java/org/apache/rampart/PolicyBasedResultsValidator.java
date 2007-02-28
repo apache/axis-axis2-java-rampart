@@ -54,8 +54,9 @@ public class PolicyBasedResultsValidator {
         RampartPolicyData rpd = rmd.getPolicyData();
         
         //Check presence of timestamp
+        WSSecurityEngineResult tsResult = null;
         if(rpd.isIncludeTimestamp()) {
-            WSSecurityEngineResult tsResult = 
+            tsResult = 
                 WSSecurityUtil.fetchActionResult(results, WSConstants.TS);
             if(tsResult == null) {
                 throw new RampartException("timestampMissing");
@@ -71,6 +72,12 @@ public class PolicyBasedResultsValidator {
         }
         
         Vector signatureParts = RampartUtil.getSignedParts(rmd);
+        
+        //Add the timestamp result
+        if(rpd.isIncludeTimestamp() && !rpd.isTransportBinding()) {
+            signatureParts.add(new WSEncryptionPart(tsResult.getTimestamp().getID()));
+        }
+        
         validateEncrSig(encryptedParts, signatureParts, results);
         
         validateProtectionOrder(data, results);

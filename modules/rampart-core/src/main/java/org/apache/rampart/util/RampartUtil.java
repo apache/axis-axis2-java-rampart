@@ -537,28 +537,10 @@ public class RampartUtil {
     public static Vector getSignedParts(RampartMessageData rmd) {
         RampartPolicyData rpd =  rmd.getPolicyData();
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        
-        if(rpd.isEntireHeadersAndBodySignatures()) {
-            
-            //Reset the signedParrts vector in RampartPolicyData to an empty
-            //vector to prvent singing headers twice, if the policy contained 
-            //a SignedParts assertion
-            rpd.setSignedParts(new Vector());
-            Iterator childElems = envelope.getHeader().getChildElements();
-            while (childElems.hasNext()) {
-                OMElement element = (OMElement) childElems.next();
-                if(!element.getQName().equals(new QName(WSConstants.WSSE_NS, WSConstants.WSSE_LN)) &&
-                        !element.getQName().equals(new QName(WSConstants.WSSE11_NS, WSConstants.WSSE_LN))) {
-                    rpd.addSignedPart(new WSEncryptionPart(addWsuIdToElement(element)));
-                }
-            }
+    
+        // Copy list of headers to sign from Policy
+        if(rpd.isSignBody()) {
             rpd.addSignedPart(new WSEncryptionPart(addWsuIdToElement(envelope.getBody())));
-            
-        } else {
-            // Copy list of headers to sign from Policy
-            if(rpd.isSignBody()) {
-                rpd.addSignedPart(new WSEncryptionPart(addWsuIdToElement(envelope.getBody())));
-            }
         }
         
         return rpd.getSignedParts();
