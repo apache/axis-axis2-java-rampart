@@ -160,7 +160,24 @@ public class RampartMessageData {
                 this.secConvVersion = TrustUtil.getWSTVersion((String)msgCtx.getProperty(KEY_WSSC_VERSION));
             }
             
+            Parameter clientSideParam = msgCtx.getAxisService().getParameter(PARAM_CLIENT_SIDE);
+            if(clientSideParam != null) {
+                this.isInitiator = true;
+            } else {
+                this.isInitiator = !msgCtx.isServerSide();
+                if(this.isInitiator) {
+                    clientSideParam = new Parameter();
+                    clientSideParam.setName(PARAM_CLIENT_SIDE);
+                    clientSideParam.setLocked(true);
+                    msgCtx.getAxisService().addParameter(clientSideParam);
+                }
+            }
+            
             //If the policy is already available in the service, then use it
+            String msgPolicyKey = getMessagePolicyKey(msgCtx);
+            if(msgCtx.getProperty(msgPolicyKey) != null) {
+                this.servicePolicy = (Policy)msgCtx.getProperty(msgPolicyKey);
+            } 
             
             String operationPolicyKey = getOperationPolicyKey(msgCtx);
             if(msgCtx.getProperty(operationPolicyKey) != null) {
@@ -176,18 +193,6 @@ public class RampartMessageData {
                 this.servicePolicy = (Policy)msgCtx.getProperty(KEY_RAMPART_POLICY);
             }
             
-            Parameter clientSideParam = msgCtx.getAxisService().getParameter(PARAM_CLIENT_SIDE);
-            if(clientSideParam != null) {
-                this.isInitiator = true;
-            } else {
-                this.isInitiator = !msgCtx.isServerSide();
-                if(this.isInitiator) {
-                    clientSideParam = new Parameter();
-                    clientSideParam.setName(PARAM_CLIENT_SIDE);
-                    clientSideParam.setLocked(true);
-                    msgCtx.getAxisService().addParameter(clientSideParam);
-                }
-            }
             
             /*
              * Init policy:
@@ -195,21 +200,21 @@ public class RampartMessageData {
              * extract the service policy is set in the msgCtx.
              * If it is missing then try to obtain from the configuration files.
              */
+            
             if(this.servicePolicy == null) {
-                if(!this.isInitiator) {
-                    this.servicePolicy = msgCtx.getEffectivePolicy();
-                } else {
-                    Parameter param = msgCtx.getParameter(RampartMessageData.KEY_RAMPART_POLICY);
-                    if(param != null) {
-                        OMElement policyElem = param.getParameterElement().getFirstElement();
-                        this.servicePolicy = PolicyEngine.getPolicy(policyElem);
-                    }
-
-                    //Set the policy in the config ctx
-                    msgCtx.getConfigurationContext().setProperty(
-                            RampartMessageData.getOperationPolicyKey(msgCtx), this.servicePolicy);
+                this.servicePolicy = msgCtx.getEffectivePolicy();
+            }
+            
+            if(this.servicePolicy == null) {
+                Parameter param = msgCtx.getParameter(RampartMessageData.KEY_RAMPART_POLICY);
+                if(param != null) {
+                    OMElement policyElem = param.getParameterElement().getFirstElement();
+                    this.servicePolicy = PolicyEngine.getPolicy(policyElem);
                 }
-                
+
+                //Set the policy in the config ctx
+                msgCtx.getConfigurationContext().setProperty(
+                        RampartMessageData.getServicePolicyKey(msgCtx), this.servicePolicy);
             }
             
             if(this.isInitiator && this.servicePolicy != null) {
@@ -581,6 +586,16 @@ public class RampartMessageData {
         this.servicePolicy = servicePolicy;
     }
     
+    
+    public static String getMessagePolicyKey(MessageContext msgCtx) {
+        if(msgCtx.getAxisOperation() != null) {
+            return createPolicyKey(msgCtx.getAxisService().getName(), 
+                                msgCtx.getAxisOperation().getName(),
+                                msgCtx.getAxisMessage().getName());
+        }
+        return null;
+    }
+    
     /**
      * @param msgCtx
      * @return The key to store/pickup policy of an operation
@@ -588,21 +603,27 @@ public class RampartMessageData {
     public static String getOperationPolicyKey(MessageContext msgCtx) {
         if(msgCtx.getAxisOperation() != null) {
             return createPolicyKey(msgCtx.getAxisService().getName(), 
-                                msgCtx.getAxisOperation().getName());
+                                msgCtx.getAxisOperation().getName(), null);
             
         }
         return null;
     }
 
     public static String getServicePolicyKey(MessageContext msgCtx) {
-        return  createPolicyKey(msgCtx.getAxisService().getName(), null);
+        return  createPolicyKey(msgCtx.getAxisService().getName(), null, null);
     }
     
-    public static String createPolicyKey(String service, QName operation) {
+    public static String createPolicyKey(String service, QName operation, String msg) {
         if(operation != null) {
-            return RampartMessageData.KEY_RAMPART_POLICY + service
+            if(msg != null) {
+                return RampartMessageData.KEY_RAMPART_POLICY + service
+                + "{" + operation.getNamespaceURI() + "}"
+                + operation.getLocalPart() + ":" + msg;
+            } else {
+                return RampartMessageData.KEY_RAMPART_POLICY + service
                     + "{" + operation.getNamespaceURI() + "}"
                     + operation.getLocalPart();
+            }
         } else {
             return RampartMessageData.KEY_RAMPART_POLICY + service;
         }

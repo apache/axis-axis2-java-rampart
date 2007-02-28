@@ -89,7 +89,7 @@ public class RampartTest extends TestCase {
                 options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
                         loadPolicy("/rampart/policy/" + i + ".xml"));
                 serviceClient.setOptions(options);
-
+                
                 //Blocking invocation
                 serviceClient.sendReceive(getEchoElement());
             }
