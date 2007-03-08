@@ -464,7 +464,14 @@ public class RampartUtil {
     
     public static String addWsuIdToElement(OMElement elem) {
         String id;
-        OMAttribute idAttr = elem.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
+        
+        //first try to get the Id attr
+        OMAttribute idAttr = elem.getAttribute(new QName("Id"));
+        if(idAttr == null) {
+            //then try the wsu:Id value
+            idAttr = elem.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
+        }
+        
         if(idAttr != null) {
             id = idAttr.getAttributeValue();
         } else {

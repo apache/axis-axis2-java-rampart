@@ -205,7 +205,8 @@ public abstract class BindingBuilder {
         sig.setWsConfig(rmd.getConfig());
         
         log.debug("Token inclusion: " + token.getInclusion());
-        if(token.getInclusion().equals(Constants.INCLUDE_NEVER)) {
+        if(token.getInclusion().equals(Constants.INCLUDE_NEVER) ||
+                (!rmd.isInitiator() && token.getInclusion().equals(Constants.INCLUDE_ALWAYS_TO_RECIPIENT))) {
             if(rpd.getWss11() != null) {
                 //Use thumbprint
                 sig.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
