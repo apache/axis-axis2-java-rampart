@@ -19,6 +19,7 @@ package org.apache.rahas;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -441,6 +442,23 @@ public class TrustUtil {
                                RahasConstants.WST_PREFIX);
 
     }
+    
+    public static OMElement createClaims(int version, 
+    											OMElement parent, String dialect) throws TrustException{
+        OMElement omElem = createOMElement(parent,
+                getWSTNamespace(version),
+                RahasConstants.IssuanceBindingLocalNames.CLAIMS,
+                RahasConstants.WST_PREFIX);    	
+        
+        OMNamespace ns = omElem.getOMFactory().createOMNamespace(getWSTNamespace(version), 
+        		RahasConstants.WSP_PREFIX);
+        omElem.addAttribute(RahasConstants.ATTR_CLAIMS_DIALECT , dialect, ns);
+       
+        
+        return omElem;
+    }
+    
+
 
     public static OMElement createCancelRequest(String tokenId,
                                                 int version) throws TrustException {
@@ -500,4 +518,6 @@ public class TrustUtil {
                                cryptoElem.getAttribute(PROVIDER).getAttributeValue().trim());
         return properties;
     }
+    
+    
 }

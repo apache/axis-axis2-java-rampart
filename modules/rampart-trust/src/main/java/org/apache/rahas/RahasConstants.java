@@ -59,6 +59,8 @@ public class RahasConstants {
         public static final String ENTROPY = "Entropy";
         public static final String APPLIES_TO = "AppliesTo";
         public static final String LIFETIME = "Lifetime";
+        public static final String CLAIMS = "Claims";
+       
     }
 
     public static class CancelBindingLocalNames {
@@ -107,5 +109,6 @@ public class RahasConstants {
                                                   "oasis-wss-saml-token-profile-1.1#SAMLV1.1";
 
     //Attrs
-    public static final String ATTR_TYPE = "Type";
+    public static final String ATTR_TYPE 			= "Type";
+    public static final String ATTR_CLAIMS_DIALECT 	= "Dialect";
 }

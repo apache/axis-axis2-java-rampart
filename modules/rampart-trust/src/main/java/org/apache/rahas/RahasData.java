@@ -69,7 +69,10 @@ public class RahasData {
     private String addressingNs;
 
     private String soapNs;
-
+    
+    private OMElement claimElem;
+    
+    private String  claimDialect;
     /**
      * Create a new RahasData instance and populate it with the information from
      * the request.
@@ -114,6 +117,8 @@ public class RahasData {
         this.processAppliesTo();
 
         this.processEntropy();
+        
+        this.processClaims();
 
     }
 
@@ -263,7 +268,22 @@ public class RahasData {
         }
         this.keysize = -1;
     }
-
+    
+    /**
+     * Processes a claims.
+     *
+     */
+    private void processClaims(){
+    	claimElem = this.rstElement
+    			.getFirstChildWithName(new QName(this.wstNs,
+    					RahasConstants.IssuanceBindingLocalNames.CLAIMS));
+    	
+    	if(claimElem == null){
+    		claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
+    					RahasConstants.ATTR_CLAIMS_DIALECT));
+    	}
+    	
+    }
 
     /**
      * Process wst:Entropy element in the request.
@@ -418,6 +438,14 @@ public class RahasData {
     public void setEphmeralKey(byte[] ephmeralKey) {
         this.ephmeralKey = ephmeralKey;
     }
+
+	public String getClaimDialect() {
+		return claimDialect;
+	}
+
+	public OMElement getClaimElem() {
+		return claimElem;
+	}
 
 
 }
