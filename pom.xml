@@ -6,7 +6,8 @@
     <groupId>org.apache.rampart</groupId>
     <artifactId>rampart-project</artifactId>
     <packaging>pom</packaging>
-	<description>WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache Axis2</description>
+    <description>WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache
+        Axis2</description>
     <version>SNAPSHOT</version>
     <name>Apache Rampart</name>
     <url>http://ws.apache.org/rampart</url>
@@ -36,9 +37,9 @@
             <archive>http://mail-archives.apache.org/mod_mbox/rampart-dev/</archive>
         </mailingList>
     </mailingLists>
-    
+
     <inceptionYear>2005</inceptionYear>
-  
+
     <developers>
         <developer>
             <name>Afkham Azeez</name>
@@ -53,9 +54,9 @@
             <organization>WSO2</organization>
         </developer>
         <developer>
-             <name>Sanka Samaranayake</name>
-             <id>sanka</id>
-             <organization>WSO2</organization>
+            <name>Sanka Samaranayake</name>
+            <id>sanka</id>
+            <organization>WSO2</organization>
             <email>sanka AT wso2.com</email>
         </developer>
         <developer>
@@ -65,9 +66,10 @@
             <organization>WSO2</organization>
         </developer>
     </developers>
-    
+
     <scm>
-        <connection>scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</connection>
+        <connection>
+            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</connection>
         <developerConnection>
             scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</developerConnection>
         <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
@@ -75,53 +77,38 @@
 
 
     <repositories>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>warn</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</snapshots>
-			<id>apache-snapshots</id>
-			<name>Apache Maven2 SNAPSHOTS</name>
-			<url>http://people.apache.org/repo/m2-snapshot-repository/</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>warn</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-				<checksumPolicy>warn</checksumPolicy>
-			</snapshots>
-			<id>apache-ws-snapshots2</id>
-			<name>Apache ws.zones - 2</name>
-			<url>http://ws.zones.apache.org/repository2/</url>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>warn</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
-				<checksumPolicy>warn</checksumPolicy>
-			</snapshots>
-			<id>maven2</id>
-			<name>Maven2 repo</name>
-			<url>http://repo1.maven.org/maven2/</url>
-		</repository>
-	</repositories>
+        <repository>
+            <releases>
+                <enabled>false</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+            <id>apache-snapshots</id>
+            <name>Apache Maven2 SNAPSHOTS</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>apache-ws-snapshots2</id>
+            <name>Apache ws.zones - 2</name>
+            <url>http://ws.zones.apache.org/repository2</url>
+        </repository>
+    </repositories>
 
 
     <pluginRepositories>
@@ -153,7 +140,7 @@
 
     <build>
         <plugins>
-		
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -169,7 +156,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.2</version>
             </plugin>
-			
+
         </plugins>
     </build>
 
@@ -186,13 +173,18 @@
             <artifactId>axis2-adb-codegen</artifactId>
             <version>${axis2.version}</version>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-mtompolicy</artifactId>
             <version>${axis2.version}</version>
-	</dependency>
-        
-	<!-- AIOM Dependencies -->
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-kernel</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+
+        <!-- AIOM Dependencies -->
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-impl</artifactId>
@@ -313,8 +305,8 @@
             <version>${backport_util_concurrent.version}</version>
         </dependency>
         <dependency>
-            <groupId>servletapi</groupId>
-            <artifactId>servletapi</artifactId>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
             <version>${servletapi.version}</version>
         </dependency>
         <dependency>
@@ -322,6 +314,7 @@
             <artifactId>XmlSchema</artifactId>
             <version>${XmlSchema.version}</version>
         </dependency>
+
         <dependency>
             <groupId>annogen</groupId>
             <artifactId>annogen</artifactId>
@@ -362,29 +355,29 @@
             <artifactId>xalan</artifactId>
             <version>${xalan.version}</version>
         </dependency>
-		<dependency>
-				<groupId>xerces</groupId>
-				<artifactId>xercesImpl</artifactId>
-				<version>${xerces.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>xml-apis</groupId>
-			<artifactId>xml-apis</artifactId>
-				<version>${xml.apis.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.axis2</groupId>
-			<artifactId>addressing</artifactId>
-			<type>mar</type>
-			<version>${addressing.mar.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>${commons.fileupload.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>${xml.apis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>addressing</artifactId>
+            <type>mar</type>
+            <version>${addressing.mar.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons.fileupload.version}</version>
+        </dependency>
     </dependencies>
-	
+
 
     <profiles>
         <profile>
@@ -423,29 +416,29 @@
         <module>modules/rampart-trust</module>
         <module>modules/rampart-core</module>
         <module>modules/rampart-tests</module>
-	<module>modules/rampart-mar</module>	
-	<module>modules/rampart-trust-mar</module>
-	<module>modules/rampart-integration</module>
+        <module>modules/rampart-mar</module>
+        <module>modules/rampart-trust-mar</module>
+        <module>modules/rampart-integration</module>
     </modules>
 
     <properties>
         <axis2.version>SNAPSHOT</axis2.version>
         <addressing.version>SNAPSHOT</addressing.version>
-        
-	<axiom.version>SNAPSHOT</axiom.version>
-	<addressing.mar.version>SNAPSHOT</addressing.mar.version>
+
+        <axiom.version>SNAPSHOT</axiom.version>
+        <addressing.mar.version>SNAPSHOT</addressing.mar.version>
 
         <wss4j.version>SNAPSHOT</wss4j.version>
         <xmlsec.version>1.3.0</xmlsec.version>
-	
-	<opensaml.version>1.1</opensaml.version>
-	
+
+        <opensaml.version>1.1</opensaml.version>
+
         <XmlSchema.version>SNAPSHOT</XmlSchema.version>
         <neethi.version>2.0</neethi.version>
-        
+
         <bsf.version>2.4.0</bsf.version>
         <xbean.version>2.1.0</xbean.version>
-	<woden.version>1.0.0M6</woden.version>
+        <woden.version>1.0.0M6</woden.version>
         <wsdl4j.version>1.6.1</wsdl4j.version>
         <annogen.version>0.1.0</annogen.version>
         <xml_schema.version>1.2</xml_schema.version>
@@ -479,7 +472,7 @@
 
         <jakarta.httpcore.version>4.0-alpha3</jakarta.httpcore.version>
         <commons.collections.version>3.1</commons.collections.version>
-		<commons.fileupload.version>1.1.1</commons.fileupload.version>
+        <commons.fileupload.version>1.1.1</commons.fileupload.version>
         <commons.discovery.version>0.2</commons.discovery.version>
 
 
@@ -488,14 +481,15 @@
         <spring.version>1.2.6</spring.version>
 
         <xalan.version>2.7.0</xalan.version>
-	<xerces.version>2.8.1</xerces.version>
-	
+        <xerces.version>2.8.1</xerces.version>
+
     </properties>
-	<distributionManagement>
+    <distributionManagement>
         <repository>
             <id>apache-repo</id>
             <name>Maven Central Repository</name>
-            <url>scpexe://people.apache.org//www/people.apache.org/repo/m2-ibiblio-rsync-repository</url>
+            <url>
+                scpexe://people.apache.org//www/people.apache.org/repo/m2-ibiblio-rsync-repository</url>
         </repository>
         <snapshotRepository>
             <id>apache-snapshots</id>
