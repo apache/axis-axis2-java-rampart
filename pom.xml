@@ -242,7 +242,7 @@
         <dependency>
             <groupId>org.apache.woden</groupId>
             <artifactId>woden</artifactId>
-            <version>1.0-incubating-SNAPSHOT</version>
+            <version>${woden.version}</version>
         </dependency>
         <dependency>
             <groupId>wsdl4j</groupId>
@@ -254,11 +254,7 @@
             <artifactId>mail</artifactId>
             <version>${javamail.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
@@ -310,13 +306,9 @@
             <artifactId>annogen</artifactId>
             <version>${annogen.version}</version>
         </dependency>
+
         <dependency>
-            <groupId>ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>${ant.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ant</groupId>
+            <groupId>org.apache.ant</groupId>
             <artifactId>ant-nodeps</artifactId>
             <version>${ant.version}</version>
         </dependency>
@@ -330,11 +322,7 @@
             <artifactId>jakarta-httpcore</artifactId>
             <version>${jakarta.httpcore.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>opensaml</groupId>
             <artifactId>opensaml</artifactId>
@@ -413,7 +401,6 @@
 
     <properties>
         <axis2.version>SNAPSHOT</axis2.version>
-        <addressing.version>SNAPSHOT</addressing.version>
 
         <axiom.version>SNAPSHOT</axiom.version>
         <addressing.mar.version>SNAPSHOT</addressing.mar.version>
@@ -426,12 +413,10 @@
         <XmlSchema.version>SNAPSHOT</XmlSchema.version>
         <neethi.version>2.0</neethi.version>
 
-        <bsf.version>2.4.0</bsf.version>
         <xbean.version>2.1.0</xbean.version>
-        <woden.version>1.0.0M6</woden.version>
+        <woden.version>1.0-incubating-SNAPSHOT</woden.version>
         <wsdl4j.version>1.6.1</wsdl4j.version>
         <annogen.version>0.1.0</annogen.version>
-        <xml_schema.version>1.2</xml_schema.version>
 
         <activation.version>1.1</activation.version>
         <javamail.version>1.4</javamail.version>
@@ -452,8 +437,6 @@
         <commons.logging.version>1.1</commons.logging.version>
         <backport_util_concurrent.version>2.1</backport_util_concurrent.version>
 
-        <jetty.version>6.0.1</jetty.version>
-        <slf4j.version>1.0.1</slf4j.version>
         <servletapi.version>2.3</servletapi.version>
 
         <junit.version>3.8.1</junit.version>
@@ -465,10 +448,7 @@
         <commons.fileupload.version>1.1.1</commons.fileupload.version>
         <commons.discovery.version>0.2</commons.discovery.version>
 
-
-        <ant.version>1.6.5</ant.version>
-
-        <spring.version>1.2.6</spring.version>
+        <ant.version>1.7.0</ant.version>
 
         <xalan.version>2.7.0</xalan.version>
         <xerces.version>2.8.1</xerces.version>
