@@ -5,7 +5,7 @@
     
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.rampart</groupId>
-    <artifactId>rampart_sts</artifactId>
+    <artifactId>rahas</artifactId>
     <packaging>mar</packaging>
     <version>SNAPSHOT</version>
     <name>Rampart - Trust-Mar</name>

@@ -2,7 +2,7 @@
 
 	<module ref="addressing"/>
 	<module ref="rampart"/>
-	<module ref="rampart_sts"/>
+	<module ref="rahas"/>
 
 	<parameter locked="false" name="ServiceClass">org.apache.rampart.Service</parameter>
 
