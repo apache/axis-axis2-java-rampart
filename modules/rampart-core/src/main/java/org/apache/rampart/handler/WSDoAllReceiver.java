@@ -142,9 +142,36 @@ public class WSDoAllReceiver extends WSDoAllHandler {
                 new ConversationCallbackHandler(config), config
                         .getCrypto());
 
+
         // Convert back to llom since the inflow cannot use llom
         msgContext.setEnvelope(Axis2Util
                 .getSOAPEnvelopeFromDOOMDocument(config.getDocument()));
+        
+        SOAPHeader soapHeader = null;
+        try {
+            soapHeader = msgContext.getEnvelope().getHeader();
+        } catch (OMException ex) {
+            throw new AxisFault(
+                    "WSDoAllReceiver: cannot get SOAP header after security processing",
+                    ex);
+        }
+
+        Iterator headers = soapHeader.examineAllHeaderBlocks();
+
+        SOAPHeaderBlock headerBlock = null;
+
+        while (headers.hasNext()) { // Find the wsse header
+            SOAPHeaderBlock hb = (SOAPHeaderBlock) headers.next();
+            if (hb.getLocalName().equals(WSConstants.WSSE_LN)
+                    && hb.getNamespace().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
+                headerBlock = hb;
+                break;
+            }
+        }
+
+        headerBlock.setProcessed();
+
+
     }
 
     private void processBasic(MessageContext msgContext, boolean disableDoom, RequestData reqData)
