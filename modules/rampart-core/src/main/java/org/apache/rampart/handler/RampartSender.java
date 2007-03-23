@@ -26,8 +26,6 @@ import org.apache.rampart.RampartException;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSSecurityException;
 
-import javax.xml.namespace.QName;
-
 
 public class RampartSender implements Handler {
     
@@ -50,7 +48,7 @@ public class RampartSender implements Handler {
 
     public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
         
-        if (!msgContext.isEngaged(new QName(WSSHandlerConstants.SECURITY_MODULE_NAME))) {
+        if (!msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
           return InvocationResponse.CONTINUE;        
         }
         

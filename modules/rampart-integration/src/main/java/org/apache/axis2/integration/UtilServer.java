@@ -78,7 +78,7 @@ public class UtilServer {
                 receiver.start();
                 ListenerManager listenerManager = er.getListenerManager();
                 TransportInDescription trsIn = new TransportInDescription(
-                        new QName(Constants.TRANSPORT_HTTP));
+                        Constants.TRANSPORT_HTTP);
                 trsIn.setReceiver(receiver);
                 if (listenerManager == null) {
                     listenerManager = new ListenerManager();

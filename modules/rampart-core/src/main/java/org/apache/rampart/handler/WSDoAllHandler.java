@@ -24,8 +24,6 @@ import org.apache.axis2.engine.Handler;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.ws.security.handler.WSHandler;
 
-import javax.xml.namespace.QName;
-
 /**
  * Class WSDoAllHandler
  */
@@ -70,7 +68,7 @@ public abstract class WSDoAllHandler extends WSHandler implements Handler {
     public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
         //If the security module is not engaged for this service
         //do not do any processing
-        if (msgContext.isEngaged(new QName(WSSHandlerConstants.SECURITY_MODULE_NAME))) {
+        if (msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
             this.processMessage(msgContext);
         }
         return InvocationResponse.CONTINUE;        

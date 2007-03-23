@@ -32,8 +32,6 @@ import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
 
-import javax.xml.namespace.QName;
-
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -63,7 +61,7 @@ public class RampartReceiver implements Handler {
 
     public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
         
-        if (!msgContext.isEngaged(new QName(WSSHandlerConstants.SECURITY_MODULE_NAME))) {
+        if (!msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
           return InvocationResponse.CONTINUE;        
         }
         
