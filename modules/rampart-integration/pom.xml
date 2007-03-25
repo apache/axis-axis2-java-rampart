@@ -121,10 +121,6 @@
                                 <copy file="src/main/resources/ping/src/org/apache/axis2/oasis/ping/PingPortSkeleton.java"
                                       tofile="generated-code/src/org/apache/axis2/oasis/ping/PingPortSkeleton.java"
                                       overwrite="yes"/>
-                                <!-- copy the stub to workaround the soapAction issue :-( of axis2 -->
-                                <copy file="src/main/resources/ping/src/org/apache/axis2/oasis/ping/PingPortStub.java"
-                                      tofile="generated-code/src/org/apache/axis2/oasis/ping/PingPortStub.java"
-                                      overwrite="yes"/>
                                 <!-- Password callback class for the interop service -->
                                 <copy file="src/main/resources/ping/src/org/apache/axis2/security/PWCallback.java"
                                       tofile="generated-code/src/org/apache/axis2/security/PWCallback.java"
