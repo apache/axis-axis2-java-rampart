@@ -66,8 +66,6 @@ public class RahasConstants {
     public static class CancelBindingLocalNames {
         public static final String REQUESTED_TOKEN_CANCELED = "RequestedTokenCancelled";
         public static final String CANCEL_TARGET = "CancelTarget";
-        public static final String SECURITY_TOKEN_REF = "SecurityTokenReference";
-        public static final String REFERENCE = "Reference";
         public static final String URI = "URI";
     }
 

@@ -22,6 +22,9 @@ import org.apache.rahas.TrustUtil;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.Token;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.message.token.Reference;
+import org.apache.ws.security.message.token.SecurityTokenReference;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMAttribute;
@@ -39,14 +42,6 @@ public class TokenCancelerImpl implements TokenCanceler {
     private OMElement configElement;
     private String configParamName;
     
-    private static final QName QNAME_CANCEL_TARGET =
-            new QName(RahasConstants.CancelBindingLocalNames.CANCEL_TARGET);
-    private static final QName QNAME_SEC_TOKEN_REF =
-            new QName(RahasConstants.CancelBindingLocalNames.SECURITY_TOKEN_REF);
-    private static final QName QNAME_REFERENCE =
-            new QName(RahasConstants.CancelBindingLocalNames.REFERENCE);
-    private static final QName QNAME_URI = new QName(RahasConstants.CancelBindingLocalNames.URI);
-
     /**
      * Cancel the token specified in the request.
      *
@@ -86,12 +81,15 @@ public class TokenCancelerImpl implements TokenCanceler {
         }
 
         OMElement rstEle = data.getRstElement();
-        OMElement cancelTargetEle = rstEle.getFirstChildWithName(QNAME_CANCEL_TARGET);
+        QName cancelTagetQName = new QName(data.getWstNs(), RahasConstants.CancelBindingLocalNames.CANCEL_TARGET);
+        OMElement cancelTargetEle = rstEle.getFirstChildWithName(cancelTagetQName);
         if (cancelTargetEle == null) {
             throw new TrustException("requiredElementNotFound",
-                                     new String[]{QNAME_CANCEL_TARGET.getLocalPart()});
+                                     new String[]{cancelTagetQName.toString()});
         }
-        OMElement secTokenRefEle = cancelTargetEle.getFirstChildWithName(QNAME_SEC_TOKEN_REF);
+        OMElement secTokenRefEle = cancelTargetEle
+                .getFirstChildWithName(new QName(WSConstants.WSSE_NS,
+                        SecurityTokenReference.SECURITY_TOKEN_REFERENCE));
         String tokenId;
         if (secTokenRefEle != null) {
 
@@ -102,9 +100,10 @@ public class TokenCancelerImpl implements TokenCanceler {
                            ValueType="http://schemas.xmlsoap.org/ws/2005/02/sc/sct" />
             </o:SecurityTokenReference>
             */
-            OMElement referenceEle = secTokenRefEle.getFirstChildWithName(QNAME_REFERENCE);
+            OMElement referenceEle = secTokenRefEle.getFirstChildWithName(Reference.TOKEN);
             if (referenceEle != null) {
-                OMAttribute uri = referenceEle.getAttribute(QNAME_URI);
+                OMAttribute uri = referenceEle.getAttribute(new QName(
+                        RahasConstants.CancelBindingLocalNames.URI));
                 if (uri != null) {
                     tokenId = uri.getAttributeValue().substring(1);
                 } else {

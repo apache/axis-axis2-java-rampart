@@ -42,9 +42,7 @@ import java.util.Properties;
 import java.util.Iterator;
 
 public class TrustUtil {
-    private static final String WSSE_NAMESPACE_URI =
-            "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
-    private static final String WSSE_PREFIX = "wsse";
+
     private static final QName PROVIDER = new QName("provider");
     private static final QName NAME = new QName("name");
 
@@ -481,13 +479,11 @@ public class TrustUtil {
         OMElement cancelTargetEle = TrustUtil.createCancelTargetElement(version, rst);
         OMFactory factory = rst.getOMFactory();
         OMElement secTokenRefEle =
-                factory.createOMElement(RahasConstants.CancelBindingLocalNames.SECURITY_TOKEN_REF,
-                                        WSSE_NAMESPACE_URI,
-                                        WSSE_PREFIX);
+                factory.createOMElement(SecurityTokenReference.SECURITY_TOKEN_REFERENCE,
+                                        WSConstants.WSSE_NS,
+                                        WSConstants.WSSE_PREFIX);
         OMElement refEle =
-                factory.createOMElement(RahasConstants.CancelBindingLocalNames.REFERENCE,
-                                        WSSE_NAMESPACE_URI,
-                                        WSSE_PREFIX);
+                factory.createOMElement(Reference.TOKEN);
         refEle.addAttribute(factory.createOMAttribute(RahasConstants.CancelBindingLocalNames.URI,
                                                       null, tokenId));
         secTokenRefEle.addChild(refEle);
