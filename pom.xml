@@ -406,7 +406,7 @@
         <addressing.mar.version>SNAPSHOT</addressing.mar.version>
 
         <wss4j.version>SNAPSHOT</wss4j.version>
-        <xmlsec.version>1.3.0</xmlsec.version>
+        <xmlsec.version>1.4.0</xmlsec.version>
 
         <opensaml.version>1.1</opensaml.version>
 
