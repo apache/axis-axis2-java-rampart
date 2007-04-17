@@ -97,7 +97,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
             throw axisFault;
         } catch (Exception e) {
             setAddressingInformationOnFault(msgContext);
-            throw new AxisFault(e);
+            throw new AxisFault(e.getMessage(), e);
         } finally {
 
             if (reqData != null) {

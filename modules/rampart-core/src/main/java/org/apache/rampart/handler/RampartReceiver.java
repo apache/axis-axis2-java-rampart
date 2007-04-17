@@ -72,13 +72,13 @@ public class RampartReceiver implements Handler {
             
         } catch (WSSecurityException e) {
             e.printStackTrace();
-            throw new AxisFault(e);
+            throw new AxisFault(e.getMessage(), e);
         } catch (WSSPolicyException e) {
             e.printStackTrace();
-            throw new AxisFault(e);
+            throw new AxisFault(e.getMessage(), e);
         } catch (RampartException e) {
             e.printStackTrace();
-            throw new AxisFault(e);
+            throw new AxisFault(e.getMessage(), e);
         } 
         
         if(wsResult == null) {
