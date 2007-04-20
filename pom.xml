@@ -172,6 +172,7 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-mtompolicy</artifactId>
             <version>${axis2.version}</version>
+	    <scope>compile</scope>
         </dependency>
 
         <!-- AIOM Dependencies -->
@@ -348,6 +349,7 @@
             <artifactId>addressing</artifactId>
             <type>mar</type>
             <version>${addressing.mar.version}</version>
+	    <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
@@ -400,10 +402,10 @@
     </modules>
 
     <properties>
-        <axis2.version>SNAPSHOT</axis2.version>
+        <axis2.version>1.2-SNAPSHOT</axis2.version>
 
         <axiom.version>SNAPSHOT</axiom.version>
-        <addressing.mar.version>SNAPSHOT</addressing.mar.version>
+        <addressing.mar.version>1.2-SNAPSHOT</addressing.mar.version>
 
         <wss4j.version>SNAPSHOT</wss4j.version>
         <xmlsec.version>1.4.0</xmlsec.version>
@@ -411,7 +413,7 @@
         <opensaml.version>1.1</opensaml.version>
 
         <XmlSchema.version>SNAPSHOT</XmlSchema.version>
-        <neethi.version>2.0</neethi.version>
+        <neethi.version>SNAPSHOT</neethi.version>
 
         <xbean.version>2.1.0</xbean.version>
         <woden.version>1.0-incubating-SNAPSHOT</woden.version>
@@ -443,7 +445,7 @@
         <xmlunit.version>1.0</xmlunit.version>
         <log4j.version>1.2.13</log4j.version>
 
-        <jakarta.httpcore.version>4.0-alpha3</jakarta.httpcore.version>
+        <jakarta.httpcore.version>4.0-alpha4</jakarta.httpcore.version>
         <commons.collections.version>3.1</commons.collections.version>
         <commons.fileupload.version>1.1.1</commons.fileupload.version>
         <commons.discovery.version>0.2</commons.discovery.version>
