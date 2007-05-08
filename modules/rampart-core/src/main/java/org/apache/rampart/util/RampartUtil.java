@@ -22,6 +22,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
@@ -64,8 +66,8 @@ import javax.xml.namespace.QName;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -532,26 +534,76 @@ public class RampartUtil {
     
     public static Vector getEncryptedParts(RampartMessageData rmd) {
         RampartPolicyData rpd =  rmd.getPolicyData();
-        Vector parts = rpd.getEncryptedParts();
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        if(rpd.isEncryptBody()) {
-            parts.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody()), "Content"));
-        }
-        
-        return parts;
+        return getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(), rpd.getEncryptedElements() );
     }
-    
+
     public static Vector getSignedParts(RampartMessageData rmd) {
         RampartPolicyData rpd =  rmd.getPolicyData();
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+        return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd.getSignedElements() );
+    }
     
-        // Copy list of headers to sign from Policy
-        if(rpd.isSignBody()) {
-            rpd.addSignedPart(new WSEncryptionPart(addWsuIdToElement(envelope.getBody())));
+    private static Vector getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody, Vector parts, Vector elements) {
+
+        Vector found = new Vector();
+        Vector result = new Vector();
+
+        // check body
+        if(includeBody) {
+            if( sign ) {
+                result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody())));
+            } else {
+                result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody()), "Content"));
+            }
+            found.add( envelope.getBody() );
         }
         
-        return rpd.getSignedParts();
+        // Search envelope header for 'parts' from Policy (SignedParts/EncryptedParts)
+
+        SOAPHeader header = envelope.getHeader();
+
+        for(int i=0; i<parts.size(); i++) {
+            WSEncryptionPart wsep = (WSEncryptionPart) parts.get( i );
+            if( wsep.getName() == null ) {
+                // NO name - search by namespace
+                ArrayList headerList = header.getHeaderBlocksWithNSURI( wsep.getNamespace() );
+              
+                for(int j=0; j<headerList.size(); j++) {
+                    SOAPHeaderBlock shb = (SOAPHeaderBlock) headerList.get( j ); 
+                    
+                    // find reference in envelope
+                    OMElement e = header.getFirstChildWithName( shb.getQName() );
+                  
+                    if( ! found.contains(  e ) ) {
+                        // found new
+                        found.add( e );
+                        
+                        if( sign ) {
+                            result.add(new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Content"));
+                        } else {
+                            result.add(new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Element"));
+                        }
+                    } 
+                }
+            } else {
+                // try to find
+                OMElement e = header.getFirstChildWithName( new QName(wsep.getNamespace(), wsep.getName()) );
+                if( e != null ) {
+                    if( ! found.contains( e ) ) {
+                        // found new (reuse wsep)
+                        found.add( e );
+                        result.add( wsep );
+                    }
+                } 
+            } 
+        }
+        
+        // ?? Search for 'Elements' here
+
+        return result;
     }
+    
     
     public static KeyGenerator getEncryptionKeyGenerator(String symEncrAlgo) throws WSSecurityException {
         KeyGenerator keyGen;

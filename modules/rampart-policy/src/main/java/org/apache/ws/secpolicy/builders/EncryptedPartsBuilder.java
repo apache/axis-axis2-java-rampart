@@ -59,7 +59,9 @@ public class EncryptedPartsBuilder implements AssertionBuilder {
             Header header = new Header();
             
             OMAttribute nameAttribute = element.getAttribute(NAME);
-            header.setName(nameAttribute.getAttributeValue());
+            if( nameAttribute != null ) {
+                header.setName(nameAttribute.getAttributeValue());
+            }
             
             OMAttribute namespaceAttribute = element.getAttribute(NAMESPACE);
             header.setNamespace(namespaceAttribute.getAttributeValue());

@@ -361,7 +361,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             sgndEndSuppTokMap = this.handleSupportingTokens(rmd, sgndEndSuppTokens);
     
             //Setup signature parts
-            sigParts = addSignatureParts(sigSuppTokMap, rpd.getSignedParts());
+            sigParts = addSignatureParts(sigSuppTokMap, sigParts);
             sigParts = addSignatureParts(sgndEndSuppTokMap, sigParts);
         } else {
             addSignatureConfirmation(rmd, sigParts);

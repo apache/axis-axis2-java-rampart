@@ -37,7 +37,6 @@ import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
@@ -82,9 +81,9 @@ public class PolicyBasedResultsValidator {
         
         validateProtectionOrder(data, results);
         
-        validateEncryptedParts(data, results);
+        validateEncryptedParts(data, encryptedParts, results);
 
-        validateSignedPartsHeaders(data, results);
+        validateSignedPartsHeaders(data, signatureParts, results);
 
         //Supporting tokens
         if(!rmd.isInitiator()) {
@@ -302,7 +301,7 @@ public class PolicyBasedResultsValidator {
         return sigEncrActions;
     }
 
-    private void validateEncryptedParts(ValidatorData data, Vector results) 
+    private void validateEncryptedParts(ValidatorData data, Vector encryptedParts, Vector results) 
     throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
@@ -321,9 +320,9 @@ public class PolicyBasedResultsValidator {
         }
         
         int refCount = 0;
-        
-        refCount += rpd.getEncryptedParts().size();
-        
+
+        refCount += encryptedParts.size();
+
         if(encrRefs.size() != refCount) {
             throw new RampartException("invalidNumberOfEncryptedParts", 
                     new String[]{Integer.toString(refCount)});
@@ -331,7 +330,7 @@ public class PolicyBasedResultsValidator {
         
     }
 
-    private void validateSignedPartsHeaders(ValidatorData data, Vector results) 
+    private void validateSignedPartsHeaders(ValidatorData data, Vector signatureParts, Vector results) 
     throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
@@ -353,12 +352,8 @@ public class PolicyBasedResultsValidator {
             }
         }
         
-        RampartPolicyData rpd = rmd.getPolicyData();
-        
-        // Get list to check from Policy
-        Vector signedParts = rpd.getSignedParts();
-        for(int i=0; i<signedParts.size(); i++) {
-            WSEncryptionPart wsep = (WSEncryptionPart) signedParts.get( i );
+        for(int i=0; i<signatureParts.size(); i++) {
+            WSEncryptionPart wsep = (WSEncryptionPart) signatureParts.get( i );
             
             Element headerElement = (Element) WSSecurityUtil.findElement(
                     envelope, wsep.getName(), wsep.getNamespace() );

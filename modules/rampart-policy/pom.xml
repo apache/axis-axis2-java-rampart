@@ -34,4 +34,17 @@
         </plugins>
     </build>
 
+    <reporting>
+      <plugins>
+        <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <configuration>
+         <templateDirectory>${basedir}</templateDirectory>
+         <menu ref="parent" />
+        </configuration>
+        </plugin>
+      </plugins>
+    </reporting>
+    
 </project>
