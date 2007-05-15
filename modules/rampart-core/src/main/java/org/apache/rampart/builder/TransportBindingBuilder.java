@@ -124,6 +124,12 @@ public class TransportBindingBuilder extends BindingBuilder {
                 }
             }
             
+            
+//          Rampart - 36
+            SupportingToken supportingToks = rpd.getSupportingTokens();
+            this.handleSupportingTokens(rmd, supportingToks);
+            
+            
             //Store the signature values vector
             rmd.getMsgContext().setProperty(WSHandlerConstants.SEND_SIGV, signatureValues);
         } else {
