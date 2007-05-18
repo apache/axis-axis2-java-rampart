@@ -3,11 +3,12 @@
     <property name="rampart.version" value="SNAPSHOT"/>
     <property name="rampart.bin.dist" value="rampart"/>
     <property name="rampart.src.dist" value="rampart-src"/>
-    <property name="rampart.src.dist" value="rampart-docs"/>
+    <property name="rampart.docs.dist" value="rampart-docs"/>
     
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.bin" value="${dir.dist}/bin/${rampart.bin.dist}-${rampart.version}"/>
     <property name="dir.dist.src" value="${dir.dist}/src/${rampart.src.dist}-${rampart.version}"/>
+    <property name="dir.dist.docs" value="${dir.dist}/docs/${rampart.docs.dist}-${rampart.version}"/>
     
     <property name="dir.mvn2.repo" value="${user.home}/.m2/repository"/>
     
@@ -31,10 +32,8 @@
         
         <!-- Modules -->
         <echo>Copying mars in to modules</echo>
-        <mkdir dir="${dir.dist.bin}/modules"/>
-        
-        <copy todir="${dir.dist.bin}/modules" file="modules/rampart-mar/target/rampart-${rampart.version}.mar"/>
-        <copy todir="${dir.dist.bin}/modules" file="modules/rampart-trust-mar/target/rahas-${rampart.version}.mar"/>
+        <copy todir="${dir.dist.bin}" file="modules/rampart-mar/target/rampart-${rampart.version}.mar"/>
+        <copy todir="${dir.dist.bin}" file="modules/rampart-trust-mar/target/rahas-${rampart.version}.mar"/>
         
         <!-- All dep jars -->
         <echo>Copying dependencies into lib</echo>
@@ -65,9 +64,36 @@
     </target>
     
     <target name="src-dist" depends="init">
+
+        <mkdir dir="${dir.dist.src}"/>
+		
+        <copy todir="${dir.dist.src}">
+            <fileset dir="release-docs">
+                <exclude name="bin"/>
+                <exclude name="build.xml"/>
+            </fileset>
+        </copy>
+        
+        <copy todir="${dir.dist.src}">
+			<fileset dir="modules">
+			    <include name="rampart-core/**/*"/>
+				<include name="rampart-policy/**/*"/>
+			    <include name="rampart-trust/**/*"/>
+			    <include name="rampart-samples/**/*"/>
+			    <exclude name=".svn"/>
+			</fileset>
+    		</copy>
+        
+        <zip destfile="${dir.dist}/${rampart.src.dist}-${rampart.version}.zip">
+            <zipfileset dir="${dir.dist.src}/../"/>
+        </zip>
+        
+    </target>
+
+    <target name="docs-dist" depends="init">
     
     </target>
-    
+
     <target name="clean">
 		<delete dir="${dir.dist}"/>
     </target>
