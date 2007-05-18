@@ -287,7 +287,7 @@ public abstract class BindingBuilder {
         
         if(suppTokens != null && suppTokens.getTokens() != null &&
                 suppTokens.getTokens().size() > 0) {
-            log.debug("Processing endorsing supporting tokens");
+            log.debug("Processing supporting tokens");
             
             ArrayList tokens = suppTokens.getTokens();
             for (Iterator iter = tokens.iterator(); iter.hasNext();) {

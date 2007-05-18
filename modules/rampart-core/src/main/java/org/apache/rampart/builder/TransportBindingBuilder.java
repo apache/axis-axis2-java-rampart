@@ -125,7 +125,6 @@ public class TransportBindingBuilder extends BindingBuilder {
             }
             
             
-//          Rampart - 36
             SupportingToken supportingToks = rpd.getSupportingTokens();
             this.handleSupportingTokens(rmd, supportingToks);
             
