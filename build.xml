@@ -1,0 +1,60 @@
+<project name="Apache Rampart release build" default="bin-dist">
+
+    <property name="rampart.version" value="SNAPSHOT"/>
+    <property name="rampart.bin.dist" value="rampart-bin"/>
+    <property name="rampart.src.dist" value="rampart-src"/>
+    
+    <property name="dir.dist" value="dist"/>
+    
+    
+    
+    
+    <target name="init" depends="clean">
+    		<mkdir dir="${dir.dist}"/>
+    </target>
+
+    <target name="bin-dist" depends="init">
+    		
+        <mkdir dir="${dir.dist}/${rampart.bin.dist}"/>
+		
+        <copy todir="${dir.dist}/${rampart.bin.dist}">
+            <fileset dir="release-docs">
+            </fileset>
+        </copy>
+        
+        <!-- Modules -->
+        <echo>Copying mars in to modules</echo>
+        <mkdir dir="${dir.dist}/${rampart.bin.dist}/modules"/>
+        
+        <copy todir="${dir.dist}/${rampart.bin.dist}/modules" file="modules/rampart-mar/target/rampart-${rampart.version}.mar"/>
+        <copy todir="${dir.dist}/${rampart.bin.dist}/modules" file="modules/rampart-trust-mar/target/rahas-${rampart.version}.mar"/>
+        
+        <!-- All dep jars -->
+        <echo>Copying dependencies into lib</echo>
+        <mkdir dir="${dir.dist}/${rampart.bin.dist}/lib"/>
+        
+        <copy todir="${dir.dist}/${rampart.bin.dist}/lib" file="modules/rampart-core/target/rampart-core-${rampart.version}.jar"/>
+        <copy todir="${dir.dist}/${rampart.bin.dist}/lib" file="modules/rampart-policy/target/rampart-policy-${rampart.version}.jar"/>
+        <copy todir="${dir.dist}/${rampart.bin.dist}/lib" file="modules/rampart-trust/target/rampart-trust-${rampart.version}.jar"/>
+
+        <echo>Copying samples</echo>
+        <!-- copy samples -->
+        <mkdir dir="${dir.dist}/${rampart.bin.dist}/samples"/>
+        
+        <copy todir="${dir.dist}/${rampart.bin.dist}/samples">
+            <fileset dir="modules/rampart-samples/">
+            </fileset>
+        </copy>
+        
+        
+    </target>
+    
+    <target name="src-dist" depends="init">
+    
+    </target>
+    
+    <target name="clean">
+		<delete dir="${dir.dist}"/>
+    </target>
+    
+</project>
