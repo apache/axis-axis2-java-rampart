@@ -70,6 +70,7 @@
         <copy todir="${dir.dist.src}">
             <fileset dir="release-docs">
                 <exclude name="build.xml"/>
+                <exclude name="README.txt"/>
             </fileset>
         </copy>
         
@@ -96,6 +97,7 @@
         <copy todir="${dir.dist.docs}">
             <fileset dir="release-docs">
                 <exclude name="build.xml"/>
+                <exclude name="README.txt"/>
             </fileset>
         </copy>
         
