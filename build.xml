@@ -16,7 +16,7 @@
     <property name="version.xmlsec" value="1.4.0"/>
     <property name="version.opensaml" value="1.1"/>
     <property name="version.wss4j" value="SNAPSHOT"/>
-
+    
     <target name="init">
     		<mkdir dir="${dir.dist}"/>
     </target>
@@ -69,7 +69,6 @@
 		
         <copy todir="${dir.dist.src}">
             <fileset dir="release-docs">
-                <exclude name="bin"/>
                 <exclude name="build.xml"/>
             </fileset>
         </copy>
@@ -90,8 +89,38 @@
         
     </target>
 
-    <target name="docs-dist" depends="init">
-    
+    <target name="docs-dist" depends="bin-dist">
+
+        <mkdir dir="${dir.dist.docs}"/>
+
+        <copy todir="${dir.dist.docs}">
+            <fileset dir="release-docs">
+                <exclude name="build.xml"/>
+            </fileset>
+        </copy>
+        
+        <mkdir dir="${dir.dist.docs}/core"/>
+        <mkdir dir="${dir.dist.docs}/policy"/>
+        <mkdir dir="${dir.dist.docs}/trust"/>
+        
+        <copy todir="${dir.dist.docs}/core">
+        		<fileset dir="modules/rampart-core/target/site/apidocs/">
+        		</fileset>
+        </copy>
+        
+        <copy todir="${dir.dist.docs}/policy">
+        		<fileset dir="modules/rampart-policy/target/site/apidocs/">
+        		</fileset>
+        </copy>
+
+        <copy todir="${dir.dist.docs}/trust">
+        		<fileset dir="modules/rampart-trust/target/site/apidocs/">
+        		</fileset>
+        </copy>
+        
+        <zip destfile="${dir.dist}/${rampart.docs.dist}-${rampart.version}.zip">
+            <zipfileset dir="${dir.dist.docs}/../"/>
+        </zip>
     </target>
 
     <target name="clean">

@@ -413,7 +413,7 @@
         <opensaml.version>1.1</opensaml.version>
 
         <XmlSchema.version>SNAPSHOT</XmlSchema.version>
-        <neethi.version>SNAPSHOT</neethi.version>
+        <neethi.version>2.0.1</neethi.version>
 
         <xbean.version>2.1.0</xbean.version>
         <woden.version>1.0-incubating-SNAPSHOT</woden.version>
