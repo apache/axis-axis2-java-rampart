@@ -405,7 +405,7 @@
         <axis2.version>1.2</axis2.version>
 
         <axiom.version>1.2.4</axiom.version>
-        <addressing.mar.version>1.2-SNAPSHOT</addressing.mar.version>
+        <addressing.mar.version>1.2</addressing.mar.version>
 
         <wss4j.version>SNAPSHOT</wss4j.version>
         <xmlsec.version>1.4.0</xmlsec.version>
