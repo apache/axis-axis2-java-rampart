@@ -41,6 +41,7 @@ import org.apache.ws.security.message.WSSecSignature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -171,9 +172,12 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             HashMap endSuppTokMap = null;
             HashMap sgndEndSuppTokMap = null;
             this.sigParts = RampartUtil.getSignedParts(rmd);
-            sigParts.add(new WSEncryptionPart(RampartUtil
+            
+            if(this.timestampElement != null){
+            	sigParts.add(new WSEncryptionPart(RampartUtil
                     .addWsuIdToElement((OMElement) this.timestampElement)));
-
+            }
+            
             if (rmd.isInitiator()) {
 
                 // Now add the supporting tokens
@@ -278,9 +282,13 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         sigParts = RampartUtil.getSignedParts(rmd);
         
         //Add timestamp
-        sigParts.add(new WSEncryptionPart(RampartUtil
+        if(this.timestampElement != null){
+        	sigParts.add(new WSEncryptionPart(RampartUtil
                 .addWsuIdToElement((OMElement) this.timestampElement)));
-
+        }else{
+        	this.setInsertionLocation(null);
+        }
+        
         if (rmd.isInitiator()) {
             // Now add the supporting tokens
             SupportingToken sgndSuppTokens = rpd.getSignedSupportingTokens();
@@ -327,6 +335,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
+        
+             
         Vector encrParts = RampartUtil.getEncryptedParts(rmd);
         
         //Check for signature protection
@@ -396,23 +406,30 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
                             .getRampartConfig(), rmd.getCustomClassLoader()));
                     
-                    this.setInsertionLocation(this.timestampElement);
+                    if(this.timestampElement != null){
+                    	this.setInsertionLocation(this.timestampElement);
+                    }else{
+                    	this.setInsertionLocation(null);
+                    }
+                    
                     if(encr.getBSTTokenId() != null) {
                         this.setInsertionLocation(RampartUtil
-                                .insertSiblingAfter(rmd,
+                                .insertSiblingAfterOrPrepend(rmd,
                                         this.getInsertionLocation(),
                                         encr.getBinarySecurityTokenElement()));
                     }
                     
+                    
                     Element encryptedKeyElement = encr.getEncryptedKeyElement();
                     this.setInsertionLocation(RampartUtil
-                            .insertSiblingAfter(rmd,
+                            .insertSiblingAfterOrPrepend(rmd,
                                     this.getInsertionLocation(),
                                     encryptedKeyElement));
                     
+                                       
                     //Encrypt, get hold of the ref list and add it
                     refList = encr.encryptForInternalRef(null, encrParts);
-    
+                    
                     //Add internal refs
                     encryptedKeyElement.appendChild(refList);
 //                    RampartUtil.insertSiblingAfter(rmd,
@@ -467,11 +484,11 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                  this.sigDKTElement = RampartUtil.insertSiblingAfter(rmd,
                         this.getInsertionLocation(), dkSign.getdktElement());
                 this.setInsertionLocation(this.sigDKTElement);
-
+                
                 this.setInsertionLocation(RampartUtil.insertSiblingAfter(rmd,
                         this.getInsertionLocation(), dkSign
                                 .getSignatureElement()));
-
+                                
                 this.mainSigId = RampartUtil
                         .addWsuIdToElement((OMElement) dkSign
                                 .getSignatureElement());

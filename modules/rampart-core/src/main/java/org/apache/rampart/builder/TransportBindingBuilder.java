@@ -55,9 +55,11 @@ public class TransportBindingBuilder extends BindingBuilder {
         log.debug("TransportBindingBuilder build invoked");
         
         RampartPolicyData rpd = rmd.getPolicyData();
-
-        addTimestamp(rmd);
         
+        if (rpd.isIncludeTimestamp()) {
+        	addTimestamp(rmd);
+        }
+       
         /*
          * Process Supporting tokens
          */
@@ -177,7 +179,9 @@ public class TransportBindingBuilder extends BindingBuilder {
                 
                 Vector sigParts = new  Vector();
                 
-                sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
+                if(this.timestampElement != null){
+                	sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));
+                }
                 
                 if(rpd.isTokenProtection()) {
                     sigParts.add(new WSEncryptionPart(encrKey.getBSTTokenId()));
@@ -211,7 +215,11 @@ public class TransportBindingBuilder extends BindingBuilder {
                 sig.appendBSTElementToHeader(rmd.getSecHeader());
                 
                 Vector sigParts = new Vector();
-                sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));
+                
+                if(this.timestampElement != null ){
+                	sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));
+                }
+                
                 if (rpd.isTokenProtection()
                         && !Constants.INCLUDE_NEVER
                                 .equals(token.getInclusion())) {
@@ -301,7 +309,9 @@ public class TransportBindingBuilder extends BindingBuilder {
               
               Vector sigParts = new  Vector();
               
-              sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
+              if(this.timestampElement != null){
+            	  sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
+              }
               
               if(rpd.isTokenProtection() && tokenIncluded) {
                   sigParts.add(new WSEncryptionPart(id));

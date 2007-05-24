@@ -16,6 +16,18 @@
 
 package org.apache.rampart.util;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
+
+import javax.crypto.KeyGenerator;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
@@ -58,18 +70,6 @@ import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Loader;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.crypto.KeyGenerator;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.xml.namespace.QName;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
 
 public class RampartUtil {
 
@@ -763,4 +763,44 @@ public class RampartUtil {
         
         return null;
     }
+    
+    /**
+     * If the child is present insert the element as a sibling after him.
+     * 
+     * If the child is null, then prepend the element.
+     * 
+     * @param rmd
+     * @param child
+     * @param elem - element mentioned above
+     * @return
+     */
+    public static Element insertSiblingAfterOrPrepend(RampartMessageData rmd, Element child, Element elem) {
+        Element retElem = null;
+    	if(child != null){ // child is not null so insert sibling after
+    		retElem = RampartUtil.insertSiblingAfter(rmd, child, elem);
+    	}else{ //Prepend 
+    		
+    		Element secHeaderElem = rmd.getSecHeader().getSecurityHeader();
+    		Node node = secHeaderElem.getOwnerDocument().importNode(
+                        elem, true);
+    		Element firstElem = (Element)secHeaderElem.getFirstChild();
+    	
+    		if(firstElem == null){
+    			retElem = (Element)secHeaderElem.appendChild(node);
+    		}else{
+    			if(firstElem.getOwnerDocument().equals(elem.getOwnerDocument())) {
+    				((OMElement)firstElem).insertSiblingBefore((OMElement)elem);
+                	retElem = elem;
+    			} else {
+    				Element newSib = (Element)firstElem.getOwnerDocument().importNode(elem, true);
+    				((OMElement)firstElem).insertSiblingBefore((OMElement)newSib);
+    				retElem = newSib;
+    			}
+    		}
+    	}
+    	
+    	return retElem;
+    }
+    
+
 }

@@ -195,9 +195,12 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             HashMap endSuppTokMap = null;
             HashMap sgndEndSuppTokMap = null;
             Vector sigParts = RampartUtil.getSignedParts(rmd);
-            sigParts.add(new WSEncryptionPart(RampartUtil
+            
+            if(this.timestampElement != null){
+            	sigParts.add(new WSEncryptionPart(RampartUtil
                     .addWsuIdToElement((OMElement) this.timestampElement)));
-
+            }
+            
             if(rmd.isInitiator()) {
             
     //          Now add the supporting tokens
@@ -346,9 +349,12 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         HashMap endSuppTokMap = null;
         HashMap sgndEndSuppTokMap = null;
         Vector sigParts = RampartUtil.getSignedParts(rmd);
-        sigParts.add(new WSEncryptionPart(RampartUtil
+        
+        if(this.timestampElement != null){
+        	sigParts.add(new WSEncryptionPart(RampartUtil
                 .addWsuIdToElement((OMElement) this.timestampElement)));
-
+        }
+        
         if(rmd.isInitiator()) {
     //      Now add the supporting tokens
             SupportingToken sgndSuppTokens = rpd.getSignedSupportingTokens();
