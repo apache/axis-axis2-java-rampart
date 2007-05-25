@@ -520,16 +520,23 @@ public class RampartUtil {
         return (Element)secHeaderElem.appendChild(node);
     }
 
-    public static Element insertSiblingAfter(RampartMessageData rmd, Element child, Element sibling) {
-        if(child == null) {
+    public static Element insertSiblingAfter(RampartMessageData rmd,
+            Element child, Element sibling) {
+        if (child == null) {
             return appendChildToSecHeader(rmd, sibling);
         } else {
-            if(child.getOwnerDocument().equals(sibling.getOwnerDocument())) {
-                ((OMElement)child).insertSiblingAfter((OMElement)sibling);
+            if (child.getOwnerDocument().equals(sibling.getOwnerDocument())) {
+
+                if (child.getParentNode() == null
+                        && !child.getLocalName().equals("UsernameToken")) {
+                    rmd.getSecHeader().getSecurityHeader().appendChild(child);
+                }
+                ((OMElement) child).insertSiblingAfter((OMElement) sibling);
                 return sibling;
             } else {
-                Element newSib = (Element)child.getOwnerDocument().importNode(sibling, true);
-                ((OMElement)child).insertSiblingAfter((OMElement)newSib);
+                Element newSib = (Element) child.getOwnerDocument().importNode(
+                        sibling, true);
+                ((OMElement) child).insertSiblingAfter((OMElement) newSib);
                 return newSib;
             }
         }

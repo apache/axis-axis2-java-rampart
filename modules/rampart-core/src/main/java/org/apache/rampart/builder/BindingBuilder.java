@@ -16,6 +16,18 @@
 
 package org.apache.rampart.builder;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Vector;
+import java.util.Map.Entry;
+
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,17 +60,6 @@ import org.apache.ws.security.message.WSSecUsernameToken;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
 
 public abstract class BindingBuilder {
     private static Log log = LogFactory.getLog(BindingBuilder.class);
@@ -394,21 +395,25 @@ public abstract class BindingBuilder {
      * @throws RampartException
      */
     protected Vector addSignatureParts(HashMap tokenMap, Vector sigParts) throws RampartException {
-        
+    	
         Set entrySet = tokenMap.entrySet();
         
         for (Iterator iter = entrySet.iterator(); iter.hasNext();) {
-            Object tempTok =  iter.next();
+            Object tempTok =  ((Entry)iter.next()).getValue();
             WSEncryptionPart part = null;
+            
             if(tempTok instanceof org.apache.rahas.Token) {
+            	
                 part = new WSEncryptionPart(
                         ((org.apache.rahas.Token) tempTok).getId());
+                
             } else if(tempTok instanceof WSSecSignature) {
                 WSSecSignature tempSig = (WSSecSignature) tempTok;
                 if(tempSig.getBSTTokenId() != null) {
                     part = new WSEncryptionPart(tempSig.getBSTTokenId());
                 }
             } else {
+            	
               throw new RampartException("UnsupportedTokenInSupportingToken");  
             }
             sigParts.add(part);
