@@ -28,11 +28,28 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.xml.namespace.QName;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.crypto.KeyGenerator;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -68,6 +85,8 @@ import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Loader;
+import org.jaxen.JaxenException;
+import org.jaxen.XPath;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -544,6 +563,49 @@ public class RampartUtil {
         return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd.getSignedElements() );
     }
     
+    private static Set findAllPrefixNamespaces(OMElement currentElement)
+    {
+    	Set results = new HashSet();
+    	Iterator iter = null;
+    	
+    	findPrefixNamespaces(currentElement,results);
+    	
+    	return results;
+    }
+    
+    private static void findPrefixNamespaces(OMElement e, Set results)
+    {
+    	
+	    	Iterator iter = e.getAllDeclaredNamespaces();
+	    	
+	    	if (iter!=null)
+	    	{
+	    		while (iter.hasNext())
+	    				results.add(iter.next());
+	    	}
+	    	
+	    	Iterator children = e.getChildElements();
+	    	
+	    	while (children.hasNext())
+	    	{
+	    		findPrefixNamespaces((OMElement)children.next(), results);
+	    	}
+    }
+    
+    private static List findDefaultPrefixNamespaces(OMElement e)
+    {
+    	List namespaces = new ArrayList();
+    	OMFactory factory = e.getOMFactory();
+    	// put default namespaces here (sp, soapenv, wsu, etc...)
+    	namespaces.add(factory.createOMNamespace(WSConstants.ENC_PREFIX, WSConstants.ENC_NS));
+    	namespaces.add(factory.createOMNamespace(WSConstants.SIG_PREFIX, WSConstants.SIG_NS));
+    	namespaces.add(factory.createOMNamespace(WSConstants.WSSE_PREFIX, WSConstants.WSSE_NS));
+    	namespaces.add(factory.createOMNamespace(WSConstants.WSU_PREFIX, WSConstants.WSU_NS));
+    	
+    	return namespaces;
+    	
+    }
+    
     private static Vector getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody, Vector parts, Vector elements) {
 
         Vector found = new Vector();
@@ -600,6 +662,42 @@ public class RampartUtil {
         }
         
         // ?? Search for 'Elements' here
+        
+        // decide what exactly is going to be used - only the default namespaces, or the list of all declared namespaces in the message !
+        Set namespaces = findAllPrefixNamespaces(envelope);
+        
+        Iterator elementsIter = elements.iterator();
+        while (elementsIter.hasNext())
+        {
+        	String expression = (String)elementsIter.next();
+        	try {
+				XPath xp = new AXIOMXPath(expression);
+				Iterator nsIter = namespaces.iterator();
+				
+				while (nsIter.hasNext())
+				{
+					OMNamespace tmpNs = (OMNamespace)nsIter.next();
+					xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
+				}
+				
+				List selectedNodes = xp.selectNodes(envelope);
+				
+				Iterator nodesIter = selectedNodes.iterator();
+			    while (nodesIter.hasNext())
+			    {
+			    	OMElement e = (OMElement)nodesIter.next();
+			    	
+			    	if (sign)
+			    		result.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content"));
+			    	else
+			    		result.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Element"));
+			    }
+				
+			} catch (JaxenException e) {
+				// This has to be changed to propagate an instance of a RampartException up
+				throw new RuntimeException(e);
+			}
+        }
 
         return result;
     }

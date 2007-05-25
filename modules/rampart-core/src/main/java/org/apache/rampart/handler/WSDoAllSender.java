@@ -72,8 +72,10 @@ public class WSDoAllSender extends WSDoAllHandler {
       
     public void processMessage(MessageContext msgContext) throws AxisFault {
         
-        String disableDoomValue = (String)msgContext.getProperty(WSSHandlerConstants.DISABLE_DOOM);
-        boolean disableDoom = disableDoomValue != null && Constants.VALUE_TRUE.equalsIgnoreCase(disableDoomValue);
+        String useDoomValue = (String) getProperty(msgContext,
+                WSSHandlerConstants.USE_DOOM);
+        boolean useDoom = useDoomValue != null
+                && Constants.VALUE_TRUE.equalsIgnoreCase(useDoomValue);
         
         RequestData reqData = new RequestData();
         try {
@@ -83,7 +85,7 @@ public class WSDoAllSender extends WSDoAllHandler {
                     WSSHandlerConstants.RSTR_ACTON_SCT.equals(msgContext.getWSAAction()) ||
                     WSSHandlerConstants.RSTR_ACTON_ISSUE.equals(msgContext.getWSAAction())) {
                 //If the msgs are msgs to an STS then use basic WS-Sec
-                processBasic(msgContext, disableDoom, reqData);
+                processBasic(msgContext, useDoom, reqData);
             } else {
                 processSecConv(msgContext);
             }
@@ -135,11 +137,11 @@ public class WSDoAllSender extends WSDoAllHandler {
      * This will carryout the WS-Security related operations.
      * 
      * @param msgContext
-     * @param disableDoom
+     * @param useDoom
      * @throws WSSecurityException
      * @throws AxisFault
      */
-    private void processBasic(MessageContext msgContext, boolean disableDoom,
+    private void processBasic(MessageContext msgContext, boolean useDoom,
             RequestData reqData) throws WSSecurityException, AxisFault {
         boolean doDebug = log.isDebugEnabled();
         
@@ -244,7 +246,7 @@ public class WSDoAllSender extends WSDoAllHandler {
         if ((doc = (Document) ((MessageContext)reqData.getMsgContext())
                 .getProperty(WSHandlerConstants.SND_SECURITY)) == null) {
             try {
-                doc = Axis2Util.getDocumentFromSOAPEnvelope(msgContext.getEnvelope(), disableDoom);
+                doc = Axis2Util.getDocumentFromSOAPEnvelope(msgContext.getEnvelope(), useDoom);
             } catch (WSSecurityException wssEx) {
                 throw new AxisFault("WSDoAllReceiver: Error in converting to Document", wssEx);
             }
@@ -265,7 +267,11 @@ public class WSDoAllSender extends WSDoAllHandler {
             ((MessageContext)reqData.getMsgContext()).setProperty(WSHandlerConstants.SND_SECURITY,
                     doc);
         } else {
-            msgContext.setEnvelope((SOAPEnvelope)doc.getDocumentElement());
+            if(useDoom) {
+                msgContext.setEnvelope((SOAPEnvelope)doc.getDocumentElement());
+            } else {
+                msgContext.setEnvelope(Axis2Util.getSOAPEnvelopeFromDOMDocument(doc, useDoom));
+            }
             ((MessageContext)reqData.getMsgContext()).setProperty(WSHandlerConstants.SND_SECURITY, null);
         }
         

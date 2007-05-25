@@ -72,10 +72,10 @@ public class WSDoAllReceiver extends WSDoAllHandler {
             log.debug("WSDoAllReceiver: enter invoke() ");
         }
 
-        String disableDoomValue = (String) msgContext
-                .getProperty(WSSHandlerConstants.DISABLE_DOOM);
-        boolean disableDoom = disableDoomValue != null
-                && Constants.VALUE_TRUE.equalsIgnoreCase(disableDoomValue);
+        String useDoomValue = (String) getProperty(msgContext,
+                WSSHandlerConstants.USE_DOOM);
+        boolean useDoom = useDoomValue != null
+                && Constants.VALUE_TRUE.equalsIgnoreCase(useDoomValue);
 
         RequestData reqData = new RequestData();
         try {
@@ -88,7 +88,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
                             .getWSAAction())
                     || WSSHandlerConstants.RSTR_ACTON_SCT.equals(msgContext
                             .getWSAAction())) {
-                this.processBasic(msgContext, disableDoom, reqData);
+                this.processBasic(msgContext, useDoom, reqData);
             } else {
                 this.processSecConv(msgContext);
             }
@@ -145,7 +145,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
 
         // Convert back to llom since the inflow cannot use llom
         msgContext.setEnvelope(Axis2Util
-                .getSOAPEnvelopeFromDOOMDocument(config.getDocument()));
+                .getSOAPEnvelopeFromDOMDocument(config.getDocument(), true));
         
         SOAPHeader soapHeader = null;
         try {
@@ -174,7 +174,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
 
     }
 
-    private void processBasic(MessageContext msgContext, boolean disableDoom, RequestData reqData)
+    private void processBasic(MessageContext msgContext, boolean useDoom, RequestData reqData)
             throws Exception {
 
         // populate the properties
@@ -224,7 +224,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
 
         try {
             doc = Axis2Util.getDocumentFromSOAPEnvelope(msgContext
-                    .getEnvelope(), disableDoom);
+                    .getEnvelope(), useDoom);
         } catch (WSSecurityException wssEx) {
             throw new AxisFault(
                     "WSDoAllReceiver: Error in converting to Document", wssEx);
@@ -304,7 +304,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
          * Set the new SOAPEnvelope
          */
 
-        msgContext.setEnvelope(Axis2Util.getSOAPEnvelopeFromDOOMDocument(doc));
+        msgContext.setEnvelope(Axis2Util.getSOAPEnvelopeFromDOMDocument(doc, useDoom));
 
         /*
          * After setting the new current message, probably modified because of

@@ -28,11 +28,13 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.ws.security.WSSecurityException;
+import org.apache.xml.security.utils.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 
 import java.io.ByteArrayInputStream;
@@ -74,46 +76,51 @@ public class Axis2Util {
 	 * @return Returns the DOM Document of the given SOAP Envelope.
 	 * @throws Exception
 	 */
-	public static Document getDocumentFromSOAPEnvelope(SOAPEnvelope env, boolean disableDoom)
+	public static Document getDocumentFromSOAPEnvelope(SOAPEnvelope env, boolean useDoom)
 			throws WSSecurityException {
 		try {
             if(env instanceof Element) {
                 return ((Element)env).getOwnerDocument();
             }
             
-            if(!disableDoom) {
-    			env.build();
-                
-                //Workaround to prevent a bug in AXIOM where 
-                //there can be an incomplete OMElement as the first child body 
+            if (useDoom) {
+                env.build();
+
+                // Workaround to prevent a bug in AXIOM where
+                // there can be an incomplete OMElement as the first child body
                 OMElement firstElement = env.getBody().getFirstElement();
-                if(firstElement != null) {
+                if (firstElement != null) {
                     firstElement.build();
                 }
-    			
-    			//Check the namespace and find SOAP version and factory
-    			String nsURI = null;
-    			SOAPFactory factory;
-    			if(env.getNamespace().getNamespaceURI().equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-    				nsURI = SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI;
-    				factory = DOOMAbstractFactory.getSOAP11Factory();
-    			} else {
-    				nsURI = SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI;
-    				factory = DOOMAbstractFactory.getSOAP12Factory();
-    			}
-    			
-    			StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(env.getXMLStreamReader(),factory, nsURI);
-    			SOAPEnvelope envelope = (stAXSOAPModelBuilder).getSOAPEnvelope();
-    			((OMNode)envelope.getParent()).build();
-    			
-    			Element envElem = (Element)envelope;
-    			return envElem.getOwnerDocument();
+
+                // Check the namespace and find SOAP version and factory
+                String nsURI = null;
+                SOAPFactory factory;
+                if (env.getNamespace().getNamespaceURI().equals(
+                        SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+                    nsURI = SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI;
+                    factory = DOOMAbstractFactory.getSOAP11Factory();
+                } else {
+                    nsURI = SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI;
+                    factory = DOOMAbstractFactory.getSOAP12Factory();
+                }
+
+                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
+                        env.getXMLStreamReader(), factory, nsURI);
+                SOAPEnvelope envelope = (stAXSOAPModelBuilder)
+                        .getSOAPEnvelope();
+                ((OMNode) envelope.getParent()).build();
+
+                Element envElem = (Element) envelope;
+                return envElem.getOwnerDocument();
             } else {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 env.build();
                 env.serialize(baos);
-                ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                ByteArrayInputStream bais = new ByteArrayInputStream(baos
+                        .toByteArray());
+                DocumentBuilderFactory factory = DocumentBuilderFactory
+                        .newInstance();
                 factory.setNamespaceAware(true);
                 return factory.newDocumentBuilder().parse(bais);
             }
@@ -123,22 +130,34 @@ public class Axis2Util {
 		}
 	}
 
-	public static SOAPEnvelope getSOAPEnvelopeFromDOOMDocument(Document doc)
+	public static SOAPEnvelope getSOAPEnvelopeFromDOMDocument(Document doc, boolean useDoom)
             throws WSSecurityException {
 
-        try {
-            XMLStreamReader reader = ((OMElement) doc.getDocumentElement())
-                    .getXMLStreamReader();
-            StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
-                    reader, null);
-            SOAPEnvelope envelope = stAXSOAPModelBuilder.getSOAPEnvelope();
-            envelope.build();
-            return envelope;
-            
-        } catch (FactoryConfigurationError e) {
-            throw new WSSecurityException(e.getMessage());
-        }
+        if(useDoom) {
+            try {
+                XMLStreamReader reader = ((OMElement) doc.getDocumentElement())
+                        .getXMLStreamReader();
+                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
+                        reader, null);
+                SOAPEnvelope envelope = stAXSOAPModelBuilder.getSOAPEnvelope();
+                envelope.build();
+                return envelope;
 
+            } catch (FactoryConfigurationError e) {
+                throw new WSSecurityException(e.getMessage());
+            }
+        } else {
+            try {
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                XMLUtils.outputDOM(doc.getDocumentElement(), os, true);
+                ByteArrayInputStream bais =  new ByteArrayInputStream(os.toByteArray());
+
+                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(XMLInputFactory.newInstance().createXMLStreamReader(bais), null);
+                return stAXSOAPModelBuilder.getSOAPEnvelope();
+            } catch (Exception e) {
+                throw new WSSecurityException(e.getMessage());
+            }
+        }
     }
 	
 	

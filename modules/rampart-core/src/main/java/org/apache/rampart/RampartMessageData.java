@@ -145,7 +145,7 @@ public class RampartMessageData {
              * First get the SOAP envelope as document, then create a security
              * header and insert into the document (Envelope)
              */
-            this.document = Axis2Util.getDocumentFromSOAPEnvelope(msgCtx.getEnvelope(), false);
+            this.document = Axis2Util.getDocumentFromSOAPEnvelope(msgCtx.getEnvelope(), true);
             msgCtx.setEnvelope((SOAPEnvelope)this.document.getDocumentElement());
             
             this.soapConstants = WSSecurityUtil.getSOAPConstants(this.document.getDocumentElement());

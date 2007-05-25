@@ -57,7 +57,7 @@ public class EncryptedElementsBuilder implements AssertionBuilder {
 
     private void processElement(OMElement element, SignedEncryptedElements parent) {
         if (XPATH.equals(element.getQName())) {
-            parent.addXPathExpression(element.getText());                        
+            parent.setXPathVersion(element.getText());                        
         }
     }
     

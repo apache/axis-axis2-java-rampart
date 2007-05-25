@@ -109,7 +109,7 @@ public class WSSHandlerConstants {
     /**
      * Key to be used to set a flag in msg ctx to enable/disable using doom
      */
-    public final static String DISABLE_DOOM = "useDoom";
+    public final static String USE_DOOM = "useDoom";
     
     
     ///

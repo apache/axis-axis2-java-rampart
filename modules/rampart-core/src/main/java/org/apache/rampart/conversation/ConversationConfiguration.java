@@ -205,7 +205,7 @@ public class ConversationConfiguration {
 
                 //Convert the Envelop to DOOM
                 config.doc = Axis2Util.getDocumentFromSOAPEnvelope(msgCtx
-                        .getEnvelope(), false);
+                        .getEnvelope(), true);
                 
                 //Token store
                 config.tokenStore = (TokenStorage) msgCtx
