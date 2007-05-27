@@ -407,16 +407,16 @@
         <axiom.version>1.2.4</axiom.version>
         <addressing.mar.version>1.2</addressing.mar.version>
 
-        <wss4j.version>SNAPSHOT</wss4j.version>
+        <wss4j.version>1.5.2</wss4j.version>
         <xmlsec.version>1.4.0</xmlsec.version>
 
         <opensaml.version>1.1</opensaml.version>
 
-        <XmlSchema.version>SNAPSHOT</XmlSchema.version>
+        <XmlSchema.version>1.3.1</XmlSchema.version>
         <neethi.version>2.0.1</neethi.version>
 
         <xbean.version>2.1.0</xbean.version>
-        <woden.version>1.0-incubating-SNAPSHOT</woden.version>
+        <woden.version>1.0-incubating-M7a</woden.version>
         <wsdl4j.version>1.6.1</wsdl4j.version>
         <annogen.version>0.1.0</annogen.version>
 
