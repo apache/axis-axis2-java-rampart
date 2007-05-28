@@ -8,4 +8,8 @@ This directory contains three sub directories:
     	          parameters
 
     - policy - A set of samples that uses rampart with WS-SecurityPolicy
+    
+    - keys   - The keystore files that contains the keys used by the samples
 
+Please use Apache Ant with the build.xml file available here to copy all jars
+and mars to required places.
