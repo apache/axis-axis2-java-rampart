@@ -13,12 +13,10 @@ lib      - This directory contains all the libraries required by rampart
            release.
 	   
 
-rampart-1.1.mar   - WS-Security and WS-SecureConversation support for Axis2
-rahas-1.1.mar     - STS module - to be used to add STS operations to a service
-				IMPORTANT: Note that the module versions are set to 1.1 enven 
-				though this release is 1.1-RC1
+rampart-1.2.mar   - WS-Security and WS-SecureConversation support for Axis2
+rahas-1.2.mar     - STS module - to be used to add STS operations to a service
 
-rahas-1.1.zip - STS zip - you can use this to create your own configured STS
+rahas-1.2.zip - STS zip - you can use this to create your own configured STS
 
 samples  - This contains samples on using Apache Rampart and configuring
            different conponents to carryout different WS-Sec* operations.
