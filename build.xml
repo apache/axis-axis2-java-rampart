@@ -1,4 +1,4 @@
-<project name="Apache Rampart release build" default="bin-dist">
+<project name="Apache Rampart release build" default="dist">
 
     <property name="rampart.version" value="SNAPSHOT"/>
     <property name="rampart.bin.dist" value="rampart"/>
@@ -15,10 +15,18 @@
     <property name="version.bcprov13" value="132"/>
     <property name="version.xmlsec" value="1.4.0"/>
     <property name="version.opensaml" value="1.1"/>
-    <property name="version.wss4j" value="SNAPSHOT"/>
+    <property name="version.wss4j" value="1.5.2"/>
     
     <target name="init">
     		<mkdir dir="${dir.dist}"/>
+    </target>
+    
+    <target name="dist" depends="clean, bin-dist, src-dist, docs-dist">
+        <copy todir="${dir.dist}" file="modules/rampart-mar/target/rampart-${rampart.version}.mar"/>
+		<copy todir="${dir.dist}" file="modules/rampart-trust-mar/target/rahas-${rampart.version}.mar"/>
+	    <copy todir="${dir.dist}" file="modules/rampart-core/target/rampart-core-${rampart.version}.jar"/>
+        <copy todir="${dir.dist}" file="modules/rampart-policy/target/rampart-policy-${rampart.version}.jar"/>
+        <copy todir="${dir.dist}" file="modules/rampart-trust/target/rampart-trust-${rampart.version}.jar"/>
     </target>
 
     <target name="bin-dist" depends="init">
@@ -60,6 +68,8 @@
         <zip destfile="${dir.dist}/${rampart.bin.dist}-${rampart.version}.zip">
             <zipfileset dir="${dir.dist.bin}/../"/>
         </zip>
+        
+        <delete dir="${dir.dist.bin}/../"/>
 
     </target>
     
@@ -88,9 +98,10 @@
             <zipfileset dir="${dir.dist.src}/../"/>
         </zip>
         
+        <delete dir="${dir.dist.src}/../"/>        
     </target>
 
-    <target name="docs-dist" depends="bin-dist">
+    <target name="docs-dist">
 
         <mkdir dir="${dir.dist.docs}"/>
 
@@ -123,6 +134,8 @@
         <zip destfile="${dir.dist}/${rampart.docs.dist}-${rampart.version}.zip">
             <zipfileset dir="${dir.dist.docs}/../"/>
         </zip>
+            
+        <delete dir="${dir.dist.docs}/../"/>
     </target>
 
     <target name="clean">
