@@ -402,12 +402,12 @@
     </modules>
 
     <properties>
-        <axis2.version>1.2</axis2.version>
+        <axis2.version>SNAPSHOT</axis2.version>
 
-        <axiom.version>1.2.4</axiom.version>
-        <addressing.mar.version>1.2</addressing.mar.version>
+        <axiom.version>SNAPSHOT</axiom.version>
+        <addressing.mar.version>SNAPSHOT</addressing.mar.version>
 
-        <wss4j.version>1.5.2</wss4j.version>
+        <wss4j.version>SNAPSHOT</wss4j.version>
         <xmlsec.version>1.4.0</xmlsec.version>
 
         <opensaml.version>1.1</opensaml.version>
