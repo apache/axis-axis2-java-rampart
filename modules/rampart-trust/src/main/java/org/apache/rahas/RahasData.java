@@ -279,18 +279,14 @@ public class RahasData {
      *
      */
     private void processClaims() throws TrustException{
-    	claimElem = this.rstElement
-    			.getFirstChildWithName(new QName(this.wstNs,
-    					RahasConstants.IssuanceBindingLocalNames.CLAIMS));
-    	
-    	if(claimElem != null){
-    		claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
-    					RahasConstants.ATTR_CLAIMS_DIALECT));
-    		if(claimDialect == null){
-    			throw new TrustException(
-    					"Without the Dialect Attribute Claims can't be processed");
-    		}
-    	}
+        	claimElem = this.rstElement
+        			.getFirstChildWithName(new QName(this.wstNs,
+        					RahasConstants.IssuanceBindingLocalNames.CLAIMS));
+        	
+        	if(claimElem != null){
+        		claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
+        					RahasConstants.ATTR_CLAIMS_DIALECT));
+        	}
     	
     }
 
