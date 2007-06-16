@@ -55,6 +55,8 @@ public class RahasData {
     private String keyType;
 
     private String appliesToAddress;
+    
+    private OMElement appliesToEpr;
 
     private Principal principal;
 
@@ -176,6 +178,8 @@ public class RahasData {
 
         if (appliesToElem != null) {
             OMElement eprElem = appliesToElem.getFirstElement();
+            this.appliesToEpr = eprElem;
+            
             // If there were no addressing headers
             // The find the addressing version using the EPR element
             if (this.addressingNs == null) {
@@ -184,6 +188,9 @@ public class RahasData {
             }
 
             if (eprElem != null) {
+                
+                //Of the epr is a web service then try to get the addr
+                
                 OMElement addrElem = eprElem
                         .getFirstChildWithName(new QName(
                                 this.addressingNs,
@@ -191,9 +198,7 @@ public class RahasData {
                 if (addrElem != null && addrElem.getText() != null
                     && !"".equals(addrElem.getText().trim())) {
                     this.appliesToAddress = addrElem.getText().trim();
-                } else {
-                    throw new TrustException("invalidAppliesToElem");
-                }
+                } 
             } else {
                 throw new TrustException("invalidAppliesToElem");
             }
@@ -450,6 +455,10 @@ public class RahasData {
 	public OMElement getClaimElem() {
 		return claimElem;
 	}
+
+    public OMElement getAppliesToEpr() {
+        return appliesToEpr;
+    }
 
 
 }
