@@ -142,29 +142,29 @@ public abstract class InteropTestBase extends TestCase {
     /**
      * Do test
      */
-    public void testInteropWithConfigFiles() {
-        try {
-
-            Class interopScenarioClientClass = Class
-                    .forName("org.apache.axis2.security.InteropScenarioClient");
-
-            Constructor c = interopScenarioClientClass
-                    .getConstructor(new Class[]{boolean.class});
-            Object clientObj = c.newInstance(new Object[]{this
-                    .isUseSOAP12InStaticConfigTest() ? Boolean.TRUE
-                    : Boolean.FALSE});
-            Method m = interopScenarioClientClass.getMethod(
-                    "invokeWithStaticConfig", new Class[]{String.class,
-                    String.class});
-            m.invoke(clientObj, new Object[]{
-                    Constants.TESTING_PATH + getClientRepo(), targetEpr});
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Error in introperating with " + targetEpr
-                    + ", client configuration: " + getClientRepo());
-        }
-    }
+//    public void testInteropWithConfigFiles() {
+//        try {
+//
+//            Class interopScenarioClientClass = Class
+//                    .forName("org.apache.axis2.security.InteropScenarioClient");
+//
+//            Constructor c = interopScenarioClientClass
+//                    .getConstructor(new Class[]{boolean.class});
+//            Object clientObj = c.newInstance(new Object[]{this
+//                    .isUseSOAP12InStaticConfigTest() ? Boolean.TRUE
+//                    : Boolean.FALSE});
+//            Method m = interopScenarioClientClass.getMethod(
+//                    "invokeWithStaticConfig", new Class[]{String.class,
+//                    String.class});
+//            m.invoke(clientObj, new Object[]{
+//                    Constants.TESTING_PATH + getClientRepo(), targetEpr});
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Error in introperating with " + targetEpr
+//                    + ", client configuration: " + getClientRepo());
+//        }
+//    }
 
     public void testInteropWithDynamicConfig() {
         try {
@@ -191,35 +191,35 @@ public abstract class InteropTestBase extends TestCase {
         }
 
     }
-
-    public void testInteropWithDynamicConfigWithProfRefs() {
-        if(getPropertyRefs() != null) {
-            try {
-    
-                Class interopScenarioClientClass = Class
-                        .forName("org.apache.axis2.security.InteropScenarioClient");
-                Constructor c = interopScenarioClientClass
-                        .getConstructor(new Class[]{boolean.class});
-                Object clientObj = c.newInstance(new Object[]{this
-                        .isUseSOAP12InStaticConfigTest() ? Boolean.TRUE
-                        : Boolean.FALSE});
-                Method m = interopScenarioClientClass.getMethod(
-                        "invokeWithGivenConfigWithProRefs", new Class[]{
-                        String.class,
-                        String.class, OutflowConfiguration.class,
-                        InflowConfiguration.class, Hashtable.class});
-                m.invoke(clientObj, new Object[]{
-                        Constants.TESTING_PATH + DEFAULT_CLIENT_REPOSITORY,
-                        targetEpr, getOutflowConfigurationWithRefs(),
-                        getInflowConfigurationWithRefs(),
-                        getPropertyRefs()});
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail("Error in introperating with " + targetEpr
-                        + ", client configuration: " + getClientRepo());
-            }
-        }
-    }
+//
+//    public void testInteropWithDynamicConfigWithProfRefs() {
+//        if(getPropertyRefs() != null) {
+//            try {
+//    
+//                Class interopScenarioClientClass = Class
+//                        .forName("org.apache.axis2.security.InteropScenarioClient");
+//                Constructor c = interopScenarioClientClass
+//                        .getConstructor(new Class[]{boolean.class});
+//                Object clientObj = c.newInstance(new Object[]{this
+//                        .isUseSOAP12InStaticConfigTest() ? Boolean.TRUE
+//                        : Boolean.FALSE});
+//                Method m = interopScenarioClientClass.getMethod(
+//                        "invokeWithGivenConfigWithProRefs", new Class[]{
+//                        String.class,
+//                        String.class, OutflowConfiguration.class,
+//                        InflowConfiguration.class, Hashtable.class});
+//                m.invoke(clientObj, new Object[]{
+//                        Constants.TESTING_PATH + DEFAULT_CLIENT_REPOSITORY,
+//                        targetEpr, getOutflowConfigurationWithRefs(),
+//                        getInflowConfigurationWithRefs(),
+//                        getPropertyRefs()});
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                fail("Error in introperating with " + targetEpr
+//                        + ", client configuration: " + getClientRepo());
+//            }
+//        }
+//    }
     
     protected abstract OutflowConfiguration getOutflowConfiguration();
 

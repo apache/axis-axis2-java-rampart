@@ -52,6 +52,12 @@ public class PolicyBasedResultsValidator {
         
         RampartPolicyData rpd = rmd.getPolicyData();
         
+        //If there's Security policy present and no results 
+        //then we should throw an error
+        if(rpd != null && results == null) {
+            throw new RampartException("noSecurityResults");
+        }
+        
         //Check presence of timestamp
         WSSecurityEngineResult tsResult = null;
         if(rpd.isIncludeTimestamp()) {

@@ -343,7 +343,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         if(rpd.isSignatureProtection() && this.mainSigId != null) {
             encrParts.add(new WSEncryptionPart(RampartUtil.addWsuIdToElement((OMElement)this.signatureElement), "Element"));
         }
-        
+
         //Do encryption
         Token encrToken = rpd.getRecipientToken();
         if(encrToken != null && encrParts.size() > 0) {
