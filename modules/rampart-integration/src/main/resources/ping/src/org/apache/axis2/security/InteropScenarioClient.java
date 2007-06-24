@@ -106,12 +106,12 @@ public class InteropScenarioClient {
                 new javax.xml.namespace.QName("rampart"));
 
         if (outflowConfig != null) {
-            stub._getServiceClient().getOptions().setProperty(
+            stub._getServiceClient().getServiceContext().setProperty(
                     WSSHandlerConstants.OUTFLOW_SECURITY,
                     outflowConfig.getProperty());
         }
         if (inflowConfig != null) {
-            stub._getServiceClient().getOptions().setProperty(
+            stub._getServiceClient().getServiceContext().setProperty(
                     WSSHandlerConstants.INFLOW_SECURITY,
                     inflowConfig.getProperty());
         }
@@ -150,12 +150,12 @@ public class InteropScenarioClient {
                 new javax.xml.namespace.QName("rampart"));
 
         if (outflowConfig != null) {
-            stub._getServiceClient().getOptions().setProperty(
+            stub._getServiceClient().getServiceContext().setProperty(
                     WSSHandlerConstants.OUTFLOW_SECURITY,
                     outflowConfig.getProperty());
         }
         if (inflowConfig != null) {
-            stub._getServiceClient().getOptions().setProperty(
+            stub._getServiceClient().getServiceContext().setProperty(
                     WSSHandlerConstants.INFLOW_SECURITY,
                     inflowConfig.getProperty());
         }
@@ -165,7 +165,7 @@ public class InteropScenarioClient {
             while (keysEnum.hasMoreElements()) {
                 String refKey = (String) keysEnum.nextElement();
                 
-                stub._getServiceClient().getOptions().setProperty(refKey,
+                stub._getServiceClient().getServiceContext().setProperty(refKey,
                        propRefs.get(refKey));
             }
         }

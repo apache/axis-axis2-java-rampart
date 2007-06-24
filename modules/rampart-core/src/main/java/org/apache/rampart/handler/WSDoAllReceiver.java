@@ -26,13 +26,9 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
-import org.apache.axis2.description.Parameter;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.rampart.conversation.ConversationCallbackHandler;
-import org.apache.rampart.conversation.ConversationConfiguration;
-import org.apache.rampart.conversation.Util;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.HandlerParameterDecoder;
 import org.apache.ws.security.SOAPConstants;
@@ -48,6 +44,7 @@ import org.w3c.dom.Document;
 
 import javax.security.auth.callback.CallbackHandler;
 import javax.xml.namespace.QName;
+
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.Vector;
@@ -80,18 +77,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
         RequestData reqData = new RequestData();
         try {
 
-            Parameter param = ConversationConfiguration
-                    .getParameter(msgContext);
-
-            if (param == null
-                    || WSSHandlerConstants.RST_ACTON_SCT.equals(msgContext
-                            .getWSAAction())
-                    || WSSHandlerConstants.RSTR_ACTON_SCT.equals(msgContext
-                            .getWSAAction())) {
-                this.processBasic(msgContext, useDoom, reqData);
-            } else {
-                this.processSecConv(msgContext);
-            }
+            this.processBasic(msgContext, useDoom, reqData);
         } catch (AxisFault axisFault) {
             setAddressingInformationOnFault(msgContext);
             throw axisFault;
@@ -109,68 +95,6 @@ public class WSDoAllReceiver extends WSDoAllHandler {
                 log.debug("WSDoAllReceiver: exit invoke()");
             }
         }
-
-    }
-
-    /**
-     * Use WS-SecureConversation to secure messages
-     * @param msgContext
-     * @throws Exception
-     */
-    private void processSecConv(MessageContext msgContext) throws Exception {
-        // Parse the configuration
-        ConversationConfiguration config = ConversationConfiguration
-                .load(msgContext, false);
-
-        // check if there's an RSTR in the msg and process it if exists
-        SOAPEnvelope env = (SOAPEnvelope) config.getDocument()
-                .getDocumentElement();
-        SOAPHeader header = env.getHeader();
-        if (header != null
-                && header
-                        .getFirstChildWithName(new QName(
-                                WSSHandlerConstants.WST_NS,
-                                WSSHandlerConstants.REQUEST_SECURITY_TOKEN_RESPONSE_LN)) != null) {
-            OMElement elem = header
-                    .getFirstChildWithName(new QName(
-                            WSSHandlerConstants.WST_NS,
-                            WSSHandlerConstants.REQUEST_SECURITY_TOKEN_RESPONSE_LN));
-            Util.processRSTR(elem, config);
-        }
-
-        secEngine.processSecurityHeader(config.getDocument(), null,
-                new ConversationCallbackHandler(config), config
-                        .getCrypto());
-
-
-        // Convert back to llom since the inflow cannot use llom
-        msgContext.setEnvelope(Axis2Util
-                .getSOAPEnvelopeFromDOMDocument(config.getDocument(), true));
-        
-        SOAPHeader soapHeader = null;
-        try {
-            soapHeader = msgContext.getEnvelope().getHeader();
-        } catch (OMException ex) {
-            throw new AxisFault(
-                    "WSDoAllReceiver: cannot get SOAP header after security processing",
-                    ex);
-        }
-
-        Iterator headers = soapHeader.examineAllHeaderBlocks();
-
-        SOAPHeaderBlock headerBlock = null;
-
-        while (headers.hasNext()) { // Find the wsse header
-            SOAPHeaderBlock hb = (SOAPHeaderBlock) headers.next();
-            if (hb.getLocalName().equals(WSConstants.WSSE_LN)
-                    && hb.getNamespace().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-                headerBlock = hb;
-                break;
-            }
-        }
-
-        headerBlock.setProcessed();
-
 
     }
 

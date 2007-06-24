@@ -263,6 +263,8 @@
                                       tofile="target/temp-ramp/META-INF/services.xml"/>
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureServiceSC1.aar"
                                      basedir="target/temp-ramp"/>
+								
+								<!-- Service SC-1 -->
                                 <copy overwrite="yes"
                                       file="src/test/resources/rampart/issuer.properties"
                                       tofile="target/temp-ramp/issuer.properties"/>
@@ -271,102 +273,7 @@
                                       tofile="target/temp-ramp/META-INF/services.xml"/>
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureServiceSC2.aar"
                                      basedir="target/temp-ramp"/>
-                                <!-- Service classes for the SecConv tests -->
-                                <mkdir dir="target/temp-sc"/>
-                                <mkdir dir="target/temp-sc/META-INF"/>
-                                <copy overwrite="yes"
-                                      file="target/classes/org/apache/axis2/security/sc/Service.class"
-                                      tofile="target/temp-sc/org/apache/axis2/security/sc/Service.class"/>
-                                <copy overwrite="yes"
-                                      file="target/classes/org/apache/axis2/security/sc/PWCallback.class"
-                                      tofile="target/temp-sc/org/apache/axis2/security/sc/PWCallback.class"/>
-                                <copy overwrite="yes" todir="target/temp-sc">
-                                    <fileset dir="src/test/resources/security/sc">
-                                        <include name="sctIssuer.properties"/>
-                                        <include name="sts.jks"/>
-                                    </fileset>
-                                </copy>
-                                <!--path id="sc.client.props" location="test-resources/security/sc"/-->
-                                <!-- Dimuthu addPath id="maven.dependency.classpath" refid="sc.client.props" -->
-                                <mkdir dir="target/test-resources/sc_client_repo"/>
-                                <mkdir dir="target/test-resources/sc_client_repo/conf"/>
-                                <mkdir dir="target/test-resources/sc_client_repo/modules"/>
-                                <copy file="target/artifacts/addressing-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_client_repo/modules/addressing-SNAPSHOT.mar"/>
-                                <copy file="target/artifacts/rampart-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_client_repo/modules/rampart-SNAPSHOT.mar"/>
-                                <!-- SecConv Test - 1  -->
-                                <mkdir dir="target/test-resources/sc_service_repo_1"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_1/conf"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_1/services"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_1/modules"/>
-                                <copy file="target/artifacts/rampart-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_1/modules/rampart-SNAPSHOT.mar"/>
-                                <copy file="target/artifacts/rahas-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_1/modules/rahas-SNAPSHOT.mar"/>
-                                <copy file="target/artifacts/addressing-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_1/modules/addressing-SNAPSHOT.mar"/>
-                                <!-- copy the services.xml and create the aar -->
-                                <copy overwrite="yes"
-                                      file="src/test/resources/security/sc/s1-services.xml"
-                                      tofile="target/temp-sc/META-INF/services.xml"/>
-                                <jar jarfile="target/test-resources/sc_service_repo_1/services/SecureService.aar"
-                                     basedir="target/temp-sc"/>
-                                <!-- SecConv Test - 1 :END -->
-                                <!-- SecConv Test - 2  -->
-                                <mkdir dir="target/test-resources/sc_service_repo_2"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_2/conf"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_2/services"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_2/modules"/>
-                                <copy file="target/artifacts/rampart-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_2/modules/rampart-SNAPSHOT.mar"/>
-                                <copy file="target/artifacts/rahas-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_2/modules/rahas-SNAPSHOT.mar"/>
-                                <copy file="target/artifacts/addressing-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_2/modules/addressing-SNAPSHOT.mar"/>
-                                <!-- copy the services.xml and create the aar -->
-                                <copy overwrite="yes"
-                                      file="src/test/resources/security/sc/s2-services.xml"
-                                      tofile="target/temp-sc/META-INF/services.xml"/>
-                                <jar jarfile="target/test-resources/sc_service_repo_2/services/SecureService.aar"
-                                     basedir="target/temp-sc"/>
-                                <!-- SecConv Test - 2 :END -->
-                                <!-- SecConv Test - 3  -->
-                                <mkdir dir="target/test-resources/sc_service_repo_3"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_3/conf"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_3/services"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_3/modules"/>
-                                <copy file="target/artifacts/rampart-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_3/modules/rampart-SNAPSHOT.mar"/>
-                                <copy file="target/artifacts/addressing-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_3/modules/addressing-SNAPSHOT.mar"/>
-                                <!-- copy the services.xml and create the aar -->
-                                <copy overwrite="yes"
-                                      file="src/test/resources/security/sc/s3-services.xml"
-                                      tofile="target/temp-sc/META-INF/services.xml"/>
-                                <jar jarfile="target/test-resources/sc_service_repo_3/services/SecureService.aar"
-                                     basedir="target/temp-sc"/>
-                                <!-- SecConv Test - 3 :END -->
-                                <!-- SecConv Test - 4  -->
-                                <mkdir dir="target/test-resources/sc_service_repo_4"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_4/conf"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_4/services"/>
-                                <mkdir dir="target/test-resources/sc_service_repo_4/modules"/>
-                                <copy file="target/artifacts/rampart-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_4/modules/rampart-SNAPSHOT.mar"/>
-                                <copy file="target/artifacts/rahas-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_4/modules/rahas-SNAPSHOT.mar"/>
-                                <copy file="target/artifacts/addressing-SNAPSHOT.mar"
-                                      tofile="target/test-resources/sc_service_repo_4/modules/addressing-SNAPSHOT.mar"/>
-                                <!-- copy the services.xml and create the aar -->
-                                <copy overwrite="yes"
-                                      file="src/test/resources/security/sc/s4-services.xml"
-                                      tofile="target/temp-sc/META-INF/services.xml"/>
-                                <jar jarfile="target/test-resources/sc_service_repo_4/services/SecureService.aar"
-                                     basedir="target/temp-sc"/>
-                                <!-- SecConv Test - 4 :END -->
-                                <!-- clean up temp sc stuff -->
-                                <delete dir="target/temp-sc"/>
+
                                 <!--
                                  Set up the infra for rahas tests and the rahas client repo
                                 -->

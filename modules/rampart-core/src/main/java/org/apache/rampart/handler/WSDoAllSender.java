@@ -16,45 +16,24 @@
 
 package org.apache.rampart.handler;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
-import org.apache.axis2.description.Parameter;
-import org.apache.rampart.RampartException;
-import org.apache.rampart.conversation.ConversationConfiguration;
-import org.apache.rampart.conversation.STSRequester;
-import org.apache.rampart.conversation.Util;
-import org.apache.rampart.util.Axis2Util;
-import org.apache.rampart.util.HandlerParameterDecoder;
-import org.apache.rampart.util.MessageOptimizer;
-import org.apache.rahas.Token;
-import org.apache.rahas.TrustException;
-import org.apache.rahas.TrustUtil;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rampart.util.Axis2Util;
+import org.apache.rampart.util.HandlerParameterDecoder;
+import org.apache.rampart.util.MessageOptimizer;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.handler.RequestData;
 import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.message.WSSecDKEncrypt;
-import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.message.WSSecHeader;
-import org.apache.ws.security.message.token.SecurityContextToken;
 import org.apache.ws.security.util.WSSecurityUtil;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -79,16 +58,8 @@ public class WSDoAllSender extends WSDoAllHandler {
         
         RequestData reqData = new RequestData();
         try {
-            Parameter param = ConversationConfiguration.getParameter(msgContext);
-            
-            if(param == null || WSSHandlerConstants.RST_ACTON_SCT.equals(msgContext.getWSAAction()) ||
-                    WSSHandlerConstants.RSTR_ACTON_SCT.equals(msgContext.getWSAAction()) ||
-                    WSSHandlerConstants.RSTR_ACTON_ISSUE.equals(msgContext.getWSAAction())) {
-                //If the msgs are msgs to an STS then use basic WS-Sec
-                processBasic(msgContext, useDoom, reqData);
-            } else {
-                processSecConv(msgContext);
-            }
+            //If the msgs are msgs to an STS then use basic WS-Sec
+            processBasic(msgContext, useDoom, reqData);
             
         } catch (Exception e) {
             throw new AxisFault(e.getMessage(), e);
@@ -99,38 +70,6 @@ public class WSDoAllSender extends WSDoAllHandler {
                 reqData = null;
             }
         }     
-    }
-
-    /**
-     * Use WS-SecureConversation to secure the messages
-     * @param msgContext
-     * @throws Exception
-     */
-    private void processSecConv(MessageContext msgContext) throws Exception {
-        //Parse the Conversation configuration
-        ConversationConfiguration config = ConversationConfiguration.load(msgContext, true);
-        if(config != null)
-        msgContext.setEnvelope((SOAPEnvelope) config.getDocument()
-                .getDocumentElement());
-        
-        if(!config.getMsgCtx().isServerSide()) {
-            if(config.getContextIdentifier() == null && !config.getMsgCtx().isServerSide()) {
-      
-                String sts = config.getStsEPRAddress();
-                if(sts != null) {
-                  //Use a security token service
-                    Axis2Util.useDOOM(false);
-                    STSRequester.issueRequest(config);
-                    Axis2Util.useDOOM(true);
-                } else {
-                    //Create an an SCT, include it in an RSTR 
-                    // and add the RSTR to the header
-                    this.createRSTR(config);
-                }
-                
-            }
-        }
-        this.constructMessage(config);
     }
     
     /**
@@ -320,125 +259,6 @@ public class WSDoAllSender extends WSDoAllHandler {
         if (doDebug) {
             log.debug("WSDoAllSender: exit invoke()");
         }
-    }
-    
-
-    /**
-     * Create the self created <code>wsc:SecurityContextToken</code> and 
-     * add it to a <code>wst:RequestSecurityTokenResponse</code>.
-     * 
-     * This is called in the case where the security context establishment 
-     * is done by one of the parties with out the use of an STS
-     * and the creted SCT is sent across to the other party in an unsolicited 
-     * <code>wst:RequestSecurityTokenResponse</code>
-     * 
-     * @param config
-     * @throws Exception
-     */
-    private void createRSTR(ConversationConfiguration config) throws Exception {
-        
-        WSSecEncryptedKey encrKeyBuilder = new WSSecEncryptedKey();
-        Crypto crypto = org.apache.rampart.conversation.Util.getCryptoInstace(config);
-        String encryptionUser = config.getEncryptionUser();
-        if(encryptionUser == null) {
-            throw new RampartException("missingEncryptionUser");
-        }
-        X509Certificate cert = crypto.getCertificates(encryptionUser)[0];
-        
-        encrKeyBuilder.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
-        try {
-            encrKeyBuilder.setUseThisCert(cert);
-            encrKeyBuilder.prepare(config.getDocument(), crypto);
-        } catch (WSSecurityException e) {
-            throw new TrustException(
-                    "errorInBuildingTheEncryptedKeyForPrincipal",
-                    new String[] { cert.getSubjectDN().getName()}, e);
-        }
-        
-        SecurityContextToken sct = new SecurityContextToken(config.getDocument());
-        Util.resgisterContext(sct.getIdentifier(), config);
-        
-        //Creation and expiration times
-        Date creationTime = new Date();
-        Date expirationTime = new Date();
-        
-        expirationTime.setTime(creationTime.getTime() + 300000);
-        
-        Token token = new Token(sct.getIdentifier(), (OMElement)sct.getElement(), creationTime, expirationTime);
-        token.setSecret(encrKeyBuilder.getEphemeralKey());
-        
-        config.getTokenStore().add(token);
-        
-        SOAPEnvelope env = config.getMsgCtx().getEnvelope();
-
-        SOAPHeader header = env.getHeader();
-        if(header == null) {
-            header = ((SOAPFactory)env.getOMFactory()).createSOAPHeader(env);
-        }
-        
-        OMElement rstrElem = TrustUtil.createRequestSecurityTokenResponseElement(config.getWstVersion(), header);
-
-        OMElement rstElem = TrustUtil.createRequestedSecurityTokenElement(config.getWstVersion(), rstrElem);
-
-        // Use GMT time in milliseconds
-        DateFormat zulu = new XmlSchemaDateFormat();
-        
-        // Add the Lifetime element
-        TrustUtil.createLifetimeElement(config.getWstVersion(), rstrElem, zulu
-                .format(creationTime), zulu.format(expirationTime));
-        
-        rstElem.addChild((OMElement)sct.getElement());
-        
-        TrustUtil.createRequestedAttachedRef(config.getWstVersion(), rstrElem,
-                "#" + sct.getID(), WSSHandlerConstants.TOK_TYPE_SCT);
-
-        TrustUtil
-                .createRequestedUnattachedRef(config.getWstVersion(), rstrElem,
-                        sct.getIdentifier(), WSSHandlerConstants.TOK_TYPE_SCT);
-        
-        Element encryptedKeyElem = encrKeyBuilder.getEncryptedKeyElement();
-        Element bstElem = encrKeyBuilder.getBinarySecurityTokenElement();
-        
-        OMElement reqProofTok = TrustUtil.createRequestedProofTokenElement(
-                config.getWstVersion(), rstrElem);
-
-        if(bstElem != null) {
-            reqProofTok.addChild((OMElement)bstElem);
-        }
-        
-        reqProofTok.addChild((OMElement)encryptedKeyElem);
-        
-    }
-    
-    private void constructMessage(ConversationConfiguration config) throws Exception {
-
-        Document doc = config.getDocument();
-
-        WSSecHeader secHeader = new WSSecHeader();
-        secHeader.insertSecurityHeader(doc);
-
-        Token tempToken = config.getTokenStore().getToken(
-                config.getContextIdentifier());
-        byte[] tempSecret = tempToken.getSecret();
-
-        SecurityContextToken sct = new SecurityContextToken((Element) doc
-                .importNode((Element) tempToken.getToken(), true));
-
-        // Derived key encryption
-        WSSecDKEncrypt encrBuilder = new WSSecDKEncrypt();
-        encrBuilder.setSymmetricEncAlgorithm(WSConstants.AES_128);
-        OMElement attachedReference = tempToken.getAttachedReference();
-        if(attachedReference != null) {
-            encrBuilder.setExternalKey(tempSecret, (Element) doc.importNode(
-                    (Element) attachedReference, true));
-        } else {
-            String tokenId = sct.getID();
-            encrBuilder.setExternalKey(tempSecret, tokenId);
-        }
-        encrBuilder.build(doc, secHeader);
-
-        WSSecurityUtil.prependChildElement(doc, secHeader.getSecurityHeader(),
-                sct.getElement(), false);
     }
     
 }

@@ -95,11 +95,11 @@ public abstract class TestClient extends TestCase {
 
             OutflowConfiguration clientOutflowConfiguration = getClientOutflowConfiguration();
             if (clientOutflowConfiguration != null) {
-                options.setProperty(WSSHandlerConstants.OUTFLOW_SECURITY, clientOutflowConfiguration.getProperty());
+                configContext.setProperty(WSSHandlerConstants.OUTFLOW_SECURITY, clientOutflowConfiguration.getProperty());
             }
             InflowConfiguration clientInflowConfiguration = getClientInflowConfiguration();
             if (clientInflowConfiguration != null) {
-                options.setProperty(WSSHandlerConstants.INFLOW_SECURITY, clientInflowConfiguration.getProperty());
+                configContext.setProperty(WSSHandlerConstants.INFLOW_SECURITY, clientInflowConfiguration.getProperty());
             }
 
             serviceClient.engageModule(new QName("addressing"));
