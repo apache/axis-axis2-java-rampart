@@ -319,8 +319,8 @@
             <version>${neethi.version}</version>
         </dependency>
         <dependency>
-            <groupId>httpcomponents-httpcore</groupId>
-            <artifactId>jakarta-httpcore</artifactId>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
             <version>${jakarta.httpcore.version}</version>
         </dependency>
 
@@ -445,7 +445,7 @@
         <xmlunit.version>1.0</xmlunit.version>
         <log4j.version>1.2.13</log4j.version>
 
-        <jakarta.httpcore.version>4.0-alpha4</jakarta.httpcore.version>
+        <jakarta.httpcore.version>4.0-alpha5</jakarta.httpcore.version>
         <commons.collections.version>3.1</commons.collections.version>
         <commons.fileupload.version>1.1.1</commons.fileupload.version>
         <commons.discovery.version>0.2</commons.discovery.version>
