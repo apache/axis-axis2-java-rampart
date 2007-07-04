@@ -1,0 +1,96 @@
+<html>
+<head><title>Rampart Developer Guide</title></head>
+<body>
+<h2>Getting involved in Rampart</h2>
+
+<h3>Introduction</h3>
+<p>
+Rampart is the security module of Axis2. It secures SOAP messages according to specifications in WS-Security stack. Rampart implements following specifications,<p>
+<ul>
+<li>WS - Security 1.0</li>
+<li>WS - Secure Conversation - February 2005</li>
+<li>WS - Security Policy - 1.1 - July 2005</li>
+<li>WS - Trust - February 2005</li>
+<li>WS - Trust - WS-SX spec - EXPERIMENTAL </li>
+</ul>
+<p></p>
+Components of Rampart
+<ul>
+<li>Rampart Core</li>
+<li>Rampart Policy</li>
+<li>Rampart Trust</li>
+</ul>
+<p></p>	
+<img alt="Rampart Components and WS-Security Stack" title="Rampart Components and WS-Security Stack" src="images/security-stack.jpg"  align="middle"/>
+<p><strong>Figure 1 : Rampart Components and WS-Security Stack</strong></p>
+
+<h3>Building Rampart</h3>
+<ol>
+<li>Install maven2. Installation guide is available <a href="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">here</a></li>
+<li>Rampart repository uses svn. Install svn on your machine. Please read ASF <a href="http://www.apache.org/dev/version-control.html">Source Code Repositories page</a></li>
+<li>Download source code
+	<ul>
+	<li>Anon Checkout <a href="http://svn.apache.org/repos/asf/webservices/rampart/trunk/java/">http://svn.apache.org/repos/asf/webservices/rampart/trunk/java/</a></li>
+	<li>Committers <a href="https://svn.apache.org/repos/asf/webservices/rampart/trunk/java/">https://svn.apache.org/repos/asf/webservices/rampart/trunk/java/</a></li>
+	</ul>
+</li>
+<li>Rampart project has 8 modules under it.</li>
+<ul>
+<li>rampart-core, rampart-policy and rampart-trust corresponds to the main tree components mentioned above</li>
+<li>rampart-mar and rampart-trust-mar modules builds the  .mar files that are deployed in the "modules" directory of the Axis2 repository.</li>
+<li>rampat-test has a set of unit test cases</li>
+<li>integration-test has functional tests</li>
+<li>rampart-samples consist of samples provided with the distribution</li>
+</ul>
+<li>Build by typing "mvn clean install"</li>
+</ol>
+<p><strong>Note: rampart.mar and rampart-trust.mar do not include any dependencies. All the dependencies must be in the classpath.</strong></p>
+
+<h3>Rampart in Axis2</h3>
+<p>Rampart is deployed as a module in Axis2, in the security phase. Security phase is right after the Transport phase. Rampart module introduces couple of handlers – "RampartReciever" and  "RampartSender" to the security phase</p>
+<p></p>
+<img alt="DOOM" title="Rampart in Axis2" src="images/rampart-handlers.jpg"  align="middle"/>
+<p><strong>Figure 2 : Rampart in Axis2</strong></p>
+<p>"RampartReciver" handler intercepts the incoming message. Then Rampart validates the security of the incoming message, and checks whether it is in-line with the specified security policy. All security actions such as decryption of the message, validating the digital signature, validating the timestamp and authenticating user happens inside the Rampart module. </p>
+<p>"RampartSender" is the last handler in the out going chain. Outgoing message is intercepted by this handler and Rampart takes the security actions. For example SOAP message can be encrypted, digitally signed, and security tokens are included according to the security policy.</p>
+
+<h3>Rampart, WSS4J and DOOM</h3>
+<p>Rampart uses WSS4J for securing SOAP messages. WSS4J is an Apache project which implements WS-Security specification. SOAP messages are signed and encrypted according to <a href="http://www.w3.org/TR/xmlenc-core/">XML Encryption</a> and <a href="http://www.w3.org/TR/xmldsig-core/">XML Digital</a> signature specifications, but the WS-Security specification introduces an additional set of rules. Therefore WSS4J ensures that SOAP messages are singed according all the rules defined in the specifications. WSS4J uses Apache's  <a href="http://santuario.apache.org/Java/index.html">xmlsec libraries</a> for XML encryption and XML Digital signature.</p>
+<p>Rather than re-inventing the wheel, it was decided to use WSS4J for SOAP message security in Rampart but there was a fundamental problem. WSS4J and all the incorporating XML security libraries use "DOM" for parsing and generating XML, while Axis2 uses "AXIOM" as the object model. This was resolved by using a new object model named "DOOM". DOOM wraps OM objects with DOM  behavior by implementing DOM interfaces. Therefore all the actions performed on DOM, as well as OM can be taken on DOOM objects. Architecture of DOOM is a separate document by itself.<p>
+<img alt="DOOM" title="DOOM" src="images/doom.jpg"  align="middle"/>
+<p><strong>Figure 3 : DOOM, DOM and OM</strong></p>
+<p>When Rampart is deployed as a module in Axis2, the incoming SOAP messages are converted to DOOM. Since DOOM implements the DOM interface it is possible to use WSS4J for processing the message. After performing the security validations, before flushing the message down the incoming handler chain, the DOOM SOAP message is converted back to OM, since rest of the inflow does not understand DOOM.
+At the outgoing flow message is converted DOOM and then security functions are performed using WSS4J. After that the message is "not" converted back to DOOM, because Transport is the only phase that follows security phase. </p>
+
+<h3>Rampart Core</h3>
+<p>Rampart core drives security enforcement and validation on SOAP messages. It binds all components together to create the final product. The important components of Rampart core are,</p>
+<ul> 
+<li>RampartEngine</li>
+<li>MessageBuilder</li>
+</ul>
+<p><strong>SOAP Message Inflow</strong></p>
+<p>Incoming messages are intercepted by RampartReciver and handed over to the RampartEngine. RampartEngine is responsible for handling validation of security in the incoming SOAP message. </p>
+<img alt="Rampart Engine" title="Rampart Engine" src="images/rampart-engine.jpg"  align="middle"/>
+<p><strong>Figure 4: Control flow in RampartEngine</strong></p>
+<p><strong>Note:RampartMessageData stores "RampartPolicyData", which contains security policy in the manner required by "RampartEngine" and "MessageBuilder</strong></p>
+<p><strong>SOAP Message Outflow</strong></p>
+<p>Outgoing messages are intercepted by RampartSender and handed over to Rampart Message Builder. It is responsible for enforcing security on an outgoing SOAP message</p>
+<img alt="Message Builder" title="Message Builder" src="images/message-builder.jpg"  align="middle"/>
+<p><strong>Figure 5: Control flow of MessageBuilder</strong></p>
+
+<h3>Rampart Policy</h3>
+<p>WS - Security Policy is an extension of WS-Policy specification. Corresponding to this, implementation of security policy in Rampart is based on "Neethi", which the Apache implementation of WS Policy specification. For each policy assertion introduced in WS-Security Policy, there is an "Assertion Builder" and an "Assertion Model" defined in Rampart-policy. </p>
+<p>Apache Neethi is a highly extensible framework. When reading a security policy file, these builders and models in Rampart Policy are picked up by the Neethi framework using the "Sun Provider Interface" technology. All Rampart builders are listed in the META-INF/services/org.apache.neethi.builders.AssertionBuilder file.  When adding a new Policy assertion it requires only a Builder, Assertion Model and an entry in the file.</p>
+<p>RampartPolicyBuilder creates RampartPolicyData given a "Policy" object created using Rampart-policy and Neethi frameowoks.  </p>
+
+<h3>Rampart Trust</h3>
+<p>Rampart Trust implement the WS-Trust specification, it is can be used in-conjunction with Rampart Core and Rampart Policy  modules. Rampart Trust defines a framework that can be used to issue, cancel, renew and validate tokens, i.e. it defines a set of interfaces that must be implemented by different token issuing parties. Basically, Rampart Trust provides functionality needed to host a STS – Security Token Service. </p>
+<img alt="Rampart Trust" title="Rampart Trust" src="images/rampart-trust.jpg"  align="middle"/>
+<p><strong>Figure 6: Control flow in Rampart Trust</strong></p>
+
+<h3>Future development</h3>
+
+</body>
+
+
+</html>
