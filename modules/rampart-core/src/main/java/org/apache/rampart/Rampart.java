@@ -21,8 +21,8 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
-import org.apache.axis2.modules.ModulePolicyExtension;
-import org.apache.axis2.modules.PolicyExtension;
+import org.apache.axis2.wsdl.codegen.extension.ModulePolicyExtension;
+import org.apache.axis2.wsdl.codegen.extension.PolicyExtension;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 
