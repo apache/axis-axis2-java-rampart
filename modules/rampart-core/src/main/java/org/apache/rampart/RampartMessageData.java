@@ -177,7 +177,6 @@ public class RampartMessageData {
                 this.servicePolicy = (Policy)msgCtx.getProperty(KEY_RAMPART_POLICY);
             }
             
-            
             /*
              * Init policy:
              * When creating the RampartMessageData instance we 
@@ -195,12 +194,8 @@ public class RampartMessageData {
                     OMElement policyElem = param.getParameterElement().getFirstElement();
                     this.servicePolicy = PolicyEngine.getPolicy(policyElem);
                 }
-
             }
             
-            if(this.isInitiator && this.servicePolicy != null) {
-                msgCtx.getServiceContext().setProperty(RampartMessageData.KEY_RAMPART_POLICY, this.servicePolicy);
-            }
             
             if(this.servicePolicy != null){
                 List it = (List)this.servicePolicy.getAlternatives().next();

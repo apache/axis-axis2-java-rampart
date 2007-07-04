@@ -118,7 +118,7 @@ public class STSClient {
             
             ServiceClient client = getServiceClient(rstQn, issuerAddress);
             
-            client.getOptions().setProperty(RAMPART_POLICY, issuerPolicy);
+            client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
             client.getOptions().setSoapVersionURI(this.soapVersion); 
 
             //Process the STS and service policy policy

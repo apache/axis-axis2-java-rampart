@@ -17,16 +17,23 @@
 package org.apache.rampart;
 
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
+import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityEngine;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.WSSecurityUtil;
 
+import javax.xml.namespace.QName;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Vector;
 
 public class RampartEngine {
@@ -58,18 +65,33 @@ public class RampartEngine {
         
         ValidatorData data = new ValidatorData(rmd);
         
+        ArrayList headerBlocks = rmd.getMsgContext().getEnvelope()
+                .getHeader().getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
+        Iterator headerBlocksIterator = headerBlocks.iterator();
+        SOAPHeaderBlock secHeader = null;
+        while (headerBlocksIterator.hasNext()) {
+            SOAPHeaderBlock elem = (SOAPHeaderBlock) headerBlocksIterator.next();
+            if(elem.getLocalName().equals(WSConstants.WSSE_LN)) {
+                secHeader = elem;
+                break;
+            }
+        }
+        
+        String actorValue = secHeader.getAttributeValue(new QName(rmd
+                .getSoapConstants().getEnvelopeURI(), "actor"));
+
         if(rpd.isSymmetricBinding()) {
             //Here we have to create the CB handler to get the tokens from the 
             //token storage
             
             results = engine.processSecurityHeader(rmd.getDocument(), 
-                                null, 
+                                actorValue, 
                                 new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd)),
                                 RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
                                         msgCtx.getAxisService().getClassLoader()));
         } else {
             results = engine.processSecurityHeader(rmd.getDocument(),
-                      null, 
+                      actorValue, 
                       new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd)),
                       RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
                               msgCtx.getAxisService().getClassLoader()), 
