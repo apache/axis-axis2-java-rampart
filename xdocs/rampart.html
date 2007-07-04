@@ -38,7 +38,7 @@ Components of Rampart
 <ul>
 <li>rampart-core, rampart-policy and rampart-trust corresponds to the main tree components mentioned above</li>
 <li>rampart-mar and rampart-trust-mar modules builds the  .mar files that are deployed in the "modules" directory of the Axis2 repository.</li>
-<li>rampat-test has a set of unit test cases</li>
+<li>rampart-test has a set of unit test cases</li>
 <li>integration-test has functional tests</li>
 <li>rampart-samples consist of samples provided with the distribution</li>
 </ul>
@@ -81,7 +81,7 @@ At the outgoing flow message is converted DOOM and then security functions are p
 <h3>Rampart Policy</h3>
 <p>WS - Security Policy is an extension of WS-Policy specification. Corresponding to this, implementation of security policy in Rampart is based on "Neethi", which the Apache implementation of WS Policy specification. For each policy assertion introduced in WS-Security Policy, there is an "Assertion Builder" and an "Assertion Model" defined in Rampart-policy. </p>
 <p>Apache Neethi is a highly extensible framework. When reading a security policy file, these builders and models in Rampart Policy are picked up by the Neethi framework using the "Sun Provider Interface" technology. All Rampart builders are listed in the META-INF/services/org.apache.neethi.builders.AssertionBuilder file.  When adding a new Policy assertion it requires only a Builder, Assertion Model and an entry in the file.</p>
-<p>RampartPolicyBuilder creates RampartPolicyData given a "Policy" object created using Rampart-policy and Neethi frameowoks.  </p>
+<p>RampartPolicyBuilder creates RampartPolicyData given a "Policy" object created using Rampart-policy and Neethi frameworks.  </p>
 
 <h3>Rampart Trust</h3>
 <p>Rampart Trust implement the WS-Trust specification, it is can be used in-conjunction with Rampart Core and Rampart Policy  modules. Rampart Trust defines a framework that can be used to issue, cancel, renew and validate tokens, i.e. it defines a set of interfaces that must be implemented by different token issuing parties. Basically, Rampart Trust provides functionality needed to host a STS – Security Token Service. </p>
