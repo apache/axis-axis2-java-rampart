@@ -15,8 +15,6 @@
  */
 package org.apache.ws.secpolicy.builders;
 
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
@@ -24,6 +22,8 @@ import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.model.SecurityContextToken;
+
+import javax.xml.namespace.QName;
 
 public class SecurityContextTokenBuilder implements AssertionBuilder {
 
@@ -33,25 +33,10 @@ public class SecurityContextTokenBuilder implements AssertionBuilder {
         SecurityContextToken contextToken = new SecurityContextToken();
 
         OMAttribute attribute = element.getAttribute(Constants.INCLUDE_TOKEN);
-        if (attribute == null) {
-            throw new IllegalArgumentException(
-                    "SecurityContextToken doesn't contain any sp:IncludeToken attribute");
-        }
-        
-        String inclusionValue = attribute.getAttributeValue().trim();
-        
-        if (inclusionValue.endsWith(Constants.INCLUDE_NEVER)) {
-            contextToken.setInclusion(Constants.INCLUDE_NEVER);
 
-        } else if (inclusionValue.endsWith(Constants.INCLUDE_ONCE)) {
-            contextToken.setInclusion(Constants.INCLUDE_ONCE);
-
-        } else if (inclusionValue
-                .endsWith(Constants.INCLUDE_ALWAYS_TO_RECIPIENT)) {
-            contextToken.setInclusion(Constants.INCLUDE_ALWAYS_TO_RECIPIENT);
-
-        } else if (inclusionValue.endsWith(Constants.INCLUDE_ALWAYS)) {
-            contextToken.setInclusion(Constants.INCLUDE_ALWAYS);
+        OMAttribute  includeAttr = element.getAttribute(Constants.INCLUDE_TOKEN);
+        if(includeAttr != null) {
+            contextToken.setInclusion(includeAttr.getAttributeValue());
         }
 
         element = element.getFirstChildWithName(Constants.POLICY);

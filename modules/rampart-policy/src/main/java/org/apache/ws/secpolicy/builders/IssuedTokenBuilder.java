@@ -15,6 +15,7 @@
  */
 package org.apache.ws.secpolicy.builders;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
@@ -35,6 +36,10 @@ public class IssuedTokenBuilder implements AssertionBuilder {
             throws IllegalArgumentException {
         IssuedToken issuedToken = new IssuedToken();
 
+        OMAttribute  includeAttr = element.getAttribute(Constants.INCLUDE_TOKEN);
+        if(includeAttr != null) {
+            issuedToken.setInclusion(includeAttr.getAttributeValue());
+        }
         // Extract Issuer
         OMElement issuerElem = element.getFirstChildWithName(Constants.ISSUER);
         if (issuerElem != null && issuerElem.getFirstElement() != null) {

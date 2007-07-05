@@ -37,21 +37,9 @@ public class UsernameTokenBuilder implements AssertionBuilder {
         UsernameToken usernameToken = new UsernameToken();
         
         OMAttribute attribute = element.getAttribute(Constants.INCLUDE_TOKEN);
-        String inclusionValue = attribute.getAttributeValue();
-        
-        if (inclusionValue.endsWith(Constants.INCLUDE_NEVER)) {
-            usernameToken.setInclusion(Constants.INCLUDE_NEVER);
-            
-        } else if (inclusionValue.endsWith(Constants.INCLUDE_ONCE)) {
-            usernameToken.setInclusion(Constants.INCLUDE_ONCE);
-            
-        } else if (inclusionValue.endsWith(Constants.INCLUDE_ALWAYS_TO_RECIPIENT)) {
-            usernameToken.setInclusion(Constants.INCLUDE_ALWAYS_TO_RECIPIENT);
-            
-        } else if (inclusionValue.endsWith(Constants.INCLUDE_ALWAYS)) {
-            usernameToken.setInclusion(Constants.INCLUDE_ALWAYS);
+        if(attribute != null) {
+            usernameToken.setInclusion(attribute.getAttributeValue());
         }
-        
         
         OMElement policyElement = element.getFirstElement();
         
