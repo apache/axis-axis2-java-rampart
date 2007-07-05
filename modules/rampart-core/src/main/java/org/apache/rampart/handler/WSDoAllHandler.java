@@ -33,7 +33,7 @@ public abstract class WSDoAllHandler extends WSHandler implements Handler {
      * Field EMPTY_HANDLER_METADATA
      */
     private static HandlerDescription EMPTY_HANDLER_METADATA =
-            new HandlerDescription("deafult Handler");
+            new HandlerDescription("default Handler");
 
     private final static String WSS_PASSWORD = "password";
 
@@ -155,9 +155,9 @@ public abstract class WSDoAllHandler extends WSHandler implements Handler {
     protected int getCurrentRepetition(Object msgContext) {
         //get the repetition from the message context
         int repetition = 0;
-        if (!inHandler) {//We only need to repete the out handler
+        if (!inHandler) {//We only need to repeat the out handler
             Integer count = (Integer) ((MessageContext) msgContext).getProperty(WSSHandlerConstants.CURRENT_REPETITON);
-            if (count != null) { //When we are repeting the handler
+            if (count != null) { //When we are repeating the handler
                 repetition = count.intValue();
             }
         }
@@ -181,8 +181,8 @@ public abstract class WSDoAllHandler extends WSHandler implements Handler {
     }
 
     /**
-     * Gets optoin. Extracts the configuration values from the service.xml
-     * and/or axis2.xml. Values set in the service.xml takes prority over
+     * Gets option. Extracts the configuration values from the service.xml
+     * and/or axis2.xml. Values set in the service.xml takes priority over
      * values of the axis2.xml
      */
     public Object getOption(String axisKey) {

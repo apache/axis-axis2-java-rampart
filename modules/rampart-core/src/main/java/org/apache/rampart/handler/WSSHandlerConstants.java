@@ -118,7 +118,7 @@ public class WSSHandlerConstants {
     
     
     /**
-     * Key to hod the map of security context identifiers against the 
+     * Key to hold the map of security context identifiers against the 
      * service epr addresses (service scope) or wsa:Action values (operation 
      * scope).
      */

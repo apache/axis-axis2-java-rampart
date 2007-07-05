@@ -39,7 +39,7 @@ import java.util.Vector;
 public class RampartReceiver implements Handler {
     
     private static HandlerDescription EMPTY_HANDLER_METADATA =
-        new HandlerDescription("deafult Handler");
+        new HandlerDescription("default Handler");
 
     private HandlerDescription handlerDesc;
     
