@@ -16,6 +16,8 @@
 package org.apache.rampart.policy;
 
 import org.apache.axis2.policy.model.MTOMAssertion;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.WSSPolicyException;
@@ -42,6 +44,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class RampartPolicyBuilder {
+    
+    private static Log log = LogFactory.getLog(RampartPolicyBuilder.class);
     
     /**
      * Compile the parsed security data into one Policy data block.
@@ -99,7 +103,7 @@ public class RampartPolicyBuilder {
             } else if (assertion instanceof MTOMAssertion){
             	processMTOMSerialization((MTOMAssertion)assertion, rpd);
             } else {
-                System.out.println("Unknown top level PED found: "
+                log.debug("Unknown top level PED found: "
                         + assertion.getClass().getName());
             }
         }
