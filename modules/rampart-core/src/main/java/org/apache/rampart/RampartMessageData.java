@@ -104,7 +104,7 @@ public class RampartMessageData {
     /**
      * WS-Trust version to use.
      * 
-     * Pissible values:
+     * Possible values:
      * RahasConstants.VERSION_05_02
      * RahasConstants.VERSION_05_12
      */
@@ -115,7 +115,7 @@ public class RampartMessageData {
     
     /*
      * IssuedTokens or SecurityContextTokens can be used
-     * as the encryption token, signature token,
+     * as the encryption token, signature token
      */
     private String issuedEncryptionTokenId;
     
@@ -206,7 +206,7 @@ public class RampartMessageData {
             
             
             if(isInitiator && this.policyData != null && this.policyData.getRampartConfig() == null) {
-                //We'r missing the extra info rampart needs
+                //We'er missing the extra info rampart needs
                 throw new RampartException("rampartConigMissing");
             }
             
@@ -221,7 +221,7 @@ public class RampartMessageData {
                     
                     RampartConfig rampartConfig = policyData.getRampartConfig();
                     /*
-                     * Copy crypto info from the into the new issuer policy 
+                     * Copy crypto info into the new issuer policy 
                      */
                     RampartConfig rc = new RampartConfig();
                     rc.setEncrCryptoConfig(rampartConfig.getEncrCryptoConfig());
@@ -301,6 +301,7 @@ public class RampartMessageData {
 
     /**
      * @param document The document to set.
+     * @deprecated document is derived from MessageContext passed in constructor
      */
     public void setDocument(Document document) {
         this.document = document;
@@ -343,8 +344,8 @@ public class RampartMessageData {
     }
 
     /**
-     * @param msgContext
-     *            The msgContext to set.
+     * @param msgContext The msgContext to set.
+     * @deprecated MessageContext is set in constructor
      */
     public void setMsgContext(MessageContext msgContext) {
         this.msgContext = msgContext;
@@ -358,8 +359,8 @@ public class RampartMessageData {
     }
 
     /**
-     * @param policyData
-     *            The policyData to set.
+     * @param policyData The policyData to set.
+     * @deprecated Policy data determined within constructor
      */
     public void setPolicyData(RampartPolicyData policyData) throws RampartException {
         this.policyData = policyData;
@@ -528,17 +529,18 @@ public class RampartMessageData {
     }
 
     /**
-     * @return Returns the wstVerion.
+     * @return Returns the wstVersion.
      */
     public int getWstVersion() {
         return wstVersion;
     }
 
     /**
-     * @param wstVerion The wstVerion to set.
+     * @param wstVersion The wstVersion to set.
+     * @deprecated This is defined by the class.
      */
-    public void setWstVersion(int wstVerion) {
-        this.wstVersion = wstVerion;
+    public void setWstVersion(int wstVersion) {
+        this.wstVersion = wstVersion;
     }
 
     /**
@@ -557,52 +559,10 @@ public class RampartMessageData {
 
     /**
      * @param servicePolicy The servicePolicy to set.
+     * @deprecated servicePolicy determined in constructor
      */
     public void setServicePolicy(Policy servicePolicy) {
         this.servicePolicy = servicePolicy;
-    }
-    
-    
-    public static String getMessagePolicyKey(MessageContext msgCtx) {
-        if(msgCtx.getAxisOperation() != null) {
-            return createPolicyKey(msgCtx.getAxisService().getName(), 
-                                msgCtx.getAxisOperation().getName(),
-                                msgCtx.getAxisMessage().getName());
-        }
-        return null;
-    }
-    
-    /**
-     * @param msgCtx
-     * @return The key to store/pickup policy of an operation
-     */
-    public static String getOperationPolicyKey(MessageContext msgCtx) {
-        if(msgCtx.getAxisOperation() != null) {
-            return createPolicyKey(msgCtx.getAxisService().getName(), 
-                                msgCtx.getAxisOperation().getName(), null);
-            
-        }
-        return null;
-    }
-
-    public static String getServicePolicyKey(MessageContext msgCtx) {
-        return  createPolicyKey(msgCtx.getAxisService().getName(), null, null);
-    }
-    
-    public static String createPolicyKey(String service, QName operation, String msg) {
-        if(operation != null) {
-            if(msg != null) {
-                return RampartMessageData.KEY_RAMPART_POLICY + service
-                + "{" + operation.getNamespaceURI() + "}"
-                + operation.getLocalPart() + ":" + msg;
-            } else {
-                return RampartMessageData.KEY_RAMPART_POLICY + service
-                    + "{" + operation.getNamespaceURI() + "}"
-                    + operation.getLocalPart();
-            }
-        } else {
-            return RampartMessageData.KEY_RAMPART_POLICY + service;
-        }
     }
     
     /**
@@ -620,16 +580,25 @@ public class RampartMessageData {
     }
 
     /**
-     * @return Returns the isClientSide.
+     * @return Returns the Initiator value
      */
     public boolean isInitiator() {
         return isInitiator;
     }
 
+    /**
+     * Returns the custom class loader if we are using one
+     * @return Returns the custom class loader if we are using one
+     */
     public ClassLoader getCustomClassLoader() {
         return customClassLoader;
     }
 
+    /**
+     * Returns an <code>org.apache.ws.security.SOAPConstants</code> instance 
+     * with soap version information of this request. 
+     * @return Returns soap version information of this request
+     */
     public SOAPConstants getSoapConstants() {
         return soapConstants;
     }
