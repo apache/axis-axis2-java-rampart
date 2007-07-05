@@ -30,7 +30,7 @@ import org.apache.ws.security.WSSecurityException;
 public class RampartSender implements Handler {
     
     private static HandlerDescription EMPTY_HANDLER_METADATA =
-        new HandlerDescription("deafult Handler");
+        new HandlerDescription("default Handler");
 
     private HandlerDescription handlerDesc;
     
