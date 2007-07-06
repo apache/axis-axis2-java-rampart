@@ -15,14 +15,15 @@
  */
 package org.apache.rampart.policy.builders;
 
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.rampart.policy.model.CryptoConfig;
 import org.apache.rampart.policy.model.RampartConfig;
-
-import javax.xml.namespace.QName;
+import org.apache.rampart.policy.model.SSLConfig;
 
 public class RampartConfigBuilder implements AssertionBuilder {
 
@@ -50,7 +51,20 @@ public class RampartConfigBuilder implements AssertionBuilder {
         if (childElement != null) {
             rampartConfig.setPwCbClass(childElement.getText().trim());
         }
-
+        
+                      
+        // handle ssl config	
+		childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.SSL_CONFIG));
+        if (childElement != null) {            	            	
+        	SSLConfig sslConfig = (SSLConfig)new SSLConfigBuilder().
+        	                          build(childElement, 
+        			                  factory);
+            rampartConfig.setSSLConfig(sslConfig);
+            
+        }
+        
+                      
         childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.SIG_CRYPTO_LN));
         if (childElement != null) {

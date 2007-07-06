@@ -230,6 +230,7 @@ public class RampartMessageData {
                     rc.setUser(rampartConfig.getUser());
                     rc.setEncryptionUser(rampartConfig.getEncryptionUser());
                     rc.setPwCbClass(rampartConfig.getPwCbClass());
+                    rc.setSSLConfig(rampartConfig.getSSLConfig());
                     
                     this.servicePolicy.addAssertion(rc);
                     

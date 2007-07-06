@@ -101,6 +101,20 @@ public class RampartConfig implements Assertion {
     private String optimizeParts;
 
     private String tokenStoreClass;
+    
+    private SSLConfig sslConfig;
+    
+    public final static String SSL_CONFIG = "sslConfig";
+    
+    
+    public SSLConfig getSSLConfig() {
+        return sslConfig;
+    }
+
+    public void setSSLConfig(SSLConfig sslConfig) {
+        this.sslConfig = sslConfig;
+    }
+    
 
     /**
      * @return Returns the tokenStoreClass.
