@@ -35,6 +35,7 @@ import javax.xml.stream.XMLStreamWriter;
  *  &lt;ramp:encryptionUser&gt;bob&lt;/ramp:encryptionUser&gt;
  *  &lt;ramp:passwordCallbackClass&gt;org.apache.axis2.security.PWCallback&lt;/ramp:passwordCallbackClass&gt;
  *  &lt;ramp:timestampTTL&gt;300&lt;/ramp:timestampTTL&gt;
+ *  &lt;ramp:timestampMaxSkew&gt;0&lt;/ramp:timestampMaxSkew&gt;
  *  &lt;ramp:tokenStoreClass&gt;org.apache.rahas.StorageImpl&lt;/ramp:tokenStoreClass&gt;
  *  
  *  &lt;ramp:signatureCrypto&gt;
@@ -60,6 +61,8 @@ public class RampartConfig implements Assertion {
 
     public static final int DEFAULT_TIMESTAMP_TTL = 300;
 
+    public static final int DEFAULT_TIMESTAMP_MAX_SKEW = 0;
+
     public final static String NS = "http://ws.apache.org/rampart/policy";
 
     public final static String PREFIX = "rampart";
@@ -80,6 +83,8 @@ public class RampartConfig implements Assertion {
 
     public final static String TS_TTL_LN = "timestampTTL";
 
+    public final static String TS_MAX_SKEW_LN = "timestampMaxSkew";
+
     public final static String TOKEN_STORE_CLASS_LN = "tokenStoreClass";
     
     public final static String OPTIMISE_PARTS_LN = "OptimizeParts";
@@ -98,6 +103,8 @@ public class RampartConfig implements Assertion {
 
     private String timestampTTL = Integer.toString(DEFAULT_TIMESTAMP_TTL);
     
+    private String timestampMaxSkew = Integer.toString(DEFAULT_TIMESTAMP_MAX_SKEW);
+
     private String optimizeParts;
 
     private String tokenStoreClass;
@@ -228,6 +235,12 @@ public class RampartConfig implements Assertion {
             writer.writeEndElement();
         }
         
+        if (getTimestampMaxSkew() != null) {
+            writer.writeStartElement(NS, TS_MAX_SKEW_LN);
+            writer.writeCharacters(getTimestampMaxSkew());
+            writer.writeEndElement();
+        }
+
         if (getTokenStoreClass() != null) {
             writer.writeStartElement(NS, TOKEN_STORE_CLASS_LN);
             writer.writeCharacters(getTokenStoreClass());
@@ -278,6 +291,21 @@ public class RampartConfig implements Assertion {
      */
     public void setTimestampTTL(String timestampTTL) {
         this.timestampTTL = timestampTTL;
+    }
+    
+    /**
+     * @return Returns the timestampMaxSkew.
+     */
+    public String getTimestampMaxSkew() {
+        return timestampMaxSkew;
+    }
+
+    /**
+     * @param timestampMaxSkew
+     *            The timestampMaxSkew to set.
+     */
+    public void setTimestampMaxSkew(String timestampMaxSkew) {
+        this.timestampMaxSkew = timestampMaxSkew;
     }
     
     /**

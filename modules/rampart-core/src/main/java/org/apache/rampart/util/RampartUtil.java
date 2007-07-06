@@ -318,25 +318,47 @@ public class RampartUtil {
     public static int getTimeToLive(RampartMessageData messageData) {
 
         RampartConfig rampartConfig = messageData.getPolicyData().getRampartConfig();
-        if(rampartConfig != null) {
-        String ttl = rampartConfig.getTimestampTTL();
-        int ttl_i = 0;
-        if (ttl != null) {
-            try {
-                ttl_i = Integer.parseInt(ttl);
-            } catch (NumberFormatException e) {
+        if (rampartConfig != null) {
+            String ttl = rampartConfig.getTimestampTTL();
+            int ttl_i = 0;
+            if (ttl != null) {
+                try {
+                    ttl_i = Integer.parseInt(ttl);
+                } catch (NumberFormatException e) {
+                    ttl_i = messageData.getTimeToLive();
+                }
+            }
+            if (ttl_i <= 0) {
                 ttl_i = messageData.getTimeToLive();
             }
-        }
-        if (ttl_i <= 0) {
-            ttl_i = messageData.getTimeToLive();
-        }
-        return ttl_i;
+            return ttl_i;
         } else {
             return RampartConfig.DEFAULT_TIMESTAMP_TTL;
         }
     }
-    
+
+    public static int getTimestampMaxSkew(RampartMessageData messageData) {
+
+        RampartConfig rampartConfig = messageData.getPolicyData().getRampartConfig();
+        if (rampartConfig != null) {
+            String maxSkew = rampartConfig.getTimestampMaxSkew();
+            int maxSkew_i = 0;
+            if (maxSkew != null) {
+                try {
+                    maxSkew_i = Integer.parseInt(maxSkew);
+                } catch (NumberFormatException e) {
+                    maxSkew_i = messageData.getTimestampMaxSkew();
+                }
+            }
+            if (maxSkew_i < 0) {
+                maxSkew_i = 0;
+            }
+            return maxSkew_i;
+        } else {
+            return RampartConfig.DEFAULT_TIMESTAMP_MAX_SKEW;
+        }
+    }
+
     /**
      * Obtain a security context token.
      * @param rmd

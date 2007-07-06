@@ -136,7 +136,7 @@ public class PolicyBasedResultsValidator {
             Timestamp timestamp = actionResult.getTimestamp();
 
             if (timestamp != null) {
-                if (!verifyTimestamp(timestamp, rmd.getTimeToLive())) {
+                if (!verifyTimestamp(timestamp, rmd)) {
                     throw new RampartException("cannotValidateTimestamp");
                 }
             }
@@ -386,17 +386,24 @@ public class PolicyBasedResultsValidator {
     }
     
 
-    
-    private boolean verifyTimestamp(Timestamp timestamp, int timeToLive) throws RampartException {
-
-        // 'now' must be between ts->Created and ts->Expires
-        // here we test that now is after ts->Created
-        // test that now is before ts->Expires is handled earlier by WSS4J
+    /*
+     * Verify that ts->Created is before 'now'
+     * - testing that timestamp has not expired ('now' is before ts->Expires) is handled earlier by WSS4J
+     */
+    private boolean verifyTimestamp(Timestamp timestamp, RampartMessageData rmd) throws RampartException {
 
         Calendar cre = timestamp.getCreated();
         if (cre != null) {
-            Calendar now = Calendar.getInstance();
-            if( now.before( cre ) ) {
+            long now = Calendar.getInstance().getTimeInMillis();
+
+            // ajust 'now' with allowed timeskew 
+            long maxSkew = RampartUtil.getTimestampMaxSkew( rmd );
+            if( maxSkew > 0 ) {
+                now += (maxSkew * 1000);
+            }
+            
+            // fail if ts->Created is after 'now'
+            if( cre.getTimeInMillis() > now ) {
                 return false;
             }
         }

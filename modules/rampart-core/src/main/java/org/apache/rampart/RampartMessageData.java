@@ -95,6 +95,8 @@ public class RampartMessageData {
     
     private int timeToLive = 300;
     
+    private int timestampMaxSkew = 0;
+    
     private String timestampId;
     
     private Document document;
@@ -320,6 +322,20 @@ public class RampartMessageData {
      */
     public void setTimeToLive(int timeToLive) {
         this.timeToLive = timeToLive;
+    }
+
+    /**
+     * @return Returns the timestampMaxSkew.
+     */
+    public int getTimestampMaxSkew() {
+        return timestampMaxSkew;
+    }
+
+    /**
+     * @param timestampMaxSkew The timestampMaxSkew to set.
+     */
+    public void setTimestampMaxSkew(int timestampMaxSkew) {
+        this.timestampMaxSkew = timestampMaxSkew;
     }
 
     /**
