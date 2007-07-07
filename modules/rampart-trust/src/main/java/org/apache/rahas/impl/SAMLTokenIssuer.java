@@ -332,7 +332,16 @@ public class SAMLTokenIssuer implements TokenIssuer {
                         subjectNameId, null, SAMLNameIdentifier.FORMAT_EMAIL);
 
                 // Create the ds:KeyValue element with the ds:X509Data
-                byte[] clientCertBytes = data.getClientCert().getEncoded();
+                X509Certificate clientCert = data.getClientCert();
+
+                if(clientCert == null) {
+                    X509Certificate[] certs = crypto.getCertificates(
+                            data.getPrincipal().getName());
+                    clientCert = certs[0];
+                }
+
+                byte[] clientCertBytes = clientCert.getEncoded();
+
                 String base64Cert = Base64.encode(clientCertBytes);
 
                 Text base64CertText = doc.createTextNode(base64Cert);
@@ -349,9 +358,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
                 return this.createAuthAssertion(doc,
                         SAMLSubject.CONF_HOLDER_KEY, nameId, keyValueElem,
                         config, crypto, creationTime, expirationTime);
-            } catch (SAMLException e) {
-                throw new TrustException("samlAssertionCreationError", e);
-            } catch (CertificateEncodingException e) {
+            } catch (Exception e) {
                 throw new TrustException("samlAssertionCreationError", e);
             }
         }

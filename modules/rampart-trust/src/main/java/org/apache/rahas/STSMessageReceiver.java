@@ -16,18 +16,18 @@
 
 package org.apache.rahas;
 
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
-import org.apache.axis2.receivers.AbstractInOutSyncMessageReceiver;
+import org.apache.axis2.receivers.AbstractInOutMessageReceiver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class STSMessageReceiver extends AbstractInOutSyncMessageReceiver {
+import javax.xml.namespace.QName;
+
+public class STSMessageReceiver extends AbstractInOutMessageReceiver {
     
 	private static final Log log = LogFactory.getLog(STSMessageReceiver.class);
     
@@ -66,5 +66,6 @@ public class STSMessageReceiver extends AbstractInOutSyncMessageReceiver {
             throw new AxisFault(e.getFaultString(), e.getFaultCode());
         }
     }
+
 
 }
