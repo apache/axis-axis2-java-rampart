@@ -1,2 +1,3 @@
 org.apache.rampart.policy.builders.CryptoConfigBuilder
 org.apache.rampart.policy.builders.RampartConfigBuilder
+org.apache.rampart.policy.builders.SSLConfigBuilder
