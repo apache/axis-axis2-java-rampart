@@ -303,7 +303,7 @@ public class STSClient {
 
         } else {
             if (this.requestorEntropy != null) {
-                //Use requestor entropy as the key
+                //Use requester entropy as the key
                 secret = this.requestorEntropy;
             }
         }

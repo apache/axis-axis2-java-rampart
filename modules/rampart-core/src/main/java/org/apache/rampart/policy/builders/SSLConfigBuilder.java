@@ -15,14 +15,6 @@
  */
 package org.apache.rampart.policy.builders;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.util.Iterator;
-import java.util.Properties;
-
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
@@ -30,6 +22,11 @@ import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.policy.model.SSLConfig;
+
+import javax.xml.namespace.QName;
+
+import java.util.Iterator;
+import java.util.Properties;
 
 public class SSLConfigBuilder implements AssertionBuilder {
 

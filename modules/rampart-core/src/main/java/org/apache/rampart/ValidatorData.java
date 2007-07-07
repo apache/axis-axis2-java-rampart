@@ -22,8 +22,10 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.apache.xml.security.utils.EncryptionConstants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ValidatorData {
 
@@ -37,34 +39,39 @@ public class ValidatorData {
     }
     
     private void extractEncryptedPartInformation() {
-        Node start = rmd.getDocument().getDocumentElement();
-        while(start != null) {
-            Element elem = (Element) WSSecurityUtil.findElement(start, 
-                    EncryptionConstants._TAG_ENCRYPTEDDATA, WSConstants.ENC_NS);
-            if(elem != null) {
-                Element parentElem = (Element)elem.getParentNode();
-                if(parentElem != null && parentElem.getLocalName().equals(SOAP11Constants.BODY_LOCAL_NAME) &&
-                        parentElem.getNamespaceURI().equals(rmd.getSoapConstants().getEnvelopeURI())) {
-                    this.bodyEncrDataId = elem.getAttribute("Id");
-                } else {
-                    encryptedDataRefIds.add(elem.getAttribute("Id"));
-                }
-                
-                if(elem.getNextSibling() != null) {
-                    start = elem.getNextSibling();
-                } else {
-                    start = elem.getParentNode().getNextSibling();
-                }
-            } else {
-                if(start.getNextSibling() != null) {
-                    start = start.getNextSibling();
-                } else {
-                    start = start.getParentNode().getNextSibling();
-                }
-            }
-            
+        Element start = rmd.getDocument().getDocumentElement();
+        if(start != null) {
+            extractEncryptedPartInformation(start);
         }
         
+    }
+    
+    private void extractEncryptedPartInformation(Element parent) {
+
+        NodeList childNodes = parent.getChildNodes();
+        Node node;
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            node = childNodes.item(i);
+            if (node instanceof Element) {
+                Element elem = (Element) node;
+                if (elem.getNamespaceURI().equals(WSConstants.ENC_NS)
+                        && elem.getLocalName().equals(
+                                EncryptionConstants._TAG_ENCRYPTEDDATA)) {
+                    if (parent != null
+                            && parent.getLocalName().equals(
+                                    SOAP11Constants.BODY_LOCAL_NAME)
+                            && parent.getNamespaceURI().equals(
+                                    rmd.getSoapConstants().getEnvelopeURI())) {
+                        this.bodyEncrDataId = elem.getAttribute("Id");
+                    } else {
+                        encryptedDataRefIds.add(elem.getAttribute("Id"));
+                    }
+                    break;
+                } else {
+                    extractEncryptedPartInformation(elem);
+                }
+            }
+        }
     }
 
     public ArrayList getEncryptedDataRefIds() {
