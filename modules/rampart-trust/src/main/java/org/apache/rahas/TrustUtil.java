@@ -26,6 +26,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.rahas.impl.AbstractIssuerConfig;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.message.token.Reference;
 import org.apache.ws.security.message.token.SecurityTokenReference;
@@ -43,7 +44,6 @@ import java.util.Iterator;
 
 public class TrustUtil {
 
-    private static final QName PROVIDER = new QName("provider");
     private static final QName NAME = new QName("name");
 
     /**
@@ -511,7 +511,8 @@ public class TrustUtil {
             properties.setProperty(name, value);
         }
         properties.setProperty("org.apache.ws.security.crypto.provider",
-                               cryptoElem.getAttribute(PROVIDER).getAttributeValue().trim());
+                cryptoElem.getAttribute(AbstractIssuerConfig.PROVIDER)
+                        .getAttributeValue().trim());
         return properties;
     }
     

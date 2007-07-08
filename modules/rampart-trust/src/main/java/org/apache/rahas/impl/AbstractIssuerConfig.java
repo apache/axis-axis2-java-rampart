@@ -44,6 +44,8 @@ public abstract class AbstractIssuerConfig {
      */
     public final static QName CRYPTO_PROPERTIES = new QName("cryptoProperties");
     public static final QName CRYPTO = new QName("crypto");
+    public static final QName PROVIDER = new QName("provider");
+    public static final QName PROPERTY = new QName("property");
 
     protected int keyComputation = KeyComputation.KEY_COMP_PROVIDE_ENT;
     protected String proofKeyType = TokenIssuerUtil.ENCRYPTED_KEY;
@@ -53,5 +55,26 @@ public abstract class AbstractIssuerConfig {
     protected String cryptoPropertiesFile;
     protected OMElement cryptoPropertiesElement;
     protected int keySize = 256;
+    
+    public void setAddRequestedAttachedRef(boolean addRequestedAttachedRef) {
+        this.addRequestedAttachedRef = addRequestedAttachedRef;
+    }
+    public void setAddRequestedUnattachedRef(boolean addRequestedUnattachedRef) {
+        this.addRequestedUnattachedRef = addRequestedUnattachedRef;
+    }
+    public void setKeyComputation(int keyComputation) {
+        this.keyComputation = keyComputation;
+    }
+    public void setProofKeyType(String proofKeyType) {
+        this.proofKeyType = proofKeyType;
+    }
+    public void setTtl(long ttl) {
+        this.ttl = ttl;
+    }
+    public void setKeySize(int keySize) {
+        this.keySize = keySize;
+    }
+    
+    
 
 }

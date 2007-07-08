@@ -16,17 +16,22 @@
 
 package org.apache.rahas.impl;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.description.Parameter;
 import org.apache.rahas.TrustException;
 
 import javax.xml.namespace.QName;
 
 import java.io.FileInputStream;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Configuration manager for the <code>SAMLTokenIssuer</code>
@@ -75,10 +80,38 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     protected String issuerKeyAlias;
     protected String issuerKeyPassword;
     protected String issuerName;
-    protected Map trustedServices;
+    protected Map trustedServices = new HashMap();
     protected String trustStorePropFile;
 
-    private SAMLTokenIssuerConfig(OMElement elem) throws TrustException {
+    /**
+     * Create a SAMLTokenIssuer configuration with a config file picked from the
+     * given location.
+     * @param configFilePath Path to the config file
+     * @throws TrustException
+     */
+    public SAMLTokenIssuerConfig(String configFilePath) throws TrustException {
+        FileInputStream fis;
+        StAXOMBuilder builder;
+        try {
+            fis = new FileInputStream(configFilePath);
+            builder = new StAXOMBuilder(fis);
+        } catch (Exception e) {
+            throw new TrustException("errorLoadingConfigFile",
+                    new String[] { configFilePath });
+        }
+        this.load(builder.getDocumentElement());
+    }
+    
+    /**
+     * Create a  SAMLTokenIssuer configuration using the give config element
+     * @param elem Configuration element as an <code>OMElement</code>
+     * @throws TrustException
+     */
+    public SAMLTokenIssuerConfig(OMElement elem) throws TrustException {
+        this.load(elem);
+    }
+
+    private void load(OMElement elem) throws TrustException {
         OMElement proofKeyElem = elem.getFirstChildWithName(PROOF_KEY_TYPE);
         if (proofKeyElem != null) {
             this.proofKeyType = proofKeyElem.getText().trim();
@@ -116,7 +149,7 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         if (cryptoPropElem != null) {
             if ((cryptoPropertiesElement =
                     cryptoPropElem.getFirstChildWithName(CRYPTO)) == null){
-                // no children. Hence, prop file shud have been defined
+                // no children. Hence, prop file should have been defined
                 this.cryptoPropertiesFile = cryptoPropElem.getText().trim();
             }
             // else Props should be defined as children of a crypto element
@@ -186,22 +219,110 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         }
     }
 
-    public static SAMLTokenIssuerConfig load(OMElement elem) throws TrustException {
-        return new SAMLTokenIssuerConfig(elem);
-    }
-
-    public static SAMLTokenIssuerConfig load(String configFilePath)
-            throws TrustException {
-        FileInputStream fis;
-        StAXOMBuilder builder;
-        try {
-            fis = new FileInputStream(configFilePath);
-            builder = new StAXOMBuilder(fis);
-        } catch (Exception e) {
-            throw new TrustException("errorLoadingConfigFile",
-                                     new String[]{configFilePath});
+    /**
+     * Generate an Axis2 parameter for this configuration
+     * @return An Axis2 Parameter instance with configuration information
+     */
+    public Parameter getParameter() {
+        Parameter param = new Parameter();
+        
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        
+        OMElement paramElem = fac.createOMElement("Parameter", null);
+        paramElem.addAttribute("name", SAML_ISSUER_CONFIG.getLocalPart(), null);
+        
+        OMElement configElem = fac.createOMElement(SAML_ISSUER_CONFIG, paramElem);
+        
+        OMElement issuerNameElem = fac.createOMElement(ISSUER_NAME, configElem);
+        issuerNameElem.setText(this.issuerName);
+        
+        OMElement issuerKeyAliasElem = fac.createOMElement(ISSUER_KEY_ALIAS, configElem);
+        issuerKeyAliasElem.setText(this.issuerKeyAlias);
+        
+        OMElement issuerKeyPasswd = fac.createOMElement(ISSUER_KEY_PASSWD, configElem);
+        issuerKeyPasswd.setText(this.issuerKeyPassword);
+        
+        configElem.addChild(this.cryptoPropertiesElement);
+        
+        OMElement keySizeElem = fac.createOMElement(KEY_SIZE, configElem);
+        keySizeElem.setText(Integer.toString(this.keySize));
+        
+        if(this.addRequestedAttachedRef) {
+            fac.createOMElement(ADD_REQUESTED_ATTACHED_REF, configElem);
         }
-        return load(builder.getDocumentElement());
+        if(this.addRequestedUnattachedRef) {
+            fac.createOMElement(ADD_REQUESTED_UNATTACHED_REF, configElem);
+        }
+        
+        OMElement keyCompElem = fac.createOMElement(KeyComputation.KEY_COMPUTATION, configElem);
+        keyCompElem.setText(Integer.toString(this.keyComputation));
+        
+        OMElement proofKeyTypeElem = fac.createOMElement(PROOF_KEY_TYPE, configElem);
+        proofKeyTypeElem.setText(this.proofKeyType);
+        
+        OMElement trustedServicesElem = fac.createOMElement(TRUSTED_SERVICES, configElem);
+        for (Iterator iterator = this.trustedServices.keySet().iterator(); iterator.hasNext();) {
+            String service = (String) iterator.next();
+            OMElement serviceElem = fac.createOMElement(SERVICE, trustedServicesElem);
+            serviceElem.setText(service);
+            serviceElem.addAttribute("alias", (String)this.trustedServices.get(service), null);
+            
+        }
+        
+        param.setParameterElement(paramElem);
+        return param;
+    }
+    
+    public void setIssuerKeyAlias(String issuerKeyAlias) {
+        this.issuerKeyAlias = issuerKeyAlias;
     }
 
+    public void setIssuerKeyPassword(String issuerKeyPassword) {
+        this.issuerKeyPassword = issuerKeyPassword;
+    }
+
+    public void setIssuerName(String issuerName) {
+        this.issuerName = issuerName;
+    }
+
+    public void setTrustedServices(Map trustedServices) {
+        this.trustedServices = trustedServices;
+    }
+
+    public void setTrustStorePropFile(String trustStorePropFile) {
+        this.trustStorePropFile = trustStorePropFile;
+    }
+
+    /**
+     * Add a new trusted service endpoint address with its certificate
+     * @param address Service endpoint address
+     * @param alias certificate alias
+     */
+    public void addTrustedServiceEndpointAddress(String address, String alias) {
+        this.trustedServices.put(address, alias);
+    }
+    
+    /**
+     * Set crypto information using WSS4J mechanisms
+     * 
+     * @param providerClassName
+     *            Provider class - an implementation of
+     *            org.apache.ws.security.components.crypto.Crypto
+     * @param props Configuration properties
+     */
+    public void setCryptoProperties(String providerClassName, Properties props) {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        this.cryptoPropertiesElement= fac.createOMElement(CRYPTO_PROPERTIES);
+        OMElement cryptoElem = fac.createOMElement(CRYPTO, this.cryptoPropertiesElement);
+        cryptoElem.addAttribute(PROVIDER.getLocalPart(), providerClassName, null);
+        Enumeration keys =  props.keys();
+        while (keys.hasMoreElements()) {
+            String prop = (String) keys.nextElement();
+            String value = (String)props.get(prop);
+            OMElement propElem = fac.createOMElement(PROPERTY, cryptoElem);
+            propElem.setText(value);
+            propElem.addAttribute("name", prop, null);
+        }
+    }
+    
 }

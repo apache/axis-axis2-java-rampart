@@ -53,7 +53,6 @@ import org.w3c.dom.Text;
 
 import java.security.Principal;
 import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.Arrays;
@@ -77,21 +76,20 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
             SAMLTokenIssuerConfig config = null;
             if (this.configElement != null) {
-                config = SAMLTokenIssuerConfig
-                        .load(configElement
+                config = new SAMLTokenIssuerConfig(configElement
                                 .getFirstChildWithName(SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
             }
 
             // Look for the file
             if (config == null && this.configFile != null) {
-                config = SAMLTokenIssuerConfig.load(this.configFile);
+                config = new SAMLTokenIssuerConfig(this.configFile);
             }
 
             // Look for the param
             if (config == null && this.configParamName != null) {
                 Parameter param = inMsgCtx.getParameter(this.configParamName);
                 if (param != null && param.getParameterElement() != null) {
-                    config = SAMLTokenIssuerConfig.load(param
+                    config = new SAMLTokenIssuerConfig(param
                             .getParameterElement().getFirstChildWithName(
                                     SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
                 } else {
