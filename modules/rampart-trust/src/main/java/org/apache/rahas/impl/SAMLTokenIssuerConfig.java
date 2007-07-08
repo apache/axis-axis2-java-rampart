@@ -84,6 +84,17 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     protected String trustStorePropFile;
 
     /**
+     * Create a new configuration with issuer name and crypto information
+     * @param issuerName Name of the issuer
+     * @param cryptoProviderClassName WSS4J Crypto impl class name
+     * @param cryptoProps Configuration properties of crypto impl
+     */
+    public SAMLTokenIssuerConfig(String issuerName, String cryptoProviderClassName, Properties cryptoProps) {
+        this.issuerName = issuerName;
+        this.setCryptoProperties(cryptoProviderClassName, cryptoProps);
+    }
+    
+    /**
      * Create a SAMLTokenIssuer configuration with a config file picked from the
      * given location.
      * @param configFilePath Path to the config file
