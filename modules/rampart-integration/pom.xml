@@ -25,6 +25,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <!-- The pertest forkMode is not ideal but seems to be necessary
+                         because the test server doesn't shut down properly :-(
+                         Should be removed if possible -->
+                    <forkMode>pertest</forkMode>
                     <excludes>
                         <exclude>**/ScenarioST1Test.class</exclude>
                     </excludes>
