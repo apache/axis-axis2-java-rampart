@@ -152,13 +152,21 @@ public class RahasData {
                 for (int j = 0; j < wsSecEngineResults.size(); j++) {
                     WSSecurityEngineResult wser = (WSSecurityEngineResult) wsSecEngineResults
                             .get(j);
-                    if (wser.getAction() == WSConstants.SIGN
-                        && wser.getPrincipal() != null) {
-                        this.clientCert = wser.getCertificate();
-                        this.principal = wser.getPrincipal();
-                    } else if (wser.getAction() == WSConstants.UT
-                               && wser.getPrincipal() != null) {
-                        this.principal = wser.getPrincipal();
+                    Object principalObject = wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
+                    int act = ((Integer)wser.get(WSSecurityEngineResult.TAG_ACTION)).
+                            intValue();
+                    if (act == WSConstants.SIGN && principalObject != null) {
+                        this.clientCert = (X509Certificate) wser
+                                .get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+                        this.principal = (Principal)principalObject;
+                    } else if (act == WSConstants.UT && principalObject != null) {
+                        this.principal = (Principal)principalObject;
+                    } else if (act == WSConstants.BST) {
+                        final X509Certificate[] certificates = 
+                            (X509Certificate[]) wser
+                                .get(WSSecurityEngineResult.TAG_X509_CERTIFICATES);
+                        this.clientCert = certificates[0];
+                        this.principal = this.clientCert.getSubjectDN();
                     }
                 }
             }

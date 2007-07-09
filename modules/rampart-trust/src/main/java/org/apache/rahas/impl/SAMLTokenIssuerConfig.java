@@ -280,7 +280,11 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
             
         }
         
+        param.setName(SAML_ISSUER_CONFIG.getLocalPart());
         param.setParameterElement(paramElem);
+        param.setValue(paramElem);
+        param.setParameterType(Parameter.OM_PARAMETER);
+        
         return param;
     }
     
