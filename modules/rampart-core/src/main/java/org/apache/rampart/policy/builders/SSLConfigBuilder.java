@@ -62,7 +62,7 @@ public class SSLConfigBuilder implements AssertionBuilder {
     }
 
     public QName[] getKnownElements() {
-        return null;
+    	return new QName[] {new QName(RampartConfig.NS, SSLConfig.SSL_LN)};
     }
 
 }
