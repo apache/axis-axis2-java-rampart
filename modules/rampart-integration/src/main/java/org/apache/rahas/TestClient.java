@@ -92,7 +92,7 @@ public abstract class TestClient extends TestCase {
             options.setAction(this.getRequestAction());
 //            options.setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.getWSANamespace());
 
-
+            options.setTimeOutInMilliSeconds(200 * 1000);
             OutflowConfiguration clientOutflowConfiguration = getClientOutflowConfiguration();
             if (clientOutflowConfiguration != null) {
                 configContext.setProperty(WSSHandlerConstants.OUTFLOW_SECURITY, clientOutflowConfiguration.getProperty());
