@@ -18,14 +18,12 @@ package org.apache.rampart;
 
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.util.WSSecurityUtil;
 import org.apache.xml.security.utils.EncryptionConstants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ValidatorData {
 
@@ -54,7 +52,8 @@ public class ValidatorData {
             node = childNodes.item(i);
             if (node instanceof Element) {
                 Element elem = (Element) node;
-                if (elem.getNamespaceURI().equals(WSConstants.ENC_NS)
+                if (elem.getNamespaceURI() != null 
+                        && elem.getNamespaceURI().equals(WSConstants.ENC_NS)
                         && elem.getLocalName().equals(
                                 EncryptionConstants._TAG_ENCRYPTEDDATA)) {
                     if (parent != null
