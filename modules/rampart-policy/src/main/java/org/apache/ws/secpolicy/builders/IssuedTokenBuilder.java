@@ -52,11 +52,9 @@ public class IssuedTokenBuilder implements AssertionBuilder {
             issuedToken.setRstTemplate(rstTmplElem);
         }
 
-        OMElement policyElement = element.getFirstElement();
+        OMElement policyElement = element.getFirstChildWithName(org.apache.neethi.Constants.Q_ELEM_POLICY);
 
-        if (policyElement != null
-                && policyElement.getQName().equals(
-                        org.apache.neethi.Constants.Q_ELEM_POLICY)) {
+        if (policyElement != null) {
 
             Policy policy = PolicyEngine.getPolicy(policyElement);
             policy = (Policy) policy.normalize(false);

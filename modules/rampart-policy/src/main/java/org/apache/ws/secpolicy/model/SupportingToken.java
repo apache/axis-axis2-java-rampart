@@ -245,7 +245,7 @@ public class SupportingToken extends AbstractSecurityAssertion implements
 
         
         if (signedParts != null) {
-            signedElements.serialize(writer);
+            signedParts.serialize(writer);
             
         } else if (signedElements != null) {
             signedElements.serialize(writer);
