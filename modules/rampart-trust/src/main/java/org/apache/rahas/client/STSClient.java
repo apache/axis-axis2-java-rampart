@@ -121,7 +121,6 @@ public class STSClient {
             client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
             client.getOptions().setSoapVersionURI(this.soapVersion); 
             client.engageModule("addressing");
-            client.engageModule("rampart");
 
             //Process the STS and service policy policy
             this.processPolicy(issuerPolicy, servicePolicy);
@@ -178,7 +177,7 @@ public class STSClient {
         //Set the action
         client.getOptions().setAction(action);
         client.getOptions().setTo(new EndpointReference(issuerAddress));
-        client.engageModule(new QName("rampart"));
+        client.engageModule("rampart");
         return client;
     }
 

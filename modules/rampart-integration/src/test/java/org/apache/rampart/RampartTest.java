@@ -64,8 +64,8 @@ public class RampartTest extends TestCase {
             ServiceClient serviceClient = new ServiceClient(configContext, null);
             
 
-            serviceClient.engageModule(new QName("addressing"));
-            serviceClient.engageModule(new QName("rampart"));
+            serviceClient.engageModule("addressing");
+            serviceClient.engageModule("rampart");
 
             //TODO : figure this out !!
             boolean basic256Supported = true;

@@ -376,7 +376,7 @@ public class TrustUtil {
 
     /**
      * Returns the token store.
-     * If the token store is aleady available in the configuration context then
+     * If the token store is already available in the configuration context then
      * fetch it and return it. If not create a new one, hook it up in the
      * configuration context and return it
      *
@@ -385,11 +385,23 @@ public class TrustUtil {
      */
     public static TokenStorage getTokenStore(MessageContext msgCtx) {
         ConfigurationContext configCtx = msgCtx.getConfigurationContext();
-        TokenStorage storage =
-                (TokenStorage) configCtx.getProperty(TokenStorage.TOKEN_STORAGE_KEY);
+        return getTokenStore(configCtx);
+    }
+    
+    /**
+     * Fetches the token storage from the configuration context.
+     * If the token store is already available in the configuration context then
+     * fetch it and return it. If not create a new one, hook it up in the
+     * configuration context and return it
+     * @param ctx
+     * @return
+     */
+    public static TokenStorage getTokenStore(ConfigurationContext ctx) {
+        TokenStorage storage = (TokenStorage) ctx
+                .getProperty(TokenStorage.TOKEN_STORAGE_KEY);
         if (storage == null) {
             storage = new SimpleTokenStore();
-            configCtx.setProperty(TokenStorage.TOKEN_STORAGE_KEY, storage);
+            ctx.setProperty(TokenStorage.TOKEN_STORAGE_KEY, storage);
         }
         return storage;
     }

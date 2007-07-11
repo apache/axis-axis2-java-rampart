@@ -423,8 +423,8 @@ public class RampartUtil {
 
         try {
             
-            //TODO : Provide the overriding mechanism to prvide a custom way of 
-            //obtianing a token
+            //TODO : Provide the overriding mechanism to provide a custom way of 
+            //obtaining a token
             
             String action = TrustUtil.getActionValue(rmd.getWstVersion(),
                     RahasConstants.RST_ACTION_ISSUE);

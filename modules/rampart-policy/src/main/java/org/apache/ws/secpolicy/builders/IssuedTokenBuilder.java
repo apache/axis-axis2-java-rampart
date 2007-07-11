@@ -47,9 +47,9 @@ public class IssuedTokenBuilder implements AssertionBuilder {
         }
 
         // Extract RSTTemplate
-        OMElement rstTmplElem = element.getFirstChildWithName(Constants.ISSUER);
+        OMElement rstTmplElem = element.getFirstChildWithName(Constants.RST_TEMPLATE);
         if (rstTmplElem != null) {
-            issuedToken.setIssuerEpr(rstTmplElem);
+            issuedToken.setRstTemplate(rstTmplElem);
         }
 
         OMElement policyElement = element.getFirstElement();
