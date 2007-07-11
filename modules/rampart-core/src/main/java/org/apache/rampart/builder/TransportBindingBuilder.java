@@ -86,10 +86,10 @@ public class TransportBindingBuilder extends BindingBuilder {
                         //Add the UT
                         utBuilder.appendToHeader(rmd.getSecHeader());
                         
-                    } if(token instanceof IssuedToken) {
+                    } else if(token instanceof IssuedToken) {
                         //TODO Handle issued token
                         
-                    }else {
+                    } else {
                         throw new RampartException("unsupportedSignedSupportingToken", 
                                 new String[]{"{" +token.getName().getNamespaceURI() 
                                 + "}" + token.getName().getLocalPart()});
