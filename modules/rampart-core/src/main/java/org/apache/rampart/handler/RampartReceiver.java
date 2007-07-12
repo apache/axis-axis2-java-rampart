@@ -24,8 +24,12 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartEngine;
 import org.apache.rampart.RampartException;
+import org.apache.rampart.builder.TransportBindingBuilder;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;
@@ -37,12 +41,13 @@ import java.util.Vector;
 
 
 public class RampartReceiver implements Handler {
-    
+	
+	private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
+	
     private static HandlerDescription EMPTY_HANDLER_METADATA =
         new HandlerDescription("default Handler");
 
     private HandlerDescription handlerDesc;
-    
     
     public RampartReceiver() {
         this.handlerDesc = EMPTY_HANDLER_METADATA;
@@ -57,12 +62,17 @@ public class RampartReceiver implements Handler {
 
     public void flowComplete(MessageContext msgContext)
     {
+    	
     }
 
     public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
         
         if (!msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
           return InvocationResponse.CONTINUE;        
+        }
+        
+        if(mlog.isDebugEnabled()){
+        	mlog.debug("*********************** RampartReceiver recieved \n"+msgContext.getEnvelope());
         }
         
         RampartEngine engine = new RampartEngine();

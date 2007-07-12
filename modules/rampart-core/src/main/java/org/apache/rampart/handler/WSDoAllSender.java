@@ -24,6 +24,7 @@ import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rampart.RampartConstants;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.HandlerParameterDecoder;
 import org.apache.rampart.util.MessageOptimizer;
@@ -42,6 +43,7 @@ import java.util.Vector;
 public class WSDoAllSender extends WSDoAllHandler {
     
     private static final Log log = LogFactory.getLog(WSDoAllSender.class);
+    private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
     
     
     public WSDoAllSender() {
@@ -51,7 +53,7 @@ public class WSDoAllSender extends WSDoAllHandler {
       
     public void processMessage(MessageContext msgContext) throws AxisFault {
         
-        String useDoomValue = (String) getProperty(msgContext,
+              String useDoomValue = (String) getProperty(msgContext,
                 WSSHandlerConstants.USE_DOOM);
         boolean useDoom = useDoomValue != null
                 && Constants.VALUE_TRUE.equalsIgnoreCase(useDoomValue);
@@ -69,7 +71,11 @@ public class WSDoAllSender extends WSDoAllHandler {
                 reqData.clear();
                 reqData = null;
             }
-        }     
+        }  
+        
+        if(mlog.isDebugEnabled()){
+        	mlog.debug("*********************** WSDoAllSender sent out \n"+msgContext.getEnvelope());
+        }
     }
     
     /**

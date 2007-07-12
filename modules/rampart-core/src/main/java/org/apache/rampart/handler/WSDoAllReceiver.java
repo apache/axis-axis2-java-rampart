@@ -29,6 +29,7 @@ import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rampart.RampartConstants;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.HandlerParameterDecoder;
 import org.apache.ws.security.SOAPConstants;
@@ -55,6 +56,7 @@ import java.util.Vector;
 public class WSDoAllReceiver extends WSDoAllHandler {
 
     private static final Log log = LogFactory.getLog(WSDoAllReceiver.class);
+    private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
 
     public WSDoAllReceiver() {
         super();
@@ -62,7 +64,11 @@ public class WSDoAllReceiver extends WSDoAllHandler {
     }
 
     public void processMessage(MessageContext msgContext) throws AxisFault {
-
+    	
+    	if(mlog.isDebugEnabled()){
+        	mlog.debug("*********************** WSDoAllReceiver recieved \n"+msgContext.getEnvelope());
+        }
+    	
         boolean doDebug = log.isDebugEnabled();
 
         if (doDebug) {

@@ -21,14 +21,19 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.MessageBuilder;
+import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartException;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSSecurityException;
 
 
 public class RampartSender implements Handler {
-    
+	
+	private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
+	
     private static HandlerDescription EMPTY_HANDLER_METADATA =
         new HandlerDescription("default Handler");
 
@@ -62,6 +67,11 @@ public class RampartSender implements Handler {
         } catch (RampartException e) {
             throw new AxisFault(e.getMessage(), e);
         }
+        
+        if(mlog.isDebugEnabled()){
+        	mlog.debug("*********************** RampartSender sent out \n"+msgContext.getEnvelope());
+        }
+        
         return InvocationResponse.CONTINUE;        
     }
 
