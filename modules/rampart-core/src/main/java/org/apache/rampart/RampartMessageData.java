@@ -46,11 +46,10 @@ import org.apache.ws.security.conversation.ConversationConstants;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
 import org.apache.ws.security.message.WSSecHeader;
+import org.apache.ws.security.message.token.SecurityContextToken;
 import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
-
-import javax.xml.namespace.QName;
 
 import java.util.List;
 import java.util.Vector;
@@ -63,9 +62,9 @@ public class RampartMessageData {
     public final static String KEY_RAMPART_POLICY = "rampartPolicy";
     
     /**
-     * Key to hold the address of the issuer in the msg ctx.
+     * Key to hold the custom issued token identifier
      */
-    public final static String KEY_ISSUER_ADDRESS = "issuerAddress";
+    public final static String KEY_CUSTOM_ISSUED_TOKEN = "customIssuedToken";
     
     /**
      * Key to hold the WS-Trust version
@@ -459,8 +458,13 @@ public class RampartMessageData {
                 for (int j = 0; j < wsSecEngineResults.size(); j++) {
                     WSSecurityEngineResult wser = (WSSecurityEngineResult) wsSecEngineResults
                             .get(j);
-                    if(WSConstants.SCT == wser.getAction()) {
-                        id = wser.getSecurityContextToken().getID();
+                    final Integer actInt = 
+                        (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
+                    if(WSConstants.SCT == actInt.intValue()) {
+                        final SecurityContextToken sct = 
+                            ((SecurityContextToken) wser
+                                .get(WSSecurityEngineResult.TAG_SECURITY_CONTEXT_TOKEN));
+                        id = sct.getID();
                     }
 
                 }
