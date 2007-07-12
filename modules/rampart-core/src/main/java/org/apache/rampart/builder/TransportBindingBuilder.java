@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
+import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -49,10 +50,21 @@ import java.util.Vector;
 public class TransportBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(TransportBindingBuilder.class);
+    private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
+    private boolean dotDebug = false;
+    
+    public TransportBindingBuilder(){
+    	dotDebug = tlog.isDebugEnabled();
+    }
     
     public void build(RampartMessageData rmd) throws RampartException {
         
         log.debug("TransportBindingBuilder build invoked");
+        
+        long t0 = 0, t1 = 0;
+    	if(dotDebug){
+    		t1 = System.currentTimeMillis();
+    	}
         
         RampartPolicyData rpd = rmd.getPolicyData();
         
@@ -139,6 +151,11 @@ public class TransportBindingBuilder extends BindingBuilder {
         } else {
             addSignatureConfirmation(rmd, null);
         }
+        
+    	if(dotDebug){
+    		t1 = System.currentTimeMillis();
+    		tlog.debug("Transport binding build took "+ (t1 - t0));
+    	}
     }
 
 

@@ -70,6 +70,7 @@ public abstract class BindingBuilder {
     
     protected Element timestampElement;
     
+    
     /**
      * @param rmd
      */

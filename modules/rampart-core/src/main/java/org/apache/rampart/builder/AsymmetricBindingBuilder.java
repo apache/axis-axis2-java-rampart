@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
+import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -49,7 +50,9 @@ import java.util.Vector;
 public class AsymmetricBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(AsymmetricBindingBuilder.class);
-
+    private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
+    private boolean dotDebug = false;
+    
     private Token sigToken;
 
     private WSSecSignature sig;
@@ -71,6 +74,10 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
     private Vector sigParts = new Vector();
     
     private Element signatureElement; 
+    
+    public AsymmetricBindingBuilder(){
+    	dotDebug = tlog.isDebugEnabled();
+    }
 
     public void build(RampartMessageData rmd) throws RampartException {
         log.debug("AsymmetricBindingBuilder build invoked");
@@ -91,7 +98,11 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
     private void doEncryptBeforeSig(RampartMessageData rmd)
             throws RampartException {
-
+    	
+    	long t0 = 0, t1 = 0, t2 = 0;
+    	if(dotDebug){
+    		t0 = System.currentTimeMillis();
+    	}
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
         RampartConfig config = rpd.getRampartConfig();
@@ -165,7 +176,11 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
 
             RampartUtil.appendChildToSecHeader(rmd, refList);
-
+            
+            if(dotDebug){
+            	t1 = System.currentTimeMillis();
+            }
+            
             this.setInsertionLocation(encrTokenElement);
 
             HashMap sigSuppTokMap = null;
@@ -228,10 +243,19 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     signatureValues.add(iter.next());
                 }
             }
+            
+            if(dotDebug){
+            	t2 = System.currentTimeMillis();
+            	tlog.debug("Encryption took :" + (t1 - t0)
+            				+", Signature tool :" + (t2 - t1) );
+            }
 
             // Check for signature protection
             if (rpd.isSignatureProtection() && this.mainSigId != null) {
-
+            	long t3 = 0, t4 = 0;
+            	if(dotDebug){
+            		t3 = System.currentTimeMillis();
+            	}
                 Vector secondEncrParts = new Vector();
 
                 // Now encrypt the signature using the above token
@@ -266,13 +290,22 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                         throw new RampartException("errorInEncryption", e);
                     }
                 }
+                if(dotDebug){
+            		t4 = System.currentTimeMillis();
+            		tlog.debug("Signature protection took :" + (t4 - t3));
+            	}
             }
         }
+        
+        
 
     }
 
     private void doSignBeforeEncrypt(RampartMessageData rmd)
             throws RampartException {
+    	
+    	long t0 = 0, t1 = 0, t2 = 0;
+    	        
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
 
@@ -288,6 +321,10 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         }else{
         	this.setInsertionLocation(null);
         }
+        
+        if(dotDebug){
+    		t0 = System.currentTimeMillis();
+    	}
         
         if (rmd.isInitiator()) {
             // Now add the supporting tokens
@@ -335,7 +372,9 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
-        
+        if(dotDebug){
+    		t1 = System.currentTimeMillis();
+    	}
              
         Vector encrParts = RampartUtil.getEncryptedParts(rmd);
         
@@ -441,13 +480,25 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
+        if(dotDebug){
+    		t2 = System.currentTimeMillis();
+    		tlog.debug("Signature took :" + (t1 - t0)
+    				+", Encryption took :" + (t2 - t1) );
+    	}
+        
     }
 
     private void doSignature(RampartMessageData rmd) throws RampartException {
 
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
-
+        
+        long t0 = 0, t1 = 0;
+        if(dotDebug){
+    		t0 = System.currentTimeMillis();
+    		tlog.debug("Signature took :" + (t1 - t0));
+    	}
+        
         sigToken = rpd.getInitiatorToken();
 
         if (sigToken.isDerivedKeys()) {
@@ -531,6 +582,11 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
             signatureValues.add(sig.getSignatureValue());
         }
+        
+        if(dotDebug){
+    		t1 = System.currentTimeMillis();
+    		tlog.debug("Signature took :" + (t1 - t0));
+    	}
 
     }
 
@@ -567,6 +623,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         } else {
             createEncryptedKey(rmd, token);
         }
+       
     }
 
     /**

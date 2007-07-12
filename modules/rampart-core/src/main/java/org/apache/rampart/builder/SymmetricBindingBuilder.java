@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
+import org.apache.rampart.RampartConstants;
+import org.apache.rampart.RampartEngine;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -50,7 +52,13 @@ import java.util.Vector;
 public class SymmetricBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(SymmetricBindingBuilder.class);
+    private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
+    private boolean dotDebug = false;
     
+    
+    public SymmetricBindingBuilder(){
+    	dotDebug = tlog.isDebugEnabled();
+    }
     
     public void build(RampartMessageData rmd) throws RampartException {
         
@@ -80,9 +88,15 @@ public class SymmetricBindingBuilder extends BindingBuilder {
     
     private void doEncryptBeforeSig(RampartMessageData rmd) throws RampartException {
         
+    	long t0 = 0, t1 = 0, t2 = 0;
+    	       	
         RampartPolicyData rpd = rmd.getPolicyData();
         
         Vector signatureValues = new Vector();
+        
+    	if(dotDebug){
+    		t0 = System.currentTimeMillis();
+    	}
         
         Token encryptionToken = rpd.getEncryptionToken();
         Vector encrParts = RampartUtil.getEncryptedParts(rmd);
@@ -189,6 +203,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             RampartUtil.appendChildToSecHeader(rmd, refList);
             
+            if(dotDebug){
+            	t1 = System.currentTimeMillis();
+            }
+            
             this.setInsertionLocation(encrTokenElement);
 
             HashMap sigSuppTokMap = null;
@@ -247,9 +265,19 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 }
             }
             
+            if(dotDebug){
+            	t2 = System.currentTimeMillis();
+            	tlog.debug("Encryption took :" + (t1 - t0)
+            				+", Signature tool :" + (t2 - t1) );
+            }
+            
             //Check for signature protection
             if(rpd.isSignatureProtection() && this.mainSigId != null) {
-                
+            	long t3 = 0, t4 = 0;
+            	if(dotDebug){
+            		t3 = System.currentTimeMillis();
+            	}
+            	log.debug("Signature protection");
                 Vector secondEncrParts = new Vector();
                 
                 //Now encrypt the signature using the above token
@@ -281,6 +309,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                         throw new RampartException("errorInEncryption", e);
                     }    
                 }
+                if(dotDebug){
+            		t4 = System.currentTimeMillis();
+            		tlog.debug("Signature protection took :" + (t4 - t3));
+            	}
             }
            
         } else {
@@ -290,10 +322,15 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
 
     private void doSignBeforeEncrypt(RampartMessageData rmd) throws RampartException {
-
+    	
+    	long t0 = 0, t1 = 0, t2 = 0;
+    	    	  	
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
         
+        if(dotDebug){
+    		t0 = System.currentTimeMillis();
+    	}
         Token sigToken = rpd.getSignatureToken();
         
         String encrTokId = null;
@@ -393,7 +430,11 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 signatureValues.add(iter.next());
             }
         }
-
+        
+        if(dotDebug){
+    		t1 = System.currentTimeMillis();
+    	}
+        
         //Encryption
         Token encrToken = rpd.getEncryptionToken();
         Element encrTokElem = null;
@@ -416,7 +457,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             }
             
         }
-        
+    
         Vector encrParts = RampartUtil.getEncryptedParts(rmd);
         
         //Check for signature protection
@@ -488,12 +529,20 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 throw new RampartException("errorInEncryption", e);
             }    
         }
+        
+        if(dotDebug){
+    		t2 = System.currentTimeMillis();
+    		tlog.debug("Signature took :" + (t1 - t0)
+    				+", Encryption took :" + (t2 - t1) );
+    	}
+        
+
     }
 
     /**
      * @param rmd
      * @param sigToken
-     * @return
+     * @return 
      * @throws RampartException
      */
     private String setupEncryptedKey(RampartMessageData rmd, Token sigToken) 

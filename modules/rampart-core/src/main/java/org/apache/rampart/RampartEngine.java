@@ -16,11 +16,18 @@
 
 package org.apache.rampart;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
@@ -30,90 +37,125 @@ import org.apache.ws.security.WSSecurityEngine;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.WSSecurityUtil;
 
-import javax.xml.namespace.QName;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Vector;
-
 public class RampartEngine {
 
+	private static Log log = LogFactory.getLog(RampartEngine.class.getName());
+	private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
 
-    public Vector process(MessageContext msgCtx) throws WSSPolicyException,
-    RampartException, WSSecurityException, AxisFault {
-        
-        RampartMessageData rmd = new RampartMessageData(msgCtx, false);
-        
+	public Vector process(MessageContext msgCtx) throws WSSPolicyException,
+	RampartException, WSSecurityException, AxisFault {
 
-        //If there is no policy information or if the message is a fault
-        RampartPolicyData rpd = rmd.getPolicyData();
-        if(rpd == null || 
-                WSSecurityUtil.findElement(rmd.getDocument().getDocumentElement(), 
-                        "Fault", 
-                        rmd.getSoapConstants().getEnvelopeURI()) != null) {
-            SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
+		boolean doDebug = log.isDebugEnabled();
+		boolean dotDebug = tlog.isDebugEnabled();
+		
+		if(doDebug){
+			log.debug("Enter process(MessageContext msgCtx)");
+		}
 
-            //Convert back to llom since the inflow cannot use llom
-            msgCtx.setEnvelope(env);
-            Axis2Util.useDOOM(false);
-            return null;
-        }
-        
-        Vector results = null;
-        
-        WSSecurityEngine engine = new WSSecurityEngine();
-        
-        ValidatorData data = new ValidatorData(rmd);
-        
-        ArrayList headerBlocks = rmd.getMsgContext().getEnvelope()
-                .getHeader().getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
-        Iterator headerBlocksIterator = headerBlocks.iterator();
-        SOAPHeaderBlock secHeader = null;
-        while (headerBlocksIterator.hasNext()) {
-            SOAPHeaderBlock elem = (SOAPHeaderBlock) headerBlocksIterator.next();
-            if(elem.getLocalName().equals(WSConstants.WSSE_LN)) {
-                secHeader = elem;
-                break;
-            }
-        }
-        
-        String actorValue = secHeader.getAttributeValue(new QName(rmd
-                .getSoapConstants().getEnvelopeURI(), "actor"));
+		RampartMessageData rmd = new RampartMessageData(msgCtx, false);
 
-        if(rpd.isSymmetricBinding()) {
-            //Here we have to create the CB handler to get the tokens from the 
-            //token storage
-            
-            results = engine.processSecurityHeader(rmd.getDocument(), 
-                                actorValue, 
-                                new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd)),
-                                RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
-                                        msgCtx.getAxisService().getClassLoader()));
-        } else {
-            results = engine.processSecurityHeader(rmd.getDocument(),
-                      actorValue, 
-                      new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd)),
-                      RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
-                              msgCtx.getAxisService().getClassLoader()), 
-                      RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), 
-                              msgCtx.getAxisService().getClassLoader()));
-        }
-        
+		//If there is no policy information or if the message is a fault
+		RampartPolicyData rpd = rmd.getPolicyData();
+		if(rpd == null || 
+				WSSecurityUtil.findElement(rmd.getDocument().getDocumentElement(), 
+						"Fault", 
+						rmd.getSoapConstants().getEnvelopeURI()) != null) {
+			SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
 
-        SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
-
-        //Convert back to llom since the inflow cannot use DOOM
-        msgCtx.setEnvelope(env);
-        Axis2Util.useDOOM(false);
-
-        PolicyBasedResultsValidator validator = new PolicyBasedResultsValidator();
-        validator.validate(data, results);
-        
-        return results;
-    }
+			//Convert back to llom since the inflow cannot use llom
+			msgCtx.setEnvelope(env);
+			Axis2Util.useDOOM(false);
+			if(doDebug){
+				log.debug("Return process(MessageContext msgCtx)");
+			}
+			return null;
+		}
 
 
+		Vector results = null;
 
-    
+		WSSecurityEngine engine = new WSSecurityEngine();
+
+		ValidatorData data = new ValidatorData(rmd);
+
+		ArrayList headerBlocks = rmd.getMsgContext().getEnvelope()
+		.getHeader().getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
+		Iterator headerBlocksIterator = headerBlocks.iterator();
+		SOAPHeaderBlock secHeader = null;
+		while (headerBlocksIterator.hasNext()) {
+			SOAPHeaderBlock elem = (SOAPHeaderBlock) headerBlocksIterator.next();
+			if(elem.getLocalName().equals(WSConstants.WSSE_LN)) {
+				secHeader = elem;
+				break;
+			}
+		}
+
+		long t0=0, t1=0, t2=0, t3=0;
+		if(dotDebug){
+			t0 = System.currentTimeMillis();
+		}
+
+		String actorValue = secHeader.getAttributeValue(new QName(rmd
+				.getSoapConstants().getEnvelopeURI(), "actor"));
+
+		if(rpd.isSymmetricBinding()) {
+			//Here we have to create the CB handler to get the tokens from the 
+			//token storage
+			if(doDebug){
+				log.debug("Processing security header using SymetricBinding");
+			}
+
+			results = engine.processSecurityHeader(rmd.getDocument(), 
+					actorValue, 
+					new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd)),
+					RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
+							msgCtx.getAxisService().getClassLoader()));
+		} else {
+			if(doDebug){
+				log.debug("Processing security header in normal path");
+			}
+			results = engine.processSecurityHeader(rmd.getDocument(),
+					actorValue, 
+					new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd)),
+					RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
+							msgCtx.getAxisService().getClassLoader()), 
+							RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), 
+									msgCtx.getAxisService().getClassLoader()));
+		}
+
+		if(dotDebug){
+			t1 = System.currentTimeMillis();
+		}
+
+
+		SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
+
+		if(dotDebug){
+			t2 = System.currentTimeMillis();
+		}
+
+		//Convert back to llom since the inflow cannot use DOOM
+		msgCtx.setEnvelope(env);
+		Axis2Util.useDOOM(false);
+
+		PolicyBasedResultsValidator validator = new PolicyBasedResultsValidator();
+		validator.validate(data, results);
+
+		if(dotDebug){
+			t3 = System.currentTimeMillis();
+			tlog.debug("processHeader by WSSecurityEngine took : " + (t1 - t0) +
+					", DOOM Converstion took :" + (t2 - t1) +
+					", PolicyBasedResultsValidattor took " + (t3 - t2));
+		}
+
+		if(doDebug){
+			log.debug("Return process(MessageContext msgCtx)");
+		}
+		return results;
+	}
+
+
+
+
 
 }
