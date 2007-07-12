@@ -127,7 +127,7 @@ public class STSClient {
             OMElement response = client.sendReceive(rstQn,
                                                     createIssueRequest(requestType, appliesTo));
 
-            return processIssueResponse(version, response);
+            return processIssueResponse(version, response, issuerAddress);
         } catch (AxisFault e) {
             e.printStackTrace();
             log.error("errorInObtainingToken", e);
@@ -185,7 +185,8 @@ public class STSClient {
      * @param result
      * @return Token
      */
-    private Token processIssueResponse(int version, OMElement result) throws TrustException {
+    private Token processIssueResponse(int version, OMElement result, 
+            String issuerAddress) throws TrustException {
         OMElement rstr = result;
         if (version == RahasConstants.VERSION_05_12) {
             //The WS-SX result will be an RSTRC
@@ -229,6 +230,7 @@ public class STSClient {
                                                              LIFETIME));
 
         Token token = new Token(id, tokenElem, lifeTimeEle);
+        token.setIssuerAddress(issuerAddress);
         token.setAttachedReference(reqAttRef);
         token.setUnattachedReference(reqUnattRef);
 

@@ -117,6 +117,11 @@ public class Token {
      */
     private Date expires;
     
+    /**
+     * Issuer end point address
+     */
+    private String issuerAddress;
+    
     public Token(String id,
                  OMElement tokenElem,
                  Date created,
@@ -309,5 +314,13 @@ public class Token {
      */
     public void setExpires(Date expires) {
         this.expires = expires;
+    }
+
+    public String getIssuerAddress() {
+        return issuerAddress;
+    }
+
+    public void setIssuerAddress(String issuerAddress) {
+        this.issuerAddress = issuerAddress;
     }
 }
