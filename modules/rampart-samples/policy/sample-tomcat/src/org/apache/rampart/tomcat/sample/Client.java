@@ -56,11 +56,10 @@ public class Client {
         client.engageModule("addressing");
         client.engageModule("rampart");	
         OMElement response = client.sendReceive(getPayload("Hello world"));
-        
         System.out.println(response);
         
     }
-    
+
     private static Policy loadPolicy(String xmlPath) throws Exception {
         StAXOMBuilder builder = new StAXOMBuilder(xmlPath);
         OMElement elem = builder.getDocumentElement();

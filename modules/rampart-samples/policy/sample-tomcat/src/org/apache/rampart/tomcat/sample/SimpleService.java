@@ -16,8 +16,6 @@
  */
 package org.apache.rampart.tomcat.sample;
 
-import java.io.File;
-import java.io.FileOutputStream;
 
 public class SimpleService {
     
