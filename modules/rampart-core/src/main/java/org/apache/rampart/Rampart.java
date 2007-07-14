@@ -46,11 +46,10 @@ public class Rampart implements Module, ModulePolicyExtension  {
     }
 
     public void applyPolicy(Policy policy, AxisDescription axisDescription) throws AxisFault {
-        // TODO Ruchith
+        //Do not do anything
     }
 
     public boolean canSupportAssertion(Assertion assertion) {
-        // TODO Ruchith
         return true;
     }
 }

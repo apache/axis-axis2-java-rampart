@@ -193,8 +193,4 @@ public class RampartEngine {
 		return results;
 	}
 
-
-
-
-
 }

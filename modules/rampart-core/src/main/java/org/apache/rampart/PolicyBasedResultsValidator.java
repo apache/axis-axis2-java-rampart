@@ -402,7 +402,7 @@ public class PolicyBasedResultsValidator {
         if (cre != null) {
             long now = Calendar.getInstance().getTimeInMillis();
 
-            // ajust 'now' with allowed timeskew 
+            // adjust 'now' with allowed timeskew 
             long maxSkew = RampartUtil.getTimestampMaxSkew( rmd );
             if( maxSkew > 0 ) {
                 now += (maxSkew * 1000);
