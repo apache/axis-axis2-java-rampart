@@ -462,40 +462,49 @@ public class RampartUtil {
             String issuerEpr, String action, Policy issuerPolicy) throws RampartException {
 
         try {
-            Axis2Util.useDOOM(false);
-            
-            STSClient client = new STSClient(rmd.getMsgContext()
-                    .getConfigurationContext());
-            // Set request action
-            client.setAction(action);
-            
-            client.setRstTemplate(rstTemplate);
+            //First check whether the user has provided the token
+            MessageContext msgContext = rmd.getMsgContext();
+            String customTokeId = (String) msgContext
+                    .getProperty(RampartMessageData.KEY_CUSTOM_ISSUED_TOKEN);
+            if(customTokeId != null) {
+                return customTokeId;
+            } else {
     
-            // Set crypto information
-            Crypto crypto = RampartUtil.getSignatureCrypto(rmd.getPolicyData().getRampartConfig(), 
-                    rmd.getMsgContext().getAxisService().getClassLoader());
-            CallbackHandler cbh = RampartUtil.getPasswordCB(rmd);
-            client.setCryptoInfo(crypto, cbh);
-    
-            // Get service policy
-            Policy servicePolicy = rmd.getServicePolicy();
-    
-            // Get service epr
-            String servceEprAddress = rmd.getMsgContext()
-                    .getOptions().getTo().getAddress();
-    
-            //Make the request
-            org.apache.rahas.Token rst = 
-                client.requestSecurityToken(servicePolicy, 
-                                            issuerEpr,
-                                            issuerPolicy, 
-                                            servceEprAddress);
-            
-            //Add the token to token storage
-            rst.setState(Token.ISSUED);
-            rmd.getTokenStorage().add(rst);
-            Axis2Util.useDOOM(true);
-            return rst.getId();
+                Axis2Util.useDOOM(false);
+                
+                STSClient client = new STSClient(rmd.getMsgContext()
+                        .getConfigurationContext());
+                // Set request action
+                client.setAction(action);
+                
+                client.setRstTemplate(rstTemplate);
+        
+                // Set crypto information
+                Crypto crypto = RampartUtil.getSignatureCrypto(rmd.getPolicyData().getRampartConfig(), 
+                        rmd.getMsgContext().getAxisService().getClassLoader());
+                CallbackHandler cbh = RampartUtil.getPasswordCB(rmd);
+                client.setCryptoInfo(crypto, cbh);
+        
+                // Get service policy
+                Policy servicePolicy = rmd.getServicePolicy();
+        
+                // Get service epr
+                String servceEprAddress = rmd.getMsgContext()
+                        .getOptions().getTo().getAddress();
+        
+                //Make the request
+                org.apache.rahas.Token rst = 
+                    client.requestSecurityToken(servicePolicy, 
+                                                issuerEpr,
+                                                issuerPolicy, 
+                                                servceEprAddress);
+                
+                //Add the token to token storage
+                rst.setState(Token.ISSUED);
+                rmd.getTokenStorage().add(rst);
+                Axis2Util.useDOOM(true);
+                return rst.getId();
+            }
         } catch (Exception e) {
             throw new RampartException("errorInObtainingToken", e);
         }

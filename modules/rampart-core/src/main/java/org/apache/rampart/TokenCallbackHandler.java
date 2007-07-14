@@ -19,6 +19,7 @@ package org.apache.rampart;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
 import org.apache.ws.security.WSPasswordCallback;
+import org.w3c.dom.Element;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -44,7 +45,8 @@ public class TokenCallbackHandler implements CallbackHandler {
 
             if (callbacks[i] instanceof WSPasswordCallback) {
                 WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
-                if(pc.getUsage() == WSPasswordCallback.SECURITY_CONTEXT_TOKEN &&
+                if((pc.getUsage() == WSPasswordCallback.SECURITY_CONTEXT_TOKEN || 
+                        pc.getUsage() == WSPasswordCallback.CUSTOM_TOKEN) &&
                         this.store != null) {
                     String id = pc.getIdentifer();
                     Token tok;
@@ -54,6 +56,7 @@ public class TokenCallbackHandler implements CallbackHandler {
                         if(tok != null) {
                             //Get the secret and set it in the callback object
                             pc.setKey(tok.getSecret());
+                            pc.setCustomToken((Element)tok.getToken());
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

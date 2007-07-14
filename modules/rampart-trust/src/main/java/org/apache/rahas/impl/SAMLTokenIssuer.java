@@ -375,19 +375,21 @@ public class SAMLTokenIssuer implements TokenIssuer {
      */
     private X509Certificate getServiceCert(SAMLTokenIssuerConfig config,
             Crypto crypto, String serviceAddress) throws WSSecurityException {
-
-        if (serviceAddress != null && !"".equals(serviceAddress)) {
-            String alias = (String) config.trustedServices.get(serviceAddress);
-            if (alias != null) {
-                return crypto.getCertificates(alias)[0];
-            } else {
-                alias = (String) config.trustedServices.get("*");
-                return crypto.getCertificates(alias)[0];
-            }
-        } else {
-            String alias = (String) config.trustedServices.get("*");
-            return crypto.getCertificates(alias)[0];
-        }
+        
+        return crypto.getCertificates("bob")[0];
+//
+//        if (serviceAddress != null && !"".equals(serviceAddress)) {
+//            String alias = (String) config.trustedServices.get(serviceAddress);
+//            if (alias != null) {
+//                return crypto.getCertificates(alias)[0];
+//            } else {
+//                alias = (String) config.trustedServices.get("*");
+//                return crypto.getCertificates(alias)[0];
+//            }
+//        } else {
+//            String alias = (String) config.trustedServices.get("*");
+//            return crypto.getCertificates(alias)[0];
+//        }
 
     }
 

@@ -140,7 +140,7 @@ public class STSClient {
      *
      * @param issuerAddress
      * @param tokenId
-     * @return true is the Token was successfully cancelled. False otherwise.
+     * @return true is the Token was successfully canceled. False otherwise.
      * @throws TrustException
      */
     public boolean cancelToken(String issuerAddress,
@@ -364,7 +364,8 @@ public class STSClient {
             return null;
         }
         
-        if (child.getQName().equals(new QName(WSConstants.SIG_NS, "KeyInfo"))) {
+        if (child.getQName().equals(new QName(WSConstants.SIG_NS, "KeyInfo")) ||
+                child.getQName().equals(new QName(WSConstants.WSSE_NS, "KeyIdentifier"))) {
             return child.getText();
         } else if(child.getQName().equals(Reference.TOKEN)) {
             return child.getAttributeValue(new QName("URI"));

@@ -49,6 +49,7 @@ import org.apache.ws.security.message.WSSecHeader;
 import org.apache.ws.security.message.token.SecurityContextToken;
 import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.opensaml.SAMLAssertion;
 import org.w3c.dom.Document;
 
 import java.util.List;
@@ -429,7 +430,33 @@ public class RampartMessageData {
      * @return Returns the issuedSignatureTokenId.
      */
     public String getIssuedSignatureTokenId() {
-        return issuedSignatureTokenId;
+        if(this.isInitiator) {
+            return issuedSignatureTokenId;
+        } else {
+            //Pick the first SAML token
+            //TODO : This is a hack , MUST FIX
+            //get the sec context id from the req msg ctx
+            Vector results = (Vector)this.msgContext.getProperty(WSHandlerConstants.RECV_RESULTS);
+            for (int i = 0; i < results.size(); i++) {
+                WSHandlerResult rResult = (WSHandlerResult) results.get(i);
+                Vector wsSecEngineResults = rResult.getResults();
+
+                for (int j = 0; j < wsSecEngineResults.size(); j++) {
+                    WSSecurityEngineResult wser = (WSSecurityEngineResult) wsSecEngineResults
+                            .get(j);
+                    final Integer actInt = 
+                        (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
+                    if(WSConstants.ST_UNSIGNED == actInt.intValue()) {
+                        final SAMLAssertion assertion = 
+                            ((SAMLAssertion) wser
+                                .get(WSSecurityEngineResult.TAG_SAML_ASSERTION));
+                        return assertion.getId();
+                    }
+
+                }
+            }
+            return null;
+        }
     }
 
     /**

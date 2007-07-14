@@ -542,8 +542,38 @@ public abstract class BindingBuilder {
                         "errorInDerivedKeyTokenSignature", e);
             }
         } else {
-            //TODO :  Example SAMLTOken Signature
-            throw new UnsupportedOperationException("TODO");
+            try {
+                WSSecSignature sig = new WSSecSignature();
+                sig.setWsConfig(rmd.getConfig());
+                sig.setCustomTokenId(tok.getId());
+                sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
+                        WSConstants.SAML_ASSERTION_ID);
+                sig.setSecretKey(tok.getSecret());
+                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
+                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
+                sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
+                        .getRampartConfig(), rmd.getCustomClassLoader()),
+                        rmd.getSecHeader());
+
+                sig.setParts(sigParts);
+                sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+
+                //Do signature
+                sig.computeSignature();
+
+
+                this.setInsertionLocation(RampartUtil.insertSiblingAfter(
+                        rmd,
+                        this.getInsertionLocation(),
+                        sig.getSignatureElement()));
+
+                return sig.getSignatureValue();
+
+            } catch (WSSecurityException e) {
+                throw new RampartException("errorInSignatureWithACustomToken", e);
+            }
+
         }
     }
     

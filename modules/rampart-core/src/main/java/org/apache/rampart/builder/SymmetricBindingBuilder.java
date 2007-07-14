@@ -512,19 +512,26 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 WSSecEncrypt encr = new WSSecEncrypt();
                 
                 encr.setWsConfig(rmd.getConfig());
-                
+                encr.setEncKeyId(encrTokId);
                 encr.setEphemeralKey(encrTok.getSecret());
                 RampartUtil.setEncryptionUser(rmd, encr);
                 encr.setDocument(doc);
+                encr.setEncryptSymmKey(false);
                 encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
                         .getRampartConfig(), rmd.getCustomClassLoader()));
                 
                 //Encrypt, get hold of the ref list and add it
                 refList = encr.encryptForExternalRef(null, encrParts);
 
-                RampartUtil.insertSiblingAfter(rmd,
+                if(encrTokElem != null) {
+                    RampartUtil.insertSiblingAfter(rmd,
                                                 encrTokElem,
                                                 refList);
+                } else {
+                    RampartUtil.insertSiblingAfter(rmd,
+                            this.timestampElement,
+                            refList);
+                }
             } catch (WSSecurityException e) {
                 throw new RampartException("errorInEncryption", e);
             }    
@@ -594,7 +601,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         MessageContext msgContext = rmd.getMsgContext();
         if(rpd.isSymmetricBinding() && !msgContext.isServerSide()) {
-            log.debug("Procesing symmentric binding: " +
+            log.debug("Processing symmetric binding: " +
                     "Setting up encryption token and signature token");
             //Setting up encryption token and signature token
             
@@ -612,7 +619,6 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     String id = RampartUtil.getIssuedToken(rmd, 
                             issuedToken);
                     rmd.setIssuedSignatureTokenId(id);
-                    
                     
                 }
                 

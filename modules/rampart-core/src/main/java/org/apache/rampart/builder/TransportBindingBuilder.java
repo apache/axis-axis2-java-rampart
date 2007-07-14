@@ -98,9 +98,6 @@ public class TransportBindingBuilder extends BindingBuilder {
                         //Add the UT
                         utBuilder.appendToHeader(rmd.getSecHeader());
                         
-                    } else if(token instanceof IssuedToken) {
-                        //TODO Handle issued token
-                        
                     } else {
                         throw new RampartException("unsupportedSignedSupportingToken", 
                                 new String[]{"{" +token.getName().getNamespaceURI() 
@@ -299,8 +296,18 @@ public class TransportBindingBuilder extends BindingBuilder {
           
             tokenIncluded = true;
         }
-   
-        //check for dirived keys
+
+        Vector sigParts = new  Vector();
+        
+        if(this.timestampElement != null){
+            sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
+        }
+        
+        if(rpd.isTokenProtection() && tokenIncluded) {
+            sigParts.add(new WSEncryptionPart(id));
+        }
+        
+        //check for derived keys
         if(token.isDerivedKeys()) {
           //Create a derived key and add
           try {
@@ -327,16 +334,6 @@ public class TransportBindingBuilder extends BindingBuilder {
               
               dkSign.appendDKElementToHeader(rmd.getSecHeader());
               
-              Vector sigParts = new  Vector();
-              
-              if(this.timestampElement != null){
-            	  sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
-              }
-              
-              if(rpd.isTokenProtection() && tokenIncluded) {
-                  sigParts.add(new WSEncryptionPart(id));
-              }
-              
               dkSign.setParts(sigParts);
               
               dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
@@ -357,8 +354,44 @@ public class TransportBindingBuilder extends BindingBuilder {
           }
           
         } else {
-          //TODO: Do signature withtout derived keys with the Issuedtoken ??
-            return null;
+            try {
+                WSSecSignature sig = new WSSecSignature();
+                sig.setWsConfig(rmd.getConfig());
+                sig.setCustomTokenId(tok.getId().substring(1));
+                sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
+                        WSConstants.SAML_ASSERTION_ID);
+                sig.setSecretKey(tok.getSecret());
+                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
+                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
+                sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
+                        .getRampartConfig(), rmd.getCustomClassLoader()),
+                        rmd.getSecHeader());
+
+                sig.setParts(sigParts);
+                sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+
+                //Do signature
+                sig.computeSignature();
+
+                //Add elements to header
+                Element tokElem = (Element)doc.importNode((Element)tok.getToken(), true);
+
+                this.setInsertionLocation(RampartUtil
+                        .insertSiblingAfter(rmd,
+                                this.getInsertionLocation(),
+                                tokElem));
+
+                this.setInsertionLocation(RampartUtil.insertSiblingAfter(
+                        rmd,
+                        this.getInsertionLocation(),
+                        sig.getSignatureElement()));
+
+                return sig.getSignatureValue();
+
+            } catch (WSSecurityException e) {
+                throw new RampartException("errorInSignatureWithACustomToken", e);
+            }
         }
     }
 }
