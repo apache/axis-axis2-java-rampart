@@ -41,7 +41,7 @@ import java.util.Properties;
  * Also this holds the <code>OMElement</code>s representing the token in its 
  * present state and the previous state.
  * 
- * These tokens are stired using the storage mechanism provided via the 
+ * These tokens are stored using the storage mechanism provided via the 
  * <code>TokenStorage</code> interface.
  * @see org.apache.rahas.TokenStorage
  */
@@ -168,14 +168,14 @@ public class Token {
     }
 
     /**
-     * @return Returns the chnaged.
+     * @return Returns the changed.
      */
     public boolean isChanged() {
         return changed;
     }
 
     /**
-     * @param chnaged The chnaged to set.
+     * @param chnaged The changed to set.
      */
     public void setChanged(boolean chnaged) {
         this.changed = chnaged;

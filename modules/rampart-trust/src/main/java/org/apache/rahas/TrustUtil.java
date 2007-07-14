@@ -47,7 +47,7 @@ public class TrustUtil {
     private static final QName NAME = new QName("name");
 
     /**
-     * Create a wsse:Reference element with the given uri and the value type
+     * Create a wsse:Reference element with the given URI and the value type
      *
      * @param doc
      * @param refUri

@@ -141,7 +141,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
              * 
              * If the KeyType is Bearer then issue a Bearer assertion
              * 
-             * If the key type is missing we will issue a HoK asserstion
+             * If the key type is missing we will issue a HoK assertion
              */
 
             String keyType = data.getKeyType();
@@ -276,12 +276,12 @@ public class SAMLTokenIssuer implements TokenIssuer {
             X509Certificate serviceCert = null;
             try {
 
-                // Get ApliesTo to figureout which service to issue the token
+                // Get ApliesTo to figure out which service to issue the token
                 // for
                 serviceCert = getServiceCert(config, crypto, data
                         .getAppliesToAddress());
 
-                // Ceate the encrypted key
+                // Create the encrypted key
                 WSSecEncryptedKey encrKeyBuilder = new WSSecEncryptedKey();
 
                 // Use thumbprint id
@@ -376,20 +376,18 @@ public class SAMLTokenIssuer implements TokenIssuer {
     private X509Certificate getServiceCert(SAMLTokenIssuerConfig config,
             Crypto crypto, String serviceAddress) throws WSSecurityException {
         
-        return crypto.getCertificates("bob")[0];
-//
-//        if (serviceAddress != null && !"".equals(serviceAddress)) {
-//            String alias = (String) config.trustedServices.get(serviceAddress);
-//            if (alias != null) {
-//                return crypto.getCertificates(alias)[0];
-//            } else {
-//                alias = (String) config.trustedServices.get("*");
-//                return crypto.getCertificates(alias)[0];
-//            }
-//        } else {
-//            String alias = (String) config.trustedServices.get("*");
-//            return crypto.getCertificates(alias)[0];
-//        }
+        if (serviceAddress != null && !"".equals(serviceAddress)) {
+            String alias = (String) config.trustedServices.get(serviceAddress);
+            if (alias != null) {
+                return crypto.getCertificates(alias)[0];
+            } else {
+                alias = (String) config.trustedServices.get("*");
+                return crypto.getCertificates(alias)[0];
+            }
+        } else {
+            String alias = (String) config.trustedServices.get("*");
+            return crypto.getCertificates(alias)[0];
+        }
 
     }
 
@@ -516,11 +514,8 @@ public class SAMLTokenIssuer implements TokenIssuer {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.rahas.TokenIssuer#getResponseAction(org.apache.axiom.om.OMElement,
-     *      org.apache.axis2.context.MessageContext)
+    /**
+     * {@inheritDoc}
      */
     public String getResponseAction(RahasData data) throws TrustException {
         return TrustUtil.getActionValue(data.getVersion(),
@@ -544,29 +539,23 @@ public class SAMLTokenIssuer implements TokenIssuer {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.rahas.TokenIssuer#setConfigurationFile(java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public void setConfigurationFile(String configFile) {
         // TODO TODO SAMLTokenIssuer setConfigurationFile
 
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.rahas.TokenIssuer#setConfigurationElement(org.apache.axiom.om.OMElement)
+    
+    /**
+     * {@inheritDoc}
      */
     public void setConfigurationElement(OMElement configElement) {
         // TODO TODO SAMLTokenIssuer setConfigurationElement
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.rahas.TokenIssuer#setConfigurationParamName(java.lang.String)
+    /**
+     * {@inheritDoc}
      */
     public void setConfigurationParamName(String configParamName) {
         this.configParamName = configParamName;

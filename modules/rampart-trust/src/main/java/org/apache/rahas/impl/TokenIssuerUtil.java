@@ -52,7 +52,7 @@ public class TokenIssuerUtil {
         try {
             if (reqEntrPresent &&
                 keyComputation != SAMLTokenIssuerConfig.KeyComputation.KEY_COMP_USE_OWN_KEY) {
-                //If there is requestor entropy and if the issuer is not
+                //If there is requester entropy and if the issuer is not
                 //configured to use its own key
 
                 if (keyComputation ==
@@ -89,7 +89,7 @@ public class TokenIssuerUtil {
 
         if (config.keyComputation == AbstractIssuerConfig.KeyComputation.KEY_COMP_PROVIDE_ENT
             && data.getRequestEntropy() != null) {
-            //If we there's requestor entropy and its configured to provide
+            //If we there's requester entropy and its configured to provide
             //entropy then we have to set the entropy value and
             //set the RPT to include a ComputedKey element
 

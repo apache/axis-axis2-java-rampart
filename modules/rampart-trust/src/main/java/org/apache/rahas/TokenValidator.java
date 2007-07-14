@@ -47,7 +47,7 @@ public interface TokenValidator {
      * token-dispatcher-configuration
      * 
      * @param configElement
-     *            <code>OMElement</code> representing the configuation
+     *            <code>OMElement</code> representing the configuration
      */
     public void setConfigurationElement(String configElement);
 

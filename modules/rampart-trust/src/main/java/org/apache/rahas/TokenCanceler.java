@@ -46,7 +46,7 @@ public interface TokenCanceler {
      * This is the &lt;configuration&gt; element of the
      * token-dispatcher-configuration
      *
-     * @param configElement <code>OMElement</code> representing the configuation
+     * @param configElement <code>OMElement</code> representing the configuration
      */
     void setConfigurationElement(OMElement configElement);
 

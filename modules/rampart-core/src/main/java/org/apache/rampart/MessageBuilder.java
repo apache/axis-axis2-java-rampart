@@ -131,7 +131,7 @@ public class MessageBuilder {
         }
         
        /*
-        * Checking wether MTOMSerializable is there. If so set optimizeElement.
+        * Checking whether MTOMSerializable is there. If so set optimizeElement.
         * */
         if(rpd.isMTOMSerialize()){
         	String optimizeElement = rpd.getOptimizeParts();

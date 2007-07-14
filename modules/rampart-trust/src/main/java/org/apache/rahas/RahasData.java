@@ -126,7 +126,7 @@ public class RahasData {
 
     /**
      * Processes the authenticated user information from the WSS4J security
-     * resutls.
+     * results.
      *
      * @throws TrustException
      */

@@ -120,7 +120,7 @@ public class TokenRequestDispatcherConfig {
                 if (conf.issuers == null) {
                     conf.issuers = new Hashtable();
                 }
-                //If the token type is not aleady declared then add it to the
+                //If the token type is not already declared then add it to the
                 //table with the issuer classname
                 if (!conf.issuers.keySet().contains(value)) {
                     conf.issuers.put(value, issuerClass);

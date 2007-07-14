@@ -50,7 +50,7 @@ public class TokenRequestDispatcher {
                                MessageContext outMsgCtx) throws TrustException {
         
     	if(mlog.isDebugEnabled()){
-    		mlog.debug("*********************** TokenRequestDispatcher recieved \n"+inMsgCtx.getEnvelope());
+    		mlog.debug("*********************** TokenRequestDispatcher received \n"+inMsgCtx.getEnvelope());
     	}
         RahasData data = new RahasData(inMsgCtx);
         
@@ -68,7 +68,7 @@ public class TokenRequestDispatcher {
             
             SOAPEnvelope response = issuer.issue(data);
             
-            //set the response wsa/soap action in teh out message context
+            //set the response wsa/soap action in the out message context
             outMsgCtx.getOptions().setAction(issuer.getResponseAction(data));
             
             if(mlog.isDebugEnabled()){

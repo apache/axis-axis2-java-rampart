@@ -24,7 +24,6 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.Token;
-import org.apache.rahas.TrustException;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
@@ -34,12 +33,10 @@ import org.apache.ws.security.WSSecurityEngine;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.handler.WSHandlerResult;
 import org.apache.ws.security.saml.SAMLKeyInfo;
 import org.apache.ws.security.saml.SAMLUtil;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.opensaml.SAMLAssertion;
-import org.opensaml.SAMLException;
 
 import javax.xml.namespace.QName;
 
@@ -186,7 +183,7 @@ public class RampartEngine {
 		if(dotDebug){
 			t3 = System.currentTimeMillis();
 			tlog.debug("processHeader by WSSecurityEngine took : " + (t1 - t0) +
-					", DOOM Converstion took :" + (t2 - t1) +
+					", DOOM conversion took :" + (t2 - t1) +
 					", PolicyBasedResultsValidattor took " + (t3 - t2));
 		}
 
