@@ -640,7 +640,7 @@ public abstract class BindingBuilder {
             for (int i = 0; i < signatureActions.size(); i++) {
                 WSSecurityEngineResult wsr = (WSSecurityEngineResult) signatureActions
                         .get(i);
-                byte[] sigVal = wsr.getSignatureValue();
+                byte[] sigVal = (byte[]) wsr.get(WSSecurityEngineResult.TAG_SIGNATURE_VALUE);
                 wsc.setSignatureValue(sigVal);
                 wsc.prepare(doc);
                 RampartUtil.appendChildToSecHeader(rmd, wsc.getSignatureConfirmationElement());

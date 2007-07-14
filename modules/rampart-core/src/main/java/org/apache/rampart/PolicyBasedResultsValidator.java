@@ -80,7 +80,9 @@ public class PolicyBasedResultsValidator {
         
         //Add the timestamp result
         if(rpd.isIncludeTimestamp() && !rpd.isTransportBinding()) {
-            signatureParts.add(new WSEncryptionPart(tsResult.getTimestamp().getID()));
+            Timestamp timestamp = (Timestamp) tsResult
+                    .get(WSSecurityEngineResult.TAG_TIMESTAMP);
+            signatureParts.add(new WSEncryptionPart(timestamp.getID()));
         }
         
         validateEncrSig(encryptedParts, signatureParts, results);
@@ -110,7 +112,8 @@ public class PolicyBasedResultsValidator {
                 results, WSConstants.SIGN);
 
         if (actionResult != null) {
-            X509Certificate returnCert = actionResult.getCertificate();
+            X509Certificate returnCert = (X509Certificate) actionResult
+                    .get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
 
             if (returnCert != null) {
                 if (!verifyTrust(returnCert, rmd)) {
@@ -133,7 +136,8 @@ public class PolicyBasedResultsValidator {
         actionResult = WSSecurityUtil.fetchActionResult(results, WSConstants.TS);
 
         if (actionResult != null) {
-            Timestamp timestamp = actionResult.getTimestamp();
+            Timestamp timestamp = (Timestamp) actionResult
+                    .get(WSSecurityEngineResult.TAG_TIMESTAMP);
 
             if (timestamp != null) {
                 if (!verifyTimestamp(timestamp, rmd)) {
@@ -178,7 +182,7 @@ public class PolicyBasedResultsValidator {
             boolean encrDataFound = false;
             for (Iterator iter = list.iterator(); iter.hasNext();) {
                 WSSecurityEngineResult result = (WSSecurityEngineResult) iter.next();
-                if(result.getDataRefUris() != null) {
+                if(result.get(WSSecurityEngineResult.TAG_DATA_REF_URIS) != null) {
                     encrDataFound = true;
                 }
             }
@@ -298,7 +302,9 @@ public class PolicyBasedResultsValidator {
     private ArrayList getSigEncrActions(Vector results) {
         ArrayList sigEncrActions = new ArrayList();
         for (Iterator iter = results.iterator(); iter.hasNext();) {
-            int action = ((WSSecurityEngineResult) iter.next()).getAction();
+            Integer actInt = (Integer) ((WSSecurityEngineResult) iter.next())
+                    .get(WSSecurityEngineResult.TAG_ACTION);
+            int action = actInt.intValue();
             if(WSConstants.SIGN == action || WSConstants.ENCR == action) {
                 sigEncrActions.add(new Integer(action));
             }
@@ -349,7 +355,7 @@ public class PolicyBasedResultsValidator {
         // Find elements that are signed
         Vector actuallySigned = new Vector();
         if( actionResult != null ) { 
-            Set signedIDs = actionResult.getSignedElements();
+            Set signedIDs = (Set)actionResult.get(WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS);
             for (Iterator i = signedIDs.iterator(); i.hasNext();) {
                 String e = (String) i.next();
                 
@@ -368,7 +374,7 @@ public class PolicyBasedResultsValidator {
                 continue;
             }
             
-            // header elemement present - verify that it is part of signature
+            // header element present - verify that it is part of signature
             if( actuallySigned.contains( headerElement) ) {
                 continue;
             }
@@ -573,7 +579,8 @@ public class PolicyBasedResultsValidator {
         
         for (Iterator iter = encrResults.iterator(); iter.hasNext();) {
             WSSecurityEngineResult engineResult = (WSSecurityEngineResult) iter.next();
-            ArrayList dataRefUris = engineResult.getDataRefUris();
+            ArrayList dataRefUris = (ArrayList) engineResult
+                    .get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
             
             //take only the ref list processing results
             if(dataRefUris != null) {
@@ -597,7 +604,8 @@ public class PolicyBasedResultsValidator {
         for (int i = 0; i < results.size(); i++) {
             // Check the result of every action whether it matches the given
             // action
-            if (((WSSecurityEngineResult) results.get(i)).getAction() == action) {
+            Integer actInt = (Integer)((WSSecurityEngineResult) results.get(i)).get(WSSecurityEngineResult.TAG_ACTION); 
+            if (actInt.intValue() == action) {
                 list.add((WSSecurityEngineResult) results.get(i));
             }
         }

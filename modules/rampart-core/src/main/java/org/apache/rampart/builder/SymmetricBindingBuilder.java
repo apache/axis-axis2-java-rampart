@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.rampart.RampartConstants;
-import org.apache.rampart.RampartEngine;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;

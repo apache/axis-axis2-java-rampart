@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartEngine;
 import org.apache.rampart.RampartException;
-import org.apache.rampart.builder.TransportBindingBuilder;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;

@@ -16,34 +16,6 @@
 
 package org.apache.rampart.util;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
-
-import javax.crypto.KeyGenerator;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.xml.namespace.QName;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.crypto.KeyGenerator;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
@@ -89,6 +61,22 @@ import org.jaxen.JaxenException;
 import org.jaxen.XPath;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import javax.crypto.KeyGenerator;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.xml.namespace.QName;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Vector;
 
 public class RampartUtil {
 
@@ -604,10 +592,17 @@ public class RampartUtil {
     private static Set findAllPrefixNamespaces(OMElement currentElement)
     {
     	Set results = new HashSet();
-    	Iterator iter = null;
     	
+    	//Find declared namespaces
     	findPrefixNamespaces(currentElement,results);
     	
+    	//Get all default namespaces
+    	List defaultNamespaces = getDefaultPrefixNamespaces(currentElement.getOMFactory());
+    	for (Iterator iterator = defaultNamespaces.iterator(); iterator
+                .hasNext();) {
+            OMNamespace ns = (OMNamespace) iterator.next();
+            results.add(ns);
+        }
     	return results;
     }
     
@@ -630,10 +625,10 @@ public class RampartUtil {
 	    	}
     }
     
-    private static List findDefaultPrefixNamespaces(OMElement e)
+    private static List getDefaultPrefixNamespaces(OMFactory factory)
     {
     	List namespaces = new ArrayList();
-    	OMFactory factory = e.getOMFactory();
+
     	// put default namespaces here (sp, soapenv, wsu, etc...)
     	namespaces.add(factory.createOMNamespace(WSConstants.ENC_PREFIX, WSConstants.ENC_NS));
     	namespaces.add(factory.createOMNamespace(WSConstants.SIG_PREFIX, WSConstants.SIG_NS));
@@ -841,8 +836,9 @@ public class RampartUtil {
             for (int j = 0; j < wsSecEngineResults.size(); j++) {
                 WSSecurityEngineResult wser =
                         (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                if (wser.getAction() == WSConstants.SIGN) {
-                    return wser.getCertificate();
+                Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
+                if (actInt.intValue() == WSConstants.SIGN) {
+                    return (X509Certificate)wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 }
             }
         }
@@ -865,9 +861,11 @@ public class RampartUtil {
             for (int j = 0; j < wsSecEngineResults.size(); j++) {
                 WSSecurityEngineResult wser =
                         (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                if (wser.getAction() == WSConstants.ENCR && 
-                        wser.getEncryptedKeyId() != null) {
-                    return wser.getEncryptedKeyId();
+                Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
+                String encrKeyId = (String)wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_ID);
+                if (actInt.intValue() == WSConstants.ENCR && 
+                        encrKeyId != null) {
+                    return encrKeyId;
                 }
             }
         }
@@ -890,9 +888,11 @@ public class RampartUtil {
             for (int j = 0; j < wsSecEngineResults.size(); j++) {
                 WSSecurityEngineResult wser =
                         (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                if (wser.getAction() == WSConstants.ENCR && 
-                        wser.getDecryptedKey() != null) {
-                    return wser.getDecryptedKey();
+                Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
+                byte[] decryptedKey = (byte[])wser.get(WSSecurityEngineResult.TAG_DECRYPTED_KEY);
+                if (actInt.intValue() == WSConstants.ENCR && 
+                        decryptedKey != null) {
+                    return decryptedKey;
                 }
             }
         }

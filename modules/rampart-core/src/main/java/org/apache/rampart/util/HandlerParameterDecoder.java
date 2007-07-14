@@ -26,6 +26,7 @@ import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 
 import javax.xml.namespace.QName;
+
 import java.util.Iterator;
 
 /**
@@ -67,7 +68,7 @@ public class HandlerParameterDecoder {
             		outFlowSecParam = (Parameter)msgCtx.getProperty(WSSHandlerConstants.OUTFLOW_SECURITY);            
        		 }
 		
-		//If the configs are not availabale in the file
+		//If the configs are not available in the file
 		if(inFlowSecParam == null) {
 			inFlowSecParam = msgCtx.getParameter(WSSHandlerConstants.INFLOW_SECURITY);
 		}
@@ -87,8 +88,8 @@ public class HandlerParameterDecoder {
 					.getFirstChildWithName(new QName(WSSHandlerConstants.ACTION));
 			if (actionElem == null) {
 				throw new Exception(
-						"Inflow configurtion must contain an 'action' "
-								+ "elementas the child of 'InflowSecurity' element");
+						"Inflow configuration must contain an 'action' "
+								+ "elements the child of 'InflowSecurity' element");
 			}
 
 			Iterator childElements = actionElem.getChildElements();
@@ -160,8 +161,8 @@ public class HandlerParameterDecoder {
                     .getFirstChildWithName(new QName(WSSHandlerConstants.ACTION));
             if (actionElem == null) {
                 throw new AxisFault(
-                        "Inflow configurtion must contain an 'action' "
-                                + "elementas the child of 'InflowSecurity' element");
+                        "Inflow configuration must contain an 'action' "
+                                + "elements the child of 'InflowSecurity' element");
             }
 
             OutflowConfiguration outflowConfiguration = new OutflowConfiguration();
@@ -200,8 +201,8 @@ public class HandlerParameterDecoder {
                     .getFirstChildWithName(new QName(WSSHandlerConstants.ACTION));
             if (actionElem == null) {
                 throw new AxisFault(
-                        "Inflow configurtion must contain an 'action' "
-                                + "elementas the child of 'InflowSecurity' element");
+                        "Inflow configuration must contain an 'action' "
+                                + "elements the child of 'InflowSecurity' element");
             }
 
             InflowConfiguration inflowConfiguration = new InflowConfiguration();
@@ -251,7 +252,7 @@ public class HandlerParameterDecoder {
             Iterator children = msgCtx.getEnvelope().getHeader().getChildElements();
             while (children.hasNext()) {
                 OMElement element = (OMElement) children.next();
-                //Sign only the quilified headers
+                //Sign only the qualified headers
                 //TODO check whether we can sign the unqualified header elements
                 String ns = element.getNamespace().getNamespaceURI();
                 if(ns != null && ns.length() > 0) {
