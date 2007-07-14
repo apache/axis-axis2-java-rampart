@@ -70,8 +70,8 @@ public class RampartReceiver implements Handler {
         if (!msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
           return InvocationResponse.CONTINUE;        
         }
-        System.out.println("Received MEssage: \n" + msgContext.getEnvelope() + "\n\n");
-        if(mlog.isDebugEnabled()){
+        
+	if(mlog.isDebugEnabled()){
         	mlog.debug("*********************** RampartReceiver received \n"+msgContext.getEnvelope());
         }
         
