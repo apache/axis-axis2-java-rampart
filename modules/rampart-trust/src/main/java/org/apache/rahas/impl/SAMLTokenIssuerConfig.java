@@ -339,5 +339,15 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
             propElem.addAttribute("name", prop, null);
         }
     }
+
+    /**
+     * Return the list of trusted services as a <code>java.util.Map</code>.
+     * The services addresses are the keys and cert aliases available under 
+     * those keys. 
+     * @return
+     */
+    public Map getTrustedServices() {
+        return trustedServices;
+    }
     
 }
