@@ -156,12 +156,12 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
             throw new TrustException("samlIssuerNameMissing");
         }
 
-        OMElement cryptoPropElem = elem.getFirstChildWithName(CRYPTO_PROPERTIES);
-        if (cryptoPropElem != null) {
-            if ((cryptoPropertiesElement =
-                    cryptoPropElem.getFirstChildWithName(CRYPTO)) == null){
+        this.cryptoPropertiesElement = elem.getFirstChildWithName(CRYPTO_PROPERTIES);
+        if (this.cryptoPropertiesElement != null) {
+            if ((this.cryptoElement =
+                this.cryptoPropertiesElement .getFirstChildWithName(CRYPTO)) == null){
                 // no children. Hence, prop file should have been defined
-                this.cryptoPropertiesFile = cryptoPropElem.getText().trim();
+                this.cryptoPropertiesFile = this.cryptoPropertiesElement .getText().trim();
             }
             // else Props should be defined as children of a crypto element
         }
@@ -253,7 +253,8 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         OMElement issuerKeyPasswd = fac.createOMElement(ISSUER_KEY_PASSWD, configElem);
         issuerKeyPasswd.setText(this.issuerKeyPassword);
         
-        configElem.addChild(this.cryptoPropertiesElement);
+        OMElement cryptProp = fac.createOMElement(CRYPTO_PROPERTIES, configElem);
+        cryptProp.addChild(this.cryptoPropertiesElement);
         
         OMElement keySizeElem = fac.createOMElement(KEY_SIZE, configElem);
         keySizeElem.setText(Integer.toString(this.keySize));

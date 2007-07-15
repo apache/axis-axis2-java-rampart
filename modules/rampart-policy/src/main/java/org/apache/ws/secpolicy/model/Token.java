@@ -21,7 +21,7 @@ import org.apache.ws.secpolicy.Constants;
 public abstract class Token extends AbstractSecurityAssertion {
 
     /**
-     * Inclusiong property of a TokenAssertion
+     * Inclusion property of a TokenAssertion
      */
     private String inclusion = Constants.INCLUDE_ALWAYS;
     

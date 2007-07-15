@@ -18,7 +18,6 @@ package org.apache.ws.secpolicy.model;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Policy;
-import org.apache.neethi.PolicyComponent;
 import org.apache.ws.secpolicy.Constants;
 
 import javax.xml.namespace.QName;
@@ -26,7 +25,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
- * Model class of SecureConversationToken asertion
+ * Model class of SecureConversationToken assertion
  */
 public class SecureConversationToken extends SecurityContextToken {
 

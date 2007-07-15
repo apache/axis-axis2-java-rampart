@@ -54,6 +54,7 @@ public abstract class AbstractIssuerConfig {
     protected long ttl = 300000;
     protected String cryptoPropertiesFile;
     protected OMElement cryptoPropertiesElement;
+    protected OMElement cryptoElement;
     protected int keySize = 256;
     
     public void setAddRequestedAttachedRef(boolean addRequestedAttachedRef) {

@@ -49,8 +49,8 @@ public class SCTIssuerConfig extends AbstractIssuerConfig{
                 elem.getFirstChildWithName(ADD_REQUESTED_ATTACHED_REF) != null;
         this.addRequestedUnattachedRef =
                 elem.getFirstChildWithName(ADD_REQUESTED_UNATTACHED_REF) != null;
-        if ((cryptoPropertiesElement =
-                cryptoPropertiesElem.getFirstChildWithName(CRYPTO)) == null) { // no children. Hence, prop file shud have been defined
+        if ((cryptoElement =
+                cryptoPropertiesElem.getFirstChildWithName(CRYPTO)) == null) { // no children. Hence, prop file should have been defined
             this.cryptoPropertiesFile = cryptoPropertiesElem.getText().trim();
         }
         // else Props should be defined as children of a crypto element

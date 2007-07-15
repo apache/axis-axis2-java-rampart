@@ -109,11 +109,11 @@ public class SAMLTokenIssuer implements TokenIssuer {
                     .getEnvelope().getNamespace().getNamespaceURI());
 
             Crypto crypto;
-            if (config.cryptoPropertiesElement != null) { // crypto props
+            if (config.cryptoElement != null) { // crypto props
                                                             // defined as
                                                             // elements
                 crypto = CryptoFactory.getInstance(TrustUtil
-                        .toProperties(config.cryptoPropertiesElement), inMsgCtx
+                        .toProperties(config.cryptoElement), inMsgCtx
                         .getAxisService().getClassLoader());
             } else { // crypto props defined in a properties file
                 crypto = CryptoFactory.getInstance(config.cryptoPropertiesFile,

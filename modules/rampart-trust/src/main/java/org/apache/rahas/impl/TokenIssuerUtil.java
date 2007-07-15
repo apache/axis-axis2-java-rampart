@@ -107,8 +107,8 @@ public class TokenIssuerUtil {
             if (TokenIssuerUtil.ENCRYPTED_KEY.equals(config.proofKeyType)) {
                 WSSecEncryptedKey encrKeyBuilder = new WSSecEncryptedKey();
                 Crypto crypto;
-                if (config.cryptoPropertiesElement != null) { // crypto props defined as elements
-                    crypto = CryptoFactory.getInstance(TrustUtil.toProperties(config.cryptoPropertiesElement),
+                if (config.cryptoElement != null) { // crypto props defined as elements
+                    crypto = CryptoFactory.getInstance(TrustUtil.toProperties(config.cryptoElement),
                                                        data.getInMessageContext().
                                                                getAxisService().getClassLoader());
                 } else { // crypto props defined in a properties file

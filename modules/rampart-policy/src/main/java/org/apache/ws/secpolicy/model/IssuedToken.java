@@ -17,7 +17,6 @@
 package org.apache.ws.secpolicy.model;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.neethi.PolicyComponent;
 import org.apache.ws.secpolicy.Constants;
 
 import javax.xml.namespace.QName;
