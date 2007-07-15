@@ -511,6 +511,11 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 WSSecEncrypt encr = new WSSecEncrypt();
                 
                 encr.setWsConfig(rmd.getConfig());
+                //Hack to handle reference id issues
+                //TODO Need a better fix
+                if(encrTokId.startsWith("#")) {
+                    encrTokId = encrTokId.substring(1);
+                }
                 encr.setEncKeyId(encrTokId);
                 encr.setEphemeralKey(encrTok.getSecret());
                 RampartUtil.setEncryptionUser(rmd, encr);

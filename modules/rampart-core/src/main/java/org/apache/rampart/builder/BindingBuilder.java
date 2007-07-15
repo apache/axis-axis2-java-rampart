@@ -511,7 +511,14 @@ public abstract class BindingBuilder {
                 dkSign.prepare(doc, rmd.getSecHeader());
                 
                 if(rpd.isTokenProtection()) {
-                    sigParts.add(new WSEncryptionPart(tok.getId()));
+
+                    //Hack to handle reference id issues
+                    //TODO Need a better fix
+                    String sigTokId = tok.getId();
+                    if(sigTokId.startsWith("#")) {
+                        sigTokId = sigTokId.substring(1);
+                    }
+                    sigParts.add(new WSEncryptionPart(sigTokId));
                 }
                 
                 dkSign.setParts(sigParts);
@@ -545,7 +552,14 @@ public abstract class BindingBuilder {
             try {
                 WSSecSignature sig = new WSSecSignature();
                 sig.setWsConfig(rmd.getConfig());
-                sig.setCustomTokenId(tok.getId());
+                
+                //Hack to handle reference id issues
+                //TODO Need a better fix
+                String sigTokId = tok.getId();
+                if(sigTokId.startsWith("#")) {
+                    sigTokId = sigTokId.substring(1);
+                }
+                sig.setCustomTokenId(sigTokId);
                 sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
                         WSConstants.SAML_ASSERTION_ID);
                 sig.setSecretKey(tok.getSecret());

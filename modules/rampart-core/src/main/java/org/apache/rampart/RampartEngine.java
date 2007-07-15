@@ -24,6 +24,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.Token;
+import org.apache.rahas.TokenStorage;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
@@ -155,9 +156,12 @@ public class RampartEngine {
                 SAMLKeyInfo samlKi = SAMLUtil.getSAMLKeyInfo(assertion,
                         signatureCrypto, tokenCallbackHandler);
                 try {
-                    Token token = new Token(id, (OMElement)assertion.toDOM(), created, expires);
-                    token.setSecret(samlKi.getSecret());
-                    rmd.getTokenStorage().add(token);
+                    TokenStorage store = rmd.getTokenStorage(); 
+                    if(store.getToken(id) == null) {
+                        Token token = new Token(id, (OMElement)assertion.toDOM(), created, expires);
+                        token.setSecret(samlKi.getSecret());
+                        store.add(token);
+                    }
                 } catch (Exception e) {
                     throw new RampartException(
                             "errorInAddingTokenIntoStore", e);
