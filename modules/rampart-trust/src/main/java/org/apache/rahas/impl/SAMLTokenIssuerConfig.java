@@ -253,8 +253,7 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         OMElement issuerKeyPasswd = fac.createOMElement(ISSUER_KEY_PASSWD, configElem);
         issuerKeyPasswd.setText(this.issuerKeyPassword);
         
-        OMElement cryptProp = fac.createOMElement(CRYPTO_PROPERTIES, configElem);
-        cryptProp.addChild(this.cryptoPropertiesElement);
+        configElem.addChild(this.cryptoPropertiesElement);
         
         OMElement keySizeElem = fac.createOMElement(KEY_SIZE, configElem);
         keySizeElem.setText(Integer.toString(this.keySize));
