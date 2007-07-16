@@ -29,7 +29,7 @@
 	
 	<property name="ssl.port" value="8443"/>
 	<!--can be removed-->
-	<property name="sample.services.url" value="https://localhost:${ssl.port}/axis2/services"/>
+	<property name="sample.services.url" value="https://127.0.0.1:${ssl.port}/axis2/services/ut-over-https"/>
 	
     	<property environment="env"/>
     	
@@ -37,20 +37,15 @@
         	<echo message="CATALINA_HOME must be set"/>
     	</target>
 
-	<target name="check.axis2" unless="env.AXIS2_HOME">
-        	<echo message="AXIS2_HOME must be set"/>
-    	</target>
-	
 	<target name="copy.keys" depends="check.tomcat">
 		<copy file="${keys.dir}/service.jks" tofile="${env.CATALINA_HOME}/rampart-sample-keys.jks" overwrite="true"/>
 	</target>
 
-	<target name="copy.rampart.to.tomcat" depends="check.tomcat,check.axis2">
+	<target name="copy.rampart.to.tomcat" depends="check.tomcat">
 		<property name="to.modules.dir" value="${env.CATALINA_HOME}/webapps/axis2/WEB-INF/modules"/>
 	   	<property name="to.lib.dir" value="${env.CATALINA_HOME}/webapps/axis2/WEB-INF/lib"/>
 
-		<property name="from.modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
-	   	<property name="from.lib.dir" value="${env.AXIS2_HOME}/lib"/>
+		<property name="from.lib.dir" value="$../../../../../lib"/>
 		
 		
 		<copy todir="${to.lib.dir}">
@@ -60,7 +55,7 @@
 		</copy>
 		
 		<copy todir="${to.modules.dir}">
-	        <fileset dir="${from.modules.dir}">
+	        <fileset dir="${from.lib.dir}">
 	                <include name="**/*.mar"/>
 	        </fileset>
 		</copy>
@@ -101,7 +96,7 @@
 	   		
 	</target>
 
-	<target name="create.and.run.client" depends="check.tomcat,check.axis2,clean">
+	<target name="create.and.run.client" depends="check.tomcat,clean">
 	
 		<property name="from.modules" value="${env.AXIS2_HOME}/repository/modules/"/>
 	  	<property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
@@ -128,9 +123,8 @@
                     <exclude name="**/SimpleService.java"/>
             	</javac>
 
-	   	<copy file="${keys.dir}/client.jks" tofile="${temp.client.dir}/client.jks" overwrite="true"/>
-		<copy file="policy.xml" tofile="${temp.client.dir}/policy.xml" overwrite="true"/>
-
+	   	<copy file="${keys.dir}/client.jks" tofile="${temp.dir}/client.jks" overwrite="true"/>
+		
 	   	<!-- Run client -->
             	<java classname="org.apache.rampart.tomcat.sample.Client" fork="true">
                     <arg value="${sample.services.url}"/>

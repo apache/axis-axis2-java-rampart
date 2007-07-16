@@ -496,7 +496,6 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         long t0 = 0, t1 = 0;
         if(dotDebug){
     		t0 = System.currentTimeMillis();
-    		tlog.debug("Signature took :" + (t1 - t0));
     	}
         
         sigToken = rpd.getInitiatorToken();

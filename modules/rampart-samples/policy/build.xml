@@ -79,6 +79,16 @@
 		<create.and.run.client sample.number="04"/>
 	</target>
 	
+	<!-- Sample Service 05 -->
+	<target name="service.05" if="env.AXIS2_HOME" depends="check.dependency">
+		<create.service.repo sample.number="05"/>
+	</target>
+
+	<!-- Sample Client 05 -->
+	<target name="client.05" if="env.AXIS2_HOME" depends="check.dependency">
+		<create.and.run.client sample.number="05"/>
+	</target>
+
 	<target name="clean">
 		<delete dir="build" />
 	</target>

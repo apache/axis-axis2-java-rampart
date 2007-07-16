@@ -32,7 +32,7 @@
 			<ramp:user>alice</ramp:user>
 			<ramp:passwordCallbackClass>org.apache.rampart.tomcat.sample.PWCBHandler</ramp:passwordCallbackClass>
 			<ramp:sslConfig> 
- 				<ramp:property name="javax.net.ssl.trustStore">client.jks</ramp:property>
+ 				<ramp:property name="javax.net.ssl.trustStore">build/client.jks</ramp:property>
         			<ramp:property name="javax.net.ssl.trustStorePassword">apache</ramp:property> 
 			</ramp:sslConfig>
 		</ramp:RampartConfig>
