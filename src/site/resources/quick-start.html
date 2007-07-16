@@ -1,18 +1,242 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head>
-<body>
+    <title>Apache Rampart - Source Repository</title>
+    <style type="text/css" media="all">
+      @import url("./css/maven-base.css");
+      @import url("./css/maven-theme.css");
+      @import url("./css/site.css");
+    </style>
+    <link rel="stylesheet" href="./css/print.css" type="text/css" media="print" />
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+      </head>
+  <body class="composite">
+    <div id="banner">
+                  <a href="ws.apache.org/rampart/" id="bannerLeft">Apache Rampart</a>
+     <div class="clear">
+        <hr/>
+      </div>
+    </div>
+    <div id="breadcrumbs">
+    <div class="xleft">
+        Last Published: 13 Jul 2007
+    </div>
+    <div class="xright"><a href="http://www.apache.org/">Apache</a>
+          <a href="../">WebServices</a>
+       </div>
+      <div class="clear">
+        <hr/>
+      </div>
+    </div>
+    <div id="leftColumn">
+      <div id="navcolumn">
+                   <h5>Apache Rampart</h5>
+        <ul>
+              
+    <li class="none">
+              <a href="index.html">About</a>
+        </li>
+    
+            <li class="expanded">
+              <a href="">Downloads</a>
+                <ul>
+                  
+    <li class="none">
+              <a href="download.cgi">Releases</a>
+        </li>
+                  
+    <li class="none">
+              <strong>Source Code</strong>
+        </li>
+              </ul>
+        </li>
+      <li class="expanded">
+              <a href="">Documentation</a>
+                <ul>
+                  
+    <li class="none">
+              <a href="quick-start.html">Quick Start Guide</a>
+        </li>
+                  
+    <li class="none">
+              <a href="developer-guide.html">Developer Guide</a>
+        </li>
+              </ul>
+        </li>
+              
+    <li class="expanded">
+              <a href="">Project Information</a>
+                <ul>
+                  
+    <li class="none">
+              <a href="mail-lists.html">Mailing Lists</a>
+        </li>
+                  
+    <li class="none">
+              <a href="http://issues.apache.org/jira/browse/Rampart">Issue Tracking</a>
+        </li>
+                  
+    <li class="none">
+              <a href="dependencies.html">Dependencies</a>
+        </li>
+              </ul>
+        </li>
+          </ul>
+                                       <a href="http://maven.apache.org/" title="Built by Maven" id="poweredBy">
+            <img alt="Built by Maven" src="./images/logos/maven-feather.png"></img>
+          </a>
+                       
+     </div>
+    </div>
+    <div id="bodyColumn">
+      <div id="contentBox">
 <h2>Rampart Quick Start Guide</h2>
-<h3>Introduction</h3>
-<p>This guide contains three sections</p>
-<ul>
-<li>Securing SOAP Messages</li>
-<li>Setting up a Security Token Service</li>
-<li>Secure Conversation with Rampart</li>
-<p>To provide security both ends has to be secured. Therefore one has to configure both ends of the message.</p>
-<h3>Securing SOAP Messages</h3>
+
+<h3>Installing Rampart in Axis2</h3>
+<p>Steps to install</p>
+<ol>
+<li>If you haven't installed Axis2, then download and extract the standard binary distribution. Make sure you have set the AXIS2_HOME environment variable</li>
+<li>Run ant from the "samples" directory to copy the required libraries and modules to relevant directories in AXIS2_HOME.</li>
+<li>Download xalan-2.7.0.jar from <a href="http://www.apache.org/dist/java-repository/xalan/jars/">here</a> and put under AXIS2_HOME\lib folder, if you use JDK 1.5.</li>
+<li>Download log4j.jar from <a href="http://people.apache.org/repo/m1-ibiblio-rsync-repository/log4j/jars/">here</a> and put under  AXIS2_HOME\lib</li>
+</ol>
+<p></p>
+<h3>Running Samples</h3>
+<p>Now we'll look at how to run the first sample inside samples/policy folder.</p>
+<ol>
+<li>Open a console and change the directory to sample/policy and give the following command. This will start the server at port 8080</li>
+<pre><code>$ant service.01</code></pre>
+<li>Open a new console and change the directory to sample/policy and type the following command.</li>
+<pre><code>$ant client.01</code></pre>
+</ol>
+<p>Congratulations! Now you have executed the first sample. Rest of the samples can be run by changing the sample number.</p>
+
+<h3>Understanding the first sample</h3>
+
+<ul><li>Engaging Rampart</li></ul>
+<p>When securing a SOAP message, the sender must know the security actions to be performed on the message and the receiver must know enough details to process and validate the security of the message. Therefore when using Rampart with Axis2, it must be engaged at both ends.<p>
+<p>Observe how module has been engaged in server side by opening samples/policy/sample01/services.xml. The following line has engaged the module.</p>
+<div class="source">
+	&lt;module ref="rampart"/&gt;
+</div>
+<p>Engaging Rampart at client side is done programatically as follows.</p>
+<div class="source">
+ServiceClient client = new ServiceClient(ctx, null);<br/>
+client.engageModule("rampart");
+</div>
+<ul><li>Understanding policy</li></ul>
+<p>WS-Security Policy can be used to indicate what security actions that needs be performed on SOAP messages and and what actions should be validated. The file 'samples/policy/sample01/policy.xml' configures Rampart to add Username Token with Timestamp to this message. The element &lt;RampartConfig&gt; in policy.xml defines Rampart specific configurations. </p>
+<p>Policy at serverside is included in samples/policy/sample01/services.xml file. This configures Rampart module at serverside to validate the message for Username Token an Timestamp.</p>
+<p>More details on RampartConfig can be found hereXX.<p>
+
+<ul><li>Viewing the Message on wire</li></ul>
+<p>It is interesting to view the secured SOAP message on the wire using TCP monitor. Change the "client.port" property in samples/policy/build.xml file to the listening port of TCP monitor. This will send all the messages through TCP monitor when you execute the ant script. Observe the <security> header in the SOAP message.</p>
+
 <h3>Setting up a Security Token Service</h3>
-<h3>Secure Conversation with Rampart</h3>
-</ul>
-</body>
-</head>
+<p>Security Token Service can be set up as per WS-Trust specification using Rampart. The default security token service shipped with the rampart distribution is contained in the rampart-trust.mar module. It can issue SCT tokens and SAML tokens. Sample05 contains a client that connects to the default STS and obtain a SAML token. The services.xml in the sample contains "saml-issuer-config" parameter that is used to configure the default SAML issuer.</p>
+	
+<strong>STS with a custom issuer</strong>
+<p>First the default rampart.mar has to be removed from the modules. Then write you own issuer implementing the <code>"org.apache.rahas.TokenIssuer"</code> interface. Let's say that your issuer is <code>"org.custom.MyIssuer"</code>. Then create a Axis2 service archive with the following in the services.xml. Drop the archive into the repository and you have a STS with a CustomToken issuer.</p>
+<div class="source">
+&lt;module ref="rampart" /&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;operation name="IssueToken"
+mep="http://www.w3.org/2006/01/wsdl/in-out"&gt;
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;messageReceiver
+class="org.apache.rahas.STSMessageReceiver"/&gt;
+<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;!-- Action mapping to accept SCT requests --&gt;
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;actionMapping&gt;http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT&lt;/actionMapping&gt;
+
+<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;actionMapping&gt;http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue&lt;/actionMapping&gt;
+
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;actionMapping&gt;http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Renew&lt;/actionMapping&gt;
+
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;actionMapping&gt;http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Cancel&lt;/actionMapping&gt;
+
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;actionMapping&gt;http://schemas.xmlsoap.org/ws/2005/02/trust/RST/SCT/Cancel&lt;/actionMapping&gt;
+
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;actionMapping&gt;http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Validate&lt;/actionMapping&gt;
+
+<br />
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;parameter name="token-dispatcher-configuration"&gt;
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
+&lt;token-dispatcher-configuration&gt;
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &lt;!-- Issuers. You may have many
+issuers. --&gt;
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;issuer
+class="org.custom.MyIssuer"
+default="true"&gt;
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;configuration
+type="parameter"&gt;saml-issuer-config&lt;/configuration&gt;
+
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;tokenType&gt;http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1&lt;/tokenType&gt;
+
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &lt;/issuer&gt;
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/token-dispatcher-configuration&gt;
+<br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&lt;/parameter&gt;<br />
+&lt;/operation&gt;<br />
+
+<div>
+  </div>
+    </div>
+    <div class="clear">
+      <hr/>
+    </div>
+    <div id="footer">
+      <div class="xright">&#169;  
+          2005-2007
+    
+          Apache Software Foundation
+          
+  
+
+  
+    
+  
+  
+  </div>
+      <div class="clear">
+        <hr/>
+      </div>
+    </div>
+  </body>
 </html>
+
