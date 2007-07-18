@@ -27,6 +27,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.integration.UtilServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
@@ -86,8 +87,12 @@ public class RampartTest extends TestCase {
                 options.setTo(new EndpointReference("http://127.0.0.1:" +
                                         PORT + 
                                         "/axis2/services/SecureService" + i));
-                options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
+                
+                ServiceContext context = serviceClient.getServiceContext();
+                context.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
                         loadPolicy("/rampart/policy/" + i + ".xml"));
+               // options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
+                 //       loadPolicy("/rampart/policy/" + i + ".xml"));
                 serviceClient.setOptions(options);
                 
                 //Blocking invocation
