@@ -17,7 +17,7 @@
         
     <property name="version.xmlsec" value="1.4.0"/>
     <property name="version.opensaml" value="1.1"/>
-    <property name="version.wss4j" value="1.5.2"/>
+    <property name="version.wss4j" value="SNAPSHOT"/>
     
         
     <condition property="jdk14.present">
