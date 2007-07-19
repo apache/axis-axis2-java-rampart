@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
@@ -77,12 +78,35 @@ public class PolicyBasedResultsValidator {
         }
         
         Vector signatureParts = RampartUtil.getSignedParts(rmd);
-        
-        //Add the timestamp result
+
+        //Timestamp is not included in sig parts
         if(rpd.isIncludeTimestamp() && !rpd.isTransportBinding()) {
-            Timestamp timestamp = (Timestamp) tsResult
-                    .get(WSSecurityEngineResult.TAG_TIMESTAMP);
-            signatureParts.add(new WSEncryptionPart(timestamp.getID()));
+            signatureParts.add(new WSEncryptionPart("timestamp"));
+        }
+        
+        if(!rmd.isInitiator()) {
+            //Just an indicator for EndorsingSupportingToken signature
+            SupportingToken endSupportingToken = rpd.getEndorsingSupportingTokens();
+            if(endSupportingToken !=  null) {
+                SignedEncryptedParts endSignedParts = endSupportingToken.getSignedParts();
+                if(endSignedParts != null && 
+                        (endSignedParts.isBody() || 
+                                endSignedParts.getHeaders().size() > 0)) {
+                    signatureParts.add(
+                            new WSEncryptionPart("EndorsingSupportingTokens"));
+                }
+            }
+            //Just an indicator for SignedEndorsingSupportingToken signature
+            SupportingToken sgndEndSupportingToken = rpd.getSignedEndorsingSupportingTokens();
+            if(sgndEndSupportingToken != null) {
+                SignedEncryptedParts sgndEndSignedParts = sgndEndSupportingToken.getSignedParts();
+                if(sgndEndSignedParts != null && 
+                        (sgndEndSignedParts.isBody() || 
+                                sgndEndSignedParts.getHeaders().size() > 0)) {
+                    signatureParts.add(
+                            new WSEncryptionPart("SignedEndorsingSupportingTokens"));
+                }
+            }
         }
         
         validateEncrSig(encryptedParts, signatureParts, results);

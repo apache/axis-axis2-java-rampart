@@ -639,7 +639,7 @@ public class RampartUtil {
     	
     }
     
-    private static Vector getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody, Vector parts, Vector elements) {
+    public static Vector getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody, Vector parts, Vector elements) {
 
         Vector found = new Vector();
         Vector result = new Vector();

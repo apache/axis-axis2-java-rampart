@@ -17,6 +17,7 @@
 package org.apache.rampart.builder;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
@@ -26,7 +27,9 @@ import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.IssuedToken;
+import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
@@ -113,12 +116,13 @@ public class TransportBindingBuilder extends BindingBuilder {
                 log.debug("Processing endorsing signed supporting tokens");
                 
                 ArrayList tokens = sgndEndSuppTokens.getTokens();
+                SignedEncryptedParts signdParts = sgndEndSuppTokens.getSignedParts();
                 for (Iterator iter = tokens.iterator(); iter.hasNext();) {
                     Token token = (Token) iter.next();
                     if(token instanceof IssuedToken && rmd.isInitiator()) {
-                        signatureValues.add(doIssuedTokenSignature(rmd, token));
+                        signatureValues.add(doIssuedTokenSignature(rmd, token, signdParts));
                     } else if(token instanceof X509Token) {
-                        signatureValues.add(doX509TokenSignature(rmd, token));
+                        signatureValues.add(doX509TokenSignature(rmd, token, signdParts));
                     }
                 }
             }
@@ -128,12 +132,13 @@ public class TransportBindingBuilder extends BindingBuilder {
                     endSupptokens.getTokens().size() > 0) {
                 log.debug("Processing endorsing supporting tokens");
                 ArrayList tokens = endSupptokens.getTokens();
+                SignedEncryptedParts signdParts = endSupptokens.getSignedParts();
                 for (Iterator iter = tokens.iterator(); iter.hasNext();) {
                     Token token = (Token) iter.next();
                     if(token instanceof IssuedToken && rmd.isInitiator()){
-                        signatureValues.add(doIssuedTokenSignature(rmd, token));
+                        signatureValues.add(doIssuedTokenSignature(rmd, token, signdParts));
                     } else if(token instanceof X509Token) {
-                        signatureValues.add(doX509TokenSignature(rmd, token));
+                        signatureValues.add(doX509TokenSignature(rmd, token, signdParts));
                     }
                 }
             }
@@ -161,12 +166,34 @@ public class TransportBindingBuilder extends BindingBuilder {
      * X.509 signature
      * @param rmd
      * @param token
+     * @param signdParts 
      */
-    private byte[] doX509TokenSignature(RampartMessageData rmd, Token token) throws RampartException {
+    private byte[] doX509TokenSignature(RampartMessageData rmd, Token token, SignedEncryptedParts signdParts) throws RampartException {
         
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
         
+        Vector sigParts = new Vector();
+        
+        if(this.timestampElement != null){
+            sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
+        }
+        
+        if(signdParts != null) {
+            if(signdParts.isBody()) {
+                SOAPEnvelope env = rmd.getMsgContext().getEnvelope();
+                sigParts.add(new WSEncryptionPart(RampartUtil.addWsuIdToElement(env.getBody())));
+            }
+    
+            ArrayList headers = signdParts.getHeaders();
+            for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
+                Header header = (Header) iterator.next();
+                WSEncryptionPart wep = new WSEncryptionPart(header.getName(), 
+                        header.getNamespace(),
+                        "Content");
+                sigParts.add(wep);
+            }
+        }
         if(token.isDerivedKeys()) {
             //In this case we will have to encrypt the ephmeral key with the 
             //other party's key and then use it as the parent key of the
@@ -194,11 +221,6 @@ public class TransportBindingBuilder extends BindingBuilder {
                 
                 dkSig.prepare(doc, rmd.getSecHeader());
                 
-                Vector sigParts = new  Vector();
-                
-                if(this.timestampElement != null){
-                	sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));
-                }
                 
                 if(rpd.isTokenProtection()) {
                     sigParts.add(new WSEncryptionPart(encrKey.getBSTTokenId()));
@@ -231,12 +253,6 @@ public class TransportBindingBuilder extends BindingBuilder {
 
                 sig.appendBSTElementToHeader(rmd.getSecHeader());
                 
-                Vector sigParts = new Vector();
-                
-                if(this.timestampElement != null ){
-                	sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));
-                }
-                
                 if (rpd.isTokenProtection()
                         && !Constants.INCLUDE_NEVER
                                 .equals(token.getInclusion())) {
@@ -264,9 +280,10 @@ public class TransportBindingBuilder extends BindingBuilder {
      * IssuedToken signature
      * @param rmd
      * @param token
+     * @param signdParts 
      * @throws RampartException
      */
-    private byte[] doIssuedTokenSignature(RampartMessageData rmd, Token token) throws RampartException {
+    private byte[] doIssuedTokenSignature(RampartMessageData rmd, Token token, SignedEncryptedParts signdParts) throws RampartException {
         
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc= rmd.getDocument();
@@ -297,14 +314,31 @@ public class TransportBindingBuilder extends BindingBuilder {
             tokenIncluded = true;
         }
 
-        Vector sigParts = new  Vector();
+        Vector sigParts = new Vector();
         
         if(this.timestampElement != null){
             sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
         }
         
+        
         if(rpd.isTokenProtection() && tokenIncluded) {
             sigParts.add(new WSEncryptionPart(id));
+        }
+        
+        if(signdParts != null) {
+            if(signdParts.isBody()) {
+                SOAPEnvelope env = rmd.getMsgContext().getEnvelope();
+                sigParts.add(new WSEncryptionPart(RampartUtil.addWsuIdToElement(env.getBody())));
+            }
+    
+            ArrayList headers = signdParts.getHeaders();
+            for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
+                Header header = (Header) iterator.next();
+                WSEncryptionPart wep = new WSEncryptionPart(header.getName(), 
+                        header.getNamespace(),
+                        "Content");
+                sigParts.add(wep);
+            }
         }
         
         //check for derived keys
@@ -375,13 +409,6 @@ public class TransportBindingBuilder extends BindingBuilder {
                 sig.computeSignature();
 
                 //Add elements to header
-                Element tokElem = (Element)doc.importNode((Element)tok.getToken(), true);
-
-                this.setInsertionLocation(RampartUtil
-                        .insertSiblingAfter(rmd,
-                                this.getInsertionLocation(),
-                                tokElem));
-
                 this.setInsertionLocation(RampartUtil.insertSiblingAfter(
                         rmd,
                         this.getInsertionLocation(),
