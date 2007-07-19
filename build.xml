@@ -13,10 +13,17 @@
     <property name="dir.mvn2.repo" value="${user.home}/.m2/repository"/>
     
     <property name="version.bcprov13" value="132"/>
+    <property name="version.bcprov15" value="132"/>
+        
     <property name="version.xmlsec" value="1.4.0"/>
     <property name="version.opensaml" value="1.1"/>
     <property name="version.wss4j" value="1.5.2"/>
     
+        
+    <condition property="jdk14.present">
+      <equals arg1="${ant.java.version}" arg2="1.4"/>
+    </condition>
+
     <target name="init">
     		<mkdir dir="${dir.dist}"/>
     </target>
@@ -50,12 +57,12 @@
         <copy todir="${dir.dist.bin}/lib" file="modules/rampart-core/target/rampart-core-${rampart.version}.jar"/>
         <copy todir="${dir.dist.bin}/lib" file="modules/rampart-policy/target/rampart-policy-${rampart.version}.jar"/>
         <copy todir="${dir.dist.bin}/lib" file="modules/rampart-trust/target/rampart-trust-${rampart.version}.jar"/>
-        
-        <copy todir="${dir.dist.bin}/lib" file="${dir.mvn2.repo}/bouncycastle/bcprov-jdk13/${version.bcprov13}/bcprov-jdk13-${version.bcprov13}.jar"/>
         <copy todir="${dir.dist.bin}/lib" file="${dir.mvn2.repo}/org/apache/santuario/xmlsec/${version.xmlsec}/xmlsec-${version.xmlsec}.jar"/>
         <copy todir="${dir.dist.bin}/lib" file="${dir.mvn2.repo}/opensaml/opensaml/${version.opensaml}/opensaml-${version.opensaml}.jar"/>
         <copy todir="${dir.dist.bin}/lib" file="${dir.mvn2.repo}/org/apache/ws/security/wss4j/${version.wss4j}/wss4j-${version.wss4j}.jar"/>
-        
+        <antcall target="copy-bc-jar-14" />
+        <antcall target="copy-bc-jar-15" />
+
         <echo>Copying samples</echo>
         <!-- copy samples -->
         <mkdir dir="${dir.dist.bin}/samples"/>
@@ -71,6 +78,14 @@
         
         <delete dir="${dir.dist.bin}/../"/>
 
+    </target>
+    
+    <target name="copy-bc-jar-14" if="${jdk14.present}">
+		<copy todir="${dir.dist.bin}/lib" file="${dir.mvn2.repo}/bouncycastle/bcprov-jdk13/${version.bcprov13}/bcprov-jdk13-${version.bcprov13}.jar"/>
+    </target>
+
+    <target name="copy-bc-jar-15" unless="${jdk14.present}">
+		<copy todir="${dir.dist.bin}/lib" file="${dir.mvn2.repo}/bouncycastle/bcprov-jdk15/${version.bcprov15}/bcprov-jdk15-${version.bcprov15}.jar"/>
     </target>
     
     <target name="src-dist" depends="init">
