@@ -47,6 +47,7 @@
             </item>
             <item name="Documentation">
                 <item name="Quick Start Guide" href="quick-start.html"/>
+		<item name="Rampart Configuration" href="rampartconfig-guide.html"/>
 		<item name="Developer Guide" href="developer-guide.html"/>
             </item>
             <item name="Project Information">

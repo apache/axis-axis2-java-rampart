@@ -45,7 +45,7 @@
         </li>
                   
     <li class="none">
-              <strong>Source Code</strong>
+              <a href="source-repository.html">Source Code</a>
         </li>
               </ul>
         </li>
@@ -54,8 +54,12 @@
                 <ul>
                   
     <li class="none">
-              <a href="quick-start.html">Quick Start Guide</a>
+              <strong>Quick Start Guide</strong>
         </li>
+    
+    <li class="none">
+              <a href="rampartconfig-guide.html">Rampart Configuration</a>
+    </li>
                   
     <li class="none">
               <a href="developer-guide.html">Developer Guide</a>
@@ -126,7 +130,7 @@ client.engageModule("rampart");
 <ul><li>Understanding policy</li></ul>
 <p>WS-Security Policy can be used to indicate what security actions that needs be performed on SOAP messages and and what actions should be validated. The file 'samples/policy/sample01/policy.xml' configures Rampart to add Username Token with Timestamp to this message. The element &lt;RampartConfig&gt; in policy.xml defines Rampart specific configurations. </p>
 <p>Policy at serverside is included in samples/policy/sample01/services.xml file. This configures Rampart module at serverside to validate the message for Username Token an Timestamp.</p>
-<p>More details on RampartConfig can be found hereXX.<p>
+<p>More details on RampartConfig can be found <a href="ampartconfig-guide.html">here</a>.<p>
 
 <ul><li>Viewing the Message on wire</li></ul>
 <p>It is interesting to view the secured SOAP message on the wire using TCP monitor. Change the "client.port" property in samples/policy/build.xml file to the listening port of TCP monitor. This will send all the messages through TCP monitor when you execute the ant script. Observe the <security> header in the SOAP message.</p>
