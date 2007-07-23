@@ -45,6 +45,12 @@ public class RampartConfigBuilder implements AssertionBuilder {
         if (childElement != null) {
             rampartConfig.setEncryptionUser(childElement.getText().trim());
         }
+        
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.OPTIMISE_PARTS_LN));
+        if (childElement != null) {
+            rampartConfig.setOptimizeParts(childElement.getText().trim());
+        }
 
         childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.PW_CB_CLASS_LN));

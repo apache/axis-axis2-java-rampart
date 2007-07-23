@@ -87,7 +87,7 @@ public class RampartConfig implements Assertion {
 
     public final static String TOKEN_STORE_CLASS_LN = "tokenStoreClass";
     
-    public final static String OPTIMISE_PARTS_LN = "OptimizeParts";
+    public final static String OPTIMISE_PARTS_LN = "optimizeParts";
 
     private String user;
 
