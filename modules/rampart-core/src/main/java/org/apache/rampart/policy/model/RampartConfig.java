@@ -61,7 +61,7 @@ public class RampartConfig implements Assertion {
 
     public static final int DEFAULT_TIMESTAMP_TTL = 300;
 
-    public static final int DEFAULT_TIMESTAMP_MAX_SKEW = 0;
+    public static final int DEFAULT_TIMESTAMP_MAX_SKEW = 300;
 
     public final static String NS = "http://ws.apache.org/rampart/policy";
 
