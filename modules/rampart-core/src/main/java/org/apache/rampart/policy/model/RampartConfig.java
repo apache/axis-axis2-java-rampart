@@ -87,8 +87,10 @@ public class RampartConfig implements Assertion {
 
     public final static String TOKEN_STORE_CLASS_LN = "tokenStoreClass";
     
-    public final static String OPTIMISE_PARTS_LN = "optimizeParts";
+    public final static String OPTIMISE_PARTS = "optimizeParts";
 
+    public final static String SSL_CONFIG = "sslConfig";
+    
     private String user;
 
     private String encryptionUser;
@@ -105,14 +107,11 @@ public class RampartConfig implements Assertion {
     
     private String timestampMaxSkew = Integer.toString(DEFAULT_TIMESTAMP_MAX_SKEW);
 
-    private String optimizeParts;
+    private OptimizePartsConfig optimizeParts;
 
     private String tokenStoreClass;
     
     private SSLConfig sslConfig;
-    
-    public final static String SSL_CONFIG = "sslConfig";
-    
     
     public SSLConfig getSSLConfig() {
         return sslConfig;
@@ -307,23 +306,13 @@ public class RampartConfig implements Assertion {
     public void setTimestampMaxSkew(String timestampMaxSkew) {
         this.timestampMaxSkew = timestampMaxSkew;
     }
-    
-    /**
-     * @param strOptimizeParts 
-     * 			The xpath of elements that should be optimized
-     */
-    public void setOptimizeParts(String strOptimizeParts){
-    	optimizeParts = strOptimizeParts;
-    }
-    
-    /**
-     * 
-     * @return The Xpath string of indicating elements to be optimized or null.
-     */
-    
-    public String getOptimizeParts(){
-    	return optimizeParts;
-    }
-    
+
+	public OptimizePartsConfig getOptimizeParts() {
+		return optimizeParts;
+	}
+
+	public void setOptimizeParts(OptimizePartsConfig optimizeParts) {
+		this.optimizeParts = optimizeParts;
+	}
     
 }

@@ -19,6 +19,7 @@ package org.apache.rampart.policy;
 import org.apache.axis2.policy.model.MTOMAssertion;
 import org.apache.neethi.Policy;
 import org.apache.rampart.RampartException;
+import org.apache.rampart.policy.model.OptimizePartsConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.WSSPolicyException;
@@ -662,7 +663,7 @@ public class RampartPolicyData {
     		return false;
     }
     
-    public String getOptimizeParts(){
+    public OptimizePartsConfig getOptimizePartsConfig(){
     	return rampartConfig.getOptimizeParts();
     }
    

@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.rampart.RampartException;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.jaxen.JaxenException;
@@ -28,12 +29,64 @@ import org.jaxen.XPath;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * Utility class to handle MTOM-Optimizing Base64 Text values
  */
 public class MessageOptimizer {
+	
+	private static final String CIPHER_ELEMENT = "//xenc:EncryptedData/xenc:CipherData/xenc:CipherValue";
+
+	public static void optimize(SOAPEnvelope env, Vector expressions, Map namespaces) throws RampartException {
+		
+		SimpleNamespaceContext nsCtx = new SimpleNamespaceContext();
+		nsCtx.addNamespace(WSConstants.ENC_PREFIX,WSConstants.ENC_NS);
+		nsCtx.addNamespace(WSConstants.SIG_PREFIX,WSConstants.SIG_NS);
+		nsCtx.addNamespace(WSConstants.WSSE_PREFIX,WSConstants.WSSE_NS);
+		nsCtx.addNamespace(WSConstants.WSU_PREFIX,WSConstants.WSU_NS);
+
+		Iterator keys = namespaces.keySet().iterator();
+		while(keys.hasNext()){
+			String strPrefix =  (String)keys.next();
+			String strNS = (String)namespaces.get(strPrefix);
+			nsCtx.addNamespace(strPrefix,strNS);
+		}
+
+		try {
+			if(expressions.size() > 0){
+				for(int i=0; i<expressions.size(); i++){
+					String exp = (String)expressions.get(i);
+					XPath xp = new AXIOMXPath(exp);
+					xp.setNamespaceContext(nsCtx);
+					List list = xp.selectNodes(env);
+					Iterator elements = list.iterator();
+					while (elements.hasNext()) {
+						OMElement element = (OMElement) elements.next();
+						OMText text = (OMText)element.getFirstOMChild();
+						text.setOptimize(true);
+					}
+				}
+			}else{
+				String exp = CIPHER_ELEMENT;
+				XPath xp = new AXIOMXPath(exp);
+				xp.setNamespaceContext(nsCtx);
+				List list = xp.selectNodes(env);
+				Iterator elements = list.iterator();
+				while (elements.hasNext()) {
+					OMElement element = (OMElement) elements.next();
+					OMText text = (OMText)element.getFirstOMChild();
+					text.setOptimize(true);
+				}
+			}
+		} catch (JaxenException e) {
+			throw new RampartException("Error in XPath ", e);
+		}
+
+	}
+
 
 	/**
 	 * Mark the requied Base64 text values as optimized
@@ -45,47 +98,47 @@ public class MessageOptimizer {
 	public static void optimize(SOAPEnvelope env, String optimizeParts) throws WSSecurityException {
 		String separater = "<>";
 		StringTokenizer tokenizer = new StringTokenizer(optimizeParts, separater);
-		
+
 		while(tokenizer.hasMoreTokens()) {
-			
+
 			String xpathExpr = tokenizer.nextToken(); 
-			
+
 			//Find binary content
 			List list = findElements(env,xpathExpr);
-			
+
 			Iterator cipherValueElements = list.iterator();
-			
+
 			while (cipherValueElements.hasNext()) {
 				OMElement element = (OMElement) cipherValueElements.next();
 				OMText text = (OMText)element.getFirstOMChild();
-                System.out.println(text.getText().length());
+				System.out.println(text.getText().length());
 				text.setOptimize(true);
 			}
 		}
 	}
-	
-	
+
+
 	private static List findElements(OMElement elem, String expression) throws WSSecurityException {
 		try {
 			XPath xp = new AXIOMXPath(expression);
-			
+
 			//Set namespaces
 			SimpleNamespaceContext nsCtx = new SimpleNamespaceContext();
 			nsCtx.addNamespace(WSConstants.ENC_PREFIX,WSConstants.ENC_NS);
 			nsCtx.addNamespace(WSConstants.SIG_PREFIX,WSConstants.SIG_NS);
 			nsCtx.addNamespace(WSConstants.WSSE_PREFIX,WSConstants.WSSE_NS);
 			nsCtx.addNamespace(WSConstants.WSU_PREFIX,WSConstants.WSU_NS);
-			
+
 			xp.setNamespaceContext(nsCtx);
-			
+
 			return xp.selectNodes(elem);
-			
+
 		} catch (JaxenException e) {
 			throw new WSSecurityException(e.getMessage(), e);
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 }

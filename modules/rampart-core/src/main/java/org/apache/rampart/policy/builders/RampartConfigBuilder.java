@@ -22,6 +22,7 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.rampart.policy.model.CryptoConfig;
+import org.apache.rampart.policy.model.OptimizePartsConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.policy.model.SSLConfig;
 
@@ -47,12 +48,6 @@ public class RampartConfigBuilder implements AssertionBuilder {
         }
         
         childElement = element.getFirstChildWithName(new QName(
-                RampartConfig.NS, RampartConfig.OPTIMISE_PARTS_LN));
-        if (childElement != null) {
-            rampartConfig.setOptimizeParts(childElement.getText().trim());
-        }
-
-        childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.PW_CB_CLASS_LN));
         if (childElement != null) {
             rampartConfig.setPwCbClass(childElement.getText().trim());
@@ -70,7 +65,6 @@ public class RampartConfigBuilder implements AssertionBuilder {
             
         }
         
-                      
         childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.SIG_CRYPTO_LN));
         if (childElement != null) {
@@ -88,6 +82,14 @@ public class RampartConfigBuilder implements AssertionBuilder {
                 RampartConfig.NS, RampartConfig.TS_MAX_SKEW_LN));
         if (childElement != null) {
             rampartConfig.setTimestampMaxSkew(childElement.getText().trim());
+        }
+        
+		childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.OPTIMISE_PARTS));
+        if (childElement != null) {
+        	OptimizePartsConfig config = (OptimizePartsConfig)new OptimizePartsBuilder().
+            build(childElement, factory);
+        	rampartConfig.setOptimizeParts(config);
         }
 
         return rampartConfig;

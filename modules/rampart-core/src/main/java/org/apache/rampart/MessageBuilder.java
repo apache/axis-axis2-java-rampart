@@ -34,6 +34,7 @@ import org.apache.rampart.builder.AsymmetricBindingBuilder;
 import org.apache.rampart.builder.SymmetricBindingBuilder;
 import org.apache.rampart.builder.TransportBindingBuilder;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.policy.model.OptimizePartsConfig;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.MessageOptimizer;
 import org.apache.rampart.util.RampartUtil;
@@ -134,12 +135,9 @@ public class MessageBuilder {
         * Checking whether MTOMSerializable is there. If so set optimizeElement.
         * */
         if(rpd.isMTOMSerialize()){
-        	String optimizeElement = rpd.getOptimizeParts();
-        	if(optimizeElement == null){
-        		  optimizeElement = "//xenc:EncryptedData/xenc:CipherData/xenc:CipherValue";
-        	}
         	msgCtx.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
-	        MessageOptimizer.optimize(msgCtx.getEnvelope(),optimizeElement);
+        	OptimizePartsConfig config= rpd.getOptimizePartsConfig();
+	        MessageOptimizer.optimize(msgCtx.getEnvelope(), config.getExpressions(), config.getNamespaces());
         }
         
     }
