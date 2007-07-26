@@ -48,7 +48,7 @@ import java.util.Vector;
 
 public class RampartEngine {
 
-	private static Log log = LogFactory.getLog(RampartEngine.class.getName());
+	private static Log log = LogFactory.getLog(RampartEngine.class);
 	private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
 
 	public Vector process(MessageContext msgCtx) throws WSSPolicyException,

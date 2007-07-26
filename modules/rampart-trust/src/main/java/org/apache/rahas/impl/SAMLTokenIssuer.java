@@ -16,6 +16,13 @@
 
 package org.apache.rahas.impl;
 
+import java.security.Principal;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.util.Arrays;
+import java.util.Date;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
@@ -28,6 +35,9 @@ import org.apache.rahas.Token;
 import org.apache.rahas.TokenIssuer;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.util.SAMLAttributeCallback;
+import org.apache.rahas.impl.util.SAMLCallbackHandler;
+import org.apache.rahas.impl.util.SAMLNameIdentifierCallback;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.WSUsernameTokenPrincipal;
@@ -50,13 +60,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
-
-import java.security.Principal;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Date;
 
 /**
  * Issuer to issue SAMl tokens
@@ -251,10 +254,19 @@ public class SAMLTokenIssuer implements TokenIssuer {
             Principal principal = data.getPrincipal();
             // In the case where the principal is a UT
             if (principal instanceof WSUsernameTokenPrincipal) {
-                // TODO: Find the email address
-                String subjectNameId = "ruchithf@apache.org";
-                SAMLNameIdentifier nameId = new SAMLNameIdentifier(
-                        subjectNameId, null, SAMLNameIdentifier.FORMAT_EMAIL);
+            	SAMLNameIdentifier nameId = null;
+            	if(config.getCallbackHander() != null){
+            		SAMLNameIdentifierCallback cb = new SAMLNameIdentifierCallback(data);
+            		cb.setUserId(principal.getName());
+            		SAMLCallbackHandler callbackHandler = config.getCallbackHander();
+            		callbackHandler.handle(cb);
+            		nameId = cb.getNameId();
+            	}else{
+            		//TODO Remove
+            		nameId = new SAMLNameIdentifier(
+            				principal.getName(), null, SAMLNameIdentifier.FORMAT_EMAIL);
+            	}
+            	
                 return createAuthAssertion(doc, SAMLSubject.CONF_BEARER,
                         nameId, null, config, crypto, creationTime,
                         expirationTime);
@@ -321,11 +333,12 @@ public class SAMLTokenIssuer implements TokenIssuer {
                         new String[] { serviceCert.getSubjectDN().getName() },
                         e);
             }
-            return this.createAttributeAssertion(doc, encryptedKeyElem, config,
+            return this.createAttributeAssertion(doc, data ,encryptedKeyElem, config,
                     crypto, creationTime, expirationTime);
         } else {
             try {
                 String subjectNameId = data.getPrincipal().getName();
+                
                 SAMLNameIdentifier nameId = new SAMLNameIdentifier(
                         subjectNameId, null, SAMLNameIdentifier.FORMAT_EMAIL);
 
@@ -404,7 +417,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
      * @return
      * @throws TrustException
      */
-    private SAMLAssertion createAttributeAssertion(Document doc,
+    private SAMLAssertion createAttributeAssertion(Document doc, RahasData data,
             Element keyInfoContent, SAMLTokenIssuerConfig config,
             Crypto crypto, Date notBefore, Date notAfter) throws TrustException {
         try {
@@ -422,11 +435,22 @@ public class SAMLTokenIssuer implements TokenIssuer {
             SAMLSubject subject = new SAMLSubject(null, Arrays
                     .asList(confirmationMethods), null, keyInfoElem);
 
-            SAMLAttribute attribute = new SAMLAttribute("Name",
-                    "https://rahas.apache.org/saml/attrns", null, -1, Arrays
-                            .asList(new String[] { "Colombo/Rahas" }));
+           
+            SAMLAttribute[] attrs = null;
+            if(config.getCallbackHander() != null){
+            	SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
+            	SAMLCallbackHandler handler = config.getCallbackHander();
+            	attrs = cb.getAttributes();
+            }else{
+            	//TODO Remove this after discussing
+                SAMLAttribute attribute = new SAMLAttribute("Name",
+                        "https://rahas.apache.org/saml/attrns", null, -1, Arrays
+                                .asList(new String[] { "Colombo/Rahas" }));
+                attrs = new SAMLAttribute[]{attribute};
+            }
+            
             SAMLAttributeStatement attrStmt = new SAMLAttributeStatement(
-                    subject, Arrays.asList(new SAMLAttribute[] { attribute }));
+            subject, Arrays.asList(attrs ));
 
             SAMLStatement[] statements = { attrStmt };
 

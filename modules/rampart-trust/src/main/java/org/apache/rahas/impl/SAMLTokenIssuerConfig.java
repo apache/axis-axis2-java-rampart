@@ -16,22 +16,25 @@
 
 package org.apache.rahas.impl;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axis2.description.Parameter;
-import org.apache.rahas.TrustException;
-
-import javax.xml.namespace.QName;
-
 import java.io.FileInputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.xml.namespace.QName;
+
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMAttribute;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.description.Parameter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.TrustException;
+import org.apache.rahas.impl.util.SAMLCallbackHandler;
 
 /**
  * Configuration manager for the <code>SAMLTokenIssuer</code>
@@ -40,6 +43,9 @@ import java.util.Properties;
  */
 public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
 
+	
+	Log log = LogFactory.getLog(SAMLTokenIssuerConfig.class);
+	
     /**
      * The QName of the configuration element of the SAMLTokenIssuer
      */
@@ -76,13 +82,16 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     public final static QName USE_SAML_ATTRIBUTE_STATEMENT = new QName("useSAMLAttributeStatement");
 
     public final static QName ISSUER_NAME = new QName("issuerName");
-
+    
+    public final static QName SAML_CALLBACK_CLASS = new QName("dataCallbackHandlerClass");
+        
     protected String issuerKeyAlias;
     protected String issuerKeyPassword;
     protected String issuerName;
     protected Map trustedServices = new HashMap();
     protected String trustStorePropFile;
-
+    protected SAMLCallbackHandler callbackHander;
+  
     /**
      * Create a new configuration with issuer name and crypto information
      * @param issuerName Name of the issuer
@@ -228,6 +237,27 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
             //throw an exception when there are no trusted in the list at the 
             //moment
         }
+        
+        
+       	OMElement attrElemet = elem.getFirstChildWithName(SAML_CALLBACK_CLASS);
+		if (attrElemet != null) {
+				try {
+					String value = attrElemet.getText();
+					Class handlerClass = Class.forName(value);
+					this.callbackHander = (SAMLCallbackHandler)handlerClass.newInstance();
+				} catch (ClassNotFoundException e) {
+					log.debug("Error loading class" , e);
+					throw new TrustException("Error loading class" , e);
+				} catch (InstantiationException e) {
+					log.debug("Error instantiating class" , e);
+					throw new TrustException("Error instantiating class" , e);
+				} catch (IllegalAccessException e) {
+					log.debug("Illegal Access" , e);
+					throw new TrustException("Illegal Access" , e);
+				}
+		}
+				
+
     }
 
     /**
@@ -349,5 +379,15 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     public Map getTrustedServices() {
         return trustedServices;
     }
+
+	public SAMLCallbackHandler getCallbackHander() {
+		return callbackHander;
+	}
+
+	public void setCallbackHander(SAMLCallbackHandler callbackHander) {
+		this.callbackHander = callbackHander;
+	}
+
+	
     
 }

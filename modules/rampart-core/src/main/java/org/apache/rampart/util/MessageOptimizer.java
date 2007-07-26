@@ -56,7 +56,6 @@ public class MessageOptimizer {
 		}
 
 		try {
-			if(expressions.size() > 0){
 				for(int i=0; i<expressions.size(); i++){
 					String exp = (String)expressions.get(i);
 					XPath xp = new AXIOMXPath(exp);
@@ -69,18 +68,6 @@ public class MessageOptimizer {
 						text.setOptimize(true);
 					}
 				}
-			}else{
-				String exp = CIPHER_ELEMENT;
-				XPath xp = new AXIOMXPath(exp);
-				xp.setNamespaceContext(nsCtx);
-				List list = xp.selectNodes(env);
-				Iterator elements = list.iterator();
-				while (elements.hasNext()) {
-					OMElement element = (OMElement) elements.next();
-					OMText text = (OMText)element.getFirstOMChild();
-					text.setOptimize(true);
-				}
-			}
 		} catch (JaxenException e) {
 			throw new RampartException("Error in XPath ", e);
 		}

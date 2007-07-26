@@ -137,7 +137,9 @@ public class MessageBuilder {
         if(rpd.isMTOMSerialize()){
         	msgCtx.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
         	OptimizePartsConfig config= rpd.getOptimizePartsConfig();
-	        MessageOptimizer.optimize(msgCtx.getEnvelope(), config.getExpressions(), config.getNamespaces());
+        	if(config != null){
+        		MessageOptimizer.optimize(msgCtx.getEnvelope(), config.getExpressions(), config.getNamespaces());
+        	}
         }
         
     }
