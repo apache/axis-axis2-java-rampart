@@ -15,25 +15,7 @@
     <name>Rampart - Integration</name>
 
     <build>
-        <!--unitTest>
-              <excludes>
-                  <exclude>**/ScenarioST1Test.class</exclude>
-               </excludes>
-      </unitTest-->
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <!-- The pertest forkMode is not ideal but seems to be necessary
-                         because the test server doesn't shut down properly :-(
-                         Should be removed if possible -->
-                    <forkMode>pertest</forkMode>
-                    <excludes>
-                        <exclude>**/ScenarioST1Test.class</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -96,7 +78,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-			       <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
+								<java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
                                     <arg line="-uri src/main/resources/ping/ping.wsdl -ss -o target/generated-code -p org.apache.axis2.oasis.ping -d xmlbeans -g"/>
                                     <classpath refid="maven.dependency.classpath"/>
                                     <classpath refid="maven.compile.classpath"/>
@@ -115,18 +97,31 @@
                                       tofile="target/generated-code/src/org/apache/axis2/security/InteropScenarioClient.java"
                                       overwrite="yes"/>
 
-				<copy todir="target/test-classes">
+				                <copy todir="target/test-classes">
+                                    <fileset dir="target/generated-code/resources">
+                                        <include name="**/*"/>
+                                    </fileset>
+                                </copy>
+
+				                <copy todir="target/clover/test-classes">
                                     <fileset dir="target/generated-code/resources">
                                         <include name="**/*"/>
                                     </fileset>
                                 </copy>
 								
-	        		<javac srcdir="target/generated-code" destdir="target/classes" fork="true">
-                    			<classpath refid="maven.dependency.classpath"/>
+								<javac srcdir="target/generated-code" destdir="target/classes" fork="true">
+                    					<classpath refid="maven.dependency.classpath"/>
                                     	<classpath refid="maven.compile.classpath"/>
                                     	<classpath refid="maven.runtime.classpath"/>
-                    		</javac>
-	   		    </tasks>
+								</javac>
+								
+								<mkdir dir="target/clover/classes"/>
+								<javac srcdir="target/generated-code" destdir="target/clover/classes" fork="true">
+                    					<classpath refid="maven.dependency.classpath"/>
+                                    	<classpath refid="maven.compile.classpath"/>
+                                    	<classpath refid="maven.runtime.classpath"/>
+								</javac>
+							</tasks>
                         </configuration>
                     </execution>
                     <execution>
