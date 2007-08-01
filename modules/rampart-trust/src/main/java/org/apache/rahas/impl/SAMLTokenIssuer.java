@@ -262,9 +262,8 @@ public class SAMLTokenIssuer implements TokenIssuer {
             		callbackHandler.handle(cb);
             		nameId = cb.getNameId();
             	}else{
-            		//TODO Remove
-            		nameId = new SAMLNameIdentifier(
-            				principal.getName(), null, SAMLNameIdentifier.FORMAT_EMAIL);
+              		nameId = new SAMLNameIdentifier(
+            		principal.getName(), null, SAMLNameIdentifier.FORMAT_EMAIL);
             	}
             	
                 return createAuthAssertion(doc, SAMLSubject.CONF_BEARER,
@@ -440,6 +439,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
             if(config.getCallbackHander() != null){
             	SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
             	SAMLCallbackHandler handler = config.getCallbackHander();
+            	handler.handle(cb);
             	attrs = cb.getAttributes();
             }else{
             	//TODO Remove this after discussing

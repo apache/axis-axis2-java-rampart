@@ -3,6 +3,13 @@ package org.apache.rahas.impl.util;
 import org.apache.rahas.RahasData;
 import org.opensaml.SAMLNameIdentifier;
 
+/**
+ * This is used retrieve data for the SAMLNameIdentifier.
+ * SAMLNameIdentifier can have different formats.
+ * Depending on it, NameIdentifier must have different values.
+ * It should be implementation specific.
+ *
+ */
 public class SAMLNameIdentifierCallback implements SAMLCallback{
 	
 	private SAMLNameIdentifier nameId = null;
@@ -31,6 +38,10 @@ public class SAMLNameIdentifierCallback implements SAMLCallback{
 
 	public String getUserId() {
 		return userId;
+	}
+
+	public RahasData getData() {
+		return data;
 	}
 		
 }

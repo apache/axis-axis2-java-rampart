@@ -29,5 +29,8 @@ public class SAMLAttributeCallback implements SAMLCallback{
 		
 	}
 
+	public RahasData getData() {
+		return data;
+	}
 
 }
