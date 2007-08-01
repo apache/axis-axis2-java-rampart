@@ -341,6 +341,27 @@
                                       tofile="target/test-resources/default_security_client_repo/modules/addressing-SNAPSHOT.mar"/>
                                 <copy file="src/test/resources/conf/axis2.xml"
                                       tofile="target/test-resources/default_security_client_repo/conf/axis2.xml"/>
+				<!--
+				RahasSAMLTokenAttributeTest
+				-->
+				<mkdir dir="target/test-resources/rahas_service_repo_5"/>
+                                <mkdir dir="target/test-resources/rahas_service_repo_5/conf"/>
+                                <mkdir dir="target/test-resources/rahas_service_repo_5/services"/>
+                                <mkdir dir="target/test-resources/rahas_service_repo_5/modules"/>
+                                <copy file="target/artifacts/rampart-SNAPSHOT.mar"
+                                      tofile="target/test-resources/rahas_service_repo_5/modules/rampart-SNAPSHOT.mar"/>
+                                <copy file="target/artifacts/rahas-SNAPSHOT.mar"
+                                      tofile="target/test-resources/rahas_service_repo_5/modules/rahas-SNAPSHOT.mar"/>
+                                <copy file="target/artifacts/addressing-SNAPSHOT.mar"
+                                      tofile="target/test-resources/rahas_service_repo_5/modules/addressing-SNAPSHOT.mar"/>
+                                <!-- copy the services.xml and create the aar -->
+                                <copy overwrite="yes"
+                                      file="src/test/resources/rahas/s5-services.xml"
+                                      tofile="target/temp-rahas/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rahas_service_repo_5/services/SecureService.aar"
+                                     basedir="target/temp-rahas"/>
+
+				<!--RahasAttributeTest END-->
                                 <!-- Scenario 1 -->
                                 <mkdir dir="target/test-resources/scenario1_client_repo"/>
                                 <mkdir dir="target/test-resources/scenario1_client_repo/conf"/>
