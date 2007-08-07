@@ -11,7 +11,7 @@
     <groupId>org.apache.rampart</groupId>
     <artifactId>rampart</artifactId>
     <packaging>mar</packaging>
-    <version>SNAPSHOT</version>
+    <version>${rampart.mar.version}</version>
     <name>Rampart - Mar</name>
 
     <scm>
