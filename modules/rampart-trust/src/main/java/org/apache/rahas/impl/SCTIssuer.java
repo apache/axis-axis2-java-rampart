@@ -156,8 +156,13 @@ public class SCTIssuer implements TokenIssuer {
                                        creationTime,
                                        expirationTime);
             
-            sctToken.setUnattachedReference(reqAttachedRef.getFirstElement());
-            sctToken.setAttachedReference(reqAttachedRef.getFirstElement());
+            if(config.addRequestedAttachedRef) {
+                sctToken.setAttachedReference(reqAttachedRef.getFirstElement());
+            }
+            
+            if(config.addRequestedUnattachedRef) {
+                sctToken.setUnattachedReference(reqUnattachedRef.getFirstElement());
+            }
 
             byte[] secret = TokenIssuerUtil.getSharedSecret(data, config.keyComputation, config.keySize);
             sctToken.setSecret(secret);
