@@ -1,7 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+    <parent>
+        <groupId>org.apache.rampart</groupId>
+        <artifactId>rampart-project</artifactId>
+        <version>SNAPSHOT</version>
+    </parent>
     
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.rampart</groupId>
@@ -51,12 +55,12 @@
     	<dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
-            <version>${pom.version}</version>
+            <version>${rampart.version}</version>
         </dependency>
     	<dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-trust</artifactId>
-            <version>${pom.version}</version>
+            <version>${rampart.version}</version>
         </dependency>
     </dependencies>
 

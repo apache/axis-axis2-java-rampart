@@ -464,7 +464,10 @@
     </modules>
 
     <properties>
-        <axis2.version>SNAPSHOT</axis2.version>
+		<rampart.version>SNAPSHOT</rampart.version>
+        <rampart.mar.version>SNAPSHOT</rampart.mar.version>
+		<rahas.mar.version>SNAPSHOT</rahas.mar.version>
+		<axis2.version>SNAPSHOT</axis2.version>
 
         <axiom.version>SNAPSHOT</axiom.version>
         <addressing.mar.version>SNAPSHOT</addressing.mar.version>
