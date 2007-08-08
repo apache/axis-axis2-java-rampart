@@ -144,8 +144,7 @@ public class TokenCancelerImpl implements TokenCanceler {
 
             rstrElem = TrustUtil.createRequestSecurityTokenResponseElement(version, rstrcElem);
         }
-        OMElement reqTokenCanceledEle =
-                TrustUtil.createRequestedTokenCanceledElement(version, rstrElem);
+        TrustUtil.createRequestedTokenCanceledElement(version, rstrElem);
         return responseEnv;
     }
 
