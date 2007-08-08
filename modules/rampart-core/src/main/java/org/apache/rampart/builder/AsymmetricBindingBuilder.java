@@ -29,6 +29,8 @@ import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
+import org.apache.ws.secpolicy.model.Wss10;
+import org.apache.ws.secpolicy.model.Wss11;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSecurityException;
@@ -156,6 +158,21 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     encr.setDocument(doc);
                     RampartUtil.setEncryptionUser(rmd, encr);
                     encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
+                    if(encryptionToken.getInclusion().equals(Constants.INCLUDE_NEVER)) {
+                        Wss10 wss = rpd.getWss11();
+                        if(wss == null) {
+                            wss = rpd.getWss10();
+                        }
+                        if(wss.isMustSupportRefKeyIdentifier()) {
+                            encr.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
+                        } if(wss.isMustSupportRefIssuerSerial()) {
+                            encr.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
+                        } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
+                            encr.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
+                        }
+                    } else {
+                        encr.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
+                    }
                     encr.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(config, rmd.getCustomClassLoader()));
 
@@ -427,9 +444,15 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     
                     
                     if(encrToken.getInclusion().equals(Constants.INCLUDE_NEVER)) {
-                        if(rpd.getWss10() != null && rpd.getWss10().isMustSupportRefKeyIdentifier()) {
+                        Wss10 wss = rpd.getWss11();
+                        if(wss == null) {
+                            wss = rpd.getWss10();
+                        }
+                        if(wss.isMustSupportRefKeyIdentifier()) {
                             encr.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-                        } else if(rpd.getWss11() != null && rpd.getWss11().isMustSupportRefThumbprint()) {
+                        } if(wss.isMustSupportRefIssuerSerial()) {
+                            encr.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
+                        } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
                             encr.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
                         }
                     } else {

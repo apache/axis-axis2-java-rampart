@@ -42,6 +42,8 @@ import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
+import org.apache.ws.secpolicy.model.Wss10;
+import org.apache.ws.secpolicy.model.Wss11;
 import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
@@ -175,16 +177,21 @@ public abstract class BindingBuilder {
         
         WSSecEncryptedKey encrKey = new WSSecEncryptedKey();
         if(token.getInclusion().equals(Constants.INCLUDE_NEVER)) {
-            if(rpd.getWss11() != null) {
-                //Use thumbprint
-                encrKey.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
-            } else {
-                //Use SKI
+            Wss10 wss = rpd.getWss11();
+            if(wss == null) {
+                wss = rpd.getWss10();
+            }
+            if(wss.isMustSupportRefKeyIdentifier()) {
                 encrKey.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
+            } if(wss.isMustSupportRefIssuerSerial()) {
+                encrKey.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
+            } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
+                encrKey.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
             }
         } else {
             encrKey.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
         }
+        
         try {
             RampartUtil.setEncryptionUser(rmd, encrKey);
             encrKey.setKeySize(rpd.getAlgorithmSuite().getMaximumSymmetricKeyLength());
@@ -207,14 +214,17 @@ public abstract class BindingBuilder {
         sig.setWsConfig(rmd.getConfig());
         
         log.debug("Token inclusion: " + token.getInclusion());
-        if(token.getInclusion().equals(Constants.INCLUDE_NEVER) ||
-                (!rmd.isInitiator() && token.getInclusion().equals(Constants.INCLUDE_ALWAYS_TO_RECIPIENT))) {
-            if(rpd.getWss11() != null) {
-                //Use thumbprint
-                sig.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
-            } else {
-                //Use SKI
+        if(token.getInclusion().equals(Constants.INCLUDE_NEVER)) {
+            Wss10 wss = rpd.getWss11();
+            if(wss == null) {
+                wss = rpd.getWss10();
+            }
+            if(wss.isMustSupportRefKeyIdentifier()) {
                 sig.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
+            } if(wss.isMustSupportRefIssuerSerial()) {
+                sig.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
+            } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
+                sig.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
             }
         } else {
             sig.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
