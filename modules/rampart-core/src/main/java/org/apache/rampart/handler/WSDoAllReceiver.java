@@ -330,7 +330,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
                     ttl_i = reqData.getTimeToLive();
                 }
 
-                if (!verifyTimestamp(timestamp, reqData.getTimeToLive())) {
+                if (!verifyTimestamp(timestamp, ttl_i)) {
                     throw new AxisFault(
                             "WSDoAllReceiver: The timestamp could not be validated");
                 }
