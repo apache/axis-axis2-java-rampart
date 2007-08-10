@@ -183,7 +183,7 @@ public abstract class BindingBuilder {
             }
             if(wss.isMustSupportRefKeyIdentifier()) {
                 encrKey.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-            } if(wss.isMustSupportRefIssuerSerial()) {
+            } else if(wss.isMustSupportRefIssuerSerial()) {
                 encrKey.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
             } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
                 encrKey.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
@@ -221,7 +221,7 @@ public abstract class BindingBuilder {
             }
             if(wss.isMustSupportRefKeyIdentifier()) {
                 sig.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-            } if(wss.isMustSupportRefIssuerSerial()) {
+            } else  if(wss.isMustSupportRefIssuerSerial()) {
                 sig.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
             } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
                 sig.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);

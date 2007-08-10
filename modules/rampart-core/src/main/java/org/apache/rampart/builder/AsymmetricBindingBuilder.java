@@ -121,7 +121,12 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         /*
          * We MUST use keys derived from the same token
          */
-        Token encryptionToken = rpd.getRecipientToken();
+        Token encryptionToken = null;
+        if(rmd.isInitiator()) {
+            encryptionToken = rpd.getRecipientToken();
+        } else {
+            encryptionToken = rpd.getInitiatorToken();
+        }
         Vector encrParts = RampartUtil.getEncryptedParts(rmd);
 
         if(encryptionToken == null && encrParts.size() > 0) {
@@ -165,7 +170,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                         }
                         if(wss.isMustSupportRefKeyIdentifier()) {
                             encr.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-                        } if(wss.isMustSupportRefIssuerSerial()) {
+                        } else if(wss.isMustSupportRefIssuerSerial()) {
                             encr.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
                         } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
                             encr.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
@@ -241,7 +246,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 addSignatureConfirmation(rmd, sigParts);
             }
             
-            if(rpd.getInitiatorToken() != null) {
+            if((rmd.isInitiator() && rpd.getInitiatorToken() != null) || 
+                    (!rmd.isInitiator() && rpd.getRecipientToken() != null)) {
                 this.doSignature(rmd);
             }
 
@@ -366,7 +372,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             addSignatureConfirmation(rmd, sigParts);
         }
 
-        if(rpd.getInitiatorToken() != null) {
+        if((rmd.isInitiator() && rpd.getInitiatorToken() != null) || 
+                (!rmd.isInitiator() && rpd.getRecipientToken() != null)) {
             // Do signature
             this.doSignature(rmd);
         }
@@ -450,7 +457,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                         }
                         if(wss.isMustSupportRefKeyIdentifier()) {
                             encr.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-                        } if(wss.isMustSupportRefIssuerSerial()) {
+                        } else if(wss.isMustSupportRefIssuerSerial()) {
                             encr.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
                         } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
                             encr.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
@@ -520,8 +527,11 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         if(dotDebug){
     		t0 = System.currentTimeMillis();
     	}
-        
-        sigToken = rpd.getInitiatorToken();
+        if(rmd.isInitiator()) {
+            sigToken = rpd.getInitiatorToken();
+        } else {
+            sigToken = rpd.getRecipientToken();
+        }
 
         if (sigToken.isDerivedKeys()) {
             // Set up the encrypted key to use

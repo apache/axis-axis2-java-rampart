@@ -72,7 +72,7 @@ public class PolicyBasedResultsValidator {
         
         //sig/encr
         Vector encryptedParts = RampartUtil.getEncryptedParts(rmd);
-        if(rpd.isSignatureProtection() && isSignatureRequired(rpd)) {
+        if(rpd.isSignatureProtection() && isSignatureRequired(rmd)) {
             encryptedParts.add(new WSEncryptionPart(WSConstants.SIG_LN, 
                     WSConstants.SIG_NS, "Element"));
         }
@@ -409,10 +409,12 @@ public class PolicyBasedResultsValidator {
     }
 
     
-    private boolean isSignatureRequired(RampartPolicyData rpd) {
+    private boolean isSignatureRequired(RampartMessageData rmd) {
+        RampartPolicyData rpd = rmd.getPolicyData();
         return (rpd.isSymmetricBinding() && rpd.getSignatureToken() != null) ||
                 (!rpd.isSymmetricBinding() && !rpd.isTransportBinding() && 
-                        rpd.getInitiatorToken() != null);
+                        ((rpd.getInitiatorToken() != null && rmd.isInitiator())
+                                || rpd.getRecipientToken() != null && !rmd.isInitiator()));
     }
     
 
