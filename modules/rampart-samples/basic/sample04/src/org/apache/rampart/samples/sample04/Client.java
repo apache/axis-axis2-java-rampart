@@ -50,7 +50,7 @@ public class Client {
     
     private static OMElement getPayload(String value) {
         OMFactory factory = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = factory.createOMNamespace("http://sample04.samples.rampart.apache.org/xsd","ns1");
+        OMNamespace ns = factory.createOMNamespace("http://sample04.samples.rampart.apache.org","ns1");
         OMElement elem = factory.createOMElement("echo", ns);
         OMElement childElem = factory.createOMElement("param0", null);
         childElem.setText(value);
