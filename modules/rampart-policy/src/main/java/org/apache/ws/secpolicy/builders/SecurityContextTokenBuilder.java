@@ -62,7 +62,7 @@ public class SecurityContextTokenBuilder implements AssertionBuilder {
     }
 
     public QName[] getKnownElements() {
-        return new QName[] {Constants.SECURE_CONVERSATION_TOKEN};
+        return new QName[] {Constants.SECURITY_CONTEXT_TOKEN};
     }
 
 }
