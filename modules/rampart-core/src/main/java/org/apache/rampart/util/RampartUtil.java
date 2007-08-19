@@ -128,7 +128,9 @@ public class RampartUtil {
             if(cbHandler == null) {
                 Parameter param = msgContext.getParameter(
                         WSHandlerConstants.PW_CALLBACK_REF);
-                cbHandler = (CallbackHandler)param.getValue();
+                if(param != null) {
+                    cbHandler = (CallbackHandler)param.getValue();
+                }
             }
         }
         

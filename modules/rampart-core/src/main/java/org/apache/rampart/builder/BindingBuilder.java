@@ -29,6 +29,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.client.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
@@ -110,49 +111,63 @@ public abstract class BindingBuilder {
         RampartPolicyData rpd = rmd.getPolicyData();
         
         //Get the user
-        String user = rpd.getRampartConfig().getUser();
+        //First try options
+        Options options = rmd.getMsgContext().getOptions();
+        String user = options.getUserName();
+        if(user == null || user.length() == 0) {
+            //Then try RampartConfig
+            if(rpd.getRampartConfig() != null) {
+                user = rpd.getRampartConfig().getUser();
+            }
+        }
+        
         if(user != null && !"".equals(user)) {
             log.debug("User : " + user);
             
             //Get the password
-            CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
+
+            //First check options object for a password
+            String password = options.getPassword();
             
-            if(handler == null) {
-                //If the callback handler is missing
-                throw new RampartException("cbHandlerMissing");
-            }
+            if((password == null || password.length() == 0) &&
+                    rpd.getRampartConfig() != null) {
+                
+                //Then try to get the password from the given callback handler
+                CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
             
-            WSPasswordCallback[] cb = { new WSPasswordCallback(user,
-                    WSPasswordCallback.USERNAME_TOKEN) };
-            
-            try {
-                handler.handle(cb);
+                if(handler == null) {
+                    //If the callback handler is missing
+                    throw new RampartException("cbHandlerMissing");
+                }
+                
+                WSPasswordCallback[] cb = { new WSPasswordCallback(user,
+                        WSPasswordCallback.USERNAME_TOKEN) };
+                try {
+                    handler.handle(cb);
+                } catch (Exception e) {
+                    throw new RampartException("errorInGettingPasswordForUser", 
+                            new String[]{user}, e);
+                }
                 
                 //get the password
-                String password = cb[0].getPassword();
+                password = cb[0].getPassword();
+            }
+            
+            log.debug("Password : " + password);
+            
+            if(password != null && !"".equals(password)) {
+                //If the password is available then build the token
                 
-                log.debug("Password : " + password);
+                WSSecUsernameToken utBuilder = new WSSecUsernameToken();
                 
-                if(password != null && !"".equals(password)) {
-                    //If the password is available then build the token
-                    
-                    WSSecUsernameToken utBuilder = new WSSecUsernameToken();
-                    
-                    //TODO Get the UT type, only WS-SX spec supports this
-                    utBuilder.setUserInfo(user, password);
-                    
-                    return utBuilder;
-                } else {
-                    //If there's no password then throw an exception
-                    throw new RampartException("noPasswordForUser", 
-                            new String[]{user});
-                }
-            } catch (IOException e) {
-                throw new RampartException("errorInGettingPasswordForUser", 
-                        new String[]{user}, e);
-            } catch (UnsupportedCallbackException e) {
-                throw new RampartException("errorInGettingPasswordForUser", 
-                        new String[]{user}, e);
+                //TODO Get the UT type, only WS-SX spec supports this
+                utBuilder.setUserInfo(user, password);
+                
+                return utBuilder;
+            } else {
+                //If there's no password then throw an exception
+                throw new RampartException("noPasswordForUser", 
+                        new String[]{user});
             }
             
         } else {

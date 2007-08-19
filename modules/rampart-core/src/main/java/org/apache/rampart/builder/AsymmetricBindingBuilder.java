@@ -134,6 +134,13 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         }
         
         if (encryptionToken != null && encrParts.size() > 0) {
+            
+            //Check for RampartConfig assertion
+            if(rpd.getRampartConfig() == null) {
+                //We'er missing the extra info rampart needs
+                throw new RampartException("rampartConigMissing");
+            }
+            
             if (encryptionToken.isDerivedKeys()) {
                 try {
                     this.setupEncryptedKey(rmd, encryptionToken);

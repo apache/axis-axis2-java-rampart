@@ -207,11 +207,6 @@ public class RampartMessageData {
             }
             
             
-            if(isInitiator && this.policyData != null && this.policyData.getRampartConfig() == null) {
-                //We'er missing the extra info rampart needs
-                throw new RampartException("rampartConigMissing");
-            }
-            
             if(this.policyData != null) {
                 
                 //Check for RST and RSTR for an SCT
@@ -222,20 +217,22 @@ public class RampartMessageData {
                     this.servicePolicy = this.policyData.getIssuerPolicy();
                     
                     RampartConfig rampartConfig = policyData.getRampartConfig();
-                    /*
-                     * Copy crypto info into the new issuer policy 
-                     */
-                    RampartConfig rc = new RampartConfig();
-                    rc.setEncrCryptoConfig(rampartConfig.getEncrCryptoConfig());
-                    rc.setSigCryptoConfig(rampartConfig.getSigCryptoConfig());
-                    rc.setDecCryptoConfig(rampartConfig.getDecCryptoConfig());
-                    rc.setUser(rampartConfig.getUser());
-                    rc.setEncryptionUser(rampartConfig.getEncryptionUser());
-                    rc.setPwCbClass(rampartConfig.getPwCbClass());
-                    rc.setSSLConfig(rampartConfig.getSSLConfig());
-                    
-                    this.servicePolicy.addAssertion(rc);
-                    
+                    if(rampartConfig != null) {
+                        /*
+                         * Copy crypto info into the new issuer policy 
+                         */
+                        RampartConfig rc = new RampartConfig();
+                        rc.setEncrCryptoConfig(rampartConfig.getEncrCryptoConfig());
+                        rc.setSigCryptoConfig(rampartConfig.getSigCryptoConfig());
+                        rc.setDecCryptoConfig(rampartConfig.getDecCryptoConfig());
+                        rc.setUser(rampartConfig.getUser());
+                        rc.setEncryptionUser(rampartConfig.getEncryptionUser());
+                        rc.setPwCbClass(rampartConfig.getPwCbClass());
+                        rc.setSSLConfig(rampartConfig.getSSLConfig());
+                        
+                        this.servicePolicy.addAssertion(rc);
+                    }
+    
                     List it = (List)this.servicePolicy.getAlternatives().next();
     
                     //Process policy and build policy data
@@ -518,7 +515,7 @@ public class RampartMessageData {
     }
 
 
-    
+
     /**
      * @return Returns the tokenStorage.
      */
@@ -535,11 +532,11 @@ public class RampartMessageData {
             this.tokenStorage = storage;
         } else {
 
-            String storageClass = this.policyData.getRampartConfig()
-                    .getTokenStoreClass();
-    
-            if (storageClass != null) {
+            if (this.policyData.getRampartConfig() != null &&
+                    this.policyData.getRampartConfig().getTokenStoreClass() != null) {
                 Class stClass = null;
+                String storageClass = this.policyData.getRampartConfig()
+                        .getTokenStoreClass(); 
                 try {
                     stClass = Loader.loadClass(msgContext.getAxisService()
                             .getClassLoader(), storageClass);

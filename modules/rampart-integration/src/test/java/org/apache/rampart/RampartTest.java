@@ -32,8 +32,6 @@ import org.apache.axis2.integration.UtilServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 
-import javax.xml.namespace.QName;
-
 import junit.framework.TestCase;
 
 
@@ -76,12 +74,19 @@ public class RampartTest extends TestCase {
                         "Unlimited Strength Jurisdiction Policy !!!");
             }
             
-            for (int i = 1; i <= 12; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 13; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i ==5)) {
                     //Skip the Basic256 tests
                     continue;
                 }
                 Options options = new Options();
+                
+                if(i == 13) {
+                    //Username token created with user/pass from options
+                    options.setUserName("alice");
+                    options.setPassword("password");
+                }
+                
                 System.out.println("Testing WS-Sec: custom scenario " + i);
                 options.setAction("urn:echo");
                 options.setTo(new EndpointReference("http://127.0.0.1:" +
@@ -91,8 +96,6 @@ public class RampartTest extends TestCase {
                 ServiceContext context = serviceClient.getServiceContext();
                 context.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
                         loadPolicy("/rampart/policy/" + i + ".xml"));
-               // options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
-                 //       loadPolicy("/rampart/policy/" + i + ".xml"));
                 serviceClient.setOptions(options);
                 
                 //Blocking invocation
