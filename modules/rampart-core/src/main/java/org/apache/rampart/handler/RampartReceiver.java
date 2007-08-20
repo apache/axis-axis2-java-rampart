@@ -38,7 +38,11 @@ import org.apache.ws.security.handler.WSHandlerResult;
 import java.util.Iterator;
 import java.util.Vector;
 
-
+/**
+ * Rampart inflow handler.
+ * This processes the incoming message and validates it against the effective 
+ * policy.
+ */
 public class RampartReceiver implements Handler {
 	
 	private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
@@ -70,8 +74,9 @@ public class RampartReceiver implements Handler {
           return InvocationResponse.CONTINUE;        
         }
         
-	if(mlog.isDebugEnabled()){
-        	mlog.debug("*********************** RampartReceiver received \n"+msgContext.getEnvelope());
+        if(mlog.isDebugEnabled()){
+        	mlog.debug("*********************** RampartReceiver received \n"
+                    + msgContext.getEnvelope());
         }
         
         RampartEngine engine = new RampartEngine();
@@ -80,13 +85,10 @@ public class RampartReceiver implements Handler {
             wsResult = engine.process(msgContext);
             
         } catch (WSSecurityException e) {
-            e.printStackTrace();
             throw new AxisFault(e.getMessage(), e);
         } catch (WSSPolicyException e) {
-            e.printStackTrace();
             throw new AxisFault(e.getMessage(), e);
         } catch (RampartException e) {
-            e.printStackTrace();
             throw new AxisFault(e.getMessage(), e);
         } 
         
@@ -95,7 +97,8 @@ public class RampartReceiver implements Handler {
         }
         
         Vector results = null;
-        if ((results = (Vector) msgContext.getProperty(WSHandlerConstants.RECV_RESULTS)) == null) {
+        if ((results = (Vector) msgContext
+                .getProperty(WSHandlerConstants.RECV_RESULTS)) == null) {
             results = new Vector();
             msgContext.setProperty(WSHandlerConstants.RECV_RESULTS, results);
         }

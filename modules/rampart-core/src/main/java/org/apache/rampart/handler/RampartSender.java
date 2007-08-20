@@ -29,7 +29,10 @@ import org.apache.rampart.RampartException;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSSecurityException;
 
-
+/**
+ * Rampart outflow handler.
+ * This constructs the secured message according to the effective policy.
+ */
 public class RampartSender implements Handler {
 	
 	private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
@@ -38,7 +41,6 @@ public class RampartSender implements Handler {
         new HandlerDescription("default Handler");
 
     private HandlerDescription handlerDesc;
-    
     
     public RampartSender() {
         this.handlerDesc = EMPTY_HANDLER_METADATA;
@@ -69,7 +71,8 @@ public class RampartSender implements Handler {
         }
         
         if(mlog.isDebugEnabled()){
-        	mlog.debug("*********************** RampartSender sent out \n"+msgContext.getEnvelope());
+        	mlog.debug("*********************** RampartSender sent out \n" + 
+        	        msgContext.getEnvelope());
         }
         
         return InvocationResponse.CONTINUE;        
