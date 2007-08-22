@@ -2,6 +2,8 @@
 **************************** Apache Rampart Tomcat Samples *********************
 ********************************************************************************
 
+It is strongly recommended to run other samples before trying this. Because it will create the directory structure to expected by the build file.
+
 UsernameToken Authentication over HTTPS.
 
 Step1: Install Axis2 in Tomcat by reading the Axis2 installation guide available in http://ws.apache.org/axis2/. Then test axis2 in Tomcat.
