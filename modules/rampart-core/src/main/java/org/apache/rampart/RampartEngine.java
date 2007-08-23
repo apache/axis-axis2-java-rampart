@@ -75,7 +75,7 @@ public class RampartEngine {
 			msgCtx.setEnvelope(env);
 			Axis2Util.useDOOM(false);
 			if(doDebug){
-				log.debug("Return process(MessageContext msgCtx)");
+				log.debug("Return process MessageContext msgCtx)");
 			}
 			return null;
 		}
@@ -88,17 +88,24 @@ public class RampartEngine {
 		ValidatorData data = new ValidatorData(rmd);
 
 		ArrayList headerBlocks = rmd.getMsgContext().getEnvelope()
-		.getHeader().getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
-		Iterator headerBlocksIterator = headerBlocks.iterator();
+		    .getHeader().getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
 		SOAPHeaderBlock secHeader = null;
-		while (headerBlocksIterator.hasNext()) {
-			SOAPHeaderBlock elem = (SOAPHeaderBlock) headerBlocksIterator.next();
-			if(elem.getLocalName().equals(WSConstants.WSSE_LN)) {
-				secHeader = elem;
-				break;
-			}
+		//Issue is axiom - a returned collection must not be null
+		if(headerBlocks != null) {
+    		Iterator headerBlocksIterator = headerBlocks.iterator();
+    		while (headerBlocksIterator.hasNext()) {
+    			SOAPHeaderBlock elem = (SOAPHeaderBlock) headerBlocksIterator.next();
+    			if(elem.getLocalName().equals(WSConstants.WSSE_LN)) {
+    				secHeader = elem;
+    				break;
+    			}
+    		}
 		}
-
+		
+		if(secHeader == null) {
+		    throw new RampartException("missingSecurityHeader");
+		}
+		
 		long t0=0, t1=0, t2=0, t3=0;
 		if(dotDebug){
 			t0 = System.currentTimeMillis();
