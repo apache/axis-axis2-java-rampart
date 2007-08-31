@@ -310,7 +310,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     try {
                         // Encrypt, get hold of the ref list and add it
                         secondRefList = encr.encryptForExternalRef(null,
-                                encrParts);
+                                secondEncrParts);
 
                         // Insert the ref list after the encrypted key elem
                         this.setInsertionLocation(RampartUtil

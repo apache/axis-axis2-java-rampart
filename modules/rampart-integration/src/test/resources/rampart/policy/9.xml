@@ -33,7 +33,8 @@
 				</sp:Layout>
 				<sp:IncludeTimestamp/>
 				<sp:EncryptSignature />
-				<sp:OnlySignEntireHeadersAndBody/>
+				<sp:EncryptBeforeSigning />
+				<!--sp:OnlySignEntireHeadersAndBody/-->
 			</wsp:Policy>
 		</sp:AsymmetricBinding>
 		<sp:Wss10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
