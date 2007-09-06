@@ -225,10 +225,9 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
             writer.writeEndElement();
         }
         
-        if (protectionToken != null) {
-            protectionToken.serialize(writer);
+        if(isEntireHeadersAndBodySignatures()) {
+            writer.writeEmptyElement(prefix, Constants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY, namespaceURI);
         }
-        
         // </wsp:Policy>
         writer.writeEndElement();
         

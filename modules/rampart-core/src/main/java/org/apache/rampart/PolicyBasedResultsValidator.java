@@ -354,15 +354,21 @@ public class PolicyBasedResultsValidator {
                         new String[]{data.getBodyEncrDataId()});
             }
         }
-        
-        int refCount = 0;
 
-        refCount += encryptedParts.size();
-
-        if(encrRefs.size() != refCount) {
-            throw new RampartException("invalidNumberOfEncryptedParts", 
-                    new String[]{Integer.toString(refCount)});
-        }
+//        TODO : IMPORTANT this processing is wrong .. fix it
+//
+//        int refCount = 0;
+//
+//        refCount += encryptedParts.size();
+//        
+//        if(rpd.isSignatureProtection()) {
+//            refCount ++;
+//        }
+//
+//        if(encrRefs.size() != refCount) {
+//            throw new RampartException("invalidNumberOfEncryptedParts", 
+//                    new String[]{Integer.toString(refCount)});
+//        }
         
     }
 

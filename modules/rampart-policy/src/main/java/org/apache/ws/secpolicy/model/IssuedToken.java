@@ -137,19 +137,12 @@ public class IssuedToken extends Token {
 
         if (rstTemplate != null) {
             // <sp:RequestSecurityTokenTemplate>
-            writer.writeStartElement(prefix,
-                    Constants.REQUEST_SECURITY_TOKEN_TEMPLATE.getLocalPart(),
-                    namespaceURI);
-
             rstTemplate.serialize(writer);
 
-            // </sp:RequestSecurityTokenTemplate>
-            writer.writeEndElement();
         }
 
-        String policyLocalName = Constants.PROTECTION_TOKEN.getLocalPart();
-        String policyNamespaceURI = Constants.PROTECTION_TOKEN
-                .getNamespaceURI();
+        String policyLocalName = Constants.POLICY.getLocalPart();
+        String policyNamespaceURI = Constants.POLICY.getNamespaceURI();
 
         String wspPrefix;
 
@@ -162,7 +155,8 @@ public class IssuedToken extends Token {
             wspPrefix = wspWriterPrefix;
         }
 
-        if (isRequireExternalReference() || isRequireInternalReference()) {
+        if (isRequireExternalReference() || isRequireInternalReference() ||
+                this.isDerivedKeys()) {
 
             // <wsp:Policy>
             writer.writeStartElement(wspPrefix, policyLocalName,
@@ -175,12 +169,22 @@ public class IssuedToken extends Token {
 
             if (isRequireExternalReference()) {
                 // <sp:RequireExternalReference />
-                writer.writeEmptyElement(prefix, Constants.REQUIRE_EXTERNAL_REFERNCE.getLocalPart(), namespaceURI);
+                writer.writeEmptyElement(prefix,
+                        Constants.REQUIRE_EXTERNAL_REFERNCE.getLocalPart(),
+                        namespaceURI);
             }
-            
+
             if (isRequireInternalReference()) {
                 // <sp:RequireInternalReference />
-                writer.writeEmptyElement(prefix, Constants.REQUIRE_INTERNAL_REFERNCE.getLocalPart(), namespaceURI);
+                writer.writeEmptyElement(prefix,
+                        Constants.REQUIRE_INTERNAL_REFERNCE.getLocalPart(),
+                        namespaceURI);
+            }
+
+            if (this.isDerivedKeys()) {
+                // <sp:RequireDerivedKeys />
+                writer.writeEmptyElement(prefix, Constants.REQUIRE_DERIVED_KEYS
+                        .getLocalPart(), namespaceURI);
             }
             
             // <wsp:Policy>
