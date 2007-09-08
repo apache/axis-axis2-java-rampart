@@ -89,9 +89,10 @@ public class PolicyBasedResultsValidator {
             SupportingToken endSupportingToken = rpd.getEndorsingSupportingTokens();
             if(endSupportingToken !=  null) {
                 SignedEncryptedParts endSignedParts = endSupportingToken.getSignedParts();
-                if(endSignedParts != null && 
+                if((endSignedParts != null && 
                         (endSignedParts.isBody() || 
-                                endSignedParts.getHeaders().size() > 0)) {
+                                endSignedParts.getHeaders().size() > 0)) ||
+                                rpd.isIncludeTimestamp()) {
                     signatureParts.add(
                             new WSEncryptionPart("EndorsingSupportingTokens"));
                 }
@@ -100,9 +101,10 @@ public class PolicyBasedResultsValidator {
             SupportingToken sgndEndSupportingToken = rpd.getSignedEndorsingSupportingTokens();
             if(sgndEndSupportingToken != null) {
                 SignedEncryptedParts sgndEndSignedParts = sgndEndSupportingToken.getSignedParts();
-                if(sgndEndSignedParts != null && 
+                if((sgndEndSignedParts != null && 
                         (sgndEndSignedParts.isBody() || 
-                                sgndEndSignedParts.getHeaders().size() > 0)) {
+                                sgndEndSignedParts.getHeaders().size() > 0)) || 
+                                rpd.isIncludeTimestamp()) {
                     signatureParts.add(
                             new WSEncryptionPart("SignedEndorsingSupportingTokens"));
                 }
@@ -111,7 +113,9 @@ public class PolicyBasedResultsValidator {
         
         validateEncrSig(encryptedParts, signatureParts, results);
         
-        validateProtectionOrder(data, results);
+        if(!rpd.isTransportBinding()) {
+            validateProtectionOrder(data, results);
+        }
         
         validateEncryptedParts(data, encryptedParts, results);
 
