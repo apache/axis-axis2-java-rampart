@@ -49,7 +49,7 @@
     <!-- ================================================= -->
     <parameter name="hotdeployment" locked="false">true</parameter>
     <parameter name="hotupdate" locked="false">false</parameter>
-    <parameter name="enableMTOM" locked="false">false</parameter>
+    <parameter name="enableMTOM" locked="false">true</parameter>
 
     <!--During a fault, stacktrace can be sent with the fault message. The following flag will control -->
     <!--that behaviour.-->
