@@ -124,6 +124,12 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 throw new RampartException("noSecurityToken");
             }
             
+            //Hack to handle reference id issues
+            //TODO Need a better fix
+            if(tokenId.startsWith("#")) {
+                tokenId = tokenId.substring(1);
+            }
+            
             /*
              * Get hold of the token from the token storage
              */
@@ -149,7 +155,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             //In the X509 case we MUST add the EncryptedKey
             if(encryptionToken instanceof X509Token) {
-                RampartUtil.appendChildToSecHeader(rmd, tok.getToken());
+               RampartUtil.appendChildToSecHeader(rmd, tok.getToken());
             }
             Document doc = rmd.getDocument();
 
@@ -188,11 +194,18 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 encr = new WSSecEncrypt();
                 
                 encr.setWsConfig(rmd.getConfig());
-                
+                encr.setEncKeyId(tokenId);
+                RampartUtil.setEncryptionUser(rmd, encr);
                 encr.setEphemeralKey(tok.getSecret());
                 encr.setDocument(doc);
+                // SymmKey is already encrypted, no need to do it again
+                encr.setEncryptSymmKey(false);
+
                 
                 try {
+                	
+                    encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
+                            .getRampartConfig(), rmd.getCustomClassLoader()));
                     //Encrypt, get hold of the ref list and add it
                     refList = encr.encryptForExternalRef(null, encrParts);
                 } catch (WSSecurityException e) {
