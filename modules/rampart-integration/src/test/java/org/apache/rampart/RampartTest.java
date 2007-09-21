@@ -103,7 +103,7 @@ public class RampartTest extends TestCase {
             }
 
             
-            for (int i = 1; i <= 2; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 3; i++) { //<-The number of tests we have
 
                 Options options = new Options();
                 System.out.println("Testing WS-SecConv: custom scenario " + i);

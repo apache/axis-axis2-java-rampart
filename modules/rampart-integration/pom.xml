@@ -256,7 +256,7 @@
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureServiceSC1.aar"
                                      basedir="target/temp-ramp"/>
 								
-								<!-- Service SC-1 -->
+								<!-- Service SC-2 -->
                                 <copy overwrite="yes"
                                       file="src/test/resources/rampart/issuer.properties"
                                       tofile="target/temp-ramp/issuer.properties"/>
@@ -266,6 +266,16 @@
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureServiceSC2.aar"
                                      basedir="target/temp-ramp"/>
 
+								<!-- Service SC-3 -->
+                                <copy overwrite="yes"
+                                      file="src/test/resources/rampart/issuer.properties"
+                                      tofile="target/temp-ramp/issuer.properties"/>
+                                <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-sc-3.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureServiceSC3.aar"
+                                     basedir="target/temp-ramp"/>
+									 
                                 <!--
                                  Set up the infra for rahas tests and the rahas client repo
                                 -->
