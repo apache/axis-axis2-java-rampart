@@ -24,6 +24,7 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
+import org.opensaml.SAMLAssertion;
 
 import javax.xml.namespace.QName;
 
@@ -75,6 +76,8 @@ public class RahasData {
     private OMElement claimElem;
     
     private String  claimDialect;
+    
+    private SAMLAssertion assertion;
     /**
      * Create a new RahasData instance and populate it with the information from
      * the request.
@@ -167,11 +170,15 @@ public class RahasData {
                                 .get(WSSecurityEngineResult.TAG_X509_CERTIFICATES);
                         this.clientCert = certificates[0];
                         this.principal = this.clientCert.getSubjectDN();
+                    } else if (act == WSConstants.ST_UNSIGNED) {
+                        this.assertion = (SAMLAssertion) wser
+                                .get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
+                        
                     }
                 }
             }
-            // If the principal is missing
-            if (principal == null) {
+            // If the principal or a SAML assertion is missing
+            if (this.principal == null && this.assertion == null) {
                 throw new TrustException(TrustException.REQUEST_FAILED);
             }
         }
