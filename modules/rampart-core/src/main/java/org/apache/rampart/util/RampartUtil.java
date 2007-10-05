@@ -43,6 +43,8 @@ import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
+import org.apache.ws.secpolicy.model.Wss10;
+import org.apache.ws.secpolicy.model.Wss11;
 import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
@@ -55,6 +57,7 @@ import org.apache.ws.security.conversation.ConversationConstants;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
+import org.apache.ws.security.message.WSSecBase;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Loader;
 import org.jaxen.JaxenException;
@@ -818,6 +821,55 @@ public class RampartUtil {
         } else {
             encrKeyBuilder.setUserInfo(encrUser);
         }
+    }
+    
+    /**
+     * Sets the keyIdentifierType of <code>WSSecSignature</code> or <code>WSSecEncryptedKey</code> 
+     * according to the given <code>Token</code> and <code>RampartPolicyData</code>
+     * First check the requirements specified under Token Assertion and if not found check 
+     * the WSS11 and WSS10 assertions
+     */
+    
+    public static void setKeyIdentifierType(RampartPolicyData rpd, WSSecBase secBase,org.apache.ws.secpolicy.model.Token token) {
+		
+    	if (token.getInclusion().equals(Constants.INCLUDE_NEVER)) {
+			
+    		boolean tokenTypeSet = false;
+    		
+    		if(token instanceof X509Token) {
+    			X509Token x509Token = (X509Token)token;
+    			
+    			if(x509Token.isRequireIssuerSerialReference()) {
+    				secBase.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
+    				tokenTypeSet = true;
+    			} else if (x509Token.isRequireKeyIdentifierReference()) {
+    				secBase.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
+    				tokenTypeSet = true;
+    			} else if (x509Token.isRequireThumbprintReference()) {
+    				secBase.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
+    				tokenTypeSet = true;
+    			}
+    		} 
+    		
+    		if (!tokenTypeSet) {
+	    		Wss10 wss = rpd.getWss11();
+				if (wss == null) {
+					wss = rpd.getWss10();
+				}
+				
+				if (wss.isMustSupportRefKeyIdentifier()) {
+					secBase.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
+				} else if (wss.isMustSupportRefIssuerSerial()) {
+					secBase.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
+				} else if (wss instanceof Wss11
+						&& ((Wss11) wss).isMustSupportRefThumbprint()) {
+					secBase.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
+				}
+    		}
+    		
+		} else {
+			secBase.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
+		}
     }
     
     private static X509Certificate getReqSigCert(Vector results) {

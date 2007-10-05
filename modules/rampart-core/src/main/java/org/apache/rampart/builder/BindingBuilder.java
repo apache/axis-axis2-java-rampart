@@ -191,23 +191,9 @@ public abstract class BindingBuilder {
         Document doc = rmd.getDocument();
         
         WSSecEncryptedKey encrKey = new WSSecEncryptedKey();
-        if(token.getInclusion().equals(Constants.INCLUDE_NEVER)) {
-            Wss10 wss = rpd.getWss11();
-            if(wss == null) {
-                wss = rpd.getWss10();
-            }
-            if(wss.isMustSupportRefKeyIdentifier()) {
-                encrKey.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-            } else if(wss.isMustSupportRefIssuerSerial()) {
-                encrKey.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
-            } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
-                encrKey.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
-            }
-        } else {
-            encrKey.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
-        }
         
         try {
+        	RampartUtil.setKeyIdentifierType(rpd, encrKey, token);
             RampartUtil.setEncryptionUser(rmd, encrKey);
             encrKey.setKeySize(rpd.getAlgorithmSuite().getMaximumSymmetricKeyLength());
             encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
@@ -229,21 +215,8 @@ public abstract class BindingBuilder {
         sig.setWsConfig(rmd.getConfig());
         
         log.debug("Token inclusion: " + token.getInclusion());
-        if(token.getInclusion().equals(Constants.INCLUDE_NEVER)) {
-            Wss10 wss = rpd.getWss11();
-            if(wss == null) {
-                wss = rpd.getWss10();
-            }
-            if(wss.isMustSupportRefKeyIdentifier()) {
-                sig.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-            } else  if(wss.isMustSupportRefIssuerSerial()) {
-                sig.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
-            } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
-                sig.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
-            }
-        } else {
-            sig.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
-        }
+        
+        RampartUtil.setKeyIdentifierType(rpd, sig, token);
 
         //Get the user
         String user = rpd.getRampartConfig().getUser();
@@ -578,6 +551,16 @@ public abstract class BindingBuilder {
                 WSSecSignature sig = new WSSecSignature();
                 sig.setWsConfig(rmd.getConfig());
                 
+                // If a EncryptedKeyToken is used, set the correct value type to
+                // be used in the wsse:Reference in ds:KeyInfo
+                if(policyToken instanceof X509Token) {
+                    sig.setCustomTokenValueType(WSConstants.ENC_KEY_VALUE_TYPE_NS
+                                          + WSConstants.ENC_KEY_VALUE_TYPE);
+                } else {
+				    sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS
+                                          + WSConstants.SAML_ASSERTION_ID);
+                }
+                
                 //Hack to handle reference id issues
                 //TODO Need a better fix
                 String sigTokId = tok.getId();
@@ -585,8 +568,6 @@ public abstract class BindingBuilder {
                     sigTokId = sigTokId.substring(1);
                 }
                 sig.setCustomTokenId(sigTokId);
-                sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
-                        WSConstants.SAML_ASSERTION_ID);
                 sig.setSecretKey(tok.getSecret());
                 sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
                 sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());

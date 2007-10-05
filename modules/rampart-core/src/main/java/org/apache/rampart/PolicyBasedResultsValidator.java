@@ -210,7 +210,8 @@ public class PolicyBasedResultsValidator {
             boolean encrDataFound = false;
             for (Iterator iter = list.iterator(); iter.hasNext();) {
                 WSSecurityEngineResult result = (WSSecurityEngineResult) iter.next();
-                if(result.get(WSSecurityEngineResult.TAG_DATA_REF_URIS) != null) {
+                ArrayList dataRefURIs = (ArrayList)result.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
+                if ( dataRefURIs != null && dataRefURIs.size() != 0) {
                     encrDataFound = true;
                 }
             }
