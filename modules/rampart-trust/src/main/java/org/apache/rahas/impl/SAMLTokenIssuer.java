@@ -361,12 +361,9 @@ public class SAMLTokenIssuer implements TokenIssuer {
                 Element x509DataElem = doc.createElementNS(WSConstants.SIG_NS,
                         "X509Data");
                 x509DataElem.appendChild(x509CertElem);
-                Element keyValueElem = doc.createElementNS(WSConstants.SIG_NS,
-                        "KeyValue");
-                keyValueElem.appendChild(x509DataElem);
 
                 return this.createAuthAssertion(doc,
-                        SAMLSubject.CONF_HOLDER_KEY, nameId, keyValueElem,
+                        SAMLSubject.CONF_HOLDER_KEY, nameId, x509DataElem,
                         config, crypto, creationTime, expirationTime);
             } catch (Exception e) {
                 throw new TrustException("samlAssertionCreationError", e);
