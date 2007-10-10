@@ -213,7 +213,7 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
             writer.writeEndElement();
         }
         
-        if (Constants.ENCRYPT_BEFORE_SIGNING.equals(protectionToken)) {
+        if (Constants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
             // <sp:EncryptBeforeSigning />
             writer.writeStartElement(prefix, Constants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
             writer.writeEndElement();
