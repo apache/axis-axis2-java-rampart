@@ -18,6 +18,7 @@ package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
@@ -87,8 +88,12 @@ public class RampartEngine {
 
 		ValidatorData data = new ValidatorData(rmd);
 
-		ArrayList headerBlocks = rmd.getMsgContext().getEnvelope()
-		    .getHeader().getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
+		SOAPHeader header = rmd.getMsgContext().getEnvelope().getHeader();
+		if(header == null) {
+		    throw new RampartException("missingSOAPHeader");
+		}
+		
+        ArrayList headerBlocks = header.getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
 		SOAPHeaderBlock secHeader = null;
 		//Issue is axiom - a returned collection must not be null
 		if(headerBlocks != null) {
