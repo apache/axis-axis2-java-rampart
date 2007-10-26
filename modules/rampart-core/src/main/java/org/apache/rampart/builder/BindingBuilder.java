@@ -60,6 +60,7 @@ import org.apache.ws.security.message.WSSecSignature;
 import org.apache.ws.security.message.WSSecSignatureConfirmation;
 import org.apache.ws.security.message.WSSecTimestamp;
 import org.apache.ws.security.message.WSSecUsernameToken;
+import org.apache.ws.security.message.token.SecurityTokenReference;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -317,40 +318,7 @@ public abstract class BindingBuilder {
                     endSuppTokMap.put(token, endSuppTok);
                     
                 } else if(token instanceof X509Token) {
-                    //Get the to be added
-                    if(token.isDerivedKeys()) {
-                        //We have to use an EncryptedKey
-                        try {
-                            WSSecEncryptedKey encrKey = this
-                                    .getEncryptedKeyBuilder(rmd, token);
-                            
-                            Element bstElem = encrKey.getBinarySecurityTokenElement();
-                            if(bstElem != null) {
-                               Element siblingElem = RampartUtil
-                                        .insertSiblingAfter(rmd, this.getInsertionLocation(),
-                                                bstElem);
-                               this.setInsertionLocation(siblingElem);
-                            }
-                            
-                            Element siblingElem = RampartUtil
-                                    .insertSiblingAfter(rmd, 
-                                            this.getInsertionLocation(),
-                                            encrKey.getEncryptedKeyElement());
-                            
-                            this.setInsertionLocation(siblingElem);
-                            
-                            Date now = new Date();
-                            endSuppTok =  
-                                new org.apache.rahas.Token(encrKey.getId(), 
-                                        (OMElement)encrKey.getEncryptedKeyElement(),
-                                        now, new Date(now.getTime() + 300000));
-                            
-                            endSuppTokMap.put(token, endSuppTok);
-                            
-                        } catch (TrustException e) {
-                            throw new RampartException("errorCreatingRahasToken", e);
-                        }
-                    } else {
+
                         //We have to use a cert
                         //Prepare X509 signature
                         WSSecSignature sig = this.getSignatureBuider(rmd, token);
@@ -361,7 +329,7 @@ public abstract class BindingBuilder {
                             this.setInsertionLocation(bstElem);
                         }
                         endSuppTokMap.put(token, sig);
-                    }
+                        
                 } else if(token instanceof UsernameToken) {
                     WSSecUsernameToken utBuilder = addUsernameToken(rmd);
                     
@@ -485,6 +453,7 @@ public abstract class BindingBuilder {
     protected byte[] doSymmSignature(RampartMessageData rmd, Token policyToken, org.apache.rahas.Token tok, Vector sigParts) throws RampartException {
         
         Document doc = rmd.getDocument();
+        
         RampartPolicyData rpd = rmd.getPolicyData();
         
         if(policyToken.isDerivedKeys() || policyToken instanceof SecureConversationToken) {
@@ -498,6 +467,15 @@ public abstract class BindingBuilder {
                 if(ref != null) {
                     dkSign.setExternalKey(tok.getSecret(), (Element) 
                             doc.importNode((Element) ref, true));
+                } else if (!rmd.isInitiator() && policyToken.isDerivedKeys()) { 
+                	
+                	// If the Encrypted key used to create the derived key is not
+                	// attached use key identifier as defined in WSS1.1 section
+                	// 7.7 Encrypted Key reference
+                	SecurityTokenReference tokenRef = new SecurityTokenReference(doc);
+                	tokenRef.setKeyIdentifierEncKeySHA1(tok.getSecret());             	
+                	dkSign.setExternalKey(tok.getSecret(), tokenRef.getElement());
+                
                 } else {
                     dkSign.setExternalKey(tok.getSecret(), tok.getId());
                 }
@@ -525,7 +503,8 @@ public abstract class BindingBuilder {
                 
                 //Do signature
                 dkSign.computeSignature();
-                
+
+
                 //Add elements to header
                 this.setInsertionLocation(RampartUtil
                         .insertSiblingAfter(rmd, 
@@ -536,6 +515,7 @@ public abstract class BindingBuilder {
                         rmd, 
                         this.getInsertionLocation(), 
                         dkSign.getSignatureElement()));
+
 
                 return dkSign.getSignatureValue();
                 
@@ -554,11 +534,18 @@ public abstract class BindingBuilder {
                 // If a EncryptedKeyToken is used, set the correct value type to
                 // be used in the wsse:Reference in ds:KeyInfo
                 if(policyToken instanceof X509Token) {
-                    sig.setCustomTokenValueType(WSConstants.ENC_KEY_VALUE_TYPE_NS
-                                          + WSConstants.ENC_KEY_VALUE_TYPE);
+                	if (rmd.isInitiator()) {
+	                    sig.setCustomTokenValueType(WSConstants.ENC_KEY_VALUE_TYPE_NS
+	                                          + WSConstants.ENC_KEY_VALUE_TYPE);
+	                    sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                	} else {
+                		sig.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
+                	}
+                    
                 } else {
 				    sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS
                                           + WSConstants.SAML_ASSERTION_ID);
+	                sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                 }
                 
                 //Hack to handle reference id issues
@@ -571,7 +558,6 @@ public abstract class BindingBuilder {
                 sig.setSecretKey(tok.getSecret());
                 sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
                 sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
-                sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                 sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
                         .getRampartConfig(), rmd.getCustomClassLoader()),
                         rmd.getSecHeader());
@@ -596,6 +582,7 @@ public abstract class BindingBuilder {
 
         }
     }
+    
     
     /**
      * Get hold of the token from the token storage

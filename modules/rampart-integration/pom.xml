@@ -246,6 +246,12 @@
                                       tofile="target/temp-ramp/META-INF/services.xml"/>
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService13.aar"
                                      basedir="target/temp-ramp"/>
+                               <!-- Service 14 -->
+                               <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-14.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService14.aar"
+                                     basedir="target/temp-ramp"/>
                                 <!-- Service SC-1 -->
                                 <copy overwrite="yes"
                                       file="src/test/resources/rampart/issuer.properties"
@@ -675,7 +681,12 @@
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-core</artifactId>
             <version>${pom.version}</version>
-        </dependency>
+        </dependency>   
+       <!--dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>jms</artifactId>
+			<version>1.1</version>
+        </dependency-->
     </dependencies>
 
     <reporting>

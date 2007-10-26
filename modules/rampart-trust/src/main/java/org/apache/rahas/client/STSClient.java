@@ -121,9 +121,11 @@ public class STSClient {
             client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
             client.getOptions().setSoapVersionURI(this.soapVersion); 
             client.engageModule("addressing");
+            client.engageModule("rampart");
 
             //Process the STS and service policy policy
             this.processPolicy(issuerPolicy, servicePolicy);
+            
             OMElement response = client.sendReceive(rstQn,
                                                     createIssueRequest(requestType, appliesTo));
 

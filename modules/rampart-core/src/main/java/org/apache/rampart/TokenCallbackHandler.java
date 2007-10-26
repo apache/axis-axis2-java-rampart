@@ -16,8 +16,10 @@
 
 package org.apache.rampart;
 
+import org.apache.rahas.EncryptedKeyToken;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
+import org.apache.rahas.TrustException;
 import org.apache.ws.security.WSPasswordCallback;
 import org.w3c.dom.Element;
 
@@ -45,10 +47,11 @@ public class TokenCallbackHandler implements CallbackHandler {
 
             if (callbacks[i] instanceof WSPasswordCallback) {
                 WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
+                String id = pc.getIdentifer();
+                
                 if((pc.getUsage() == WSPasswordCallback.SECURITY_CONTEXT_TOKEN || 
                         pc.getUsage() == WSPasswordCallback.CUSTOM_TOKEN) &&
                         this.store != null) {
-                    String id = pc.getIdentifer();
                     Token tok;
                     try {
                         //Pick up the token from the token store
@@ -62,6 +65,25 @@ public class TokenCallbackHandler implements CallbackHandler {
                         e.printStackTrace();
                         throw new IOException(e.getMessage());
                     }
+                } else if (pc.getUsage() == WSPasswordCallback.ENCRYPTED_KEY_TOKEN){
+                	try {
+            			String[] tokenIdentifiers = this.store.getTokenIdentifiers();
+            			Token tok;
+            			for (int j = 0 ; j < tokenIdentifiers.length ; j++) {
+            				
+            					tok = this.store.getToken(tokenIdentifiers[j]);
+            					
+            					if (tok instanceof EncryptedKeyToken &&
+            							((EncryptedKeyToken)tok).getSHA1().equals(id)){            						
+            					    pc.setKey(tok.getSecret());
+            					    pc.setCustomToken((Element)tok.getToken());
+            					}
+            			}
+            			
+            		} catch (TrustException e) {
+            			e.printStackTrace();
+            			throw new IOException(e.getMessage());
+            		}
                 } else {
                     //Handle other types of callbacks with the usual handler
                     if(this.handler != null) {

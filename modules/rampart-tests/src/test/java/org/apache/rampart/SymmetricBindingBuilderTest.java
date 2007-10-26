@@ -17,6 +17,7 @@
 package org.apache.rampart;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.xml.namespace.QName;
 
@@ -26,7 +27,7 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.conversation.ConversationConstants;
 
 public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
-
+	
 	public void testSymmBinding() {
 		
         try {
@@ -56,34 +57,32 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         }
 	}
 	
-	public void testSymmBindingServerSide() {
-		
-        try {
-            MessageContext ctx = getMsgCtx();
-            
-            ctx.setServerSide(true);
-            String policyXml = "test-resources/policy/rampart-symm-binding-1.xml";
-            Policy policy = this.loadPolicy(policyXml);
-            
-            ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
-            
-            MessageBuilder builder = new MessageBuilder();
-            builder.build(ctx);
-            
-            ArrayList list = new ArrayList();
-            
-            list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
-            list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
-            list.add(new QName(WSConstants.ENC_NS, WSConstants.REF_LIST_LN));
-            list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
-            
-            this.verifySecHeader(list.iterator(), ctx.getEnvelope());
-            
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-	}
+//	public void testSymmBindingServerSide() {
+//		
+//        try {
+//            MessageContext ctx = getMsgCtx();
+//            
+//            ctx.setServerSide(true);
+//            String policyXml = "test-resources/policy/rampart-symm-binding-1.xml";
+//            Policy policy = this.loadPolicy(policyXml);
+//            
+//            ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+//            
+//            MessageBuilder builder = new MessageBuilder();
+//            builder.build(ctx);
+//            
+//            ArrayList list = new ArrayList();
+//            
+//            list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
+//            list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
+//            
+//            this.verifySecHeader(list.iterator(), ctx.getEnvelope());
+//            
+//        } catch(Exception e) {
+//            e.printStackTrace();
+//            fail(e.getMessage());
+//        }
+//	}
 	
 	public void testSymmBindingWithDK() {
 		
@@ -165,8 +164,8 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
             
             list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
             list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
-            list.add(new QName(WSConstants.ENC_NS, WSConstants.REF_LIST_LN));
             list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
+            list.add(new QName(WSConstants.ENC_NS, WSConstants.REF_LIST_LN));
             
             this.verifySecHeader(list.iterator(), ctx.getEnvelope());
             
@@ -195,9 +194,10 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
             list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
             list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
             list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
-            list.add(new QName(WSConstants.ENC_NS, WSConstants.REF_LIST_LN));
-            list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
             list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
+            list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
+            list.add(new QName(WSConstants.ENC_NS, WSConstants.REF_LIST_LN));
+
             
             this.verifySecHeader(list.iterator(), ctx.getEnvelope());
             

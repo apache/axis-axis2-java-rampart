@@ -16,8 +16,10 @@
 
 package org.apache.rampart.util;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
@@ -28,6 +30,8 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
+import org.apache.axiom.soap.impl.dom.SOAPHeaderBlockImpl;
+import org.apache.axiom.soap.impl.dom.factory.DOMSOAPFactory;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.xml.security.utils.XMLUtils;
@@ -173,8 +177,44 @@ public class Axis2Util {
                 if(soapHeader != null) {
                     Iterator headerBlocs = soapHeader.getChildElements();
                     while (headerBlocs.hasNext()) {
-                        SOAPHeaderBlock element = (SOAPHeaderBlock) headerBlocs.next();
-                        if(element.isProcessed()) {
+                    	
+                    	OMElement element = (OMElement)headerBlocs.next();
+                    	SOAPHeaderBlock header = null;
+                    	
+                    	if (element instanceof SOAPHeaderBlock) {
+                            header = (SOAPHeaderBlock) element;
+                            
+                        // If a header block is not an instance of SOAPHeaderBlock, it means that
+                        // it is a header we have added in rampart eg. EncryptedHeader and should
+                        // be converted to SOAPHeaderBlock for processing
+                    	} else {
+                    		header = soapHeader.addHeaderBlock(element.getLocalName(), element.getNamespace());
+                    		Iterator attrIter = element.getAllAttributes();
+                    		while (attrIter.hasNext()) {
+                    			OMAttribute attr = (OMAttribute)attrIter.next();
+                    			header.addAttribute(attr.getLocalName(), attr.getAttributeValue(), attr.getNamespace());
+                    		}
+                    		Iterator nsIter  = element.getAllDeclaredNamespaces();
+                    		while (nsIter.hasNext()) {
+                    			OMNamespace ns =  (OMNamespace) nsIter.next();
+                    			header.declareNamespace(ns);
+                    		}
+                    		Iterator children = element.getChildElements();
+                    		while (children.hasNext()) {
+                    			OMNode child = (OMNode)children.next();
+                    			child.detach();
+                    			header.addChild(child);
+                    		}
+                    		
+                    		element.detach();
+                    		
+                    		soapHeader.build();
+                    		
+                    		header.setProcessed();
+                    		
+                    	}
+                    	
+                        if(header.isProcessed()) {
                             processedHeaderQNames.add(element.getQName());
                         }
                     }
@@ -198,6 +238,7 @@ public class Axis2Util {
                 }
                 
                 envelope.build();
+                
                 return envelope;
 
             } catch (FactoryConfigurationError e) {

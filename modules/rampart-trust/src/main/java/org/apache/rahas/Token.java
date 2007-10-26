@@ -122,6 +122,13 @@ public class Token {
      */
     private String issuerAddress;
     
+    
+    public Token(String id, Date created, Date expires) {
+    	this.id = id;
+    	this.created = created;
+    	this.expires = expires;
+    }
+    
     public Token(String id,
                  OMElement tokenElem,
                  Date created,

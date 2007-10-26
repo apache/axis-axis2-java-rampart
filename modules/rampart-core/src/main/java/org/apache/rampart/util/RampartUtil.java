@@ -51,6 +51,7 @@ import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.WSUsernameTokenPrincipal;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.conversation.ConversationConstants;
@@ -815,6 +816,13 @@ public class RampartUtil {
             Object resultsObj = rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
             if(resultsObj != null) {
                 encrKeyBuilder.setUseThisCert(getReqSigCert((Vector)resultsObj));
+                 
+                //TODO This is a hack, this should not come under USE_REQ_SIG_CERT
+                if(encrKeyBuilder.isCertSet()) {
+                	encrKeyBuilder.setUserInfo(getUsername((Vector)resultsObj));
+                }
+                	
+                
             } else {
                 throw new RampartException("noSecurityResults");
             }
@@ -899,6 +907,41 @@ public class RampartUtil {
         
         return null;
     }
+    
+    /**
+     * Scan through <code>WSHandlerResult<code> vector for a Username token and return
+     * the username if a Username Token found 
+     * @param results
+     * @return
+     */
+    
+    public static String getUsername(Vector results) {
+        /*
+         * Scan the results for a matching actor. Use results only if the
+         * receiving Actor and the sending Actor match.
+         */
+         for (int i = 0; i < results.size(); i++) {
+             WSHandlerResult rResult =
+                     (WSHandlerResult) results.get(i);
+
+             Vector wsSecEngineResults = rResult.getResults();
+             /*
+             * Scan the results for a username token. Use the username
+             * of this token to set the alias for the encryption user
+             */
+             for (int j = 0; j < wsSecEngineResults.size(); j++) {
+                 WSSecurityEngineResult wser =
+                         (WSSecurityEngineResult) wsSecEngineResults.get(j);
+                 Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
+                 if (actInt.intValue() == WSConstants.UT) {
+                	 WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
+                     return principal.getName();
+                 }
+             }
+         }
+         
+         return null;
+    }  
     
     public static String getRequestEncryptedKeyId(Vector results) {
         
@@ -991,6 +1034,5 @@ public class RampartUtil {
     	
     	return retElem;
     }
-    
 
 }

@@ -228,7 +228,7 @@ public class RampartPolicyBuilder {
             rpd.setEncryptBody(sep.isBody());
             while (it.hasNext()) {
                 Header header = (Header) it.next();
-                rpd.setEncryptedParts(header.getNamespace(), header.getName());
+                rpd.setEncryptedParts(header.getNamespace(), header.getName(),"Header");
             }
         }
     }

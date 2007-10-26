@@ -57,8 +57,8 @@ public class RampartSender implements Handler {
         
         if (!msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
           return InvocationResponse.CONTINUE;        
-        }
-        
+        }        
+
         MessageBuilder builder = new MessageBuilder();
         try {
             builder.build(msgContext);

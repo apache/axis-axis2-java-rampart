@@ -277,6 +277,23 @@ public class RampartPolicyData {
                 "Element");
         encryptedParts.add(wep);
     }
+    
+    /**
+     * @param namespace
+     *            The namespace of the part.
+     * @param element
+     *            The part's element name.
+     * @param modifier 
+     *            The type of encryption 
+     *            Element,Content,Header
+     */
+    public void setEncryptedParts(String namespace, String element, 
+    		                                       String modifier) {
+        WSEncryptionPart wep = new WSEncryptionPart(element, namespace,
+                modifier);
+        encryptedParts.add(wep);
+    }
+    
 
     /**
      * @return Returns the encryptBody.
