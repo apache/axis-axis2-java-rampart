@@ -32,8 +32,8 @@ import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 public class EncryptedPartsBuilder implements AssertionBuilder {
 
     public static final QName HEADER = new QName(Constants.SP_NS, "Header");
-    public static final QName NAME = new QName(Constants.SP_NS, "Name");
-    public static final QName NAMESPACE = new QName(Constants.SP_NS, "Namespace");
+    public static final QName NAME = new QName("Name");
+    public static final QName NAMESPACE = new QName("Namespace");
     public static final QName BODY = new QName(Constants.SP_NS, "Body");
         
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
