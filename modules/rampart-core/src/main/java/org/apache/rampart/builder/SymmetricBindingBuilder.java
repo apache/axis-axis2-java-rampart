@@ -237,7 +237,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 }
             }
             
-            RampartUtil.appendChildToSecHeader(rmd, refList);
+            if (encrParts.size() > 0 ) {
+                RampartUtil.appendChildToSecHeader(rmd, refList);
+            }
             
             if(dotDebug){
             	t1 = System.currentTimeMillis();
@@ -580,18 +582,28 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                         .getRampartConfig(), rmd.getCustomClassLoader()));
                 
                 
-                //Encrypt, get hold of the ref list and add it
-                refList = encr.encryptForExternalRef(null, encrParts);
-
-                if(encrTokElem != null) {
-                    RampartUtil.insertSiblingAfter(rmd,
-                                                encrTokElem,
-                                                refList);
-                } else {
-                    RampartUtil.insertSiblingAfter(rmd,
-                            this.timestampElement,
-                            refList);
+                if (encrParts.size() > 0) {
+                
+                    //Encrypt, get hold of the ref list and add it
+                    refList = encr.encryptForExternalRef(null, encrParts);             
+                    
+                    if(this.timestampElement != null){
+                            this.setInsertionLocation(this.timestampElement);
+                    }else{
+                            this.setInsertionLocation(null);
+                    }                              
+    
+                    if(encrTokElem != null) {
+                        RampartUtil.insertSiblingAfter(rmd,
+                                                    encrTokElem,
+                                                    refList);
+                    } else {
+                        RampartUtil.insertSiblingAfter(rmd,
+                                this.timestampElement,
+                                refList);
+                    }
                 }
+                
             } catch (WSSecurityException e) {
                 throw new RampartException("errorInEncryption", e);
             }    

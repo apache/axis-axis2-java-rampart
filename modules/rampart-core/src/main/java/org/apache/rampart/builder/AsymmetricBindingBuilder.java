@@ -253,7 +253,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 addSignatureConfirmation(rmd, sigParts);
             }
             
-            if((rmd.isInitiator() && rpd.getInitiatorToken() != null) || 
+            if(( sigParts.size() > 0 &&
+                    rmd.isInitiator() && rpd.getInitiatorToken() != null) || 
                     (!rmd.isInitiator() && rpd.getRecipientToken() != null)) {
                 this.doSignature(rmd);
             }
@@ -379,7 +380,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             addSignatureConfirmation(rmd, sigParts);
         }
 
-        if((rmd.isInitiator() && rpd.getInitiatorToken() != null) || 
+        if( sigParts.size() > 0 && 
+                (rmd.isInitiator() && rpd.getInitiatorToken() != null) || 
                 (!rmd.isInitiator() && rpd.getRecipientToken() != null)) {
             // Do signature
             this.doSignature(rmd);
@@ -500,7 +502,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     this.setInsertionLocation(RampartUtil
                             .insertSiblingAfterOrPrepend(rmd,
                                     this.getInsertionLocation(),
-                                    encryptedKeyElement));
+                                    encryptedKeyElement)); 
                     
                                        
                     //Encrypt, get hold of the ref list and add it
@@ -508,6 +510,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     
                     //Add internal refs
                     encryptedKeyElement.appendChild(refList);
+
 //                    RampartUtil.insertSiblingAfter(rmd,
 //                                                    this.getInsertionLocation(),
 //                                                    refList);
