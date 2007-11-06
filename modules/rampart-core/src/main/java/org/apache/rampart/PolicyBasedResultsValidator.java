@@ -287,8 +287,28 @@ public class PolicyBasedResultsValidator {
             //There are no results to COMPARE
             return;
         }
+        
+        boolean sigNotPresent = true; 
+        boolean encrNotPresent = true;
+        
+        for (Iterator iter = sigEncrActions.iterator(); iter.hasNext();) {
+            Integer act = (Integer) iter.next();
+            if(act.intValue() == WSConstants.SIGN) {
+                sigNotPresent = false;
+            } else if(act.intValue() == WSConstants.ENCR) {
+                encrNotPresent = false;
+            }
+        }
+        
+        // Only one action is present, so there is no order to check
+        if ( sigNotPresent || encrNotPresent ) {
+            return;
+        }
+        
+        
         boolean done = false;
         if(Constants.SIGN_BEFORE_ENCRYPTING.equals(protectionOrder)) {
+                        
             boolean sigFound = false;
             for (Iterator iter = sigEncrActions.iterator(); 
                 iter.hasNext() || !done;) {
