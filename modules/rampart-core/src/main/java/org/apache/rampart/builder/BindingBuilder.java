@@ -219,8 +219,17 @@ public abstract class BindingBuilder {
         
         RampartUtil.setKeyIdentifierType(rpd, sig, token);
 
-        //Get the user
-        String user = rpd.getRampartConfig().getUser();
+        String user = null;
+        
+        // Get the user - First check whether userCertAlias present
+        user = rpd.getRampartConfig().getUserCertAlias();
+        
+        // If userCertAlias is not present, use user property as Alias
+        
+        if (user == null) {
+            user = rpd.getRampartConfig().getUser();
+        }
+            
         String password = null;
 
         if(user != null && !"".equals(user)) {

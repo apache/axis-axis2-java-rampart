@@ -70,6 +70,8 @@ public class RampartConfig implements Assertion {
     public final static String RAMPART_CONFIG_LN = "RampartConfig";
 
     public final static String USER_LN = "user";
+    
+    public final static String USER_CERT_ALIAS_LN = "userCertAlias";
 
     public final static String ENCRYPTION_USER_LN = "encryptionUser";
 
@@ -92,6 +94,8 @@ public class RampartConfig implements Assertion {
     public final static String SSL_CONFIG = "sslConfig";
     
     private String user;
+    
+    private String userCertAlias;
 
     private String encryptionUser;
 
@@ -184,6 +188,14 @@ public class RampartConfig implements Assertion {
     public void setUser(String user) {
         this.user = user;
     }
+    
+    public String getUserCertAlias() {
+        return userCertAlias;
+    }
+    
+    public void setUserCertAlias(String userCertAlias) {
+        this.userCertAlias = userCertAlias;
+    }
 
     public QName getName() {
         return new QName(NS, RAMPART_CONFIG_LN);
@@ -213,6 +225,12 @@ public class RampartConfig implements Assertion {
         if (getUser() != null) {
             writer.writeStartElement(NS, USER_LN);
             writer.writeCharacters(getUser());
+            writer.writeEndElement();
+        }
+        
+        if (getUserCertAlias() != null) {
+            writer.writeStartElement(NS, USER_CERT_ALIAS_LN);
+            writer.writeCharacters(getUserCertAlias());
             writer.writeEndElement();
         }
         

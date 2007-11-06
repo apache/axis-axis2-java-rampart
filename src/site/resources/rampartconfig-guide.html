@@ -97,15 +97,17 @@
 <table class="bodyTable"><tbody>
     <tr class="a"><td><b>Parameter</b></td><td><b>Description</b></td><td><b>Example</b></td></tr>
 
-    <tr class="b"><td>user</td><td>The user's name</td><td>Set alias of the key to be used to sign<br></br>
+    <tr class="b"><td>user</td><td>The user's name</td><td>Set username of UsernameToken to be used <br></br>
         &lt;user&gt; bob&lt;/user&gt;</td></tr>
-    <tr class="a"><td>encryptionUser</td><td>The user's name for encryption.</td><td><br></br>
+    <tr class="a"><td>userCertAlias</td><td>The user's cert alias</td><td>Set alias of the key to be used to sign<br></br>
+        &lt;userCertAlias&gt; bob&lt;/userCertAlias&gt;</td></tr>
+    <tr class="b"><td>encryptionUser</td><td>The user's name for encryption.</td><td><br></br>
         &lt;encryptionUser&gt;alice&lt;/encryptionUser&gt;</td></tr>
-    <tr class="b"><td>passwordCallbackClass</td><td>Callback class used to provide the password required to create the
+    <tr class="a"><td>passwordCallbackClass</td><td>Callback class used to provide the password required to create the
         UsernameToken or to sign the message</td><td>&lt;passwordCallbackClass&gt;
         org.apache.axis2.security.PWCallback&lt;/passwordCallbackClass&gt;</td></tr>
 
-    <tr class="a"><td>signatureCrypto</td><td>properties to needed perform signature, such as crypto
+    <tr class="b"><td>signatureCrypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>
 	&lt;signatureCrypto&gt;<br/>
 		&nbsp;&nbsp;&nbsp;&nbsp;&lt;crypto provider="org.apache.ws.security.components.crypto.Merlin"&gt;<br>
@@ -114,14 +116,14 @@
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;apache&lt;/property&gt;<br>
 	&nbsp;&nbsp;&nbsp;&nbsp;&lt;/crypto&gt;<br>
 	&lt;signatureCrypto&gt;</td></tr>
-    <tr class="b"><td>encryptionCypto</td><td>properties to needed perform signature, such as crypto
+    <tr class="a"><td>encryptionCypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>&lt;encryptionCypto&gt;....crypto element ......&lt;/encryptionCypto&gt;</td></tr>
-    <tr class="a"><td>decryptionCrypto</td><td>properties to needed perform signature, such as crypto
+    <tr class="b"><td>decryptionCrypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>&lt;decryptionCrypto&gt;....crypto element ......&lt;/decryptionCrypto&gt;</td></tr>
- <tr class="b"><td>timestampTTL</td><td>Time to live of Timestamp</td><td>The default timestamp time to live is 300 seconds</td></tr>
-    <tr class="a"><td>timestampMaxSkew</td><td>The maximum tolerence limit for timeskew of the timestamp</td><td>Rampart allows timestamps created slightly ahead of the reciever's time.<br/> This parameter allows to specify the tolerence limit</td></tr>
-    <tr class="b"><td>tokenStoreClass</td><td></td><td></td></tr>
-    <tr class="a"><td>sslConfig</td><td>SSL Configuration need for Transportbinding</td><td>Can specify the properties such as "javax.net.ssl.trustStore" and "javax.net.ssl.trustStorePassword". Please see below for more information.</td></tr>
+ <tr class="a"><td>timestampTTL</td><td>Time to live of Timestamp</td><td>The default timestamp time to live is 300 seconds</td></tr>
+    <tr class="b"><td>timestampMaxSkew</td><td>The maximum tolerence limit for timeskew of the timestamp</td><td>Rampart allows timestamps created slightly ahead of the reciever's time.<br/> This parameter allows to specify the tolerence limit</td></tr>
+    <tr class="a"><td>tokenStoreClass</td><td></td><td></td></tr>
+    <tr class="b"><td>sslConfig</td><td>SSL Configuration need for Transportbinding</td><td>Can specify the properties such as "javax.net.ssl.trustStore" and "javax.net.ssl.trustStorePassword". Please see below for more information.</td></tr>
   </tbody></table>
 <h3>Crypto Provider</h3>
   <p>org.apache.ws.security.crypto.provider defines the implementation of
