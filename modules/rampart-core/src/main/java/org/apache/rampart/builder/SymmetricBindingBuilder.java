@@ -313,8 +313,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             				+", Signature tool :" + (t2 - t1) );
             }
             
-            //Check for signature protection
-            if(rpd.isSignatureProtection() && this.mainSigId != null) {
+            //Check for signature protection and encryption of UsernameToken
+            if(rpd.isSignatureProtection() && this.mainSigId != null || 
+                    usernameTokenIdList.size() > 0 && rmd.isInitiator()) {
             	long t3 = 0, t4 = 0;
             	if(dotDebug){
             		t3 = System.currentTimeMillis();
@@ -323,7 +324,15 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 Vector secondEncrParts = new Vector();
                 
                 //Now encrypt the signature using the above token
-                secondEncrParts.add(new WSEncryptionPart(this.mainSigId, "Element"));
+                if(rpd.isSignatureProtection()) {
+                    secondEncrParts.add(new WSEncryptionPart(this.mainSigId, "Element"));
+                }
+                
+                if(rmd.isInitiator()) {
+                    for (int i = 0 ; i < usernameTokenIdList.size(); i++) {
+                        encrParts.add(new WSEncryptionPart((String)usernameTokenIdList.get(i),"Element"));
+                    }
+                }
                 
                 Element secondRefList = null;
                 
@@ -506,6 +515,13 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             //Now encrypt the signature using the above token
             encrParts.add(new WSEncryptionPart(this.mainSigId, "Element"));
         }
+        
+        if(rmd.isInitiator()) {
+            for (int i = 0 ; i < usernameTokenIdList.size(); i++) {
+                encrParts.add(new WSEncryptionPart((String)usernameTokenIdList.get(i),"Element"));
+            }
+        }
+        
         Element refList = null;
         
         if(encrToken.isDerivedKeys() || encrToken instanceof SecureConversationToken) {

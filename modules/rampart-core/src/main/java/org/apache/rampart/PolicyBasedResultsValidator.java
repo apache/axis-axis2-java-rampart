@@ -111,7 +111,7 @@ public class PolicyBasedResultsValidator {
             }
         }
         
-        validateEncrSig(encryptedParts, signatureParts, results);
+        validateEncrSig(data,encryptedParts, signatureParts, results);
         
         if(!rpd.isTransportBinding()) {
             validateProtectionOrder(data, results);
@@ -179,7 +179,7 @@ public class PolicyBasedResultsValidator {
      * @param encryptedParts
      * @param signatureParts
      */
-    private void validateEncrSig(Vector encryptedParts, Vector signatureParts, Vector results) 
+    private void validateEncrSig(ValidatorData data,Vector encryptedParts, Vector signatureParts, Vector results) 
     throws RampartException {
         ArrayList actions = getSigEncrActions(results);
         boolean sig = false; 
@@ -215,7 +215,8 @@ public class PolicyBasedResultsValidator {
                     encrDataFound = true;
                 }
             }
-            if(encrDataFound) {
+            //TODO check whether the encrptedDataFound is an UsernameToken
+            if(encrDataFound && !isUsernameTokenPresent(data)) {
                 //Unexpected encryption
                 throw new RampartException("unexprectedEncryptedPart");
             }
@@ -669,4 +670,54 @@ public class PolicyBasedResultsValidator {
         
         return list;
     }
+    
+    private boolean isUsernameTokenPresent(ValidatorData data) {
+        
+        //TODO This can be integrated with supporting token processing
+        // which also checks whether Username Tokens present
+        
+        RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
+        
+        SupportingToken suppTok = rpd.getSupportingTokens();
+        if(isUsernameTokenPresent(suppTok)){
+            return true;
+        }
+        
+        SupportingToken signedSuppToken = rpd.getSignedSupportingTokens();
+        if(isUsernameTokenPresent(signedSuppToken)) {
+            return true;
+        }
+        
+        SupportingToken signedEndSuppToken = rpd.getSignedEndorsingSupportingTokens();
+        if(isUsernameTokenPresent(signedEndSuppToken)) {
+            return true;
+        }
+        
+        SupportingToken endSuppToken = rpd.getEndorsingSupportingTokens();
+        if(isUsernameTokenPresent(endSuppToken)){
+            return true;
+        }
+        
+        return false;
+        
+        
+    }
+    
+    private boolean isUsernameTokenPresent(SupportingToken suppTok) {
+        
+        if(suppTok == null) {
+            return false;
+        }
+        
+        ArrayList tokens = suppTok.getTokens();
+        for (Iterator iter = tokens.iterator(); iter.hasNext();) {
+            Token token = (Token) iter.next();
+            if(token instanceof UsernameToken) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
 }

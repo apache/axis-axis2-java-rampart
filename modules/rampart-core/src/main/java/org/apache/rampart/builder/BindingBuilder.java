@@ -72,6 +72,8 @@ public abstract class BindingBuilder {
     
     protected String mainSigId = null;
     
+    protected ArrayList usernameTokenIdList = new ArrayList();
+    
     protected Element timestampElement;
     
     
@@ -162,6 +164,7 @@ public abstract class BindingBuilder {
                 WSSecUsernameToken utBuilder = new WSSecUsernameToken();
                 
                 //TODO Get the UT type, only WS-SX spec supports this
+                utBuilder.setPasswordType(WSConstants.PASSWORD_TEXT);
                 utBuilder.setUserInfo(user, password);
                 
                 return utBuilder;
@@ -348,7 +351,9 @@ public abstract class BindingBuilder {
                     Element elem = utBuilder.getUsernameTokenElement();
                     RampartUtil.insertSiblingAfter(rmd, this.getInsertionLocation(), elem);
                     
-                    //Move the insert location to th enext element
+                    usernameTokenIdList.add(utBuilder.getId());
+                    
+                    //Move the insert location to the next element
                     this.setInsertionLocation(elem);
                     Date now = new Date();
                     try {
