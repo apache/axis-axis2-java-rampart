@@ -389,7 +389,11 @@ public class RampartUtil {
         
         if(bsPol != null) {
             log.debug("BootstrapPolicy found");
-            bsPol.addAssertion(rmd.getPolicyData().getRampartConfig());
+            bsPol.addAssertion(rmd.getPolicyData().getRampartConfig());           
+            //copy the <wsoma:OptimizedMimeSerialization/> to BootstrapPolicy
+            if (rmd.getPolicyData().getMTOMAssertion() != null) {
+              bsPol.addAssertion(rmd.getPolicyData().getMTOMAssertion());  
+            }
             stsPolicy = bsPol;
         } else {
             //No bootstrap policy use issuer policy
