@@ -133,6 +133,7 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
+            this.maximumSymmetricKeyLength = 192; //due to use of 3des
         } else if (Constants.ALGO_SUITE_BASIC256_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA1;
             this.encryption = Constants.AES256;
@@ -173,6 +174,7 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
+            this.maximumSymmetricKeyLength = 192; //due to use of 3des
         } else if (Constants.ALGO_SUITE_BASIC256_SHA256.equals(algoSuite)) {
             this.digest = Constants.SHA256;
             this.encryption = Constants.AES256;
@@ -213,6 +215,7 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
+            this.maximumSymmetricKeyLength = 192; //due to use of 3des
         } else if (Constants.ALGO_SUITE_BASIC256_SHA256_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA256;
             this.encryption = Constants.AES256;
@@ -254,6 +257,7 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
+            this.maximumSymmetricKeyLength = 192; //due to use of 3des
         } else {
             // throw new WSSPolicyException("Invalid algorithm suite : " +
             // algoSuite);
