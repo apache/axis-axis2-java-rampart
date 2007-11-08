@@ -122,6 +122,7 @@ public class Token {
      */
     private String issuerAddress;
     
+    private String encrKeySha1Value;
     
     public Token(String id, Date created, Date expires) {
     	this.id = id;

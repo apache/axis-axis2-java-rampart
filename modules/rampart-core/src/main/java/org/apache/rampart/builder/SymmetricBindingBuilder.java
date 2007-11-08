@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.EncryptedKeyToken;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.rampart.RampartConstants;
@@ -28,6 +29,7 @@ import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SupportingToken;
@@ -48,22 +50,12 @@ import org.apache.ws.security.util.Base64;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
-
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 
 public class SymmetricBindingBuilder extends BindingBuilder {
@@ -179,6 +171,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             Document doc = rmd.getDocument();
 
+            AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
             if(encryptionToken.isDerivedKeys()) {
                 log.debug("Use drived keys");
                 
@@ -198,6 +191,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     dkEncr.setExternalKey(tok.getSecret(), tok.getId());
                 }
                 try {
+                    dkEncr.setSymmetricEncAlgorithm(algorithmSuite.getEncryption());
+                    dkEncr.setDerivedKeyLength(algorithmSuite.getEncryptionDerivedKeyLength()/8);
                     dkEncr.prepare(doc);
                     encrDKTokenElem = dkEncr.getdktElement();
                     RampartUtil.appendChildToSecHeader(rmd, encrDKTokenElem);
@@ -218,6 +213,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 RampartUtil.setEncryptionUser(rmd, encr);
                 encr.setEphemeralKey(tok.getSecret());
                 encr.setDocument(doc);
+                encr.setSymmetricEncAlgorithm(algorithmSuite.getEncryption());
                 // SymmKey is already encrypted, no need to do it again
                 encr.setEncryptSymmKey(false);
                 // Use key identifier in the KeyInfo in server side
@@ -523,106 +519,116 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         }
         
         Element refList = null;
-        
-        if(encrToken.isDerivedKeys() || encrToken instanceof SecureConversationToken) {
-            
-            try {
-                WSSecDKEncrypt dkEncr = new WSSecDKEncrypt();
+        if(encrParts.size() > 0) {
+            if(encrToken.isDerivedKeys() || encrToken instanceof SecureConversationToken) {
                 
-                if(encrTokElem != null && encrTok.getAttachedReference() != null) {
+                try {
+                    WSSecDKEncrypt dkEncr = new WSSecDKEncrypt();
                     
-                    dkEncr.setExternalKey(encrTok.getSecret(), (Element) doc
-                            .importNode((Element) encrTok.getAttachedReference(),
-                                    true));
-                    
-                } else if(encrTok.getUnattachedReference() != null) {
-                    dkEncr.setExternalKey(encrTok.getSecret(), (Element) doc
-                            .importNode((Element) encrTok.getUnattachedReference(),
-                                    true));
-                } else if (!rmd.isInitiator() && encrToken.isDerivedKeys()) { 
-                	
-                	// If the Encrypted key used to create the derived key is not
-                	// attached use key identifier as defined in WSS1.1 section
-                	// 7.7 Encrypted Key reference
-                	SecurityTokenReference tokenRef = new SecurityTokenReference(doc);
-                	tokenRef.setKeyIdentifierEncKeySHA1(encrTok.getSecret());             	
-                	dkEncr.setExternalKey(encrTok.getSecret(), tokenRef.getElement());
-                	
-                } else {
-                    dkEncr.setExternalKey(encrTok.getSecret(), encrTok.getId());
-                }
-                
-                dkEncr.prepare(doc);
-                Element encrDKTokenElem = null;
-                encrDKTokenElem = dkEncr.getdktElement();
-                if(encrTokElem != null) {
-                    RampartUtil.insertSiblingAfter(rmd, encrTokElem, encrDKTokenElem);
-                } else {
-                    RampartUtil.insertSiblingAfter(rmd, this.timestampElement, encrDKTokenElem);
-                }
-                
-                refList = dkEncr.encryptForExternalRef(null, encrParts);
-                
-                RampartUtil.insertSiblingAfter(rmd, 
-                                                encrDKTokenElem, 
-                                                refList);
-
-            } catch (WSSecurityException e) {
-                throw new RampartException("errorInDKEncr");
-            } catch (ConversationException e) {
-                throw new RampartException("errorInDKEncr");
-            }
-        } else {
-            try {
-                
-                WSSecEncrypt encr = new WSSecEncrypt();
-                
-                encr.setWsConfig(rmd.getConfig());
-                //Hack to handle reference id issues
-                //TODO Need a better fix
-                if(encrTokId.startsWith("#")) {
-                    encrTokId = encrTokId.substring(1);
-                }
-                encr.setEncKeyId(encrTokId);
-                
-                encr.setEphemeralKey(encrTok.getSecret());
-                RampartUtil.setEncryptionUser(rmd, encr);
-                encr.setDocument(doc);
-                encr.setEncryptSymmKey(false);
-                // Use key identifier in the KeyInfo in server side
-                if (!rmd.isInitiator()) {
-                	encr.setUseKeyIdentifier(true);
-                	encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
-                }
-                encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
-                        .getRampartConfig(), rmd.getCustomClassLoader()));
-                
-                
-                if (encrParts.size() > 0) {
-                
-                    //Encrypt, get hold of the ref list and add it
-                    refList = encr.encryptForExternalRef(null, encrParts);             
-                    
-                    if(this.timestampElement != null){
-                            this.setInsertionLocation(this.timestampElement);
-                    }else{
-                            this.setInsertionLocation(null);
-                    }                              
-    
-                    if(encrTokElem != null) {
-                        RampartUtil.insertSiblingAfter(rmd,
-                                                    encrTokElem,
-                                                    refList);
+                    if(encrTokElem != null && encrTok.getAttachedReference() != null) {
+                        
+                        dkEncr.setExternalKey(encrTok.getSecret(), (Element) doc
+                                .importNode((Element) encrTok.getAttachedReference(),
+                                        true));
+                    } else if(encrTok.getUnattachedReference() != null) {
+                        dkEncr.setExternalKey(encrTok.getSecret(), (Element) doc
+                                .importNode((Element) encrTok.getUnattachedReference(),
+                                        true));
+                    } else if (!rmd.isInitiator() && encrToken.isDerivedKeys()) { 
+                    	
+                    	// If the Encrypted key used to create the derived key is not
+                    	// attached use key identifier as defined in WSS1.1 section
+                    	// 7.7 Encrypted Key reference
+                    	SecurityTokenReference tokenRef = new SecurityTokenReference(doc);
+                    	if(encrTok instanceof EncryptedKeyToken) {
+                    	    tokenRef.setKeyIdentifierEncKeySHA1(((EncryptedKeyToken)encrTok).getSHA1());
+                    	}
+                    	dkEncr.setExternalKey(encrTok.getSecret(), tokenRef.getElement());
+                    	
                     } else {
-                        RampartUtil.insertSiblingAfter(rmd,
-                                this.timestampElement,
-                                refList);
+                        dkEncr.setExternalKey(encrTok.getSecret(), encrTok.getId());
                     }
+                    
+                    if(encrTok instanceof EncryptedKeyToken) {
+                        dkEncr.setCustomValueType(WSConstants.SOAPMESSAGE_NS11 + "#"
+                                + WSConstants.ENC_KEY_VALUE_TYPE);
+                    }
+                    
+                    dkEncr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
+                    dkEncr.setDerivedKeyLength(rpd.getAlgorithmSuite().getEncryptionDerivedKeyLength()/8);
+                    dkEncr.prepare(doc);
+                    Element encrDKTokenElem = null;
+                    encrDKTokenElem = dkEncr.getdktElement();
+                    if(encrTokElem != null) {
+                        RampartUtil.insertSiblingAfter(rmd, encrTokElem, encrDKTokenElem);
+                    } else {
+                        RampartUtil.insertSiblingAfter(rmd, this.timestampElement, encrDKTokenElem);
+                    }
+                    
+                    refList = dkEncr.encryptForExternalRef(null, encrParts);
+                    
+                    RampartUtil.insertSiblingAfter(rmd, 
+                                                    encrDKTokenElem, 
+                                                    refList);
+    
+                } catch (WSSecurityException e) {
+                    throw new RampartException("errorInDKEncr");
+                } catch (ConversationException e) {
+                    throw new RampartException("errorInDKEncr");
                 }
-                
-            } catch (WSSecurityException e) {
-                throw new RampartException("errorInEncryption", e);
-            }    
+            } else {
+                try {
+                    
+                    WSSecEncrypt encr = new WSSecEncrypt();
+                    
+                    encr.setWsConfig(rmd.getConfig());
+                    //Hack to handle reference id issues
+                    //TODO Need a better fix
+                    if(encrTokId.startsWith("#")) {
+                        encrTokId = encrTokId.substring(1);
+                    }
+                    encr.setEncKeyId(encrTokId);
+                    
+                    encr.setEphemeralKey(encrTok.getSecret());
+                    RampartUtil.setEncryptionUser(rmd, encr);
+                    encr.setDocument(doc);
+                    encr.setEncryptSymmKey(false);
+                    encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
+                    // Use key identifier in the KeyInfo in server side
+                    if (!rmd.isInitiator()) {
+                    	encr.setUseKeyIdentifier(true);
+                    	encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
+                    }
+                    encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
+                            .getRampartConfig(), rmd.getCustomClassLoader()));
+                    
+                    
+                    if (encrParts.size() > 0) {
+                    
+                        //Encrypt, get hold of the ref list and add it
+                        refList = encr.encryptForExternalRef(null, encrParts);             
+                        
+                        if(this.timestampElement != null){
+                                this.setInsertionLocation(this.timestampElement);
+                        }else{
+                                this.setInsertionLocation(null);
+                        }                              
+        
+                        if(encrTokElem != null) {
+                            RampartUtil.insertSiblingAfter(rmd,
+                                                        encrTokElem,
+                                                        refList);
+                        } else {
+                            RampartUtil.insertSiblingAfter(rmd,
+                                    this.timestampElement,
+                                    refList);
+                        }
+                    }
+                    
+                } catch (WSSecurityException e) {
+                    throw new RampartException("errorInEncryption", e);
+                }    
+            }
         }
         
         if(dotDebug){
@@ -665,7 +671,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             // Set the SHA1 value of the encrypted key, this is used when the encrypted
             // key is referenced via a key identifier of type EncryptedKeySHA1
-            tempTok.setSHA1(getSHA1(secret));
+            tempTok.setSHA1(getSHA1(encrKey.getEncryptedEphemeralKey()));
             
             rmd.getTokenStorage().add(tempTok);
             
@@ -684,7 +690,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         }
     }
     
-    private String getSHA1(byte[] secret) throws RampartException{
+    private String getSHA1(byte[] input) throws RampartException{
         
     	MessageDigest sha = null;
         try {
@@ -693,7 +699,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             throw new RampartException("noSHA1availabe", e1);
         }
         sha.reset();
-        sha.update(secret);
+        sha.update(input);
         byte[] data = sha.digest();
         
         return Base64.encode(data);
@@ -724,9 +730,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 	                        Date created = new Date();
 	                        Date expires = new Date();
 	                        expires.setTime(System.currentTimeMillis() + 300000);
-	                        org.apache.rahas.Token tempTok = new org.apache.rahas.Token(encryptedKeyID,created,expires);
-	                        tempTok.setSecret((byte[])wser.getDecryptedKey());
-	                        
+	                        EncryptedKeyToken tempTok = new EncryptedKeyToken(encryptedKeyID,created,expires);
+	                        tempTok.setSecret((byte[])wser.get(WSSecurityEngineResult.TAG_DECRYPTED_KEY));
+	                        tempTok.setSHA1(getSHA1((byte[])wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_EPHEMERAL_KEY)));
 	                        rmd.getTokenStorage().add(tempTok);
 	                        
 	                        return encryptedKeyID;

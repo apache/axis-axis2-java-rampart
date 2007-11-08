@@ -27,6 +27,7 @@ import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
@@ -215,7 +216,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 
                 dkSig.setSigCanonicalization(rpd.getAlgorithmSuite().getInclusiveC14n());
                 dkSig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
-                dkSig.setDerivedKeyLength(rpd.getAlgorithmSuite().getMinimumSymmetricKeyLength()/8);
+                dkSig.setDerivedKeyLength(rpd.getAlgorithmSuite().getSignatureDerivedKeyLength()/8);
                 
                 dkSig.setExternalKey(encrKey.getEphemeralKey(), encrKey.getId());
                 
@@ -342,6 +343,7 @@ public class TransportBindingBuilder extends BindingBuilder {
         }
         
         //check for derived keys
+        AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
         if(token.isDerivedKeys()) {
           //Create a derived key and add
           try {
@@ -361,8 +363,8 @@ public class TransportBindingBuilder extends BindingBuilder {
               }
               
               //Set the algo info
-              dkSign.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
-              
+              dkSign.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
+              dkSign.setDerivedKeyLength(algorithmSuite.getSignatureDerivedKeyLength());
               
               dkSign.prepare(doc);
               
@@ -395,8 +397,8 @@ public class TransportBindingBuilder extends BindingBuilder {
                 sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
                         WSConstants.SAML_ASSERTION_ID);
                 sig.setSecretKey(tok.getSecret());
-                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
-                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
+                sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
+                sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
                 sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                 sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
                         .getRampartConfig(), rmd.getCustomClassLoader()),

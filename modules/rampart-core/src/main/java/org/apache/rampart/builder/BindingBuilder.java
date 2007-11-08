@@ -16,35 +16,21 @@
 
 package org.apache.rampart.builder;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
-import java.util.Map.Entry;
-
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.EncryptedKeyToken;
 import org.apache.rahas.TrustException;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
-import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
-import org.apache.ws.secpolicy.model.Wss10;
-import org.apache.ws.secpolicy.model.Wss11;
 import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
@@ -64,6 +50,18 @@ import org.apache.ws.security.message.token.SecurityTokenReference;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Vector;
+import java.util.Map.Entry;
 
 public abstract class BindingBuilder {
     private static Log log = LogFactory.getLog(BindingBuilder.class);
@@ -487,7 +485,9 @@ public abstract class BindingBuilder {
                 	// attached use key identifier as defined in WSS1.1 section
                 	// 7.7 Encrypted Key reference
                 	SecurityTokenReference tokenRef = new SecurityTokenReference(doc);
-                	tokenRef.setKeyIdentifierEncKeySHA1(tok.getSecret());             	
+                	if(tok instanceof EncryptedKeyToken) {
+                	    tokenRef.setKeyIdentifierEncKeySHA1(((EncryptedKeyToken)tok).getSHA1());;
+                	}
                 	dkSign.setExternalKey(tok.getSecret(), tokenRef.getElement());
                 
                 } else {
@@ -496,7 +496,12 @@ public abstract class BindingBuilder {
 
                 //Set the algo info
                 dkSign.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
-                dkSign.setDerivedKeyLength(rpd.getAlgorithmSuite().getMinimumSymmetricKeyLength()/8);
+                dkSign.setDerivedKeyLength(rpd.getAlgorithmSuite().getSignatureDerivedKeyLength()/8);
+                if(tok instanceof EncryptedKeyToken) {
+                    //Set the value type of the reference
+                    dkSign.setCustomValueType(WSConstants.SOAPMESSAGE_NS11 + "#"
+                        + WSConstants.ENC_KEY_VALUE_TYPE);
+                }
                 
                 dkSign.prepare(doc, rmd.getSecHeader());
                 
@@ -517,7 +522,6 @@ public abstract class BindingBuilder {
                 
                 //Do signature
                 dkSign.computeSignature();
-
 
                 //Add elements to header
                 this.setInsertionLocation(RampartUtil
@@ -553,6 +557,8 @@ public abstract class BindingBuilder {
 	                                          + WSConstants.ENC_KEY_VALUE_TYPE);
 	                    sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                 	} else {
+                	    //the tok has to be an EncryptedKey token
+                	    sig.setEncrKeySha1value(((EncryptedKeyToken)tok).getSHA1());
                 		sig.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
                 	}
                     

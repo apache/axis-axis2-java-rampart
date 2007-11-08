@@ -27,6 +27,7 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.Wss10;
@@ -149,6 +150,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     dkEncr.setParts(encrParts);
                     dkEncr.setExternalKey(this.encryptedKeyValue, 
                             this.encryptedKeyId);
+                    dkEncr.setDerivedKeyLength(rpd.getAlgorithmSuite().getEncryptionDerivedKeyLength()/8);
                     dkEncr.prepare(doc);
 
                     // Get and add the DKT element
@@ -420,6 +422,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         Token encrToken = rpd.getRecipientToken();
         if(encrToken != null && encrParts.size() > 0) {
             Element refList = null;
+            AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
             if(encrToken.isDerivedKeys()) {
                 
                 try {
@@ -430,7 +433,10 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     }
                     
                     dkEncr.setExternalKey(this.encryptedKeyValue, this.encryptedKeyId);
-                    dkEncr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
+                    dkEncr.setCustomValueType(WSConstants.SOAPMESSAGE_NS11 + "#"
+                            + WSConstants.ENC_KEY_VALUE_TYPE);
+                    dkEncr.setSymmetricEncAlgorithm(algorithmSuite.getEncryption());
+                    dkEncr.setDerivedKeyLength(algorithmSuite.getEncryptionDerivedKeyLength()/8);
                     dkEncr.prepare(doc);
                     
                     
@@ -449,9 +455,9 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                                                     refList);
                                                     
                 } catch (WSSecurityException e) {
-                    throw new RampartException("errorInDKEncr");
+                    throw new RampartException("errorInDKEncr", e);
                 } catch (ConversationException e) {
-                    throw new RampartException("errorInDKEncr");
+                    throw new RampartException("errorInDKEncr", e);
                 }
             } else {
                 try {
@@ -479,8 +485,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     
                     encr.setDocument(doc);
                     RampartUtil.setEncryptionUser(rmd, encr);
-                    encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
-                    encr.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
+                    encr.setSymmetricEncAlgorithm(algorithmSuite.getEncryption());
+                    encr.setKeyEncAlgo(algorithmSuite.getAsymmetricKeyWrap());
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
                             .getRampartConfig(), rmd.getCustomClassLoader()));
                     
@@ -556,8 +562,9 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             dkSign.setSignatureAlgorithm(rpd.getAlgorithmSuite()
                     .getSymmetricSignature());
             dkSign.setDerivedKeyLength(rpd.getAlgorithmSuite()
-                    .getMinimumSymmetricKeyLength() / 8);
-            
+                    .getSignatureDerivedKeyLength() / 8);
+            dkSign.setCustomValueType(WSConstants.SOAPMESSAGE_NS11 + "#"
+                    + WSConstants.ENC_KEY_VALUE_TYPE);
             try {
                 dkSign.prepare(doc, rmd.getSecHeader());
 

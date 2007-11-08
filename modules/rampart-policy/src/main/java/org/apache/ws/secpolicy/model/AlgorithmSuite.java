@@ -48,8 +48,12 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
     private String asymmetricKeyWrap;
 
     private String encryptionKeyDerivation;
+    
+    private int encryptionDerivedKeyLength;
 
     private String signatureKeyDerivation;
+    
+    private int signatureDerivedKeyLength;
 
     private int minimumSymmetricKeyLength;
 
@@ -95,7 +99,10 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
             this.encryptionKeyDerivation = Constants.P_SHA1_L256;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 256;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 256;
+            this.encryptionDerivedKeyLength = 256;
         } else if (Constants.ALGO_SUITE_BASIC192.equals(algoSuite)) {
             this.digest = Constants.SHA1;
             this.encryption = Constants.AES192;
@@ -103,6 +110,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
             this.encryptionKeyDerivation = Constants.P_SHA1_L192;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 192;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
         } else if (Constants.ALGO_SUITE_BASIC128.equals(algoSuite)) {
             this.digest = Constants.SHA1;
@@ -111,6 +120,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
             this.encryptionKeyDerivation = Constants.P_SHA1_L128;
             this.signatureKeyDerivation = Constants.P_SHA1_L128;
+            this.encryptionDerivedKeyLength = 128;
+            this.signatureDerivedKeyLength = 128;
             this.minimumSymmetricKeyLength = 128;
         } else if (Constants.ALGO_SUITE_TRIPLE_DES.equals(algoSuite)) {
             this.digest = Constants.SHA1;
@@ -119,6 +130,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
             this.encryptionKeyDerivation = Constants.P_SHA1_L192;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 192;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
         } else if (Constants.ALGO_SUITE_BASIC256_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA1;
@@ -127,6 +140,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA15;
             this.encryptionKeyDerivation = Constants.P_SHA1_L256;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 256;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 256;
         } else if (Constants.ALGO_SUITE_BASIC192_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA1;
@@ -135,6 +150,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA15;
             this.encryptionKeyDerivation = Constants.P_SHA1_L192;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 192;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
         } else if (Constants.ALGO_SUITE_BASIC128_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA1;
@@ -143,6 +160,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA15;
             this.encryptionKeyDerivation = Constants.P_SHA1_L128;
             this.signatureKeyDerivation = Constants.P_SHA1_L128;
+            this.encryptionDerivedKeyLength = 128;
+            this.signatureDerivedKeyLength = 128;
             this.minimumSymmetricKeyLength = 128;
         } else if (Constants.ALGO_SUITE_TRIPLE_DES_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA1;
@@ -151,6 +170,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA15;
             this.encryptionKeyDerivation = Constants.P_SHA1_L192;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 192;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
         } else if (Constants.ALGO_SUITE_BASIC256_SHA256.equals(algoSuite)) {
             this.digest = Constants.SHA256;
@@ -159,6 +180,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
             this.encryptionKeyDerivation = Constants.P_SHA1_L256;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 256;
+            this.signatureDerivedKeyLength = 256;
             this.minimumSymmetricKeyLength = 256;
         } else if (Constants.ALGO_SUITE_BASIC192_SHA256.equals(algoSuite)) {
             this.digest = Constants.SHA256;
@@ -167,6 +190,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
             this.encryptionKeyDerivation = Constants.P_SHA1_L192;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 192;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
         } else if (Constants.ALGO_SUITE_BASIC128_SHA256.equals(algoSuite)) {
             this.digest = Constants.SHA256;
@@ -175,6 +200,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
             this.encryptionKeyDerivation = Constants.P_SHA1_L128;
             this.signatureKeyDerivation = Constants.P_SHA1_L128;
+            this.encryptionDerivedKeyLength = 128;
+            this.signatureDerivedKeyLength = 128;
             this.minimumSymmetricKeyLength = 128;
         } else if (Constants.ALGO_SUITE_TRIPLE_DES_SHA256.equals(algoSuite)) {
             this.digest = Constants.SHA256;
@@ -183,6 +210,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
             this.encryptionKeyDerivation = Constants.P_SHA1_L192;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 192;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
         } else if (Constants.ALGO_SUITE_BASIC256_SHA256_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA256;
@@ -191,6 +220,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA15;
             this.encryptionKeyDerivation = Constants.P_SHA1_L256;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 256;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 256;
         } else if (Constants.ALGO_SUITE_BASIC192_SHA256_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA256;
@@ -199,6 +230,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA15;
             this.encryptionKeyDerivation = Constants.P_SHA1_L192;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 192;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
         } else if (Constants.ALGO_SUITE_BASIC128_SHA256_RSA15.equals(algoSuite)) {
             this.digest = Constants.SHA256;
@@ -207,6 +240,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA15;
             this.encryptionKeyDerivation = Constants.P_SHA1_L128;
             this.signatureKeyDerivation = Constants.P_SHA1_L128;
+            this.encryptionDerivedKeyLength = 128;
+            this.signatureDerivedKeyLength = 128;
             this.minimumSymmetricKeyLength = 128;
         } else if (Constants.ALGO_SUITE_TRIPLE_DES_SHA256_RSA15
                 .equals(algoSuite)) {
@@ -216,6 +251,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.asymmetricKeyWrap = Constants.KW_RSA15;
             this.encryptionKeyDerivation = Constants.P_SHA1_L192;
             this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.encryptionDerivedKeyLength = 192;
+            this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
         } else {
             // throw new WSSPolicyException("Invalid algorithm suite : " +
@@ -448,5 +485,17 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
         
         // </sp:AlgorithmSuite>
         writer.writeEndElement();
+    }
+
+    public int getEncryptionDerivedKeyLength() {
+        return encryptionDerivedKeyLength;
+    }
+
+    public int getSignatureDerivedKeyLength() {
+        return signatureDerivedKeyLength;
+    }
+
+    public void setAsymmetricKeyWrap(String asymmetricKeyWrap) {
+        this.asymmetricKeyWrap = asymmetricKeyWrap;
     }
 }
