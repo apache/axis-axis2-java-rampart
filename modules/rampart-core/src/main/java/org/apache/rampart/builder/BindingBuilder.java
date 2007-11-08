@@ -553,7 +553,7 @@ public abstract class BindingBuilder {
                 // be used in the wsse:Reference in ds:KeyInfo
                 if(policyToken instanceof X509Token) {
                 	if (rmd.isInitiator()) {
-	                    sig.setCustomTokenValueType(WSConstants.ENC_KEY_VALUE_TYPE_NS
+	                    sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS
 	                                          + WSConstants.ENC_KEY_VALUE_TYPE);
 	                    sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                 	} else {

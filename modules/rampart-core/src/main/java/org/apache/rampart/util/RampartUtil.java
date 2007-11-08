@@ -25,6 +25,7 @@ import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
@@ -490,6 +491,12 @@ public class RampartUtil {
                 String servceEprAddress = rmd.getMsgContext()
                         .getOptions().getTo().getAddress();
         
+                //If addressing version can be found set it
+                Object addrVersionNs = msgContext.getProperty(AddressingConstants.WS_ADDRESSING_VERSION);
+                if(addrVersionNs != null) {
+                    client.setAddressingNs((String)addrVersionNs);
+                }
+                
                 //Make the request
                 org.apache.rahas.Token rst = 
                     client.requestSecurityToken(servicePolicy, 

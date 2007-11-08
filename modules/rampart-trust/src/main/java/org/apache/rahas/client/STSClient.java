@@ -84,7 +84,7 @@ public class STSClient {
 
     private byte[] requestorEntropy;
 
-    private String addressingNs = AddressingConstants.Final.WSA_NAMESPACE;
+    private String addressingNs;
 
     private int keySize;
     
@@ -119,7 +119,10 @@ public class STSClient {
             ServiceClient client = getServiceClient(rstQn, issuerAddress);
             
             client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
-            client.getOptions().setSoapVersionURI(this.soapVersion); 
+            client.getOptions().setSoapVersionURI(this.soapVersion);
+            if(this.addressingNs != null) {
+                client.getOptions().setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.addressingNs);
+            }
             client.engageModule("addressing");
             client.engageModule("rampart");
 
