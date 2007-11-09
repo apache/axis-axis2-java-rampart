@@ -497,6 +497,9 @@ public class RampartUtil {
                     client.setAddressingNs((String)addrVersionNs);
                 }
                 
+                //Set soap version
+                client.setSoapVersion(msgContext.getOptions().getSoapVersionURI());
+                
                 //Make the request
                 org.apache.rahas.Token rst = 
                     client.requestSecurityToken(servicePolicy, 

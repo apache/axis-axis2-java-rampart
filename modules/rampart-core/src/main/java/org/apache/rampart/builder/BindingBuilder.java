@@ -468,7 +468,7 @@ public abstract class BindingBuilder {
         
         RampartPolicyData rpd = rmd.getPolicyData();
         
-        if(policyToken.isDerivedKeys() || policyToken instanceof SecureConversationToken) {
+        if(policyToken.isDerivedKeys()) {
             try {
                 WSSecDKSign dkSign = new WSSecDKSign();
 

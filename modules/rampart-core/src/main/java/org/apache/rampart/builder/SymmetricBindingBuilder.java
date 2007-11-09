@@ -520,7 +520,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         Element refList = null;
         if(encrParts.size() > 0) {
-            if(encrToken.isDerivedKeys() || encrToken instanceof SecureConversationToken) {
+            //The sec conv token can be used without derived keys
+            if(encrToken.isDerivedKeys()) {
                 
                 try {
                     WSSecDKEncrypt dkEncr = new WSSecDKEncrypt();
@@ -575,7 +576,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     throw new RampartException("errorInDKEncr");
                 } catch (ConversationException e) {
                     throw new RampartException("errorInDKEncr");
-                }
+                }                
             } else {
                 try {
                     
@@ -596,8 +597,13 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
                     // Use key identifier in the KeyInfo in server side
                     if (!rmd.isInitiator()) {
-                    	encr.setUseKeyIdentifier(true);
-                    	encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
+                        if(encrTok instanceof EncryptedKeyToken) {
+                            encr.setUseKeyIdentifier(true);
+                            encr.setCustomReferenceValue(((EncryptedKeyToken)encrTok).getSHA1());
+                            encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
+                        } else {
+                            encr.setEphemeralKey(encrTok.getSecret());
+                        }
                     }
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
                             .getRampartConfig(), rmd.getCustomClassLoader()));

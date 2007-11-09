@@ -29,6 +29,7 @@ import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
+import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustUtil;
 import org.apache.rampart.builder.AsymmetricBindingBuilder;
 import org.apache.rampart.builder.SymmetricBindingBuilder;
@@ -41,6 +42,7 @@ import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
+import org.apache.ws.security.message.token.SecurityContextToken;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -104,7 +106,11 @@ public class MessageBuilder {
                 if(tokenId != null && RampartUtil.isTokenValid(rmd, tokenId)) {
                     OMElement bodyElem = msgCtx.getEnvelope().getBody();
                     OMElement child = bodyElem.getFirstElement();
-                    OMElement newChild = TrustUtil.createCancelRequest(tokenId, rmd.getWstVersion());
+                    SecurityContextToken sct = new SecurityContextToken(
+                            (Element) rmd.getTokenStorage().getToken(tokenId)
+                                    .getToken());
+                    OMElement newChild = TrustUtil.createCancelRequest(sct
+                            .getIdentifier(), rmd.getWstVersion());
                     Element newDomChild = XMLUtils.toDOM(newChild);
                     Node importedNode = rmd.getDocument().importNode((Element) newDomChild, true);
                     ((Element) bodyElem).replaceChild(importedNode, (Element) child);
