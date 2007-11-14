@@ -1026,27 +1026,45 @@ public class RampartUtil {
     	if(child != null){ // child is not null so insert sibling after
     		retElem = RampartUtil.insertSiblingAfter(rmd, child, elem);
     	}else{ //Prepend 
-    		
-    		Element secHeaderElem = rmd.getSecHeader().getSecurityHeader();
-    		Node node = secHeaderElem.getOwnerDocument().importNode(
-                        elem, true);
-    		Element firstElem = (Element)secHeaderElem.getFirstChild();
-    	
-    		if(firstElem == null){
-    			retElem = (Element)secHeaderElem.appendChild(node);
-    		}else{
-    			if(firstElem.getOwnerDocument().equals(elem.getOwnerDocument())) {
-    				((OMElement)firstElem).insertSiblingBefore((OMElement)elem);
-                	retElem = elem;
-    			} else {
-    				Element newSib = (Element)firstElem.getOwnerDocument().importNode(elem, true);
-    				((OMElement)firstElem).insertSiblingBefore((OMElement)newSib);
-    				retElem = newSib;
-    			}
-    		}
+                retElem = prependSecHeader(rmd, elem);
     	}
     	
     	return retElem;
+    }
+    
+    public static Element insertSiblingBeforeOrPrepend(RampartMessageData rmd, Element child, Element elem) {
+        Element retElem = null;
+        if(child != null && child.getPreviousSibling() != null){ 
+                retElem = RampartUtil.insertSiblingBefore(rmd, child, elem);
+        }else{ //Prepend 
+                retElem = prependSecHeader(rmd, elem);
+        }
+        
+        return retElem;
+    }
+    
+    private static Element prependSecHeader(RampartMessageData rmd, Element elem){
+        Element retElem = null;
+        
+        Element secHeaderElem = rmd.getSecHeader().getSecurityHeader();
+        Node node = secHeaderElem.getOwnerDocument().importNode(
+                elem, true);
+        Element firstElem = (Element)secHeaderElem.getFirstChild();
+
+        if(firstElem == null){
+                retElem = (Element)secHeaderElem.appendChild(node);
+        }else{
+                if(firstElem.getOwnerDocument().equals(elem.getOwnerDocument())) {
+                        ((OMElement)firstElem).insertSiblingBefore((OMElement)elem);
+                retElem = elem;
+                } else {
+                        Element newSib = (Element)firstElem.getOwnerDocument().importNode(elem, true);
+                        ((OMElement)firstElem).insertSiblingBefore((OMElement)newSib);
+                        retElem = newSib;
+                }
+        }
+        
+        return retElem;
     }
 
 }

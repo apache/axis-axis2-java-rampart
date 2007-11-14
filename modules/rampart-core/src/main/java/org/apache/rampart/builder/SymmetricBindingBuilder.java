@@ -216,10 +216,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 encr.setSymmetricEncAlgorithm(algorithmSuite.getEncryption());
                 // SymmKey is already encrypted, no need to do it again
                 encr.setEncryptSymmKey(false);
-                // Use key identifier in the KeyInfo in server side
-                if (!rmd.isInitiator()) {
-                	encr.setUseKeyIdentifier(true);
-                	encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
+                if (!rmd.isInitiator() && tok instanceof EncryptedKeyToken) {
+                    encr.setUseKeyIdentifier(true);
+                    encr.setCustomReferenceValue(((EncryptedKeyToken)tok).getSHA1());
+                    encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
                 }
                 
                 try {
@@ -233,9 +233,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 }
             }
             
-            if (encrParts.size() > 0 ) {
-                RampartUtil.appendChildToSecHeader(rmd, refList);
-            }
+            RampartUtil.appendChildToSecHeader(rmd, refList);
             
             if(dotDebug){
             	t1 = System.currentTimeMillis();
@@ -458,11 +456,15 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         } else {
             addSignatureConfirmation(rmd, sigParts);
         }
-        //Sign the message
-        signatureValues.add(this.doSymmSignature(rmd, sigToken, sigTok, sigParts));
+        
+        if (sigParts.size() > 0 ) {
+            //Sign the message
+            signatureValues.add(this.doSymmSignature(rmd, sigToken, sigTok, sigParts));
+    
+            this.mainSigId = RampartUtil.addWsuIdToElement((OMElement)this.getInsertionLocation());
 
-        this.mainSigId = RampartUtil.addWsuIdToElement((OMElement)this.getInsertionLocation());
-
+        }
+        
         if(rmd.isInitiator()) {
             //Do endorsed signatures
             Vector endSigVals = this.doEndorsedSignatures(rmd, endSuppTokMap);
@@ -562,8 +564,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     encrDKTokenElem = dkEncr.getdktElement();
                     if(encrTokElem != null) {
                         RampartUtil.insertSiblingAfter(rmd, encrTokElem, encrDKTokenElem);
-                    } else {
+                    } else if (timestampElement != null){
                         RampartUtil.insertSiblingAfter(rmd, this.timestampElement, encrDKTokenElem);
+                    } else {
+                        RampartUtil.insertSiblingBefore(rmd, this.getInsertionLocation(), encrDKTokenElem);
                     }
                     
                     refList = dkEncr.encryptForExternalRef(null, encrParts);
@@ -607,28 +611,18 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     }
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
                             .getRampartConfig(), rmd.getCustomClassLoader()));
-                    
-                    
-                    if (encrParts.size() > 0) {
-                    
-                        //Encrypt, get hold of the ref list and add it
-                        refList = encr.encryptForExternalRef(null, encrParts);             
-                        
-                        if(this.timestampElement != null){
-                                this.setInsertionLocation(this.timestampElement);
-                        }else{
-                                this.setInsertionLocation(null);
-                        }                              
-        
-                        if(encrTokElem != null) {
-                            RampartUtil.insertSiblingAfter(rmd,
-                                                        encrTokElem,
-                                                        refList);
-                        } else {
-                            RampartUtil.insertSiblingAfter(rmd,
-                                    this.timestampElement,
-                                    refList);
-                        }
+                                       
+                    //Encrypt, get hold of the ref list and add it
+                    refList = encr.encryptForExternalRef(null, encrParts);                                        
+    
+                    if(encrTokElem != null) {
+                        RampartUtil.insertSiblingAfter(rmd,
+                                                    encrTokElem,
+                                                    refList);
+                    } else {
+                        RampartUtil.insertSiblingBeforeOrPrepend(rmd,
+                                this.getInsertionLocation(),
+                                refList);
                     }
                     
                 } catch (WSSecurityException e) {
