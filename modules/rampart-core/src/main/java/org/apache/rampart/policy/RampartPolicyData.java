@@ -64,6 +64,12 @@ public class RampartPolicyData {
     private Token encryptionToken;
 
     private Token signatureToken;
+    
+    
+    /*
+     * Message token for transport binding
+     */
+    private Token transportToken;
 
     /*
      * Message tokens for asymmetrical binding
@@ -420,6 +426,20 @@ public class RampartPolicyData {
      */
     public void setInitiatorToken(Token initiatorToken) {
         this.initiatorToken = initiatorToken;
+    }
+    
+    /**
+     * @return Returns the TransportToken.
+     */
+    public Token getTransportToken() {
+        return transportToken;
+    }
+
+    /**
+     * @param transportToken The TransportToken to set.
+     */
+    public void setTransportToken(Token transportToken) {
+        this.transportToken = transportToken;
     }
 
     /**

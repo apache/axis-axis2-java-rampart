@@ -36,6 +36,7 @@ import org.apache.ws.secpolicy.model.SymmetricAsymmetricBindingBase;
 import org.apache.ws.secpolicy.model.SymmetricBinding;
 import org.apache.ws.secpolicy.model.TokenWrapper;
 import org.apache.ws.secpolicy.model.TransportBinding;
+import org.apache.ws.secpolicy.model.TransportToken;
 import org.apache.ws.secpolicy.model.Trust10;
 import org.apache.ws.secpolicy.model.Wss10;
 import org.apache.ws.secpolicy.model.Wss11;
@@ -120,6 +121,8 @@ public class RampartPolicyBuilder {
     private static void processTransportBinding(TransportBinding binding, RampartPolicyData rpd) {
         binding(binding, rpd);
         rpd.setTransportBinding(true);
+        TransportToken transportToken = binding.getTransportToken();
+        rpd.setTransportToken(binding.getTransportToken().getTransportToken());
     }
 
     /**

@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.model.HttpsToken;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
@@ -115,6 +116,16 @@ public class PolicyBasedResultsValidator {
         
         if(!rpd.isTransportBinding()) {
             validateProtectionOrder(data, results);
+        }  
+        
+        if(rpd.isTransportBinding() && !rmd.isInitiator()){
+            if (rpd.getTransportToken() instanceof HttpsToken) {
+                String incomingTransport = rmd.getMsgContext().getIncomingTransportName();
+                if(!incomingTransport.equals(org.apache.axis2.Constants.TRANSPORT_HTTPS)){
+                    throw new RampartException("invalidTransport", 
+                            new String[]{incomingTransport});
+                }
+            }
         }
         
         validateEncryptedParts(data, encryptedParts, results);

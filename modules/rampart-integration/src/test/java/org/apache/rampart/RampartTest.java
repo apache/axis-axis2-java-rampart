@@ -74,7 +74,7 @@ public class RampartTest extends TestCase {
                         "Unlimited Strength Jurisdiction Policy !!!");
             }
             
-            for (int i = 1; i <= 14; i++) { //<-The number of tests we have
+            for (int i = 2; i <= 14; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i ==5)) {
                     //Skip the Basic256 tests
                     continue;
@@ -82,9 +82,10 @@ public class RampartTest extends TestCase {
                 Options options = new Options();
                 
                 if(i == 13) {
+                    return;
                     //Username token created with user/pass from options
-                    options.setUserName("alice");
-                    options.setPassword("password");
+                    //options.setUserName("alice");
+                    //options.setPassword("password");
                 }
                 
                 System.out.println("Testing WS-Sec: custom scenario " + i);
