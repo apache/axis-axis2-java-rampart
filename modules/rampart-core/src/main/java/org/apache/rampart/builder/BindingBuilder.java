@@ -195,7 +195,7 @@ public abstract class BindingBuilder {
         WSSecEncryptedKey encrKey = new WSSecEncryptedKey();
         
         try {
-        	RampartUtil.setKeyIdentifierType(rpd, encrKey, token);
+            RampartUtil.setKeyIdentifierType(rpd, encrKey, token);
             RampartUtil.setEncryptionUser(rmd, encrKey);
             encrKey.setKeySize(rpd.getAlgorithmSuite().getMaximumSymmetricKeyLength());
             encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());

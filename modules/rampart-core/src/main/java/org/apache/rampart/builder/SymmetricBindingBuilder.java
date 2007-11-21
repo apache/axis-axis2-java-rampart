@@ -280,12 +280,14 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             } else {
                 addSignatureConfirmation(rmd, sigParts);
             }
-			
+		
+            
             //Sign the message
             //We should use the same key in the case of EncryptBeforeSig
-            signatureValues.add(this.doSymmSignature(rmd, encryptionToken, tok, sigParts));
-
-            this.mainSigId = RampartUtil.addWsuIdToElement((OMElement)this.getInsertionLocation());
+            if ( sigParts.size() > 0) {
+                signatureValues.add(this.doSymmSignature(rmd, encryptionToken, tok, sigParts));
+                this.mainSigId = RampartUtil.addWsuIdToElement((OMElement)this.getInsertionLocation());         
+            }
             
             if(rmd.isInitiator()) {
                 //Do endorsed signatures

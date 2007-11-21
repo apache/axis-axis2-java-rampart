@@ -319,7 +319,7 @@ public class Constants {
             Constants.SP_PREFIX);
 
     public static final QName REQUIRE_ISSUER_SERIAL_REFERENCE = new QName(
-            Constants.SP_NS, "RequireIssuerSerializerReference",
+            Constants.SP_NS, "RequireIssuerSerialReference",
             Constants.SP_PREFIX);
 
     public static final QName REQUIRE_EMBEDDED_TOKEN_REFERENCE = new QName(

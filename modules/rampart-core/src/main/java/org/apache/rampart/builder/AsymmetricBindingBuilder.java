@@ -172,21 +172,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     encr.setDocument(doc);
                     RampartUtil.setEncryptionUser(rmd, encr);
                     encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
-                    if(encryptionToken.getInclusion().equals(Constants.INCLUDE_NEVER)) {
-                        Wss10 wss = rpd.getWss11();
-                        if(wss == null) {
-                            wss = rpd.getWss10();
-                        }
-                        if(wss.isMustSupportRefKeyIdentifier()) {
-                            encr.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-                        } else if(wss.isMustSupportRefIssuerSerial()) {
-                            encr.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
-                        } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
-                            encr.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
-                        }
-                    } else {
-                        encr.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
-                    }
+                    RampartUtil.setKeyIdentifierType(rpd,encr, encryptionToken);
                     encr.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(config, rmd.getCustomClassLoader()));
 
@@ -464,22 +450,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     
                     WSSecEncrypt encr = new WSSecEncrypt();
                     
-                    
-                    if(encrToken.getInclusion().equals(Constants.INCLUDE_NEVER)) {
-                        Wss10 wss = rpd.getWss11();
-                        if(wss == null) {
-                            wss = rpd.getWss10();
-                        }
-                        if(wss.isMustSupportRefKeyIdentifier()) {
-                            encr.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-                        } else if(wss.isMustSupportRefIssuerSerial()) {
-                            encr.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
-                        } else if(wss instanceof Wss11 && ((Wss11)wss).isMustSupportRefThumbprint()) {
-                            encr.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
-                        }
-                    } else {
-                        encr.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
-                    }
+                    RampartUtil.setKeyIdentifierType(rpd, encr, encrToken);
                     
                     encr.setWsConfig(rmd.getConfig());
                     
