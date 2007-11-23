@@ -481,7 +481,7 @@
         <neethi.version>SNAPSHOT</neethi.version>
 
         <xbean.version>2.1.0</xbean.version>
-        <woden.version>1.0-incubating-M7a</woden.version>
+        <woden.version>1.0-incubating-SNAPSHOT</woden.version>
         <wsdl4j.version>1.6.1</wsdl4j.version>
         <annogen.version>0.1.0</annogen.version>
 
