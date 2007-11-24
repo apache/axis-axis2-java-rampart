@@ -723,7 +723,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
                 if (actInt.intValue() == WSConstants.ENCR) {
                     
-                	if (wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_ID) != null) {
+                	if (wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_ID) != null &&
+                	        ((String)wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_ID)).length() != 0) {
                 		
                 		try {
                 			
