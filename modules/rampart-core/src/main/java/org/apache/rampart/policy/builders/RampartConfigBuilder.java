@@ -77,6 +77,13 @@ public class RampartConfigBuilder implements AssertionBuilder {
             rampartConfig.setSigCryptoConfig((CryptoConfig) factory
                     .build(childElement.getFirstElement()));
         }
+        
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.ENCR_CRYPTO_LN));
+        if (childElement != null) {
+            rampartConfig.setEncrCryptoConfig((CryptoConfig) factory
+                    .build(childElement.getFirstElement()));
+        }
 
         childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.TS_TTL_LN));
