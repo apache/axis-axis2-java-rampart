@@ -86,6 +86,7 @@ public class PolicyBasedResultsValidator {
         }
         
         if(!rmd.isInitiator()) {
+                        
             //Just an indicator for EndorsingSupportingToken signature
             SupportingToken endSupportingToken = rpd.getEndorsingSupportingTokens();
             if(endSupportingToken !=  null) {
@@ -204,7 +205,14 @@ public class PolicyBasedResultsValidator {
             }
         }
         
-        if(sig && signatureParts.size() == 0) {
+        RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
+        
+        SupportingToken sgndSupTokens = rpd.getSignedSupportingTokens();
+        SupportingToken sgndEndorSupTokens = rpd.getSignedEndorsingSupportingTokens();
+        
+        if(sig && signatureParts.size() == 0 
+                && sgndSupTokens.getTokens().size() == 0
+                 && sgndEndorSupTokens.getTokens().size() == 0) {
             
             //Unexpected signature
             throw new RampartException("unexprectedSignature");
