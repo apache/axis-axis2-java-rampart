@@ -79,7 +79,7 @@ public class RampartConfig implements Assertion {
 
     public final static String SIG_CRYPTO_LN = "signatureCrypto";
 
-    public final static String ENCR_CRYPTO_LN = "encryptionCypto";
+    public final static String ENCR_CRYPTO_LN = "encryptionCrypto";
 
     public final static String DEC_CRYPTO_LN = "decryptionCrypto";
 
