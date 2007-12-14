@@ -607,9 +607,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                             encr.setUseKeyIdentifier(true);
                             encr.setCustomReferenceValue(((EncryptedKeyToken)encrTok).getSHA1());
                             encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
-                        } else {
-                            encr.setEphemeralKey(encrTok.getSecret());
-                        }
+                        } 
                     }
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
                             .getRampartConfig(), rmd.getCustomClassLoader()));
