@@ -21,6 +21,7 @@ import org.apache.axis2.client.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.EncryptedKeyToken;
+import org.apache.rahas.SimpleTokenStore;
 import org.apache.rahas.TrustException;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
@@ -568,12 +569,29 @@ public abstract class BindingBuilder {
 	                sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                 }
                 
+                String sigTokId; 
+                
+                if ( policyToken instanceof SecureConversationToken) {
+                    OMElement ref = tok.getAttachedReference();
+                    if(ref == null) {
+                        ref = tok.getUnattachedReference();
+                    }
+                    
+                    if (ref != null) {
+                        sigTokId = SimpleTokenStore.getIdFromSTR(ref);
+                    } else {
+                        sigTokId = tok.getId();
+                    }
+                } else {
+                    sigTokId = tok.getId();
+                }
+                               
                 //Hack to handle reference id issues
                 //TODO Need a better fix
-                String sigTokId = tok.getId();
                 if(sigTokId.startsWith("#")) {
                     sigTokId = sigTokId.substring(1);
                 }
+                
                 sig.setCustomTokenId(sigTokId);
                 sig.setSecretKey(tok.getSecret());
                 sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
