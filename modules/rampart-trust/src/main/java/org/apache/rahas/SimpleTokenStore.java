@@ -130,9 +130,9 @@ public class SimpleTokenStore implements TokenStorage {
                 }
                 
             }
+            
         }
-
-        
+      
         return token;
     }
 
@@ -147,7 +147,7 @@ public class SimpleTokenStore implements TokenStorage {
         }
     }
     
-    private String getIdFromSTR(OMElement str) {
+    public static String getIdFromSTR(OMElement str) {
 //      ASSUMPTION:SecurityTokenReference/KeyIdentifier
         OMElement child = str.getFirstElement();
         if(child == null) {
