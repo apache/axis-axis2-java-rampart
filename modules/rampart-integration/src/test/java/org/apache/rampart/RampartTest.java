@@ -74,15 +74,15 @@ public class RampartTest extends TestCase {
                         "Unlimited Strength Jurisdiction Policy !!!");
             }
             
-            for (int i = 2; i <= 14; i++) { //<-The number of tests we have
-                if(!basic256Supported && (i == 3 || i == 4 || i ==5)) {
+            for (int i = 1; i <= 16; i++) { //<-The number of tests we have
+                if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
                     continue;
                 }
                 Options options = new Options();
                 
-                if(i == 13) {
-                    return;
+                if(i == 1 || i == 13) {
+                    continue; // Can't test Transport binding with Simple HTTP Server
                     //Username token created with user/pass from options
                     //options.setUserName("alice");
                     //options.setPassword("password");
@@ -91,7 +91,7 @@ public class RampartTest extends TestCase {
                 System.out.println("Testing WS-Sec: custom scenario " + i);
                 options.setAction("urn:echo");
                 options.setTo(new EndpointReference("http://127.0.0.1:" +
-                                        PORT + 
+                                        PORT +  
                                         "/axis2/services/SecureService" + i));
                 
                 ServiceContext context = serviceClient.getServiceContext();
@@ -105,6 +105,10 @@ public class RampartTest extends TestCase {
 
             
             for (int i = 1; i <= 3; i++) { //<-The number of tests we have
+                
+                if (i == 3) {
+                    continue; // Can't test Transport binding scenarios with Simple HTTP Server
+                }
 
                 Options options = new Options();
                 System.out.println("Testing WS-SecConv: custom scenario " + i);
