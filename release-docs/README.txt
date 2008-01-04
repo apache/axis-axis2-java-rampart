@@ -17,13 +17,22 @@ rampart-1.2.mar   - WS-Security and WS-SecureConversation support for Axis2
 rahas-1.2.mar     - STS module - to be used to add STS operations to a service
 
 samples  - This contains samples on using Apache Rampart and configuring
-           different conponents to carryout different WS-Sec* operations.
+           different components to carryout different WS-Sec* operations.
 
 README.txt - This file
 
 build.xml - Setup file to copy all jars to required places
 
-IMPORTANT: Before you try any of the samples makesure you
+IMPORTANT: 
+Before you build rampart from source distribution, you need provision for 
+unlimited security jurisdiction as some of the test cases use key size of
+256. So you need to download jce_policy-x_y_z.zip (relevant to your JDK version)
+and extract the jar files local_policy.jar and US_export_policy.jar to 
+$JAVA_HOME/jre/lib/security. These files are listed in sun download site,
+under the your JDK version as Java(TM) Cryptography Extension (JCE) Unlimited 
+Strength Jurisdiction Policy Files.     
+
+Before you try any of the samples makesure you
 
 1.) Have the Axis2 standard binary distribution downloaded and extracted.
 2.) Set the AXIS2_HOME environment variable
