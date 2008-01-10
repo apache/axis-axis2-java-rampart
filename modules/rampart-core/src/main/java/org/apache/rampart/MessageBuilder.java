@@ -42,9 +42,11 @@ import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
+import org.apache.ws.security.message.WSSecHeader;
 import org.apache.ws.security.message.token.SecurityContextToken;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 import javax.xml.namespace.QName;
 
@@ -61,7 +63,7 @@ public class MessageBuilder {
         
         
         RampartPolicyData rpd = rmd.getPolicyData();
-        if(rpd == null) {
+        if(rpd == null || isSecurityValidationFault(msgCtx)) {
             return;
         }
         
@@ -136,6 +138,13 @@ public class MessageBuilder {
             AsymmetricBindingBuilder builder = new AsymmetricBindingBuilder();
             builder.build(rmd);
         }
+       
+       Document doc = rmd.getDocument();
+       WSSecHeader secHeader = rmd.getSecHeader();
+       
+       if ( secHeader != null && secHeader.isEmpty(doc) ) {
+           secHeader.removeSecurityHeader(doc);
+       }
         
        /*
         * Checking whether MTOMSerializable is there. If so set optimizeElement.
@@ -148,5 +157,21 @@ public class MessageBuilder {
         	}
         }
         
+    }
+    
+    private boolean isSecurityValidationFault(MessageContext msgCtx) throws AxisFault {
+        
+        OperationContext opCtx = msgCtx.getOperationContext();
+        MessageContext inMsgCtx;
+        if(opCtx != null && 
+                (inMsgCtx = opCtx.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE)) != null) {
+                 Boolean secErrorFlag = (Boolean) inMsgCtx.getProperty(RampartConstants.SEC_FAULT);
+                 
+                 if (secErrorFlag != null && secErrorFlag.equals(Boolean.TRUE)) {
+                     return true;
+                 }
+        }
+        
+        return false;
     }
 }

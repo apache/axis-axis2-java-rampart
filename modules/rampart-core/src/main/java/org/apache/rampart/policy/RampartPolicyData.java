@@ -43,6 +43,8 @@ public class RampartPolicyData {
     private boolean symmetricBinding;
     
     private boolean transportBinding;
+    
+    private boolean asymmetricBinding;
 
     private String layout;
 
@@ -142,7 +144,21 @@ public class RampartPolicyData {
     public void setSymmetricBinding(boolean symmetricBinding) {
         this.symmetricBinding = symmetricBinding;
     }
+    
+    /**
+     * @return Returns a boolean value indicating whether a Asymmetric Binding
+     */
+    public boolean isAsymmetricBinding() {
+        return asymmetricBinding;
+    }
 
+    /**
+     * @param asymmetricBinding
+     *            boolean value indicating whether a Asymmetric Binding
+     */
+    public void setAsymmetricBinding(boolean asymmetricBinding) {
+        this.asymmetricBinding = asymmetricBinding;
+    }
     /**
      * @return Returns the entireHeaderAndBodySignatures.
      */

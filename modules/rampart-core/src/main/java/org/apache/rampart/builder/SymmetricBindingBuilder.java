@@ -110,6 +110,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         Token encryptionToken = rpd.getEncryptionToken();
         Vector encrParts = RampartUtil.getEncryptedParts(rmd);
 
+        Vector sigParts = RampartUtil.getSignedParts(rmd);
+        
         if(encryptionToken == null && encrParts.size() > 0) {
             throw new RampartException("encryptionTokenMissing");
         }
@@ -245,11 +247,13 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             } else if (timestampElement != null) {
             	this.setInsertionLocation(timestampElement);
             }
+            
+            RampartUtil.handleEncryptedSignedHeaders(encrParts, sigParts, doc);
 
             HashMap sigSuppTokMap = null;
             HashMap endSuppTokMap = null;
             HashMap sgndEndSuppTokMap = null;
-            Vector sigParts = RampartUtil.getSignedParts(rmd);
+            
             
             if(this.timestampElement != null){
             	sigParts.add(new WSEncryptionPart(RampartUtil

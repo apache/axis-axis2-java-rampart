@@ -17,9 +17,15 @@
 package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAP11Constants;
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFault;
+import org.apache.axiom.soap.SOAPFaultCode;
+import org.apache.axiom.soap.SOAPFaultSubCode;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.SOAPFaultValue;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
@@ -39,6 +45,7 @@ import org.apache.ws.security.saml.SAMLKeyInfo;
 import org.apache.ws.security.saml.SAMLUtil;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.opensaml.SAMLAssertion;
+import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
 
@@ -64,12 +71,10 @@ public class RampartEngine {
 
 		RampartMessageData rmd = new RampartMessageData(msgCtx, false);
 
-		//If there is no policy information or if the message is a fault
+		//If there is no policy information or if the message is a security fault or no security
+		// header required by the policy
 		RampartPolicyData rpd = rmd.getPolicyData();
-		if(rpd == null || 
-				WSSecurityUtil.findElement(rmd.getDocument().getDocumentElement(), 
-						"Fault", 
-						rmd.getSoapConstants().getEnvelopeURI()) != null) {
+		if(rpd == null || isSecurityFault(rmd) || !RampartUtil.isSecHeaderRequired(rmd)) {
 			SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
 
 			//Convert back to llom since the inflow cannot use llom
@@ -93,7 +98,7 @@ public class RampartEngine {
 		    throw new RampartException("missingSOAPHeader");
 		}
 		
-        ArrayList headerBlocks = header.getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
+                ArrayList headerBlocks = header.getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
 		SOAPHeaderBlock secHeader = null;
 		//Issue is axiom - a returned collection must not be null
 		if(headerBlocks != null) {
@@ -207,6 +212,55 @@ public class RampartEngine {
 			log.debug("Return process(MessageContext msgCtx)");
 		}
 		return results;
+	}
+	
+	// Check whether this a soap fault because of failure in processing the security header 
+	//and if so, we don't expect the security header
+	//
+	//
+
+	
+	private boolean isSecurityFault(RampartMessageData rmd) {
+	    
+	    SOAPEnvelope soapEnvelope = rmd.getMsgContext().getEnvelope();    
+	    
+	    SOAPFault soapFault = soapEnvelope.getBody().getFault();
+            
+            // This is not a soap fault
+            if (soapFault == null) {
+                return false;
+            }
+            
+            String soapVersionURI =  rmd.getMsgContext().getEnvelope().getNamespace().getNamespaceURI();
+	   	    
+	    if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI) ) {
+	        
+	        SOAPFaultCode faultCode = soapFault.getCode();
+	        
+	        // This is a fault processing the security header 
+                if (faultCode.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
+                   return true;
+                }
+	        
+	        	        
+	    } else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+	        
+	        //TODO AXIOM API returns only one fault sub code, there can be many
+	        SOAPFaultSubCode faultSubCode = soapFault.getCode().getSubCode();
+	        
+	        if (faultSubCode != null) {
+        	        SOAPFaultValue faultSubCodeValue = faultSubCode.getValue();
+        	        
+        	        // This is a fault processing the security header 
+        	        if (faultSubCodeValue != null &&
+        	                faultSubCodeValue.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
+        	           return true;
+        	        }
+	        }
+	        
+	    }
+	    
+	    return false;
 	}
 
 }

@@ -129,7 +129,11 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             encryptionToken = rpd.getInitiatorToken();
         }
         Vector encrParts = RampartUtil.getEncryptedParts(rmd);
-
+        
+        //Signed parts are determined before encryption because encrypted signed  headers
+        //will not be included otherwise
+        this.sigParts = RampartUtil.getSignedParts(rmd);
+        
         if(encryptionToken == null && encrParts.size() > 0) {
             throw new RampartException("encryptionTokenMissing");
         }
@@ -200,10 +204,11 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             
             this.setInsertionLocation(encrTokenElement);
 
+            RampartUtil.handleEncryptedSignedHeaders(encrParts, this.sigParts, doc);
+            
             HashMap sigSuppTokMap = null;
             HashMap endSuppTokMap = null;
             HashMap sgndEndSuppTokMap = null;
-            this.sigParts = RampartUtil.getSignedParts(rmd);
             
             if(this.timestampElement != null){
             	sigParts.add(new WSEncryptionPart(RampartUtil

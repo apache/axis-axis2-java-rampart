@@ -44,6 +44,7 @@ import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
+import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Wss10;
 import org.apache.ws.secpolicy.model.Wss11;
 import org.apache.ws.secpolicy.model.X509Token;
@@ -62,8 +63,10 @@ import org.apache.ws.security.handler.WSHandlerResult;
 import org.apache.ws.security.message.WSSecBase;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Loader;
+import org.apache.ws.security.util.WSSecurityUtil;
 import org.jaxen.JaxenException;
 import org.jaxen.XPath;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -1065,6 +1068,94 @@ public class RampartUtil {
         }
         
         return retElem;
+    }
+    
+    public static boolean isSecHeaderRequired(RampartMessageData rmd) {
+        RampartPolicyData rpd = rmd.getPolicyData();
+        
+        // Checking for time stamp
+        if ( rpd.isIncludeTimestamp() ) {
+            return true;
+        } 
+        
+        // Checking for signed parts and elements
+        if (rpd.isSignBody() || rpd.getSignedParts().size() != 0 && 
+                                    rpd.getSignedElements().size() != 0) {
+            return true;
+        }
+        
+        // Checking for encrypted parts and elements
+        if (rpd.isEncryptBody() || rpd.getEncryptedParts().size() != 0 && 
+                                    rpd.getEncryptedElements().size() != 0 ) {
+            return true;
+        }   
+        
+        // Checking for supporting tokens
+        SupportingToken supportingTokens;
+        
+        supportingTokens = rpd.getSupportingTokens();
+        if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            return true;
+        }
+        
+        supportingTokens = rpd.getSignedSupportingTokens();
+        if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            return true;
+        }
+        
+        supportingTokens = rpd.getEndorsingSupportingTokens();
+        if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            return true;
+        }
+        
+        supportingTokens = rpd.getSignedEndorsingSupportingTokens();
+        if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            return true;
+        }
+        
+        return false;
+        
+    }
+    
+    public static void handleEncryptedSignedHeaders(Vector encryptedParts, Vector signedParts, Document doc) {
+         
+        //TODO Is there a more efficient  way to do this ? better search algorithm 
+        for (int i = 0 ; i < signedParts.size() ; i++) {
+            WSEncryptionPart signedPart = (WSEncryptionPart)signedParts.get(i);
+            
+            //This signed part is not a header
+            if (signedPart.getNamespace() == null || signedPart.getName() == null) {
+                continue;
+            }
+             
+            for (int j = 0 ; j < encryptedParts.size() ; j ++) {
+                WSEncryptionPart encryptedPart = (WSEncryptionPart) encryptedParts.get(j);
+                
+                if (encryptedPart.getNamespace() == null || encryptedPart.getName() == null ) {
+                    continue;
+                }
+                
+                if (signedPart.getName().equals(encryptedPart.getName()) &&
+                        signedPart.getNamespace().equals(encryptedPart.getNamespace())) {
+                    
+                    String encDataID =  encryptedPart.getEncId();                    
+                    Element encDataElem = WSSecurityUtil.findElementById(doc.getDocumentElement(), encDataID, null);
+                    
+                    if (encDataElem != null) {
+                        Element encHeader = (Element)encDataElem.getParentNode();
+                        String encHeaderId = encHeader.getAttributeNS(WSConstants.WSU_NS, "Id");
+                        
+                        signedParts.remove(signedPart);
+                        WSEncryptionPart encHeaderToSign = new WSEncryptionPart(encHeaderId);
+                        signedParts.add(encHeaderToSign);
+                        
+                    }
+                }
+            }
+            
+            
+        }
+        
     }
 
 }

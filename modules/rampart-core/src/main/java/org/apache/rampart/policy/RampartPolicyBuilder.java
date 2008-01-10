@@ -177,7 +177,7 @@ public class RampartPolicyBuilder {
     private static void processAsymmetricPolicyBinding(
             AsymmetricBinding binding, RampartPolicyData rpd)
             throws WSSPolicyException {
-        rpd.setSymmetricBinding(false);
+        rpd.setAsymmetricBinding(true);
         binding(binding, rpd);
         symmAsymmBinding(binding, rpd);
         asymmetricBinding(binding, rpd);

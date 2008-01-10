@@ -17,6 +17,8 @@
 package org.apache.rampart.handler;
 
 import org.apache.axiom.om.OMException;
+import org.apache.axiom.soap.SOAP11Constants;
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
@@ -35,8 +37,12 @@ import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
+
+import javax.xml.namespace.QName;
 
 /**
  * Rampart inflow handler.
@@ -45,7 +51,7 @@ import java.util.Vector;
  */
 public class RampartReceiver implements Handler {
 	
-	private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
+    private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
 	
     private static HandlerDescription EMPTY_HANDLER_METADATA =
         new HandlerDescription("default Handler");
@@ -80,16 +86,16 @@ public class RampartReceiver implements Handler {
         }
         
         RampartEngine engine = new RampartEngine();
-        Vector wsResult;
+        Vector wsResult = null;
         try {
             wsResult = engine.process(msgContext);
             
         } catch (WSSecurityException e) {
-            throw new AxisFault(e.getMessage(), e);
+            setFaultCodeAndThrowAxisFault(msgContext, e);
         } catch (WSSPolicyException e) {
-            throw new AxisFault(e.getMessage(), e);
+            setFaultCodeAndThrowAxisFault(msgContext, e);
         } catch (RampartException e) {
-            throw new AxisFault(e.getMessage(), e);
+            setFaultCodeAndThrowAxisFault(msgContext, e);
         } 
         
         if(wsResult == null) {
@@ -143,6 +149,26 @@ public class RampartReceiver implements Handler {
 
     public Parameter getParameter(String name) {
         return this.handlerDesc.getParameter(name);
+    }
+    
+    private void setFaultCodeAndThrowAxisFault(MessageContext msgContext, Exception e) throws AxisFault {
+        
+        msgContext.setProperty(RampartConstants.SEC_FAULT, Boolean.TRUE);    
+        String soapVersionURI =  msgContext.getEnvelope().getNamespace().getNamespaceURI();
+        QName invalidSecurity = new QName(WSConstants.INVALID_SECURITY.getNamespaceURI(),WSConstants.INVALID_SECURITY.getLocalPart(),"wsse");
+        
+        if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI) ) {
+            
+            throw new AxisFault(invalidSecurity,e.getMessage(),e);
+                            
+        } else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+            
+            List subfaultCodes = new ArrayList();
+            subfaultCodes.add(invalidSecurity);
+            throw new AxisFault(null,subfaultCodes,e.getMessage(),e);
+        
+        }        
+        
     }
 
 }

@@ -26,6 +26,19 @@
             <order phase="Security" phaseLast="true"/>
         </handler>
     </OutFlow>
+    
+    <OutFaultFlow>
+        <handler name="PolicyBasedSecurityOutHandler" class="org.apache.rampart.handler.RampartSender">
+            <order phase="Security" phaseLast="true"/>
+        </handler>
+    </OutFaultFlow>
+
+    <InFaultFlow>
+        <handler name="PolicyBasedSecurityInHandler" class="org.apache.rampart.handler.RampartReceiver">
+            <order phase="Security" phaseFirst="true"/>
+        </handler>
+    </InFaultFlow>
+    
     <supported-policy-namespaces namespaces="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy"/>
     <local-policy-assertions>
     	<rampart:RampartConfig xmlns:rampart="http://ws.apache.org/rampart/policy" />
