@@ -78,6 +78,7 @@ import javax.xml.namespace.QName;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -603,16 +604,16 @@ public class RampartUtil {
     public static Vector getEncryptedParts(RampartMessageData rmd) {
         RampartPolicyData rpd =  rmd.getPolicyData();
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        return getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(), rpd.getEncryptedElements() );
+        return getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(), rpd.getEncryptedElements(),rpd.getDeclaredNamespaces());
     }
 
     public static Vector getSignedParts(RampartMessageData rmd) {
         RampartPolicyData rpd =  rmd.getPolicyData();
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd.getSignedElements() );
+        return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd.getSignedElements(), rpd.getDeclaredNamespaces());
     }
     
-    private static Set findAllPrefixNamespaces(OMElement currentElement)
+    private static Set findAllPrefixNamespaces(OMElement currentElement, HashMap decNamespacess)
     {
     	Set results = new HashSet();
     	
@@ -626,6 +627,16 @@ public class RampartUtil {
             OMNamespace ns = (OMNamespace) iterator.next();
             results.add(ns);
         }
+    	
+    	for ( Iterator iterator = decNamespacess.keySet().iterator(); iterator.hasNext();) {
+    	    String prefix  = (String) iterator.next();
+    	    String ns = (String) decNamespacess.get(prefix); 
+    	    OMFactory omFactory = currentElement.getOMFactory();
+    	    OMNamespace namespace = omFactory.createOMNamespace(ns, prefix);
+    	    results.add(namespace);
+    	    
+    	}
+    	
     	return results;
     }
     
@@ -662,7 +673,7 @@ public class RampartUtil {
     	
     }
     
-    public static Vector getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody, Vector parts, Vector elements) {
+    public static Vector getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody, Vector parts, Vector elements, HashMap decNamespaces) {
 
         Vector found = new Vector();
         Vector result = new Vector();
@@ -720,7 +731,7 @@ public class RampartUtil {
         // ?? Search for 'Elements' here
         
         // decide what exactly is going to be used - only the default namespaces, or the list of all declared namespaces in the message !
-        Set namespaces = findAllPrefixNamespaces(envelope);
+        Set namespaces = findAllPrefixNamespaces(envelope, decNamespaces);
         
         Iterator elementsIter = elements.iterator();
         while (elementsIter.hasNext())

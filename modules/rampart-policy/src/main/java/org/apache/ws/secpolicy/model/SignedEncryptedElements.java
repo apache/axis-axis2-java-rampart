@@ -18,6 +18,7 @@ package org.apache.ws.secpolicy.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.HashMap;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -29,6 +30,8 @@ import org.apache.ws.secpolicy.Constants;
 public class SignedEncryptedElements extends AbstractSecurityAssertion {
 
     private ArrayList xPathExpressions = new ArrayList();
+    
+    private HashMap declaredNamespaces = new HashMap();
 
     private String xPathVersion;
 
@@ -74,7 +77,15 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
     public boolean isSignedElemets() {
         return signedElemets;
     }
-
+    
+    public HashMap getDeclaredNamespaces () {
+        return declaredNamespaces;
+    }
+    
+    public void addDeclaredNamespaces(String uri, String prefix ) {
+        declaredNamespaces.put(prefix, uri);
+    }
+        
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
         String localName = getName().getLocalPart();

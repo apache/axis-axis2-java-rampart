@@ -100,6 +100,8 @@ public class RampartPolicyData {
     private Vector encryptedParts = new Vector();
 
     private Vector encryptedElements = new Vector();
+    
+    private HashMap declaredNamespaces = new HashMap();
 
     /*
      * Holds the supporting tokens elements
@@ -368,6 +370,14 @@ public class RampartPolicyData {
      */
     public Vector getSignedParts() {
         return signedParts;
+    }
+    
+    public HashMap getDeclaredNamespaces() {
+        return declaredNamespaces;
+    }
+    
+    public void addDeclaredNamespaces(HashMap namespaces) {
+        declaredNamespaces.putAll(namespaces);
     }
 
     /**

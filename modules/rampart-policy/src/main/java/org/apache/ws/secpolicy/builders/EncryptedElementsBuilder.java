@@ -21,6 +21,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
@@ -57,7 +58,12 @@ public class EncryptedElementsBuilder implements AssertionBuilder {
 
     private void processElement(OMElement element, SignedEncryptedElements parent) {
         if (XPATH.equals(element.getQName())) {
-            parent.addXPathExpression(element.getText());                        
+            parent.addXPathExpression(element.getText());   
+            Iterator namespaces = element.getAllDeclaredNamespaces();
+            while (namespaces.hasNext()) {
+                OMNamespace nm = (OMNamespace) namespaces.next();
+                parent.addDeclaredNamespaces(nm.getNamespaceURI(), nm.getPrefix());
+            }
         }
     }
     

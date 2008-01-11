@@ -208,6 +208,7 @@ public class RampartPolicyBuilder {
                 rpd.setEncryptedElements((String) it.next());
             }
         }
+        rpd.addDeclaredNamespaces(see.getDeclaredNamespaces());
     }
 
     /**
