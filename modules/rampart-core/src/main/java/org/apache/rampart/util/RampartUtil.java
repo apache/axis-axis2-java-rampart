@@ -1081,6 +1081,11 @@ public class RampartUtil {
         return retElem;
     }
     
+    /**
+     * Method to check whether security header is required in incoming message
+     * @param rmd 
+     * @return true if a security header is required in the incoming message
+     */
     public static boolean isSecHeaderRequired(RampartMessageData rmd) {
         RampartPolicyData rpd = rmd.getPolicyData();
         
@@ -1104,24 +1109,28 @@ public class RampartUtil {
         // Checking for supporting tokens
         SupportingToken supportingTokens;
         
-        supportingTokens = rpd.getSupportingTokens();
-        if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
-            return true;
-        }
+        if (!rmd.isInitiator()) {
         
-        supportingTokens = rpd.getSignedSupportingTokens();
-        if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
-            return true;
-        }
+            supportingTokens = rpd.getSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getSignedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getEndorsingSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getSignedEndorsingSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
         
-        supportingTokens = rpd.getEndorsingSupportingTokens();
-        if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
-            return true;
-        }
-        
-        supportingTokens = rpd.getSignedEndorsingSupportingTokens();
-        if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
-            return true;
         }
         
         return false;
