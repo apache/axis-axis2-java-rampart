@@ -22,10 +22,12 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.model.HttpsToken;
+import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
+import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSecurityEngineResult;
@@ -286,6 +288,17 @@ public class PolicyBasedResultsValidator {
                     throw new RampartException("usernameTokenMissing");
                 }
                 
+            } else if ( token instanceof IssuedToken ) {
+                //TODO is is enough to check for ST_UNSIGNED results ??
+                WSSecurityEngineResult samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_UNSIGNED);
+                if(samlResult == null) {
+                    throw new RampartException("samlTokenMissing");
+                }
+            } else if ( token instanceof X509Token) {
+                WSSecurityEngineResult x509Result = WSSecurityUtil.fetchActionResult(results, WSConstants.BST);
+                if(x509Result == null) {
+                    throw new RampartException("binaryTokenMissing");
+                }
             }
         }
     }
