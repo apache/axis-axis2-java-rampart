@@ -11,7 +11,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>rampart-core</artifactId>
     <packaging>jar</packaging>
-    <version>SNAPSHOT</version>
     <name>Rampart - Core</name>
 
     <build>
@@ -33,14 +32,14 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <dependencies>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
             <version>${pom.version}</version>
         </dependency>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-trust</artifactId>
             <version>${pom.version}</version>
@@ -48,15 +47,15 @@
     </dependencies>
 
     <reporting>
-      <plugins>
-        <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-         <templateDirectory>${basedir}</templateDirectory>
-         <menu ref="parent" />
-        </configuration>
-        </plugin>
-      </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <templateDirectory>${basedir}</templateDirectory>
+                    <menu ref="parent"/>
+                </configuration>
+            </plugin>
+        </plugins>
     </reporting>
 </project>

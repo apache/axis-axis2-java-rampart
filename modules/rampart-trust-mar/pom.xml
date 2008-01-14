@@ -12,7 +12,7 @@
     <groupId>org.apache.rampart</groupId>
     <artifactId>rahas</artifactId>
     <packaging>mar</packaging>
-    <version>${rahas.mar.version}</version>
+    <version>${rahas.mar.version}</version><!-- TODO need to remove this-->   
     <name>Rampart - Trust-Mar</name>
 
     <scm>
@@ -56,12 +56,12 @@
     	<dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
-            <version>${rampart.version}</version>
+            <version>${pom.version}</version>
         </dependency>
     	<dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-trust</artifactId>
-            <version>${rampart.version}</version>
+            <version>${pom.version}</version>
         </dependency>
     </dependencies>
 

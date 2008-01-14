@@ -11,7 +11,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>rampart-policy</artifactId>
     <packaging>jar</packaging>
-    <version>SNAPSHOT</version>
     <name>Rampart - Policy</name>
 
     <build>
@@ -35,16 +34,16 @@
     </build>
 
     <reporting>
-      <plugins>
-        <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-         <templateDirectory>${basedir}</templateDirectory>
-         <menu ref="parent" />
-        </configuration>
-        </plugin>
-      </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <templateDirectory>${basedir}</templateDirectory>
+                    <menu ref="parent"/>
+                </configuration>
+            </plugin>
+        </plugins>
     </reporting>
-    
+
 </project>

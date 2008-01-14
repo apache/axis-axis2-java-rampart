@@ -11,7 +11,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>rampart-trust</artifactId>
     <packaging>jar</packaging>
-    <version>SNAPSHOT</version>
     <name>Rampart - Trust</name>
 
     <build>
@@ -36,11 +35,11 @@
                     <target>1.4</target>
                 </configuration>
             </plugin>
-          </plugins>
+        </plugins>
     </build>
-    
+
     <dependencies>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
             <version>${pom.version}</version>
@@ -48,16 +47,16 @@
     </dependencies>
 
     <reporting>
-      <plugins>
-        <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-         <templateDirectory>${basedir}</templateDirectory>
-         <menu ref="parent" />
-        </configuration>
-        </plugin>
-      </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <templateDirectory>${basedir}</templateDirectory>
+                    <menu ref="parent"/>
+                </configuration>
+            </plugin>
+        </plugins>
     </reporting>
 
 </project>
