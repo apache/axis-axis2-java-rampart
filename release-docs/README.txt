@@ -32,6 +32,22 @@ $JAVA_HOME/jre/lib/security. These files are listed in sun download site,
 under the your JDK version as Java(TM) Cryptography Extension (JCE) Unlimited 
 Strength Jurisdiction Policy Files.     
 
+Before you engage Rampart 
+You have to make a small change to the default axis2.xml by adding the security 
+phase to OutFaultFlow. Security phase should be added just after the MessageOut 
+phase.
+
+eg.
+<phaseOrder type="OutFaultFlow">
+    <!--      user can add his own phases to this area  -->
+    <phase name="OperationOutFaultPhase"/>
+    <phase name="RMPhase"/>
+    <phase name="PolicyDetermination"/>
+    <phase name="MessageOut"/>
+    *<phase name="Security"/>* 
+</phaseOrder>
+ 
+
 Before you try any of the samples makesure you
 
 1.) Have the Axis2 standard binary distribution downloaded and extracted.
