@@ -365,6 +365,9 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
             sgndEndSuppTokMap = this.handleSupportingTokens(rmd,
                     sgndEndSuppTokens);
+            
+            SupportingToken supportingToks = rpd.getSupportingTokens();
+            this.handleSupportingTokens(rmd, supportingToks);
 
             // Setup signature parts
             sigParts = addSignatureParts(sigSuppTokMap, sigParts);
