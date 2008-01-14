@@ -32,7 +32,7 @@
             <outputDirectory>${dist.dir}/docs/apidocs</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../../target/site</directory>
+            <directory>../documentation/target/site</directory>
             <outputDirectory>${dist.dir}/docs</outputDirectory>
         </fileSet>
         <fileSet>
