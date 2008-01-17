@@ -235,5 +235,6 @@
         <phase name="OperationOutFaultPhase"/>
         <phase name="PolicyDetermination"/>
         <phase name="MessageOut"/>
+        <phase name="Security"/>
     </phaseOrder>
 </axisconfig>
