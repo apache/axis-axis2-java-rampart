@@ -114,8 +114,10 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
             // <sp:Header Name=".." Namespace=".." />
             // FIXME move 'Header' to Constants
             writer.writeStartElement(prefix, "Header", namespaceURI);
-            
-            writer.writeAttribute("Name", header.getName());
+            // Name attribute is optional
+            if (header.getName() != null) {
+                writer.writeAttribute("Name", header.getName());
+            }
             writer.writeAttribute("Namespace", header.getNamespace());
             
             writer.writeEndElement();
