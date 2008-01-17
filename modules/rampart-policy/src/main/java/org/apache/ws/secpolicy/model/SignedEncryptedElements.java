@@ -103,6 +103,9 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
 
         // <sp:SignedElements> | <sp:EncryptedElements>
         writer.writeStartElement(prefix, localName, namespaceURI);
+        
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
 
         if (writerPrefix == null) {
             // xmlns:sp=".."
