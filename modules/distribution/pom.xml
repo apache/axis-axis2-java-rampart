@@ -104,6 +104,16 @@
             <artifactId>rampart-trust</artifactId>
             <version>${pom.version}</version>
         </dependency>
+        <dependency>
+            <groupId>bouncycastle</groupId>
+            <artifactId>bcprov-jdk13</artifactId>
+            <version>${bcprov.jdk13.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>bouncycastle</groupId>
+            <artifactId>bcprov-jdk15</artifactId>
+            <version>${bcprov.jdk15.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
