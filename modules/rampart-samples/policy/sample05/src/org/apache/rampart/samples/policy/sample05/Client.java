@@ -30,9 +30,13 @@ import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rahas.RahasConstants;
+import org.apache.rahas.Token;
+import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.client.STSClient;
 import org.apache.rampart.RampartMessageData;
+import org.apache.ws.secpolicy.Constants;
 import org.opensaml.XML;
 
 import javax.xml.namespace.QName;
@@ -47,21 +51,37 @@ public class Client {
 
 		ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(args[1], null);
 
-		ServiceClient client = new ServiceClient(ctx, null);
-		Options options = new Options();
-		String action = TrustUtil.getActionValue(RahasConstants.VERSION_05_02, RahasConstants.RST_ACTION_ISSUE);
-		options.setAction(action);
-		options.setTo(new EndpointReference(args[0]));
-		options.setProperty(RampartMessageData.KEY_RAMPART_POLICY,  loadPolicy(args[2]));
-		client.setOptions(options);
-
-		client.engageModule("addressing");
-		client.engageModule("rampart");
-
-		OMElement response = client.sendReceive(getPayload());
-		OMElement saml = getSAMLToken(response);
 		
-		System.out.println(saml);
+		STSClient stsClient = new STSClient(ctx);
+		
+		stsClient.setRstTemplate(getRSTTemplate());
+		String action = TrustUtil.getActionValue(RahasConstants.VERSION_05_02, RahasConstants.RST_ACTION_ISSUE);
+		stsClient.setAction(action);
+		
+		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample05/policy.xml"), "http://localhost:8090/axis2/services/STS", loadPolicy("sample05/sts_policy.xml"), null);
+		
+	        System.out.println("\n############################# Requested Token ###################################\n");
+	        System.out.println(responseToken.getToken().toString());
+		
+	        TokenStorage store = TrustUtil.getTokenStore(ctx);
+	        store.add(responseToken);
+		
+		
+	        ServiceClient client = new ServiceClient(ctx, null);
+		
+	        Options options = new Options();
+	        options.setAction("urn:echo");
+	        options.setTo(new EndpointReference(args[0]));
+	        options.setProperty(RampartMessageData.KEY_RAMPART_POLICY,  loadPolicy("sample05/policy.xml"));
+	        options.setProperty(RampartMessageData.KEY_CUSTOM_ISSUED_TOKEN, responseToken.getId());
+	        client.setOptions(options);
+	        
+	        client.engageModule("addressing");
+                client.engageModule("rampart");
+                
+                OMElement response = client.sendReceive(getPayload("Hello world1"));
+                System.out.println("Response  : " + response);
+	        
 
 	}
 
@@ -78,18 +98,26 @@ public class Client {
         return elem;
     }
 
-	private static OMElement getPayload() throws TrustException{
-		OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_02);
-		TrustUtil.createRequestTypeElement(RahasConstants.VERSION_05_02, rstElem, RahasConstants.REQ_TYPE_ISSUE);
-		OMElement tokenTypeElem = TrustUtil.createTokenTypeElement(RahasConstants.VERSION_05_02, rstElem);
-		tokenTypeElem.setText(RahasConstants.TOK_TYPE_SAML_10);
-
-		TrustUtil.createAppliesToElement(rstElem, "http://localhost:8080/axis2/services/SimpleService", AddressingConstants.Final.WSA_NAMESPACE);
-		TrustUtil.createKeyTypeElement(RahasConstants.VERSION_05_02,
-				rstElem, RahasConstants.KEY_TYPE_PUBLIC_KEY);
-		TrustUtil.createKeySizeElement(RahasConstants.VERSION_05_02, rstElem, 256);
-
-		return rstElem;
-	}
+	
+    private static OMElement getPayload(String value) {
+	OMFactory factory = OMAbstractFactory.getOMFactory();
+	OMNamespace ns = factory.createOMNamespace("http://sample05.policy.samples.rampart.apache.org","ns1");
+	OMElement elem = factory.createOMElement("echo", ns);
+	OMElement childElem = factory.createOMElement("param0", null);
+	childElem.setText(value);
+	elem.addChild(childElem);
+	        
+	return elem;
+	
+    }
+	
+    private static OMElement getRSTTemplate() throws Exception {
+	OMFactory fac = OMAbstractFactory.getOMFactory();
+	OMElement elem = fac.createOMElement(Constants.RST_TEMPLATE);
+	TrustUtil.createTokenTypeElement(RahasConstants.VERSION_05_02, elem).setText(RahasConstants.TOK_TYPE_SAML_10);
+	TrustUtil.createKeyTypeElement(RahasConstants.VERSION_05_02, elem, RahasConstants.KEY_TYPE_PUBLIC_KEY);
+	TrustUtil.createKeySizeElement(RahasConstants.VERSION_05_02, elem, 256);
+	return elem;
+    }  
 
 }

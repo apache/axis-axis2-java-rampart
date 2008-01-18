@@ -15,7 +15,7 @@
  ! See the License for the specific language governing permissions and
  ! limitations under the License.
  !-->
-<!-- services.xml of sample-2 : Sign only-->
+<!-- services.xml of sample-04 : Secure Conversation -->
 <service>
 	<operation name="echo">
 		<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
