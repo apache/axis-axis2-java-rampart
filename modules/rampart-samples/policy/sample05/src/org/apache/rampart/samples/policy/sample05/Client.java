@@ -58,7 +58,7 @@ public class Client {
 		String action = TrustUtil.getActionValue(RahasConstants.VERSION_05_02, RahasConstants.RST_ACTION_ISSUE);
 		stsClient.setAction(action);
 		
-		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample05/policy.xml"), "http://localhost:8090/axis2/services/STS", loadPolicy("sample05/sts_policy.xml"), null);
+		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample05/policy.xml"), "http://localhost:8080/axis2/services/STS", loadPolicy("sample05/sts_policy.xml"), null);
 		
 	        System.out.println("\n############################# Requested Token ###################################\n");
 	        System.out.println(responseToken.getToken().toString());
