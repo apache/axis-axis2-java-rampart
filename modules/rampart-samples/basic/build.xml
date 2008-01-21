@@ -23,7 +23,7 @@
 	<property name="keys.dir" value="../keys"/>
 	<property name="temp.client.dir" value="build/temp_client"/>
 	
-	<property name="addressing.mar" value="addressing-1.2.mar"/>
+	<property name="addressing.mar" value="addressing-SNAPSHOT.mar"/>
 	<property name="rampart.mar" value="rampart-SNAPSHOT.mar"/>	
 	
 	<property name="client.port" value="8080"/>

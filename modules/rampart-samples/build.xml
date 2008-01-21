@@ -18,7 +18,7 @@
 <project basedir="." default="setup">
 
 	<property name="lib.dir" value="../lib"/>
-	<property name="modules.dir" value="../"/>
+	<property name="modules.dir" value="../modules"/>
 	
 	<property environment="env"/>
     	
