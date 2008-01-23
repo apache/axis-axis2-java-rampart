@@ -42,7 +42,6 @@ public class AddressingMTOMSecurityTest extends InteropTestBase {
         ofc.setSignatureKeyIdentifier(WSSHandlerConstants.SKI_KEY_IDENTIFIER);
         ofc.setEncryptionKeyIdentifier(WSSHandlerConstants.SKI_KEY_IDENTIFIER);
         ofc.setSignatureParts("{Element}{" + ADDR_NS + "}To;" +
-                                "{Element}{" + ADDR_NS + "}ReplyTo;" +
                                 "{Element}{" + ADDR_NS + "}MessageID;" +
                                 "{Element}{" + WSU_NS + "}Timestamp");
         ofc.setOptimizeParts(
@@ -85,7 +84,6 @@ public class AddressingMTOMSecurityTest extends InteropTestBase {
         ofc.setSignatureKeyIdentifier(WSSHandlerConstants.SKI_KEY_IDENTIFIER);
         ofc.setEncryptionKeyIdentifier(WSSHandlerConstants.SKI_KEY_IDENTIFIER);
         ofc.setSignatureParts("{Element}{" + ADDR_NS + "}To;" +
-                                "{Element}{" + ADDR_NS + "}ReplyTo;" +
                                 "{Element}{" + ADDR_NS + "}MessageID;" +
                                 "{Element}{" + WSU_NS + "}Timestamp");
         ofc.setOptimizeParts(

@@ -135,8 +135,10 @@ public class Token {
                  Date created,
                  Date expires) throws TrustException {
         this.id = id;
-        this.token = new StAXOMBuilder(DOOMAbstractFactory.getOMFactory(),
-                tokenElem.getXMLStreamReader()).getDocumentElement();
+        StAXOMBuilder stAXOMBuilder = new StAXOMBuilder(DOOMAbstractFactory.getOMFactory(),
+                tokenElem.getXMLStreamReader());
+        stAXOMBuilder.setNamespaceURIInterning(true);
+        this.token = stAXOMBuilder.getDocumentElement();
         this.created = created;
         this.expires = expires;
     }
@@ -145,8 +147,10 @@ public class Token {
                  OMElement tokenElem,
                  OMElement lifetimeElem) throws TrustException {
         this.id = id;
-        this.token = new StAXOMBuilder(DOOMAbstractFactory.getOMFactory(),
-                tokenElem.getXMLStreamReader()).getDocumentElement();
+        StAXOMBuilder stAXOMBuilder = new StAXOMBuilder(DOOMAbstractFactory.getOMFactory(),
+                tokenElem.getXMLStreamReader());
+        stAXOMBuilder.setNamespaceURIInterning(true);
+        this.token = stAXOMBuilder.getDocumentElement();
         this.processLifeTime(lifetimeElem);
     }
     

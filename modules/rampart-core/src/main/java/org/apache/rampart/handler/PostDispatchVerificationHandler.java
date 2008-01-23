@@ -26,11 +26,13 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
+import org.apache.rampart.util.HandlerParameterDecoder;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.security.handler.WSHandlerConstants;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Handler to verify the message security after dispatch
@@ -128,6 +130,19 @@ public class PostDispatchVerificationHandler implements Handler {
             throw new AxisFault("InvalidSecurity");
         }
         
+        //Check for an empty security processing results when parameter based 
+        //configuration is used
+        if(msgContext.getParameter(WSSHandlerConstants.INFLOW_SECURITY) != null ||
+                msgContext.getProperty(WSSHandlerConstants.INFLOW_SECURITY) != null) {
+            if(msgContext.getProperty(WSHandlerConstants.RECV_RESULTS) == null) {
+                    throw new AxisFault("InvalidSecurity");
+            } else {
+                if(((Vector)msgContext.getProperty(WSHandlerConstants.RECV_RESULTS)).size() == 0) {
+                    throw new AxisFault("InvalidSecurity");
+                }
+            }
+        }
+
         return InvocationResponse.CONTINUE;
         
     }
