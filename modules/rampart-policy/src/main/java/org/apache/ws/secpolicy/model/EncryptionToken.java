@@ -20,11 +20,17 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class EncryptionToken extends AbstractSecurityAssertion implements TokenWrapper {
 
     private Token encryptionToken;
+    
+    public EncryptionToken(int version) {
+        setVersion(version);
+    }
 
     /**
      * @return Returns the encryptionToken.
@@ -45,18 +51,23 @@ public class EncryptionToken extends AbstractSecurityAssertion implements TokenW
     }
 
     public QName getName() {
-        return Constants.ENCRYPTION_TOKEN;
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.ENCRYPTION_TOKEN;
+        } else {
+            return SP11Constants.ENCRYPTION_TOKEN;
+        }
+        
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localname = Constants.ENCRYPTION_TOKEN.getLocalPart();
-        String namespaceURI = Constants.ENCRYPTION_TOKEN.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
         String prefix;
         
         String writerPrefix = writer.getPrefix(namespaceURI);
         
         if (writerPrefix == null) {
-            prefix = Constants.ENCRYPTION_TOKEN.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         } else {
             prefix = writerPrefix;
@@ -71,14 +82,14 @@ public class EncryptionToken extends AbstractSecurityAssertion implements TokenW
         }
         
         
-        String wspNamespaceURI = Constants.POLICY.getNamespaceURI();
+        String wspNamespaceURI = SPConstants.POLICY.getNamespaceURI();
         
         String wspPrefix;
         
         String wspWriterPrefix = writer.getPrefix(wspNamespaceURI);
         
         if (wspWriterPrefix == null) {
-            wspPrefix = Constants.POLICY.getPrefix();
+            wspPrefix = SPConstants.POLICY.getPrefix();
             writer.setPrefix(wspPrefix, wspNamespaceURI);
             
         } else {
@@ -86,7 +97,7 @@ public class EncryptionToken extends AbstractSecurityAssertion implements TokenW
         }
         
         // <wsp:Policy>
-        writer.writeStartElement(wspPrefix, Constants.POLICY.getLocalPart(), wspNamespaceURI);
+        writer.writeStartElement(wspPrefix, SPConstants.POLICY.getLocalPart(), wspNamespaceURI);
         
         if (wspWriterPrefix == null) {
             // xmlns:wsp=".."
