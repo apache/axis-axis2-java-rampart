@@ -28,7 +28,9 @@ import org.apache.neethi.All;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.SP12Constants;
 
 public class TransportBinding extends Binding {
 
@@ -36,6 +38,9 @@ public class TransportBinding extends Binding {
 
     private List transportBindings;
 
+    public TransportBinding(int version) {
+        super(version);
+    }
     /**
      * @return Returns the transportToken.
      */
@@ -70,7 +75,11 @@ public class TransportBinding extends Binding {
     }
 
     public QName getName() {
-        return Constants.TRANSPORT_BINDING;
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.TRANSPORT_BINDING;
+        } else {
+            return SP11Constants.TRANSPORT_BINDING;
+        }
     }
 
     public PolicyComponent normalize() {
@@ -94,7 +103,7 @@ public class TransportBinding extends Binding {
 
         for (Iterator iterator = configurations.iterator(); iterator.hasNext();) {
             wrapper = new All();
-            transportBinding = new TransportBinding();
+            transportBinding = new TransportBinding(this.getVersion());
 
             algorithmSuite = (AlgorithmSuite) iterator.next();
             transportBinding.setAlgorithmSuite(algorithmSuite);
@@ -115,13 +124,13 @@ public class TransportBinding extends Binding {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localName = Constants.TRANSPORT_BINDING.getLocalPart();
-        String namespaceURI = Constants.TRANSPORT_BINDING.getNamespaceURI();
+        String localName = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix = writer.getPrefix(namespaceURI);
 
         if (prefix == null) {
-            prefix = Constants.TRANSPORT_BINDING.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
 
@@ -129,14 +138,14 @@ public class TransportBinding extends Binding {
         writer.writeStartElement(prefix, localName, namespaceURI);
         writer.writeNamespace(prefix, namespaceURI);
         
-        String pPrefix = writer.getPrefix(Constants.POLICY.getNamespaceURI());
+        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (pPrefix == null) {
-            pPrefix = Constants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, Constants.POLICY.getNamespaceURI());
+            pPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
         }
         
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, Constants.POLICY.getLocalPart(), Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
 
         if (transportToken == null) {
@@ -166,9 +175,7 @@ public class TransportBinding extends Binding {
 
         if (isIncludeTimestamp()) {
             // <sp:IncludeTimestamp>
-            writer.writeStartElement(Constants.INCLUDE_TIMESTAMP.getPrefix(),
-                    Constants.INCLUDE_TIMESTAMP.getLocalPart(),
-                    Constants.INCLUDE_TIMESTAMP.getNamespaceURI());
+            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
             writer.writeEndElement();
             // </sp:IncludeTimestamp>
         }
