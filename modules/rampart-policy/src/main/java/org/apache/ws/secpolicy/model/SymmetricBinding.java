@@ -27,7 +27,9 @@ import org.apache.neethi.All;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
@@ -36,6 +38,10 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
     private SignatureToken signatureToken;
     
     private ProtectionToken protectionToken;
+    
+    public SymmetricBinding(int version) {
+        super(version);
+    }
     
     /**
      * @return Returns the encryptionToken.
@@ -93,7 +99,12 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
     }
     
     public QName getName() {
-        return Constants.SYMMETRIC_BINDING;
+        if ( version == SPConstants.SP_V12) {
+            return SP12Constants.SYMMETRIC_BINDING;
+        } else {
+            return SP11Constants.SYMMETRIC_BINDING;
+        }
+        
     }
 
     public PolicyComponent normalize() {
@@ -117,7 +128,7 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         
         for (Iterator iterator = configurations.iterator(); iterator.hasNext();) {
             wrapper = new All();
-            symmetricBinding = new SymmetricBinding();
+            symmetricBinding = new SymmetricBinding(this.version);
             
             algorithmSuite = (AlgorithmSuite) iterator.next();
             symmetricBinding.setAlgorithmSuite(algorithmSuite);
@@ -145,14 +156,14 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
         
-        String localname = Constants.SYMMETRIC_BINDING.getLocalPart();
-        String namespaceURI = Constants.SYMMETRIC_BINDING.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
         
         String prefix;
         String writerPrefix = writer.getPrefix(namespaceURI);
         
         if (writerPrefix == null) {
-            prefix = Constants.SYMMETRIC_BINDING.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         } else {
             prefix = writerPrefix;
@@ -167,14 +178,14 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         }
         
         
-        String policyLocalName = Constants.POLICY.getLocalPart();
-        String policyNamespaceURI = Constants.POLICY.getNamespaceURI();
+        String policyLocalName = SPConstants.POLICY.getLocalPart();
+        String policyNamespaceURI = SPConstants.POLICY.getNamespaceURI();
         
         String wspPrefix;
         
         String wspWriterPrefix = writer.getPrefix(policyNamespaceURI);
         if (wspWriterPrefix == null) {
-            wspPrefix = Constants.POLICY.getPrefix();
+            wspPrefix = SPConstants.POLICY.getPrefix();
             writer.setPrefix(wspPrefix, policyNamespaceURI);
             
         } else {
@@ -209,24 +220,24 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         
         if (isIncludeTimestamp()) {
             // <sp:IncludeTimestamp />
-            writer.writeStartElement(prefix, Constants.INCLUDE_TIMESTAMP.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
             writer.writeEndElement();
         }
         
-        if (Constants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
+        if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
             // <sp:EncryptBeforeSigning />
-            writer.writeStartElement(prefix, Constants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
             writer.writeEndElement();
         }
         
         if (isSignatureProtection()) {
             // <sp:EncryptSignature />
-            writer.writeStartElement(prefix, Constants.ENCRYPT_SIGNATURE.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ENCRYPT_SIGNATURE , namespaceURI);
             writer.writeEndElement();
         }
         
         if(isEntireHeadersAndBodySignatures()) {
-            writer.writeEmptyElement(prefix, Constants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY, namespaceURI);
+            writer.writeEmptyElement(prefix, SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY, namespaceURI);
         }
         // </wsp:Policy>
         writer.writeEndElement();
