@@ -17,7 +17,9 @@
 package org.apache.ws.secpolicy.model;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -28,6 +30,10 @@ public class TransportToken extends AbstractSecurityAssertion implements TokenWr
 
     private Token transportToken;
     
+    public TransportToken(int version){
+        setVersion(version);
+    }
+    
     /**
      * @return Returns the transportToken.
      */
@@ -36,7 +42,11 @@ public class TransportToken extends AbstractSecurityAssertion implements TokenWr
     }
     
     public QName getName() {
-        return new QName(Constants.SP_NS, "TransportToken");
+        if ( version == SPConstants.SP_V12) {
+            return SP12Constants.TRANSPORT_TOKEN;
+        } else {
+            return SP11Constants.TRANSPORT_TOKEN;
+        }
     }
 
     public boolean isOptional() {
@@ -53,8 +63,8 @@ public class TransportToken extends AbstractSecurityAssertion implements TokenWr
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
         
-        String localName = Constants.TRANSPORT_TOKEN.getLocalPart();
-        String namespaceURI = Constants.TRANSPORT_TOKEN.getNamespaceURI();
+        String localName = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
         
         String prefix = writer.getPrefix(namespaceURI);
         if (prefix == null) {
@@ -65,13 +75,13 @@ public class TransportToken extends AbstractSecurityAssertion implements TokenWr
         
         writer.writeStartElement(prefix, localName, namespaceURI);
         
-        String wspPrefix = writer.getPrefix(Constants.POLICY.getNamespaceURI());
+        String wspPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (wspPrefix == null) {
-            writer.setPrefix(wspPrefix, Constants.POLICY.getNamespaceURI());
+            writer.setPrefix(wspPrefix, SPConstants.POLICY.getNamespaceURI());
         }
         
         // <wsp:Policy>
-        writer.writeStartElement(Constants.POLICY.getPrefix(), Constants.POLICY.getLocalPart(), Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
         // serialization of the token ..
         transportToken.serialize(writer);
