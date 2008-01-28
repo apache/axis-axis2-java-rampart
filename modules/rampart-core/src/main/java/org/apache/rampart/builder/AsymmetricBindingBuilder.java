@@ -26,7 +26,7 @@ import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.RampartUtil;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
@@ -90,7 +90,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             this.addTimestamp(rmd);
         }
 
-        if (Constants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder())) {
+        if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder())) {
             this.doEncryptBeforeSig(rmd);
         } else {
             this.doSignBeforeEncrypt(rmd);
