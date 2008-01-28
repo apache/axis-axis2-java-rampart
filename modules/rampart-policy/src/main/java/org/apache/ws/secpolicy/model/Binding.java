@@ -20,9 +20,14 @@ public abstract class Binding extends AbstractSecurityAssertion implements Algor
 
     private AlgorithmSuite algorithmSuite;
     private boolean includeTimestamp;
-    private Layout layout = new Layout();
+    private Layout layout;
     private SupportingToken signedSupportingToken;
     private SupportingToken signedEndorsingSupportingTokens;
+    
+    public Binding (int version) {
+        setVersion(version);
+        layout = new Layout(version);
+    }
         
     /**
      * @return Returns the algorithmSuite.
