@@ -26,7 +26,7 @@ import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.IssuedToken;
@@ -255,8 +255,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 sig.appendBSTElementToHeader(rmd.getSecHeader());
                 
                 if (rpd.isTokenProtection()
-                        && !Constants.INCLUDE_NEVER
-                                .equals(token.getInclusion())) {
+                        && !(SPConstants.INCLUDE_TOKEN_NEVER == token.getInclusion())) {
                     sigParts.add(new WSEncryptionPart(sig.getBSTTokenId()));
                 }
                 
@@ -292,7 +291,7 @@ public class TransportBindingBuilder extends BindingBuilder {
         //Get the issued token
         String id = RampartUtil.getIssuedToken(rmd, (IssuedToken)token);
    
-        String inclusion = token.getInclusion();
+        int inclusion = token.getInclusion();
         org.apache.rahas.Token tok = null;
         try {
           tok = rmd.getTokenStorage().getToken(id);
@@ -303,9 +302,9 @@ public class TransportBindingBuilder extends BindingBuilder {
    
         boolean tokenIncluded = false;
         
-        if(inclusion.equals(Constants.INCLUDE_ALWAYS) ||
-        ((inclusion.equals(Constants.INCLUDE_ALWAYS_TO_RECIPIENT) 
-                || inclusion.equals(Constants.INCLUDE_ONCE)) 
+        if(inclusion == SPConstants.INCLUDE_TOEKN_ALWAYS ||
+        ((inclusion == SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT 
+                || inclusion == SPConstants.INCLUDE_TOKEN_ONCE) 
                 && rmd.isInitiator())) {
           
             //Add the token
