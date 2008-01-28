@@ -28,7 +28,7 @@ import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
@@ -84,7 +84,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         }
         
             
-        if(Constants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder())) {
+        if(SPConstants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder())) {
             this.doEncryptBeforeSig(rmd);
         } else {
             this.doSignBeforeEncrypt(rmd);
@@ -162,9 +162,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             WSSecEncrypt encr = null;
             Element encrDKTokenElem = null;
             
-            if(Constants.INCLUDE_ALWAYS.equals(encryptionToken.getInclusion()) ||
-                    Constants.INCLUDE_ONCE.equals(encryptionToken.getInclusion()) ||
-                    (rmd.isInitiator() && Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(encryptionToken.getInclusion()))) {
+            if(SPConstants.INCLUDE_TOEKN_ALWAYS == encryptionToken.getInclusion() ||
+                    SPConstants.INCLUDE_TOKEN_ONCE == encryptionToken.getInclusion() ||
+                    (rmd.isInitiator() && SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT == encryptionToken.getInclusion())) {
                 encrTokenElement = RampartUtil.appendChildToSecHeader(rmd, tok.getToken());
                 attached = true;
             } else if(encryptionToken instanceof X509Token && rmd.isInitiator()) {
@@ -416,11 +416,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         sigTok = this.getToken(rmd, sigTokId);
 
-        if(Constants.INCLUDE_ALWAYS.equals(sigToken.getInclusion()) ||
-                Constants.INCLUDE_ONCE.equals(sigToken.getInclusion()) ||
+        if(SPConstants.INCLUDE_TOEKN_ALWAYS == sigToken.getInclusion() ||
+                SPConstants.INCLUDE_TOKEN_ONCE == sigToken.getInclusion() ||
                 (rmd.isInitiator() && 
-                        Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(
-                                sigToken.getInclusion()))) {
+                        SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT == sigToken.getInclusion())) {
             sigTokElem = RampartUtil.appendChildToSecHeader(rmd, 
                                                             sigTok.getToken());
             this.setInsertionLocation(sigTokElem);
@@ -504,9 +503,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             encrTokId = rmd.getIssuedEncryptionTokenId();
             encrTok = this.getToken(rmd, encrTokId);
             
-            if(Constants.INCLUDE_ALWAYS.equals(encrToken.getInclusion()) ||
-                    Constants.INCLUDE_ONCE.equals(encrToken.getInclusion()) ||
-                    (rmd.isInitiator() && Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(encrToken.getInclusion()))) {
+            if(SPConstants.INCLUDE_TOEKN_ALWAYS == encrToken.getInclusion() ||
+                    SPConstants.INCLUDE_TOKEN_ONCE == encrToken.getInclusion() ||
+                    (rmd.isInitiator() && SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT == encrToken.getInclusion())) {
                 encrTokElem = (Element)encrTok.getToken();
                 
                 //Add the encrToken element before the sigToken element
