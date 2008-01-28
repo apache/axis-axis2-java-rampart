@@ -23,7 +23,8 @@ import org.apache.neethi.Policy;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.xml.security.encryption.XMLCipher;
 import org.opensaml.XML;
 
@@ -134,8 +135,7 @@ public class RahasSAMLTokenCertForHoKV1205Test extends TestClient {
     public OMElement getRSTTemplate() throws TrustException {
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement elem =
-                factory.createOMElement(Constants.RST_TEMPLATE.getLocalPart(),
-                                        factory.createOMNamespace(Constants.RST_TEMPLATE.getNamespaceURI(), "wsp"));
+                factory.createOMElement(SP12Constants.REQUEST_SECURITY_TOKEN_TEMPLATE);
 
         TrustUtil.createTokenTypeElement(RahasConstants.VERSION_05_12, elem).
                 setText(RahasConstants.TOK_TYPE_SAML_10);
