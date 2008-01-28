@@ -21,7 +21,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +51,7 @@ public class SecpolicyModelTest extends TestCase {
                     Token token = protectionToken.getProtectionToken();
                     if(token instanceof X509Token) {
                         assertEquals("incorrect X509 token versin and type",
-                                Constants.WSS_X509_V3_TOKEN10,
+                                SPConstants.WSS_X509_V3_TOKEN10,
                                 ((X509Token) token).getTokenVersionAndType());
                     } else {
                         fail("ProtectionToken must contain a X509Token assertion");
