@@ -17,7 +17,9 @@
 package org.apache.ws.secpolicy.model;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -35,6 +37,10 @@ public class IssuedToken extends Token {
     boolean requireExternalReference;
 
     boolean requireInternalReference;
+    
+    public IssuedToken(int version) {
+        setVersion(version);
+    }
 
     /**
      * @return Returns the issuerEpr.
@@ -97,18 +103,22 @@ public class IssuedToken extends Token {
     }
 
     public QName getName() {
-        return Constants.ISSUED_TOKEN;
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.ISSUED_TOKEN;
+        } else {
+            return SP11Constants.ISSUED_TOKEN; 
+        }      
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localname = Constants.ISSUED_TOKEN.getLocalPart();
-        String namespaceURI = Constants.ISSUED_TOKEN.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix;
         String writerPrefix = writer.getPrefix(namespaceURI);
 
         if (writerPrefix == null) {
-            prefix = Constants.ISSUED_TOKEN.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
 
         } else {
@@ -122,14 +132,21 @@ public class IssuedToken extends Token {
             writer.writeNamespace(prefix, namespaceURI);
         }
 
-        String inclusion = getInclusion();
+        String inclusion;
+        
+        if (version == SPConstants.SP_V12) {
+            inclusion = SP12Constants.getAttributeValueFromInclusion(getInclusion());
+        } else {
+            inclusion = SP11Constants.getAttributeValueFromInclusion(getInclusion()); 
+        }
+        
         if (inclusion != null) {
             writer.writeAttribute(prefix, namespaceURI,
-                    Constants.ATTR_INCLUDE_TOKEN, inclusion);
+                    SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
         }
 
         if (issuerEpr != null) {
-            writer.writeStartElement(prefix, Constants.ISSUER.getLocalPart(),
+            writer.writeStartElement(prefix, SPConstants.ISSUER,
                     namespaceURI);
             issuerEpr.serialize(writer);
             writer.writeEndElement();
@@ -141,15 +158,15 @@ public class IssuedToken extends Token {
 
         }
 
-        String policyLocalName = Constants.POLICY.getLocalPart();
-        String policyNamespaceURI = Constants.POLICY.getNamespaceURI();
+        String policyLocalName = SPConstants.POLICY.getLocalPart();
+        String policyNamespaceURI = SPConstants.POLICY.getNamespaceURI();
 
         String wspPrefix;
 
         String wspWriterPrefix = writer.getPrefix(policyNamespaceURI);
 
         if (wspWriterPrefix == null) {
-            wspPrefix = Constants.PROTECTION_TOKEN.getPrefix();
+            wspPrefix = SPConstants.POLICY.getPrefix();
             writer.setPrefix(wspPrefix, policyNamespaceURI);
         } else {
             wspPrefix = wspWriterPrefix;
@@ -169,22 +186,20 @@ public class IssuedToken extends Token {
 
             if (isRequireExternalReference()) {
                 // <sp:RequireExternalReference />
-                writer.writeEmptyElement(prefix,
-                        Constants.REQUIRE_EXTERNAL_REFERNCE.getLocalPart(),
+                writer.writeEmptyElement(prefix, SPConstants.REQUIRE_EXTERNAL_REFERNCE,
                         namespaceURI);
             }
 
             if (isRequireInternalReference()) {
                 // <sp:RequireInternalReference />
-                writer.writeEmptyElement(prefix,
-                        Constants.REQUIRE_INTERNAL_REFERNCE.getLocalPart(),
+                writer.writeEmptyElement(prefix, SPConstants.REQUIRE_INTERNAL_REFERNCE,
                         namespaceURI);
             }
 
             if (this.isDerivedKeys()) {
                 // <sp:RequireDerivedKeys />
-                writer.writeEmptyElement(prefix, Constants.REQUIRE_DERIVED_KEYS
-                        .getLocalPart(), namespaceURI);
+                writer.writeEmptyElement(prefix, SPConstants.REQUIRE_DERIVED_KEYS,
+                        namespaceURI);
             }
             
             // <wsp:Policy>
