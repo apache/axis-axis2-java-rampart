@@ -36,7 +36,8 @@ import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.client.STSClient;
 import org.apache.rampart.RampartMessageData;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.opensaml.XML;
 
 import javax.xml.namespace.QName;
@@ -113,7 +114,7 @@ public class Client {
 	
     private static OMElement getRSTTemplate() throws Exception {
 	OMFactory fac = OMAbstractFactory.getOMFactory();
-	OMElement elem = fac.createOMElement(Constants.RST_TEMPLATE);
+	OMElement elem = fac.createOMElement(SP11Constants.REQUEST_SECURITY_TOKEN_TEMPLATE);
 	TrustUtil.createTokenTypeElement(RahasConstants.VERSION_05_02, elem).setText(RahasConstants.TOK_TYPE_SAML_10);
 	TrustUtil.createKeyTypeElement(RahasConstants.VERSION_05_02, elem, RahasConstants.KEY_TYPE_PUBLIC_KEY);
 	TrustUtil.createKeySizeElement(RahasConstants.VERSION_05_02, elem, 256);
