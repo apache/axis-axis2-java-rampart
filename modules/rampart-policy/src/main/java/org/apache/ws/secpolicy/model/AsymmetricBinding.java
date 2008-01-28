@@ -27,13 +27,19 @@ import org.apache.neethi.All;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     private InitiatorToken initiatorToken;
 
     private RecipientToken recipientToken;
+    
+    public AsymmetricBinding(int version) {
+        super(version);
+    }
 
     /**
      * @return Returns the initiatorToken.
@@ -66,7 +72,11 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
     }
 
     public QName getName() {
-        return Constants.ASYMMETRIC_BINDING;
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.ASYMMETRIC_BINDING;
+        } else {
+            return SP11Constants.ASYMMETRIC_BINDING; 
+        }       
     }
 
     public PolicyComponent normalize() {
@@ -88,7 +98,7 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
 
         for (Iterator iterator = configs.iterator(); iterator.hasNext();) {
             wrapper = new All();
-            asymmetricBinding = new AsymmetricBinding();
+            asymmetricBinding = new AsymmetricBinding(this.version);
 
             asymmetricBinding.setAlgorithmSuite((AlgorithmSuite) iterator
                     .next());
@@ -113,13 +123,13 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localname = Constants.ASYMMETRIC_BINDING.getLocalPart();
-        String namespaceURI = Constants.ASYMMETRIC_BINDING.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix = writer.getPrefix(namespaceURI);
         
         if (prefix == null) {
-            prefix = Constants.ASYMMETRIC_BINDING.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
 
@@ -127,15 +137,15 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
         writer.writeStartElement(prefix, localname, namespaceURI);
         writer.writeNamespace(prefix, namespaceURI);
 
-        String pPrefix = writer.getPrefix(Constants.POLICY.getNamespaceURI());
+        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (pPrefix == null) {
-            pPrefix = Constants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, Constants.POLICY.getNamespaceURI());
+            pPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
         }
 
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, Constants.POLICY.getLocalPart(),
-                Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(),
+                SPConstants.POLICY.getNamespaceURI());
 
         if (initiatorToken == null) {
             throw new RuntimeException("InitiatorToken is not set");
@@ -171,16 +181,15 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
 
         if (isIncludeTimestamp()) {
             // <sp:IncludeTimestamp>
-            writer.writeStartElement(Constants.INCLUDE_TIMESTAMP.getPrefix(),
-                    Constants.INCLUDE_TIMESTAMP.getLocalPart(),
-                    Constants.INCLUDE_TIMESTAMP.getNamespaceURI());
+            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP,
+                    namespaceURI);
             writer.writeEndElement();
             // </sp:IncludeTimestamp>
         }
 
-        if (Constants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
+        if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
             // <sp:EncryptBeforeSign />
-            writer.writeStartElement(prefix, Constants.ENCRYPT_BEFORE_SIGNING,
+            writer.writeStartElement(prefix, SPConstants.ENCRYPT_BEFORE_SIGNING,
                     namespaceURI);
             writer.writeEndElement();
         }
@@ -188,22 +197,22 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
         if (isSignatureProtection()) {
             // <sp:EncryptSignature />
             // FIXME move the String constants to a QName
-            writer.writeStartElement(prefix, Constants.ENCRYPT_SIGNATURE
-                    .getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ENCRYPT_SIGNATURE,
+                    namespaceURI);
             writer.writeEndElement();
         }
 
         if (isTokenProtection()) {
             // <sp:ProtectTokens />
-            writer.writeStartElement(prefix, Constants.PROTECT_TOKENS
-                    .getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.PROTECT_TOKENS,
+                    namespaceURI);
             writer.writeEndElement();
         }
 
         if (isEntireHeadersAndBodySignatures()) {
             // <sp:OnlySignEntireHeaderAndBody />
             writer.writeStartElement(prefix,
-                    Constants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY, namespaceURI);
+                    SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY, namespaceURI);
             writer.writeEndElement();
         }
 
