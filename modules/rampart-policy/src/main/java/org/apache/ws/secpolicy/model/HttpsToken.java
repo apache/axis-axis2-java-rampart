@@ -21,7 +21,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.SP12Constants;
 
 /**
  * 
@@ -29,6 +31,10 @@ import org.apache.ws.secpolicy.Constants;
  */
 public class HttpsToken extends Token {
 
+    public HttpsToken(int version){
+        setVersion(version);
+    }
+    
     private boolean requireClientCertificate = false;
 
     public boolean isRequireClientCertificate() {
@@ -40,7 +46,11 @@ public class HttpsToken extends Token {
     }
 
     public QName getName() {
-        return Constants.HTTPS_TOKEN;
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.HTTPS_TOKEN;
+        } else {
+            return SP11Constants.HTTPS_TOKEN;
+        }
     }
 
     public PolicyComponent normalize() {
@@ -49,12 +59,12 @@ public class HttpsToken extends Token {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
-        String localname = Constants.HTTPS_TOKEN.getLocalPart();
-        String namespaceURI = Constants.HTTPS_TOKEN.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix = writer.getPrefix(namespaceURI);
         if (prefix == null) {
-            prefix = Constants.HTTPS_TOKEN.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
 
@@ -63,8 +73,7 @@ public class HttpsToken extends Token {
 
         // RequireClientCertificate=".."
         writer
-                .writeAttribute(Constants.REQUIRE_CLIENT_CERTIFICATE
-                        .getLocalPart(), Boolean
+                .writeAttribute(SPConstants.REQUIRE_CLIENT_CERTIFICATE.getLocalPart(), Boolean
                         .toString(isRequireClientCertificate()));
 
         writer.writeEndElement();
