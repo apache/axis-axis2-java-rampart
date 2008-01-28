@@ -21,7 +21,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.SP12Constants;
 
 /**
  * Model bean to capture Trust10 assertion info
@@ -33,6 +35,10 @@ public class Trust10 extends AbstractSecurityAssertion {
     private boolean requireClientEntropy;
     private boolean requireServerEntropy;
     private boolean mustSupportIssuedTokens;
+    
+    public Trust10(int version){
+        setVersion(version);
+    }
     
     /**
      * @return Returns the mustSupportClientChallenge.
@@ -108,7 +114,7 @@ public class Trust10 extends AbstractSecurityAssertion {
      * @see org.apache.neethi.Assertion#getName()
      */
     public QName getName() {
-        return Constants.TRUST_10;
+            return SP11Constants.TRUST_10;
     }
 
     /* (non-Javadoc)
@@ -125,12 +131,12 @@ public class Trust10 extends AbstractSecurityAssertion {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
         
-        String localname = Constants.TRUST_10.getLocalPart();
-        String namespaceURI = Constants.TRUST_10.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
         
         String prefix = writer.getPrefix(namespaceURI);
         if (prefix == null) {
-            prefix = Constants.TRUST_10.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
         
@@ -139,42 +145,42 @@ public class Trust10 extends AbstractSecurityAssertion {
         // xmlns:sp=".."
         writer.writeNamespace(prefix, namespaceURI);
         
-        String wspPrefix = writer.getPrefix(Constants.POLICY.getNamespaceURI());
+        String wspPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (wspPrefix == null) {
-            writer.setPrefix(wspPrefix, Constants.POLICY.getNamespaceURI());
+            writer.setPrefix(wspPrefix, SPConstants.POLICY.getNamespaceURI());
         }
         
         // <wsp:Policy>
-        writer.writeStartElement(Constants.POLICY.getPrefix(), Constants.POLICY.getLocalPart(), Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
         if (isMustSupportClientChallenge()) {
             // <sp:MustSupportClientChallenge />
-            writer.writeStartElement(prefix, Constants.MUST_SUPPORT_CLIENT_CHALLENGE.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_CLIENT_CHALLENGE, namespaceURI);
             writer.writeEndElement();
         }
         
         if (isMustSupportServerChallenge()) {
             // <sp:MustSupportServerChallenge />
-            writer.writeStartElement(prefix, Constants.MUST_SUPPORT_SERVER_CHALLENGE.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_SERVER_CHALLENGE, namespaceURI);
             writer.writeEndElement();
         }
         
         if (isRequireClientEntropy()) {
             // <sp:RequireClientEntropy />
-            writer.writeStartElement(prefix, Constants.REQUIRE_CLIENT_ENTROPY.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.REQUIRE_CLIENT_ENTROPY, namespaceURI);
             writer.writeEndElement();
         }
         
         
         if (isRequireServerEntropy()) {
             // <sp:RequireServerEntropy />
-            writer.writeStartElement(prefix, Constants.REQUIRE_SERVER_ENTROPY.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.REQUIRE_SERVER_ENTROPY, namespaceURI);
             writer.writeEndElement();
         }
         
         if (isMustSupportIssuedTokens()) {
             // <sp:MustSupportIssuedTokens />
-            writer.writeStartElement(prefix, Constants.MUST_SUPPORT_ISSUED_TOKENS.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_ISSUED_TOKENS, namespaceURI);
             writer.writeEndElement();
         }
         
