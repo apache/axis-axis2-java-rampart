@@ -21,11 +21,17 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class Layout extends AbstractSecurityAssertion {
 
-    private String value = Constants.LAYOUT_LAX;
+    private String value = SPConstants.LAYOUT_LAX;
+    
+    public Layout(int version) {
+        setVersion(version);
+    }
 
     /**
      * @return Returns the value.
@@ -39,10 +45,10 @@ public class Layout extends AbstractSecurityAssertion {
      *            The value to set.
      */
     public void setValue(String value) {
-        if (Constants.LAYOUT_LAX.equals(value)
-                || Constants.LAYOUT_STRICT.equals(value)
-                || Constants.LAYOUT_LAX_TIMESTAMP_FIRST.equals(value)
-                || Constants.LAYOUT_LAX_TIMESTAMP_LAST.equals(value)) {
+        if (SPConstants.LAYOUT_LAX.equals(value)
+                || SPConstants.LAYOUT_STRICT.equals(value)
+                || SPConstants.LAYOUT_LAX_TIMESTAMP_FIRST.equals(value)
+                || SPConstants.LAYOUT_LAX_TIMESTAMP_LAST.equals(value)) {
             this.value = value;
         } else {
             // throw new WSSPolicyException("Incorrect layout value : " +
@@ -51,7 +57,11 @@ public class Layout extends AbstractSecurityAssertion {
     }
 
     public QName getName() {
-        return Constants.LAYOUT;
+        if ( version == SPConstants.SP_V12 ) {
+            return SP12Constants.LAYOUT;
+        } else {
+            return SP11Constants.LAYOUT; 
+        }  
     }
 
     public PolicyComponent normalize() {
@@ -60,13 +70,13 @@ public class Layout extends AbstractSecurityAssertion {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
-        String localName = Constants.LAYOUT.getLocalPart();
-        String namespaceURI = Constants.LAYOUT.getNamespaceURI();
+        String localName = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix = writer.getPrefix(namespaceURI);
 
         if (prefix == null) {
-            prefix = Constants.LAYOUT.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
 
@@ -74,21 +84,21 @@ public class Layout extends AbstractSecurityAssertion {
         writer.writeStartElement(prefix, localName, namespaceURI);
 
         // <wsp:Policy>
-        writer.writeStartElement(Constants.POLICY.getPrefix(), Constants.POLICY
-                .getLocalPart(), Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY
+                .getLocalPart(), SPConstants.POLICY.getNamespaceURI());
 
         // .. <sp:Strict /> | <sp:Lax /> | <sp:LaxTsFirst /> | <sp:LaxTsLast /> ..
-        if (Constants.LAYOUT_STRICT.equals(value)) {
-            writer.writeStartElement(prefix, Constants.STRICT.getLocalPart(), namespaceURI);
+        if (SPConstants.LAYOUT_STRICT.equals(value)) {
+            writer.writeStartElement(prefix, SPConstants.LAYOUT_STRICT, namespaceURI);
             
-        } else if (Constants.LAYOUT_LAX.equals(value)) {
-            writer.writeStartElement(prefix, Constants.LAX.getLocalPart(), namespaceURI);
+        } else if (SPConstants.LAYOUT_LAX.equals(value)) {
+            writer.writeStartElement(prefix, SPConstants.LAYOUT_LAX, namespaceURI);
             
-        } else if (Constants.LAYOUT_LAX_TIMESTAMP_FIRST.equals(value)) {
-            writer.writeStartElement(prefix, Constants.LAXTSFIRST.getLocalPart(), namespaceURI);
+        } else if (SPConstants.LAYOUT_LAX_TIMESTAMP_FIRST.equals(value)) {
+            writer.writeStartElement(prefix, SPConstants.LAYOUT_LAX_TIMESTAMP_FIRST, namespaceURI);
             
-        } else if (Constants.LAYOUT_LAX_TIMESTAMP_LAST.equals(value)) {
-            writer.writeStartElement(prefix, Constants.LAXTSLAST.getLocalPart(), namespaceURI);
+        } else if (SPConstants.LAYOUT_LAX_TIMESTAMP_LAST.equals(value)) {
+            writer.writeStartElement(prefix, SPConstants.LAYOUT_LAX_TIMESTAMP_LAST, namespaceURI);
         }
         
         writer.writeEndElement();
