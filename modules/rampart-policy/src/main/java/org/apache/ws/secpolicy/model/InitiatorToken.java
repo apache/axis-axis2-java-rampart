@@ -21,11 +21,17 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.SP12Constants;
 
 public class InitiatorToken extends AbstractSecurityAssertion implements TokenWrapper {
     
     private Token initiatorToken;
+    
+    public InitiatorToken(int version) {
+        setVersion(version);
+    }
 
     /**
      * @return Returns the initiatorToken.
@@ -46,7 +52,12 @@ public class InitiatorToken extends AbstractSecurityAssertion implements TokenWr
     }
     
     public QName getName() {
-        return Constants.INITIATOR_TOKEN;
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.INITIATOR_TOKEN;
+        } else {
+            return SP11Constants.INITIATOR_TOKEN;
+        }
+        
     }
 
     public PolicyComponent normalize() {
@@ -54,27 +65,27 @@ public class InitiatorToken extends AbstractSecurityAssertion implements TokenWr
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localName = Constants.INITIATOR_TOKEN.getLocalPart();
-        String namespaceURI = Constants.INITIATOR_TOKEN.getNamespaceURI();
+        String localName = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix = writer.getPrefix(namespaceURI);
 
         if (prefix == null) {
-            prefix = Constants.INITIATOR_TOKEN.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
         
         // <sp:InitiatorToken>
         writer.writeStartElement(prefix, localName, namespaceURI);
         
-        String pPrefix = writer.getPrefix(Constants.POLICY.getNamespaceURI());
+        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (pPrefix == null) {
-            pPrefix = Constants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, Constants.POLICY.getNamespaceURI());
+            pPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
         }
         
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, Constants.POLICY.getLocalPart(), Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
 
         Token token = getInitiatorToken();
         if (token == null) {
