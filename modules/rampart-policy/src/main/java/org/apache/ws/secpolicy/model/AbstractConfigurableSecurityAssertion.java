@@ -41,4 +41,5 @@ public abstract class AbstractConfigurableSecurityAssertion extends AbstractSecu
         }
         return null;
     }
+    
 }
