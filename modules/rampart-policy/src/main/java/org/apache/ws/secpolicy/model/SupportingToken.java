@@ -24,7 +24,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class SupportingToken extends AbstractSecurityAssertion implements
         AlgorithmWrapper, TokenWrapper {
@@ -51,10 +53,11 @@ public class SupportingToken extends AbstractSecurityAssertion implements
 
     private SignedEncryptedParts encryptedParts;
 
-    public SupportingToken(int type) {
+    public SupportingToken(int type, int version ) {
         this.type = type;
+        setVersion(version);
     }
-
+    
     /**
      * @return Returns the algorithmSuite.
      */
@@ -171,14 +174,18 @@ public class SupportingToken extends AbstractSecurityAssertion implements
 
     public QName getName() {
         switch (type) {
-        case Constants.SUPPORTING_TOKEN_SUPPORTING:
-            return Constants.SUPPORIING_TOKENS;
-        case Constants.SUPPORTING_TOKEN_SIGNED:
-            return Constants.SIGNED_SUPPORTING_TOKENS;
-        case Constants.SUPPORTING_TOKEN_ENDORSING:
-            return Constants.ENDORSING_SUPPORTING_TOKENS;
-        case Constants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
-            return Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS;
+        case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
+            return version == SPConstants.SP_V12 ? SP12Constants.SUPPORTING_TOKENS : 
+                                                                    SP11Constants.SUPPORTING_TOKENS;
+        case SPConstants.SUPPORTING_TOKEN_SIGNED:
+            return version == SPConstants.SP_V12 ? SP12Constants.SIGNED_SUPPORTING_TOKENS : 
+                                                             SP11Constants.SIGNED_SUPPORTING_TOKENS;
+        case SPConstants.SUPPORTING_TOKEN_ENDORSING:
+            return version == SPConstants.SP_V12 ? SP12Constants.ENDORSING_SUPPORTING_TOKENS :
+                                                          SP11Constants.ENDORSING_SUPPORTING_TOKENS;
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
+            return version == SPConstants.SP_V12 ? SP12Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS: 
+                                                   SP11Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS;
         default:
             return null;
         }
@@ -193,29 +200,28 @@ public class SupportingToken extends AbstractSecurityAssertion implements
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String namespaceURI = Constants.SUPPORIING_TOKENS.getNamespaceURI();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix = writer.getPrefix(namespaceURI);
         if (prefix == null) {
-            prefix = Constants.SUPPORIING_TOKENS.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
 
         String localname = null;
 
         switch (getTokenType()) {
-        case Constants.SUPPORTING_TOKEN_SUPPORTING:
-            localname = Constants.SUPPORIING_TOKENS.getLocalPart();
+        case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
+            localname = SPConstants.SUPPORTING_TOKENS;
             break;
-        case Constants.SUPPORTING_TOKEN_SIGNED:
-            localname = Constants.SIGNED_SUPPORTING_TOKENS.getLocalPart();
+        case SPConstants.SUPPORTING_TOKEN_SIGNED:
+            localname = SPConstants.SIGNED_SUPPORTING_TOKENS;
             break;
-        case Constants.SUPPORTING_TOKEN_ENDORSING:
-            localname = Constants.ENDORSING_SUPPORTING_TOKENS.getLocalPart();
+        case SPConstants.SUPPORTING_TOKEN_ENDORSING:
+            localname = SPConstants.ENDORSING_SUPPORTING_TOKENS;
             break;
-        case Constants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
-            localname = Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS
-                    .getLocalPart();
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
+            localname = SPConstants.SIGNED_ENDORSING_SUPPORTING_TOKENS;
             break;
         default:
             throw new RuntimeException("Invalid SupportingTokenType");
@@ -227,14 +233,14 @@ public class SupportingToken extends AbstractSecurityAssertion implements
         // xmlns:sp=".."
         writer.writeNamespace(prefix, namespaceURI);
 
-        String pPrefix = writer.getPrefix(Constants.POLICY.getNamespaceURI());
+        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (pPrefix == null) {
-            pPrefix = Constants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, Constants.POLICY.getNamespaceURI());
+            pPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
         }
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, Constants.POLICY.getLocalPart(),
-                Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(),
+                SPConstants.POLICY.getNamespaceURI());
 
         Token token;
         for (Iterator iterator = getTokens().iterator(); iterator.hasNext();) {
