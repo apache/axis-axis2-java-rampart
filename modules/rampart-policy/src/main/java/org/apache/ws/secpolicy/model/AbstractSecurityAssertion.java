@@ -16,14 +16,18 @@
 package org.apache.ws.secpolicy.model;
 
 import org.apache.neethi.Assertion;
-import org.apache.neethi.Constants;
 import org.apache.neethi.PolicyComponent;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.SP12Constants;
 
 public abstract class AbstractSecurityAssertion implements Assertion {
 
     private boolean isOptional;
     
-    private boolean normalized = false;
+    private boolean normalized = false; 
+    
+    protected int version;
 
     public boolean isOptional() {
         return isOptional;
@@ -34,7 +38,7 @@ public abstract class AbstractSecurityAssertion implements Assertion {
     }
 
     public short getType() {
-        return Constants.TYPE_ASSERTION;
+        return org.apache.neethi.Constants.TYPE_ASSERTION;
     }    
     
     public boolean equal(PolicyComponent policyComponent) {
@@ -55,5 +59,15 @@ public abstract class AbstractSecurityAssertion implements Assertion {
          * TODO: Handling the isOptional:TRUE case
          */
         return this;
-    }    
+    }  
+    
+    public void setVersion(int version) {
+        this.version = version;
+    }
+    
+    public int getVersion() {
+        return version;
+    }
+    
+    
 }
