@@ -24,7 +24,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class SignedEncryptedParts extends AbstractSecurityAssertion {
 
@@ -34,8 +36,9 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
     
     private boolean signedParts;
     
-    public SignedEncryptedParts(boolean signedParts) {
+    public SignedEncryptedParts(boolean signedParts, int version) {
         this.signedParts = signedParts;
+        setVersion(version);
     }
 
     /**
@@ -75,9 +78,19 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
 
     public QName getName() {
         if (signedParts) {
-            return Constants.SIGNED_PARTS;
+            if ( version == SPConstants.SP_V12) {
+                return SP12Constants.SIGNED_PARTS;
+            } else {
+                return SP11Constants.SIGNED_PARTS;
+            }           
         }
-        return Constants.ENCRYPTED_PARTS;
+        
+        if ( version == SPConstants.SP_V12) {
+            return SP12Constants.ENCRYPTED_PARTS;
+        } else {
+            return SP11Constants.ENCRYPTED_PARTS;
+        }
+        
     }
 
     public PolicyComponent normalize() {
@@ -103,8 +116,7 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
         
         if (isBody()) {
             // <sp:Body />
-            // FIXME : move 'Body' to Constants
-            writer.writeStartElement(prefix, "Body", namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.BODY, namespaceURI);
             writer.writeEndElement();
         }
         
@@ -112,8 +124,7 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
         for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
             header = (Header) iterator.next();
             // <sp:Header Name=".." Namespace=".." />
-            // FIXME move 'Header' to Constants
-            writer.writeStartElement(prefix, "Header", namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.HEADER, namespaceURI);
             // Name attribute is optional
             if (header.getName() != null) {
                 writer.writeAttribute("Name", header.getName());
