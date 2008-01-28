@@ -20,7 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.HttpsToken;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
@@ -340,7 +340,7 @@ public class PolicyBasedResultsValidator {
         
         
         boolean done = false;
-        if(Constants.SIGN_BEFORE_ENCRYPTING.equals(protectionOrder)) {
+        if(SPConstants.SIGN_BEFORE_ENCRYPTING.equals(protectionOrder)) {
                         
             boolean sigFound = false;
             for (Iterator iter = sigEncrActions.iterator(); 
