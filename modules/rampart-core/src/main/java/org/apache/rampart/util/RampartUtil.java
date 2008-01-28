@@ -41,7 +41,7 @@ import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.model.CryptoConfig;
 import org.apache.rampart.policy.model.RampartConfig;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SupportingToken;
@@ -292,9 +292,9 @@ public class RampartUtil {
             log.debug("Creating RSTTemplate for an SCT request");
             OMFactory fac = OMAbstractFactory.getOMFactory();
             
-            OMNamespace wspNs = fac.createOMNamespace(Constants.SP_NS, "wsp");
+            OMNamespace wspNs = fac.createOMNamespace(SPConstants.P_NS, "wsp");
             OMElement rstTempl = fac.createOMElement(
-                    Constants.REQUEST_SECURITY_TOKEN_TEMPLATE.getLocalPart(),
+                    SPConstants.REQUEST_SECURITY_TOKEN_TEMPLATE,
                     wspNs);
             
             //Create TokenType element and set the value
@@ -868,7 +868,7 @@ public class RampartUtil {
     
     public static void setKeyIdentifierType(RampartPolicyData rpd, WSSecBase secBase,org.apache.ws.secpolicy.model.Token token) {
 		
-    	if (token.getInclusion().equals(Constants.INCLUDE_NEVER)) {
+    	if (token.getInclusion() == SPConstants.INCLUDE_TOKEN_NEVER) {
 			
     		boolean tokenTypeSet = false;
     		
