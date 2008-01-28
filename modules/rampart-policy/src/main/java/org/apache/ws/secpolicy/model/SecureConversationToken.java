@@ -18,7 +18,9 @@ package org.apache.ws.secpolicy.model;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Policy;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -32,6 +34,10 @@ public class SecureConversationToken extends SecurityContextToken {
     private Policy bootstrapPolicy;
 
     private OMElement issuerEpr;
+    
+    public SecureConversationToken(int version) {
+        super(version);
+    }
 
     /**
      * @return Returns the bootstrapPolicy.
@@ -54,20 +60,23 @@ public class SecureConversationToken extends SecurityContextToken {
      * @see org.apache.neethi.Assertion#getName()
      */
     public QName getName() {
-        return Constants.SECURE_CONVERSATION_TOKEN;
+        if ( version == SPConstants.SP_V12) {
+            return SP12Constants.SECURE_CONVERSATION_TOKEN;
+        } else {
+            return SP11Constants.SECURE_CONVERSATION_TOKEN; 
+        }      
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
-        String localname = Constants.SECURE_CONVERSATION_TOKEN.getLocalPart();
-        String namespaceURI = Constants.SECURE_CONVERSATION_TOKEN
-                .getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
         String prefix;
 
         String writerPrefix = writer.getPrefix(namespaceURI);
 
         if (writerPrefix == null) {
-            prefix = Constants.SECURE_CONVERSATION_TOKEN.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         } else {
             prefix = writerPrefix;
@@ -81,17 +90,22 @@ public class SecureConversationToken extends SecurityContextToken {
             writer.writeNamespace(prefix, namespaceURI);
         }
 
-        String inclusion = getInclusion();
+        String inclusion;
+        
+        if (version == SPConstants.SP_V12) {
+            inclusion = SP12Constants.getAttributeValueFromInclusion(getInclusion());
+        } else {
+            inclusion = SP11Constants.getAttributeValueFromInclusion(getInclusion()); 
+        }
 
         if (inclusion != null) {
-            writer.writeAttribute(prefix, namespaceURI, Constants.INCLUDE_TOKEN
-                    .getLocalPart(), inclusion);
+            writer.writeAttribute(prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, 
+                                                                     namespaceURI + inclusion);
         }
 
         if (issuerEpr != null) {
             // <sp:Issuer>
-            writer.writeStartElement(prefix, Constants.ISSUER.getLocalPart(),
-                    namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ISSUER , namespaceURI);
 
             issuerEpr.serialize(writer);
 
@@ -101,14 +115,14 @@ public class SecureConversationToken extends SecurityContextToken {
         if (isDerivedKeys() || isRequireExternalUriRef()
                 || isSc10SecurityContextToken() || (bootstrapPolicy != null)) {
 
-            String wspNamespaceURI = Constants.POLICY.getNamespaceURI();
+            String wspNamespaceURI = SPConstants.POLICY.getNamespaceURI();
 
             String wspPrefix;
 
             String wspWriterPrefix = writer.getPrefix(wspNamespaceURI);
 
             if (wspWriterPrefix == null) {
-                wspPrefix = Constants.POLICY.getPrefix();
+                wspPrefix = SPConstants.POLICY.getPrefix();
                 writer.setPrefix(wspPrefix, wspNamespaceURI);
 
             } else {
@@ -117,7 +131,7 @@ public class SecureConversationToken extends SecurityContextToken {
 
             // <wsp:Policy>
             writer.writeStartElement(wspPrefix,
-                    Constants.POLICY.getLocalPart(), wspNamespaceURI);
+                    SPConstants.POLICY.getLocalPart(), wspNamespaceURI);
 
             if (wspWriterPrefix == null) {
                 // xmlns:wsp=".."
@@ -126,22 +140,22 @@ public class SecureConversationToken extends SecurityContextToken {
             
             if (isDerivedKeys()) {
                 // <sp:RequireDerivedKeys />
-                writer.writeEmptyElement(prefix, Constants.REQUIRE_DERIVED_KEYS.getLocalPart(), wspWriterPrefix);
+                writer.writeEmptyElement(prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
             }
             
             if (isRequireExternalUriRef()) {
                 // <sp:RequireExternalUriReference />
-                writer.writeEmptyElement(prefix, Constants.REQUIRE_EXTERNAL_URI_REFERNCE.getLocalPart(), namespaceURI);
+                writer.writeEmptyElement(prefix, SPConstants.REQUIRE_EXTERNAL_URI_REFERNCE, namespaceURI);
             }
             
             if (isSc10SecurityContextToken()) {
                 // <sp:SC10SecurityContextToken />
-                writer.writeEmptyElement(prefix, Constants.SC10_SECURITY_CONTEXT_TOKEN.getLocalPart(), namespaceURI);
+                writer.writeEmptyElement(prefix, SPConstants.SC10_SECURITY_CONTEXT_TOKEN, namespaceURI);
             }
             
             if (bootstrapPolicy != null) {
                 // <sp:BootstrapPolicy ..>
-                writer.writeStartElement(prefix, Constants.BOOTSTRAP_POLICY.getLocalPart(), namespaceURI);
+                writer.writeStartElement(prefix, SPConstants.BOOTSTRAP_POLICY, namespaceURI);
                 bootstrapPolicy.serialize(writer);
                 writer.writeEndElement();
             }
