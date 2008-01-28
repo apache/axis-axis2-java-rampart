@@ -25,7 +25,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class SignedEncryptedElements extends AbstractSecurityAssertion {
 
@@ -41,8 +43,9 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
      */
     private boolean signedElemets;
 
-    public SignedEncryptedElements(boolean signedElements) {
+    public SignedEncryptedElements(boolean signedElements, int version) {
         this.signedElemets = signedElements;
+        setVersion(version);
     }
 
     /**
@@ -113,8 +116,7 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
         }
 
         if (xPathVersion != null) {
-            writer.writeAttribute(prefix, namespaceURI,
-                    Constants.ATTR_XPATH_VERSION.getLocalPart(), xPathVersion);
+            writer.writeAttribute(prefix, namespaceURI, SPConstants.XPATH_VERSION, xPathVersion);
         }
 
         String xpathExpression;
@@ -123,8 +125,7 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
                 .hasNext();) {
             xpathExpression = (String) iterator.next();
             // <sp:XPath ..>
-            writer.writeStartElement(prefix, Constants.XPATH_.getLocalPart(),
-                    namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.XPATH_EXPR, namespaceURI);
             writer.writeCharacters(xpathExpression);
             writer.writeEndElement();
         }
@@ -135,10 +136,19 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
 
     public QName getName() {
         if (signedElemets) {
-            return Constants.SIGNED_ELEMENTS;
+            if (version == SPConstants.SP_V12) {
+                return SP12Constants.SIGNED_ELEMENTS;
+            } else {
+                return SP11Constants.SIGNED_ELEMENTS;
+            }
+            
+        } 
+        
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.ENCRYPTED_ELEMENTS;
+        } else {
+            return SP11Constants.ENCRYPTED_ELEMENTS;
         }
-
-        return Constants.ENCRYPTED_ELEMENTS;
     }
 
     public PolicyComponent normalize() {
