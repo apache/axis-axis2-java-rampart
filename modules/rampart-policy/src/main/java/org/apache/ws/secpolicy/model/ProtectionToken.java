@@ -21,11 +21,17 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class ProtectionToken extends AbstractSecurityAssertion implements TokenWrapper {
     
     private Token protectionToken;
+    
+    public ProtectionToken(int version) {
+        setVersion(version);
+    }
 
     /**
      * @return Returns the protectionToken.
@@ -46,7 +52,11 @@ public class ProtectionToken extends AbstractSecurityAssertion implements TokenW
     }
     
     public QName getName() {
-        return Constants.PROTECTION_TOKEN;
+        if ( version == SPConstants.SP_V12) {
+            return SP12Constants.PROTECTION_TOKEN;
+        } else {
+            return SP11Constants.PROTECTION_TOKEN;
+        }     
     }
 
     public PolicyComponent normalize() {
@@ -58,14 +68,14 @@ public class ProtectionToken extends AbstractSecurityAssertion implements TokenW
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localname = Constants.PROTECTION_TOKEN.getLocalPart();
-        String namespaceURI = Constants.PROTECTION_TOKEN.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
         
         String prefix;
         
         String writerPrefix = writer.getPrefix(namespaceURI);
         if (writerPrefix == null) {
-            prefix = Constants.PROTECTION_TOKEN.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
             
         } else {
@@ -80,15 +90,15 @@ public class ProtectionToken extends AbstractSecurityAssertion implements TokenW
             writer.writeNamespace(prefix, namespaceURI);
         }
         
-        String policyLocalName = Constants.POLICY.getLocalPart();
-        String policyNamespaceURI = Constants.POLICY.getNamespaceURI();
+        String policyLocalName = SPConstants.POLICY.getLocalPart();
+        String policyNamespaceURI = SPConstants.POLICY.getNamespaceURI();
         
         String wspPrefix;
         
         String wspWriterPrefix = writer.getPrefix(policyNamespaceURI);
         
         if (wspWriterPrefix == null) {
-            wspPrefix = Constants.PROTECTION_TOKEN.getPrefix();
+            wspPrefix = SPConstants.POLICY.getPrefix();
             writer.setPrefix(wspPrefix, policyNamespaceURI);
         } else {
             wspPrefix = wspWriterPrefix;
