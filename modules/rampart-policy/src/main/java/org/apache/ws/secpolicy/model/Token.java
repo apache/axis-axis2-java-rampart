@@ -16,14 +16,14 @@
 
 package org.apache.ws.secpolicy.model;
 
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public abstract class Token extends AbstractSecurityAssertion {
 
     /**
      * Inclusion property of a TokenAssertion
      */
-    private String inclusion = Constants.INCLUDE_ALWAYS;
+    private int inclusion = SPConstants.INCLUDE_TOEKN_ALWAYS;
     
     /**
      * Whether to derive keys or not
@@ -33,21 +33,23 @@ public abstract class Token extends AbstractSecurityAssertion {
     /**
      * @return Returns the inclusion.
      */
-    public String getInclusion() {
+    public int getInclusion() {
         return inclusion;
     }
 
     /**
      * @param inclusion The inclusion to set.
      */
-    public void setInclusion(String inclusion)  {
-        if(Constants.INCLUDE_ALWAYS.equals(inclusion) || 
-           Constants.INCLUDE_ALWAYS_TO_RECIPIENT.equals(inclusion) ||
-           Constants.INCLUDE_NEVER.equals(inclusion) ||
-           Constants.INCLUDE_ONCE.equals(inclusion)) {
+    public void setInclusion(int inclusion)  {
+        if(SPConstants.INCLUDE_TOEKN_ALWAYS == inclusion || 
+           SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT == inclusion ||
+           SPConstants.INCLUDE_TOEKN_ALWAYS_TO_INITIATOR == inclusion ||
+           SPConstants.INCLUDE_TOKEN_NEVER == inclusion ||
+           SPConstants.INCLUDE_TOKEN_ONCE == inclusion ) {
             this.inclusion = inclusion;
         } else {
-//            throw new WSSPolicyException("Incorrect inclusion value: " + inclusion);
+            //TODO replace this with a proper (WSSPolicyException) exception
+            throw new RuntimeException("Incorrect inclusion value: " + inclusion);
         }
     }
     
