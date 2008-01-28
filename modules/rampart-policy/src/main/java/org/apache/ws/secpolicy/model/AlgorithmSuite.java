@@ -20,18 +20,20 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.WSSPolicyException;
 
 public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
 
     private String algoSuiteString;
 
-    private String symmetricSignature = Constants.HMAC_SHA1;
+    private String symmetricSignature = SPConstants.HMAC_SHA1;
 
-    private String asymmetricSignature = Constants.RSA_SHA1;
+    private String asymmetricSignature = SPConstants.RSA_SHA1;
 
-    private String computedKey = Constants.P_SHA1;
+    private String computedKey = SPConstants.P_SHA1;
 
     private int maximumSymmetricKeyLength = 256;
 
@@ -57,211 +59,215 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
 
     private int minimumSymmetricKeyLength;
 
-    private String c14n = Constants.EX_C14N;
+    private String c14n = SPConstants.EX_C14N;
 
     private String soapNormalization;
 
     private String strTransform;
 
     private String xPath;
+    
+    public AlgorithmSuite (int version) {
+        setVersion(version);
+    }
 
     /**
      * Set the algorithm suite
      * 
      * @param algoSuite
      * @throws WSSPolicyException
-     * @see Constants#ALGO_SUITE_BASIC128
-     * @see Constants#ALGO_SUITE_BASIC128_RSA15
-     * @see Constants#ALGO_SUITE_BASIC128_SHA256
-     * @see Constants#ALGO_SUITE_BASIC128_SHA256_RSA15
-     * @see Constants#ALGO_SUITE_BASIC192
-     * @see Constants#ALGO_SUITE_BASIC192_RSA15
-     * @see Constants#ALGO_SUITE_BASIC192_SHA256
-     * @see Constants#ALGO_SUITE_BASIC192_SHA256_RSA15
-     * @see Constants#ALGO_SUITE_BASIC256
-     * @see Constants#ALGO_SUITE_BASIC256_RSA15
-     * @see Constants#ALGO_SUITE_BASIC256_SHA256
-     * @see Constants#ALGO_SUITE_BASIC256_SHA256_RSA15
-     * @see Constants#ALGO_SUITE_TRIPLE_DES
-     * @see Constants#ALGO_SUITE_TRIPLE_DES_RSA15
-     * @see Constants#ALGO_SUITE_TRIPLE_DES_SHA256
-     * @see Constants#ALGO_SUITE_TRIPLE_DES_SHA256_RSA15
+     * @see SPConstants#ALGO_SUITE_BASIC128
+     * @see SPConstants#ALGO_SUITE_BASIC128_RSA15
+     * @see SPConstants#ALGO_SUITE_BASIC128_SHA256
+     * @see SPConstants#ALGO_SUITE_BASIC128_SHA256_RSA15
+     * @see SPConstants#ALGO_SUITE_BASIC192
+     * @see SPConstants#ALGO_SUITE_BASIC192_RSA15
+     * @see SPConstants#ALGO_SUITE_BASIC192_SHA256
+     * @see SPConstants#ALGO_SUITE_BASIC192_SHA256_RSA15
+     * @see SPConstants#ALGO_SUITE_BASIC256
+     * @see SPConstants#ALGO_SUITE_BASIC256_RSA15
+     * @see SPConstants#ALGO_SUITE_BASIC256_SHA256
+     * @see SPConstants#ALGO_SUITE_BASIC256_SHA256_RSA15
+     * @see SPConstants#ALGO_SUITE_TRIPLE_DES
+     * @see SPConstants#ALGO_SUITE_TRIPLE_DES_RSA15
+     * @see SPConstants#ALGO_SUITE_TRIPLE_DES_SHA256
+     * @see SPConstants#ALGO_SUITE_TRIPLE_DES_SHA256_RSA15
      */
     public void setAlgorithmSuite(String algoSuite) {
         setAlgoSuiteString(algoSuite);
         this.algoSuiteString = algoSuite;
 
         // TODO: Optimize this :-)
-        if (Constants.ALGO_SUITE_BASIC256.equals(algoSuite)) {
-            this.digest = Constants.SHA1;
-            this.encryption = Constants.AES256;
-            this.symmetricKeyWrap = Constants.KW_AES256;
-            this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L256;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        if (SPConstants.ALGO_SUITE_BASIC256.equals(algoSuite)) {
+            this.digest = SPConstants.SHA1;
+            this.encryption = SPConstants.AES256;
+            this.symmetricKeyWrap = SPConstants.KW_AES256;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA_OAEP;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L256;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 256;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 256;
             this.encryptionDerivedKeyLength = 256;
-        } else if (Constants.ALGO_SUITE_BASIC192.equals(algoSuite)) {
-            this.digest = Constants.SHA1;
-            this.encryption = Constants.AES192;
-            this.symmetricKeyWrap = Constants.KW_AES192;
-            this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L192;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_BASIC192.equals(algoSuite)) {
+            this.digest = SPConstants.SHA1;
+            this.encryption = SPConstants.AES192;
+            this.symmetricKeyWrap = SPConstants.KW_AES192;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA_OAEP;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L192;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
             this.maximumSymmetricKeyLength = 192;
-        } else if (Constants.ALGO_SUITE_BASIC128.equals(algoSuite)) {
-            this.digest = Constants.SHA1;
-            this.encryption = Constants.AES128;
-            this.symmetricKeyWrap = Constants.KW_AES128;
-            this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L128;
-            this.signatureKeyDerivation = Constants.P_SHA1_L128;
+        } else if (SPConstants.ALGO_SUITE_BASIC128.equals(algoSuite)) {
+            this.digest = SPConstants.SHA1;
+            this.encryption = SPConstants.AES128;
+            this.symmetricKeyWrap = SPConstants.KW_AES128;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA_OAEP;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L128;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L128;
             this.encryptionDerivedKeyLength = 128;
             this.signatureDerivedKeyLength = 128;
             this.minimumSymmetricKeyLength = 128;
             this.maximumSymmetricKeyLength = 128;
-        } else if (Constants.ALGO_SUITE_TRIPLE_DES.equals(algoSuite)) {
-            this.digest = Constants.SHA1;
-            this.encryption = Constants.TRIPLE_DES;
-            this.symmetricKeyWrap = Constants.KW_TRIPLE_DES;
-            this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L192;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_TRIPLE_DES.equals(algoSuite)) {
+            this.digest = SPConstants.SHA1;
+            this.encryption = SPConstants.TRIPLE_DES;
+            this.symmetricKeyWrap = SPConstants.KW_TRIPLE_DES;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA_OAEP;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L192;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
             this.maximumSymmetricKeyLength = 192; //due to use of 3des
-        } else if (Constants.ALGO_SUITE_BASIC256_RSA15.equals(algoSuite)) {
-            this.digest = Constants.SHA1;
-            this.encryption = Constants.AES256;
-            this.symmetricKeyWrap = Constants.KW_AES256;
-            this.asymmetricKeyWrap = Constants.KW_RSA15;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L256;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_BASIC256_RSA15.equals(algoSuite)) {
+            this.digest = SPConstants.SHA1;
+            this.encryption = SPConstants.AES256;
+            this.symmetricKeyWrap = SPConstants.KW_AES256;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA15;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L256;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 256;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 256;
-        } else if (Constants.ALGO_SUITE_BASIC192_RSA15.equals(algoSuite)) {
-            this.digest = Constants.SHA1;
-            this.encryption = Constants.AES192;
-            this.symmetricKeyWrap = Constants.KW_AES192;
-            this.asymmetricKeyWrap = Constants.KW_RSA15;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L192;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_BASIC192_RSA15.equals(algoSuite)) {
+            this.digest = SPConstants.SHA1;
+            this.encryption = SPConstants.AES192;
+            this.symmetricKeyWrap = SPConstants.KW_AES192;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA15;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L192;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
             this.maximumSymmetricKeyLength = 192;
-        } else if (Constants.ALGO_SUITE_BASIC128_RSA15.equals(algoSuite)) {
-            this.digest = Constants.SHA1;
-            this.encryption = Constants.AES128;
-            this.symmetricKeyWrap = Constants.KW_AES128;
-            this.asymmetricKeyWrap = Constants.KW_RSA15;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L128;
-            this.signatureKeyDerivation = Constants.P_SHA1_L128;
+        } else if (SPConstants.ALGO_SUITE_BASIC128_RSA15.equals(algoSuite)) {
+            this.digest = SPConstants.SHA1;
+            this.encryption = SPConstants.AES128;
+            this.symmetricKeyWrap = SPConstants.KW_AES128;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA15;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L128;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L128;
             this.encryptionDerivedKeyLength = 128;
             this.signatureDerivedKeyLength = 128;
             this.minimumSymmetricKeyLength = 128;
             this.maximumSymmetricKeyLength = 128;
-        } else if (Constants.ALGO_SUITE_TRIPLE_DES_RSA15.equals(algoSuite)) {
-            this.digest = Constants.SHA1;
-            this.encryption = Constants.TRIPLE_DES;
-            this.symmetricKeyWrap = Constants.KW_TRIPLE_DES;
-            this.asymmetricKeyWrap = Constants.KW_RSA15;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L192;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_TRIPLE_DES_RSA15.equals(algoSuite)) {
+            this.digest = SPConstants.SHA1;
+            this.encryption = SPConstants.TRIPLE_DES;
+            this.symmetricKeyWrap = SPConstants.KW_TRIPLE_DES;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA15;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L192;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
             this.maximumSymmetricKeyLength = 192; //due to use of 3des
-        } else if (Constants.ALGO_SUITE_BASIC256_SHA256.equals(algoSuite)) {
-            this.digest = Constants.SHA256;
-            this.encryption = Constants.AES256;
-            this.symmetricKeyWrap = Constants.KW_AES256;
-            this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L256;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_BASIC256_SHA256.equals(algoSuite)) {
+            this.digest = SPConstants.SHA256;
+            this.encryption = SPConstants.AES256;
+            this.symmetricKeyWrap = SPConstants.KW_AES256;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA_OAEP;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L256;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 256;
             this.signatureDerivedKeyLength = 256;
             this.minimumSymmetricKeyLength = 256;
-        } else if (Constants.ALGO_SUITE_BASIC192_SHA256.equals(algoSuite)) {
-            this.digest = Constants.SHA256;
-            this.encryption = Constants.AES192;
-            this.symmetricKeyWrap = Constants.KW_AES192;
-            this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L192;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_BASIC192_SHA256.equals(algoSuite)) {
+            this.digest = SPConstants.SHA256;
+            this.encryption = SPConstants.AES192;
+            this.symmetricKeyWrap = SPConstants.KW_AES192;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA_OAEP;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L192;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
             this.maximumSymmetricKeyLength = 192;
-        } else if (Constants.ALGO_SUITE_BASIC128_SHA256.equals(algoSuite)) {
-            this.digest = Constants.SHA256;
-            this.encryption = Constants.AES128;
-            this.symmetricKeyWrap = Constants.KW_AES128;
-            this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L128;
-            this.signatureKeyDerivation = Constants.P_SHA1_L128;
+        } else if (SPConstants.ALGO_SUITE_BASIC128_SHA256.equals(algoSuite)) {
+            this.digest = SPConstants.SHA256;
+            this.encryption = SPConstants.AES128;
+            this.symmetricKeyWrap = SPConstants.KW_AES128;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA_OAEP;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L128;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L128;
             this.encryptionDerivedKeyLength = 128;
             this.signatureDerivedKeyLength = 128;
             this.minimumSymmetricKeyLength = 128;
             this.maximumSymmetricKeyLength = 128;
-        } else if (Constants.ALGO_SUITE_TRIPLE_DES_SHA256.equals(algoSuite)) {
-            this.digest = Constants.SHA256;
-            this.encryption = Constants.TRIPLE_DES;
-            this.symmetricKeyWrap = Constants.KW_TRIPLE_DES;
-            this.asymmetricKeyWrap = Constants.KW_RSA_OAEP;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L192;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_TRIPLE_DES_SHA256.equals(algoSuite)) {
+            this.digest = SPConstants.SHA256;
+            this.encryption = SPConstants.TRIPLE_DES;
+            this.symmetricKeyWrap = SPConstants.KW_TRIPLE_DES;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA_OAEP;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L192;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
             this.maximumSymmetricKeyLength = 192; //due to use of 3des
-        } else if (Constants.ALGO_SUITE_BASIC256_SHA256_RSA15.equals(algoSuite)) {
-            this.digest = Constants.SHA256;
-            this.encryption = Constants.AES256;
-            this.symmetricKeyWrap = Constants.KW_AES256;
-            this.asymmetricKeyWrap = Constants.KW_RSA15;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L256;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_BASIC256_SHA256_RSA15.equals(algoSuite)) {
+            this.digest = SPConstants.SHA256;
+            this.encryption = SPConstants.AES256;
+            this.symmetricKeyWrap = SPConstants.KW_AES256;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA15;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L256;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 256;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 256;
-        } else if (Constants.ALGO_SUITE_BASIC192_SHA256_RSA15.equals(algoSuite)) {
-            this.digest = Constants.SHA256;
-            this.encryption = Constants.AES192;
-            this.symmetricKeyWrap = Constants.KW_AES192;
-            this.asymmetricKeyWrap = Constants.KW_RSA15;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L192;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+        } else if (SPConstants.ALGO_SUITE_BASIC192_SHA256_RSA15.equals(algoSuite)) {
+            this.digest = SPConstants.SHA256;
+            this.encryption = SPConstants.AES192;
+            this.symmetricKeyWrap = SPConstants.KW_AES192;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA15;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L192;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
             this.maximumSymmetricKeyLength = 192;
-        } else if (Constants.ALGO_SUITE_BASIC128_SHA256_RSA15.equals(algoSuite)) {
-            this.digest = Constants.SHA256;
-            this.encryption = Constants.AES128;
-            this.symmetricKeyWrap = Constants.KW_AES128;
-            this.asymmetricKeyWrap = Constants.KW_RSA15;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L128;
-            this.signatureKeyDerivation = Constants.P_SHA1_L128;
+        } else if (SPConstants.ALGO_SUITE_BASIC128_SHA256_RSA15.equals(algoSuite)) {
+            this.digest = SPConstants.SHA256;
+            this.encryption = SPConstants.AES128;
+            this.symmetricKeyWrap = SPConstants.KW_AES128;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA15;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L128;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L128;
             this.encryptionDerivedKeyLength = 128;
             this.signatureDerivedKeyLength = 128;
             this.minimumSymmetricKeyLength = 128;
             this.maximumSymmetricKeyLength = 192;
-        } else if (Constants.ALGO_SUITE_TRIPLE_DES_SHA256_RSA15
+        } else if (SPConstants.ALGO_SUITE_TRIPLE_DES_SHA256_RSA15
                 .equals(algoSuite)) {
-            this.digest = Constants.SHA256;
-            this.encryption = Constants.TRIPLE_DES;
-            this.symmetricKeyWrap = Constants.KW_TRIPLE_DES;
-            this.asymmetricKeyWrap = Constants.KW_RSA15;
-            this.encryptionKeyDerivation = Constants.P_SHA1_L192;
-            this.signatureKeyDerivation = Constants.P_SHA1_L192;
+            this.digest = SPConstants.SHA256;
+            this.encryption = SPConstants.TRIPLE_DES;
+            this.symmetricKeyWrap = SPConstants.KW_TRIPLE_DES;
+            this.asymmetricKeyWrap = SPConstants.KW_RSA15;
+            this.encryptionKeyDerivation = SPConstants.P_SHA1_L192;
+            this.signatureKeyDerivation = SPConstants.P_SHA1_L192;
             this.encryptionDerivedKeyLength = 192;
             this.signatureDerivedKeyLength = 192;
             this.minimumSymmetricKeyLength = 192;
@@ -432,7 +438,11 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
     }
 
     public QName getName() {
-        return Constants.ALGORITHM_SUITE;
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.ALGORITHM_SUITE;
+        } else {
+            return SP11Constants.ALGORITHM_SUITE;
+        }
     }
 
     public PolicyComponent normalize() {
@@ -442,14 +452,13 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
-        String localName = Constants.ALGORITHM_SUITE.getLocalPart();
-        String namespaceURI = Constants.ALGORITHM_SUITE.getNamespaceURI();
+        String localName = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(Constants.ALGORITHM_SUITE
-                .getNamespaceURI());
+        String prefix = writer.getPrefix(namespaceURI);
 
         if (prefix == null) {
-            prefix = Constants.ALGORITHM_SUITE.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
 
@@ -457,37 +466,37 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
         writer.writeNamespace(prefix, namespaceURI);
 
         // <wsp:Policy>
-        writer.writeStartElement(Constants.POLICY.getPrefix(), Constants.POLICY
-                .getLocalPart(), Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY
+                .getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
         //
         writer.writeStartElement(prefix, getAlgoSuiteString(), namespaceURI);
         writer.writeEndElement();
 
-        if (Constants.C14N.equals(getInclusiveC14n())) {
-            writer.writeStartElement(prefix, Constants.INCLUSIVE_C14N, prefix);
+        if (SPConstants.C14N.equals(getInclusiveC14n())) {
+            writer.writeStartElement(prefix, SPConstants.INCLUSIVE_C14N, prefix);
             writer.writeEndElement();
         }
 
-        if (Constants.SNT.equals(getSoapNormalization())) {
-            writer.writeStartElement(prefix, Constants.SOAP_NORMALIZATION_10,
+        if (SPConstants.SNT.equals(getSoapNormalization())) {
+            writer.writeStartElement(prefix, SPConstants.SOAP_NORMALIZATION_10,
                     namespaceURI);
             writer.writeEndElement();
         }
 
-        if (Constants.STRT10.equals(getStrTransform())) {
-            writer.writeStartElement(prefix, Constants.STR_TRANSFORM_10,
+        if (SPConstants.STRT10.equals(getStrTransform())) {
+            writer.writeStartElement(prefix, SPConstants.STR_TRANSFORM_10,
                     namespaceURI);
             writer.writeEndElement();
         }
 
-        if (Constants.XPATH.equals(getXPath())) {
-            writer.writeStartElement(prefix, Constants.XPATH10, namespaceURI);
+        if (SPConstants.XPATH.equals(getXPath())) {
+            writer.writeStartElement(prefix, SPConstants.XPATH10, namespaceURI);
             writer.writeEndElement();
         }
 
-        if (Constants.XPATH20.equals(getXPath())) {
-            writer.writeStartElement(prefix, Constants.XPATH_FILTER20,
+        if (SPConstants.XPATH20.equals(getXPath())) {
+            writer.writeStartElement(prefix, SPConstants.XPATH_FILTER20,
                     namespaceURI);
             writer.writeEndElement();
         }
@@ -498,7 +507,7 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
         // </sp:AlgorithmSuite>
         writer.writeEndElement();
     }
-
+    
     public int getEncryptionDerivedKeyLength() {
         return encryptionDerivedKeyLength;
     }
