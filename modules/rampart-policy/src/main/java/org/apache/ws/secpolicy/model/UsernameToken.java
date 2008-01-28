@@ -21,13 +21,19 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.SP12Constants;
 
 public class UsernameToken extends Token {
 
     private boolean useUTProfile10 = false;
 
     private boolean useUTProfile11 = false;
+    
+    public UsernameToken(int version){
+        setVersion(version);
+    }
 
     /**
      * @return Returns the useUTProfile11.
@@ -53,7 +59,11 @@ public class UsernameToken extends Token {
     }
 
     public QName getName() {
-        return Constants.USERNAME_TOKEN;
+        if (version == SPConstants.SP_V12) {
+            return SP12Constants.USERNAME_TOKEN;
+        } else {
+            return SP11Constants.USERNAME_TOKEN;
+        }
     }
 
     public PolicyComponent normalize() {
@@ -61,12 +71,12 @@ public class UsernameToken extends Token {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localname = Constants.USERNAME_TOKEN.getLocalPart();
-        String namespaceURI = Constants.USERNAME_TOKEN.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix = writer.getPrefix(namespaceURI);
         if (prefix == null) {
-            prefix = Constants.USERNAME_TOKEN.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
 
@@ -75,33 +85,37 @@ public class UsernameToken extends Token {
 
         writer.writeNamespace(prefix, namespaceURI);
 
-        String inclusion = getInclusion();
+        String inclusion;
+        
+        if (version == SPConstants.SP_V12) {
+            inclusion = SP12Constants.getAttributeValueFromInclusion(getInclusion());
+        } else {
+            inclusion = SP11Constants.getAttributeValueFromInclusion(getInclusion()); 
+        }
+
         if (inclusion != null) {
-            writer.writeAttribute(prefix, namespaceURI, Constants.INCLUDE_TOKEN
-                    .getLocalPart(), inclusion);
+            writer.writeAttribute(prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
         }
 
         if (isUseUTProfile10() || isUseUTProfile11()) {
-            String pPrefix = writer.getPrefix(Constants.POLICY
+            String pPrefix = writer.getPrefix(SPConstants.POLICY
                     .getNamespaceURI());
             if (pPrefix == null) {
-                writer.setPrefix(Constants.POLICY.getPrefix(), Constants.POLICY
+                writer.setPrefix(SPConstants.POLICY.getPrefix(), SPConstants.POLICY
                         .getNamespaceURI());
             }
 
             // <wsp:Policy>
-            writer.writeStartElement(prefix, Constants.POLICY.getLocalPart(),
-                    Constants.POLICY.getNamespaceURI());
+            writer.writeStartElement(prefix, SPConstants.POLICY.getLocalPart(),
+                    SPConstants.POLICY.getNamespaceURI());
 
             // CHECKME
             if (isUseUTProfile10()) {
                 // <sp:WssUsernameToken10 />
-                writer.writeStartElement(prefix, Constants.WSS_USERNAME_TOKEN10
-                        .getLocalPart(), namespaceURI);
+                writer.writeStartElement(prefix, SPConstants.USERNAME_TOKEN10 , namespaceURI);
             } else {
                 // <sp:WssUsernameToken11 />
-                writer.writeStartElement(prefix, Constants.WSS_USERNAME_TOKEN11
-                        .getLocalPart(), namespaceURI);
+                writer.writeStartElement(prefix, SPConstants.USERNAME_TOKEN11 , namespaceURI);
             }
             writer.writeEndElement();
 
