@@ -21,7 +21,7 @@ import org.apache.neethi.Policy;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.policy.model.OptimizePartsConfig;
 import org.apache.rampart.policy.model.RampartConfig;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
@@ -92,6 +92,10 @@ public class RampartPolicyData {
     private boolean signBody;
 
     private boolean encryptBody;
+    
+    private boolean signAttachments;
+    
+    private boolean encryptAttachments;
 
     private Vector signedParts = new Vector();
 
@@ -348,6 +352,36 @@ public class RampartPolicyData {
     public void setSignBody(boolean signBody) {
         this.signBody = signBody;
     }
+    
+    /**
+     * @return Returns the signAttachments.
+     */
+    public boolean isSignAttachments() {
+        return signAttachments;
+    }
+
+    /**
+     * @param signAttachments
+     *            The signAttachments to set.
+     */
+    public void setSignAttachments(boolean signAttachments) {
+        this.signAttachments = signAttachments;
+    }
+    
+    /**
+     * @return Returns the encryptAttachments.
+     */
+    public boolean isEncryptAttachments() {
+        return encryptAttachments;
+    }
+
+    /**
+     * @param encryptAttachments
+     *            The encryptAttachments to set.
+     */
+    public void setEncryptAttachments(boolean encryptAttachments) {
+        this.encryptAttachments = encryptAttachments;
+    }
 
     /**
      * @return Returns the signedElements.
@@ -405,13 +439,13 @@ public class RampartPolicyData {
             throws WSSPolicyException {
 
         int tokenType = suppTokens.getTokenType();
-        if (tokenType == Constants.SUPPORTING_TOKEN_SUPPORTING) {
+        if (tokenType == SPConstants.SUPPORTING_TOKEN_SUPPORTING) {
             supportingTokens = suppTokens;
-        } else if (tokenType == Constants.SUPPORTING_TOKEN_SIGNED) {
+        } else if (tokenType == SPConstants.SUPPORTING_TOKEN_SIGNED) {
             signedSupportingTokens = suppTokens;
-        } else if (tokenType == Constants.SUPPORTING_TOKEN_ENDORSING) {
+        } else if (tokenType == SPConstants.SUPPORTING_TOKEN_ENDORSING) {
             endorsingSupportingTokens = suppTokens;
-        } else if (tokenType == Constants.SUPPORTING_TOKEN_SIGNED_ENDORSING) {
+        } else if (tokenType == SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING) {
             signedEndorsingSupportingTokens = suppTokens;
         }
     }
@@ -612,28 +646,28 @@ public class RampartPolicyData {
         
         HashMap tokenMap = null;
         switch (type) {
-        case Constants.SUPPORTING_TOKEN_SUPPORTING:
+        case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
             if(this.supportingTokensIdMap == null) {
                 this.supportingTokensIdMap = new HashMap();
             }
             tokenMap = this.supportingTokensIdMap;
             break;
 
-        case Constants.SUPPORTING_TOKEN_SIGNED:
+        case SPConstants.SUPPORTING_TOKEN_SIGNED:
             if(this.signedSupportingTokensIdMap == null) {
                 this.signedSupportingTokensIdMap = new HashMap();
             }
             tokenMap = this.signedSupportingTokensIdMap;
             break;
             
-        case Constants.SUPPORTING_TOKEN_ENDORSING:
+        case SPConstants.SUPPORTING_TOKEN_ENDORSING:
             if(this.endorsingSupportingTokensIdMap == null) {
                 this.endorsingSupportingTokensIdMap = new HashMap();
             }
             tokenMap = this.endorsingSupportingTokensIdMap;
             break;
             
-        case Constants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
             if(this.signedEndorsingSupportingTokensIdMap == null) {
                 this.signedEndorsingSupportingTokensIdMap = new HashMap();
             }
@@ -651,25 +685,25 @@ public class RampartPolicyData {
     public String getSupportingTokenID(Token token, int type)
             throws RampartException {
         switch (type) {
-        case Constants.SUPPORTING_TOKEN_SUPPORTING:
+        case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
             if(this.supportingTokensIdMap != null) {
                 return (String)this.supportingTokensIdMap.get(token);
             }
             return null;
 
-        case Constants.SUPPORTING_TOKEN_SIGNED:
+        case SPConstants.SUPPORTING_TOKEN_SIGNED:
             if(this.signedSupportingTokensIdMap != null) {
                 return (String)this.signedSupportingTokensIdMap.get(token);
             }
             return null;
             
-        case Constants.SUPPORTING_TOKEN_ENDORSING:
+        case SPConstants.SUPPORTING_TOKEN_ENDORSING:
             if(this.endorsingSupportingTokensIdMap != null) {
                 return (String)this.endorsingSupportingTokensIdMap.get(token);
             }
             return null;
             
-        case Constants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
             if(this.signedEndorsingSupportingTokensIdMap == null) {
                 this.signedEndorsingSupportingTokensIdMap = new HashMap();
             }
