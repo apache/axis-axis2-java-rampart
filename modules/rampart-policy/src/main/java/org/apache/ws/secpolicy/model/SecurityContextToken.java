@@ -17,7 +17,9 @@
 package org.apache.ws.secpolicy.model;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -31,6 +33,10 @@ public class SecurityContextToken extends Token {
     boolean requireExternalUriRef;
     
     boolean sc10SecurityContextToken;
+    
+    public SecurityContextToken(int version) {
+        setVersion(version);
+    }
     
     /**
      * @return Returns the requireExternalUriRef.
@@ -64,7 +70,11 @@ public class SecurityContextToken extends Token {
      * @see org.apache.neethi.Assertion#getName()
      */
     public QName getName() {
-        return Constants.SECURITY_CONTEXT_TOKEN;
+        if ( version == SPConstants.SP_V12) {
+            return SP12Constants.SECURITY_CONTEXT_TOKEN;
+        } else {
+            return SP11Constants.SECURITY_CONTEXT_TOKEN;
+        }   
     }
 
     /* (non-Javadoc)
