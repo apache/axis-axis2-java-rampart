@@ -21,7 +21,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.Constants;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 
 public class Wss10 extends AbstractSecurityAssertion {
     
@@ -29,6 +31,10 @@ public class Wss10 extends AbstractSecurityAssertion {
     private boolean MustSupportRefIssuerSerial;
     private boolean MustSupportRefExternalURI;
     private boolean MustSupportRefEmbeddedToken;
+    
+    public Wss10(int version) {
+        setVersion(version);
+    }
     
     /**
      * @return Returns the mustSupportRefEmbeddedToken.
@@ -80,7 +86,11 @@ public class Wss10 extends AbstractSecurityAssertion {
     }
     
     public QName getName() {
-        return Constants.WSS10;
+        if ( version == SPConstants.SP_V12 ) {
+            return SP12Constants.WSS10;
+        } else {
+            return SP11Constants.WSS10;
+        }  
     }
     
     public PolicyComponent normalize() {
@@ -88,12 +98,12 @@ public class Wss10 extends AbstractSecurityAssertion {
     }
     
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localname = Constants.WSS10.getLocalPart();
-        String namespaceURI = Constants.WSS10.getNamespaceURI();
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
 
         String prefix = writer.getPrefix(namespaceURI);
         if (prefix == null) {
-            prefix = Constants.WSS10.getPrefix();
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
 
@@ -103,35 +113,35 @@ public class Wss10 extends AbstractSecurityAssertion {
         // xmlns:sp=".."
         writer.writeNamespace(prefix, namespaceURI);
         
-        String pPrefix = writer.getPrefix(Constants.POLICY.getNamespaceURI());
+        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (pPrefix == null) {
-            writer.setPrefix(Constants.POLICY.getPrefix(), Constants.POLICY.getNamespaceURI());
+            writer.setPrefix(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getNamespaceURI());
         }
         
         // <wsp:Policy>
-        writer.writeStartElement(prefix, Constants.POLICY.getLocalPart(), Constants.POLICY.getNamespaceURI());
+        writer.writeStartElement(prefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
         if (isMustSupportRefKeyIdentifier()) {
             // <sp:MustSupportRefKeyIdentifier />
-            writer.writeStartElement(prefix, Constants.MUST_SUPPORT_REF_KEY_IDENTIFIER.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_KEY_IDENTIFIER, namespaceURI);
             writer.writeEndElement();
         }
         
         if (isMustSupportRefIssuerSerial()) {
             // <sp:MustSupportRefIssuerSerial />
-            writer.writeStartElement(prefix, Constants.MUST_SUPPORT_REF_ISSUER_SERIAL.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_ISSUER_SERIAL, namespaceURI);
             writer.writeEndElement();
         }
         
         if (isMustSupportRefExternalURI()) {
             // <sp:MustSupportRefExternalURI />
-            writer.writeStartElement(prefix, Constants.MUST_SUPPORT_REF_EXTERNAL_URI.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_EXTERNAL_URI, namespaceURI);
             writer.writeEndElement();
         }
         
         if (isMustSupportRefEmbeddedToken()) {
             // <sp:MustSupportRefEmbeddedToken />
-            writer.writeStartElement(prefix, Constants.MUST_SUPPORT_REF_EMBEDDED_TOKEN.getLocalPart(), namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_EMBEDDED_TOKEN, namespaceURI);
             writer.writeEndElement();
 
             
