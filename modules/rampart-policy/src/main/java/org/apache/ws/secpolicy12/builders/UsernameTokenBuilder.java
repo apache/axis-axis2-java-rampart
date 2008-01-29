@@ -46,7 +46,7 @@ public class UsernameTokenBuilder implements AssertionBuilder {
         
         OMElement policyElement = element.getFirstElement();
         
-        if (policyElement != null && !policyElement.getQName().equals(org.apache.neethi.Constants.Q_ELEM_POLICY)) {
+        if (policyElement != null && policyElement.getQName().equals(org.apache.neethi.Constants.Q_ELEM_POLICY)) {
         
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
             policy = (Policy) policy.normalize(false);
@@ -69,16 +69,25 @@ public class UsernameTokenBuilder implements AssertionBuilder {
     }
 
     private void processAlternative(List assertions, UsernameToken parent) {
-                
+             
         for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
             Assertion assertion = (Assertion) iterator.next();
             QName qname = assertion.getName();
             
             if (SP12Constants.WSS_USERNAME_TOKEN10.equals(qname)) {
-                parent.setUseUTProfile10(true);
-                
+                parent.setUseUTProfile10(true);               
             } else if (SP12Constants.WSS_USERNAME_TOKEN11.equals(qname)) {
                 parent.setUseUTProfile11(true);
+            } else if (SP12Constants.NO_PASSWORD.equals(qname)) {
+                parent.setNoPassword(true);
+            } else if (SP12Constants.HASH_PASSWORD.equals(qname)) {
+                parent.setHashPassword(true);
+            } else if (SP12Constants.REQUIRE_DERIVED_KEYS.equals(qname)) {
+                parent.setDerivedKeys(true);
+            } else if (SP12Constants.REQUIRE_EXPLICIT_DERIVED_KEYS.equals(qname)) {
+                parent.setExplicitDerivedKeys(true);
+            } else if (SP12Constants.REQUIRE_IMPLIED_DERIVED_KEYS.equals(qname)) {
+                parent.setImpliedDerivedKeys(true);
             }
         }
     }

@@ -27,25 +27,26 @@ import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.Header;
+import org.apache.ws.secpolicy.model.RequiredParts;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 
-public class SignedPartsBuilder implements AssertionBuilder {
+public class RequiredPartsBuilder implements AssertionBuilder {
         
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
-        SignedEncryptedParts signedEncryptedParts = new SignedEncryptedParts(true, SPConstants.SP_V12);
+        RequiredParts requiredParts = new RequiredParts(SPConstants.SP_V12);
         
         for (Iterator iterator = element.getChildElements(); iterator.hasNext();) {
-            processElement((OMElement) iterator.next(), signedEncryptedParts);
+            processElement((OMElement) iterator.next(), requiredParts);
         }
         
-        return signedEncryptedParts;
+        return requiredParts;
     }
        
     public QName[] getKnownElements() {
-        return new QName[] {SP12Constants.SIGNED_PARTS};
+        return new QName[] {SP12Constants.REQUIRED_PARTS};
     }
 
-    private void processElement(OMElement element, SignedEncryptedParts parent) {
+    private void processElement(OMElement element, RequiredParts parent) {
         
         QName name = element.getQName();
         
@@ -62,10 +63,6 @@ public class SignedPartsBuilder implements AssertionBuilder {
             
             parent.addHeader(header);
             
-        } else if (SP12Constants.BODY.equals(name)) {
-            parent.setBody(true);            
-        } else if (SPConstants.ATTACHMENTS.equals(name)){
-            parent.setAttachments(true);
         }
     }
 }

@@ -21,51 +21,48 @@ import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
-import org.apache.ws.secpolicy.model.Header;
-import org.apache.ws.secpolicy.model.SignedEncryptedParts;
+import org.apache.ws.secpolicy.model.ContentEncryptedElements;
+import org.apache.ws.secpolicy.model.RequiredElements;
 
-public class SignedPartsBuilder implements AssertionBuilder {
-        
+public class RequiredElementsBuilder implements AssertionBuilder {
+
+    
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
-        SignedEncryptedParts signedEncryptedParts = new SignedEncryptedParts(true, SPConstants.SP_V12);
+        
+        RequiredElements requiredElements = new RequiredElements(SPConstants.SP_V12);
+        OMAttribute attrXPathVersion = element.getAttribute(SP12Constants.ATTR_XPATH_VERSION);
+        
+        if (attrXPathVersion != null) {
+            requiredElements.setXPathVersion(attrXPathVersion.getAttributeValue());
+        }
         
         for (Iterator iterator = element.getChildElements(); iterator.hasNext();) {
-            processElement((OMElement) iterator.next(), signedEncryptedParts);
+            processElement((OMElement) iterator.next(),requiredElements);            
         }
         
-        return signedEncryptedParts;
+        return requiredElements;
     }
-       
+        
     public QName[] getKnownElements() {
-        return new QName[] {SP12Constants.SIGNED_PARTS};
+        return new QName[] {SP12Constants.REQUIRED_ELEMENTS};
     }
 
-    private void processElement(OMElement element, SignedEncryptedParts parent) {
-        
+    private void processElement(OMElement element, RequiredElements parent) {
         QName name = element.getQName();
-        
-        if (SP12Constants.HEADER.equals(name)) {
-            Header header = new Header();
-            
-            OMAttribute nameAttribute = element.getAttribute(SPConstants.NAME);
-            if( nameAttribute != null ) {
-                header.setName(nameAttribute.getAttributeValue());
+        if (SP12Constants.XPATH.equals(name)) {
+            parent.addXPathExpression(element.getText());
+            Iterator namespaces = element.getAllDeclaredNamespaces();
+            while (namespaces.hasNext()) {
+                OMNamespace nm = (OMNamespace) namespaces.next();
+                parent.addDeclaredNamespaces(nm.getNamespaceURI(), nm.getPrefix());
             }
-            
-            OMAttribute namespaceAttribute = element.getAttribute(SPConstants.NAMESPACE);
-            header.setNamespace(namespaceAttribute.getAttributeValue());
-            
-            parent.addHeader(header);
-            
-        } else if (SP12Constants.BODY.equals(name)) {
-            parent.setBody(true);            
-        } else if (SPConstants.ATTACHMENTS.equals(name)){
-            parent.setAttachments(true);
         }
     }
+    
 }
