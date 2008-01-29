@@ -100,6 +100,15 @@ public class SP12Constants {
     public static final QName ENCRYPTED_ELEMENTS = new QName(SP12Constants.SP_NS,
             SPConstants.ENCRYPTED_ELEMENTS, SP12Constants.SP_PREFIX);
 
+    public static final QName REQUIRED_ELEMENTS = new QName(SP12Constants.SP_NS,
+            SPConstants.REQUIRED_ELEMENTS, SP12Constants.SP_PREFIX);
+    
+    public static final QName REQUIRED_PARTS = new QName(SP12Constants.SP_NS,
+            SPConstants.REQUIRED_PARTS, SP12Constants.SP_PREFIX);
+    
+    public static final QName CONTENT_ENCRYPTED_ELEMENTS = new QName(SP12Constants.SP_NS,
+            SPConstants.CONTENT_ENCRYPTED_ELEMENTS, SP12Constants.SP_PREFIX);
+
     public static final QName USERNAME_TOKEN = new QName(SP12Constants.SP_NS,
             SPConstants.USERNAME_TOKEN , SP12Constants.SP_PREFIX);
 
@@ -240,7 +249,13 @@ public class SP12Constants {
 
     public static final QName REQUIRE_DERIVED_KEYS = new QName(SP12Constants.SP_NS,
             SPConstants.REQUIRE_DERIVED_KEYS, SP12Constants.SP_PREFIX);
-
+    
+    public static final QName REQUIRE_IMPLIED_DERIVED_KEYS = new QName(SP12Constants.SP_NS,
+            SPConstants.REQUIRE_IMPLIED_DERIVED_KEYS, SP12Constants.SP_PREFIX);
+    
+    public static final QName REQUIRE_EXPLICIT_DERIVED_KEYS = new QName(SP12Constants.SP_NS,
+            SPConstants.REQUIRE_EXPLICIT_DERIVED_KEYS, SP12Constants.SP_PREFIX);
+    
     public static final QName REQUIRE_EXTERNAL_URI_REFERNCE = new QName(
             SP12Constants.SP_NS,SPConstants.REQUIRE_EXTERNAL_URI_REFERNCE, SP12Constants.SP_PREFIX);
 
@@ -262,12 +277,22 @@ public class SP12Constants {
 
     public final static QName XPATH = new QName(SP12Constants.SP_NS, SPConstants.XPATH_EXPR,
             SP12Constants.SP_PREFIX);
+    
+    public static final QName NO_PASSWORD = new QName(SP12Constants.SP_NS, SPConstants.NO_PASSWORD,
+            SP12Constants.SP_PREFIX);
+    
+    public static final QName HASH_PASSWORD = new QName(SP12Constants.SP_NS, SPConstants.HASH_PASSWORD,
+            SP12Constants.SP_PREFIX);
 
-    // /////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////////////////////////
     
-    public static final QName HEADER = new QName(SP12Constants.SP_NS, "Header");
+    public static final QName HEADER = new QName(SP12Constants.SP_NS, SPConstants.HEADER);
     
-    public static final QName BODY = new QName(SP12Constants.SP_NS, "Body");
+    public static final QName BODY = new QName(SP12Constants.SP_NS, SPConstants.BODY);
+    
+    public static final QName ATTACHMENTS = new QName(SP12Constants.SP_NS, SPConstants.ATTACHMENTS);
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     
     public static int getInclusionFromAttributeValue(String value ) {
         
