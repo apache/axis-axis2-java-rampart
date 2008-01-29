@@ -30,6 +30,10 @@ public abstract class Token extends AbstractSecurityAssertion {
      */
     private boolean derivedKeys;
     
+    private boolean impliedDerivedKeys;
+    
+    private boolean explicitDerivedKeys;
+    
     /**
      * @return Returns the inclusion.
      */
@@ -65,6 +69,23 @@ public abstract class Token extends AbstractSecurityAssertion {
      */
     public void setDerivedKeys(boolean derivedKeys) {
         this.derivedKeys = derivedKeys;
-    }    
+    } 
+    
+    
+    public boolean isExplicitDerivedKeys() {
+        return explicitDerivedKeys;
+    }
+    
+    public void setExplicitDerivedKeys(boolean explicitDerivedKeys) {
+        this.explicitDerivedKeys = explicitDerivedKeys;
+    }
+    
+    public boolean isImpliedDerivedKeys() {
+        return impliedDerivedKeys;
+    }
+    
+    public void setImpliedDerivedKeys(boolean impliedDerivedKeys) {
+        this.impliedDerivedKeys = impliedDerivedKeys;
+    }
     
 }

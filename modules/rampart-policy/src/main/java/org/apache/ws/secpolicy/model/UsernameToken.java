@@ -31,6 +31,10 @@ public class UsernameToken extends Token {
 
     private boolean useUTProfile11 = false;
     
+    private boolean noPassword;
+    
+    private boolean hashPassword;
+    
     public UsernameToken(int version){
         setVersion(version);
     }
@@ -48,6 +52,22 @@ public class UsernameToken extends Token {
      */
     public void setUseUTProfile11(boolean useUTProfile11) {
         this.useUTProfile11 = useUTProfile11;
+    }
+    
+    public boolean isNoPassword() {
+        return noPassword;
+    }
+    
+    public void setNoPassword(boolean noPassword) {
+        this.noPassword = noPassword;
+    }
+    
+    public boolean isHashPassword() {
+        return hashPassword;
+    }
+    
+    public void setHashPassword(boolean hashPassword) {
+        this.hashPassword = hashPassword;
     }
 
     public boolean isUseUTProfile10() {
@@ -116,6 +136,29 @@ public class UsernameToken extends Token {
             } else {
                 // <sp:WssUsernameToken11 />
                 writer.writeStartElement(prefix, SPConstants.USERNAME_TOKEN11 , namespaceURI);
+            }
+            
+            if (version == SPConstants.SP_V12) {
+                
+                if (isNoPassword()) {
+                    writer.writeStartElement(prefix, SPConstants.NO_PASSWORD, namespaceURI);
+                    writer.writeEndElement();    
+                } else if (isHashPassword()){
+                    writer.writeStartElement(prefix, SPConstants.HASH_PASSWORD, namespaceURI);
+                    writer.writeEndElement(); 
+                }
+                
+                if (isDerivedKeys()) {
+                    writer.writeStartElement(prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
+                    writer.writeEndElement();  
+                } else if (isExplicitDerivedKeys()) {
+                    writer.writeStartElement(prefix, SPConstants.REQUIRE_EXPLICIT_DERIVED_KEYS, namespaceURI);
+                    writer.writeEndElement();  
+                } else if (isImpliedDerivedKeys()) {
+                    writer.writeStartElement(prefix, SPConstants.REQUIRE_IMPLIED_DERIVED_KEYS, namespaceURI);
+                    writer.writeEndElement();  
+                }
+                
             }
             writer.writeEndElement();
 

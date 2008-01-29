@@ -28,47 +28,12 @@ import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.SPConstants;
 
-public class SignedEncryptedParts extends AbstractSecurityAssertion {
-
-    private boolean body;
-    
-    private boolean attachments;
+public class RequiredParts extends AbstractSecurityAssertion {
     
     private ArrayList headers = new ArrayList();
     
-    private boolean signedParts;
-    
-    public SignedEncryptedParts(boolean signedParts, int version) {
-        this.signedParts = signedParts;
+    public RequiredParts(int version) {
         setVersion(version);
-    }
-
-    /**
-     * @return Returns the body.
-     */
-    public boolean isBody() {
-        return body;
-    }
-
-    /**
-     * @param body The body to set.
-     */
-    public void setBody(boolean body) {
-        this.body = body;
-    }
-    
-    /**
-     * @return Returns the attachments.
-     */
-    public boolean isAttachments() {
-        return attachments;
-    }
-
-    /**
-     * @param attachments The attachments to set.
-     */
-    public void setAttachments(boolean attachments) {
-        this.attachments = attachments;
     }
 
     /**
@@ -85,28 +50,9 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
         this.headers.add(header);
     }
 
-    /**
-     * @return Returns the signedParts.
-     */
-    public boolean isSignedParts() {
-        return signedParts;
-    }
 
     public QName getName() {
-        if (signedParts) {
-            if ( version == SPConstants.SP_V12) {
-                return SP12Constants.SIGNED_PARTS;
-            } else {
-                return SP11Constants.SIGNED_PARTS;
-            }           
-        }
-        
-        if ( version == SPConstants.SP_V12) {
-            return SP12Constants.ENCRYPTED_PARTS;
-        } else {
-            return SP11Constants.ENCRYPTED_PARTS;
-        }
-        
+         return SP12Constants.REQUIRED_PARTS;         
     }
 
     public PolicyComponent normalize() {
@@ -124,17 +70,11 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
             writer.setPrefix(prefix, namespaceURI);
         }
             
-        // <sp:SignedParts> | <sp:EncryptedParts> 
+        // <sp:RequiredParts> 
         writer.writeStartElement(prefix, localName, namespaceURI);
         
         // xmlns:sp=".."
         writer.writeNamespace(prefix, namespaceURI);
-        
-        if (isBody()) {
-            // <sp:Body />
-            writer.writeStartElement(prefix, SPConstants.BODY, namespaceURI);
-            writer.writeEndElement();
-        }
         
         Header header;        
         for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
@@ -150,13 +90,7 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
             writer.writeEndElement();
         }
         
-        if (isAttachments() && version == SPConstants.SP_V12) {
-            // <sp:Attachments />
-            writer.writeStartElement(prefix, SPConstants.ATTACHMENTS, namespaceURI);
-            writer.writeEndElement();
-        }
-        
-        // </sp:SignedParts> | </sp:EncryptedParts>
+        // </sp:RequiredParts>
         writer.writeEndElement();
     }    
     
