@@ -105,6 +105,10 @@ public class RampartPolicyData {
 
     private Vector encryptedElements = new Vector();
     
+    private Vector requiredElements = new Vector();
+    
+    private Vector contentEncryptedElements = new Vector();
+    
     private HashMap declaredNamespaces = new HashMap();
 
     /*
@@ -285,6 +289,37 @@ public class RampartPolicyData {
     public void setEncryptedElements(String encElement) {
 
         encryptedElements.add(encElement);
+    }
+    
+    /**
+     * @return Returns the requiredElements.
+     */
+    public Vector getRequiredElements() {
+        return requiredElements;
+    }
+
+    /**
+     * @param requiredElements
+     *            The Required Element (XPath) to set.
+     */
+    public void setRequiredElements(String reqElement) {
+        requiredElements.add(reqElement);
+    }
+    
+    /**
+     * @return Returns the contentEncryptedElements.
+     */
+    public Vector getContentEncryptedElements() {
+        return contentEncryptedElements;
+    }
+
+    /**
+     * @param encElement
+     *            The encrypted Element (XPath) to set.
+     */
+    public void setContentEncryptedElements(String encElement) {
+
+        contentEncryptedElements.add(encElement);
     }
 
     /**
