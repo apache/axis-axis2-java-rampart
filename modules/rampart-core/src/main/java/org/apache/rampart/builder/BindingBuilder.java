@@ -106,7 +106,7 @@ public abstract class BindingBuilder {
      * @return The <code>WSSecUsernameToken</code> instance
      * @throws RampartException
      */
-    protected WSSecUsernameToken addUsernameToken(RampartMessageData rmd) throws RampartException {
+    protected WSSecUsernameToken addUsernameToken(RampartMessageData rmd, UsernameToken token) throws RampartException {
        
         log.debug("Adding a UsernameToken");
         
@@ -125,6 +125,14 @@ public abstract class BindingBuilder {
         
         if(user != null && !"".equals(user)) {
             log.debug("User : " + user);
+            
+            // If NoPassword property is set we don't need to set the password
+            if (token.isNoPassword()) {
+                WSSecUsernameToken utBuilder = new WSSecUsernameToken();
+                utBuilder.setUserInfo(user, null);
+                utBuilder.setPasswordType(null);
+                return utBuilder;
+            }
             
             //Get the password
 
@@ -162,8 +170,12 @@ public abstract class BindingBuilder {
                 
                 WSSecUsernameToken utBuilder = new WSSecUsernameToken();
                 
-                //TODO Get the UT type, only WS-SX spec supports this
-                utBuilder.setPasswordType(WSConstants.PASSWORD_TEXT);
+                if (token.isHashPassword()) {
+                    utBuilder.setPasswordType(WSConstants.PASSWORD_DIGEST);  
+                } else {
+                    utBuilder.setPasswordType(WSConstants.PASSWORD_TEXT);
+                }
+                
                 utBuilder.setUserInfo(user, password);
                 
                 return utBuilder;
@@ -342,7 +354,7 @@ public abstract class BindingBuilder {
                         endSuppTokMap.put(token, sig);
                         
                 } else if(token instanceof UsernameToken) {
-                    WSSecUsernameToken utBuilder = addUsernameToken(rmd);
+                    WSSecUsernameToken utBuilder = addUsernameToken(rmd, (UsernameToken)token);
                     
                     utBuilder.prepare(rmd.getDocument());
                     
