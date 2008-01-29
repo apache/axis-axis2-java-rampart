@@ -92,6 +92,12 @@ public class SPConstants {
     
     public final static String ENCRYPTED_ELEMENTS = "EncryptedElements";
     
+    public final static String REQUIRED_ELEMENTS = "RequiredElements";
+    
+    public final static String CONTENT_ENCRYPTED_ELEMENTS = "ContentEncryptedElements";
+    
+    public final static String REQUIRED_PARTS = "RequiredParts";
+    
     public final static String XPATH_VERSION = "XPathVersion";
     
     public final static String XPATH_EXPR = "XPath";
@@ -360,6 +366,10 @@ public class SPConstants {
     
     public static final String REQUIRE_DERIVED_KEYS = "RequireDerivedKeys";
     
+    public static final String REQUIRE_IMPLIED_DERIVED_KEYS = "RequireImpliedDerivedKeys";
+    
+    public static final String REQUIRE_EXPLICIT_DERIVED_KEYS = "RequireExplicitDerivedKeys";
+    
     public static final String REQUIRE_EXTERNAL_URI_REFERNCE = "RequireExternalUriReference";
     
     public static final String REQUIRE_EXTERNAL_REFERNCE = "RequireExternalReference";
@@ -378,9 +388,19 @@ public class SPConstants {
     
     public static final String BODY = "Body" ;
     
+    public static final String ATTACHMENTS = "Attachments";
+    
     public static final QName NAME = new QName("Name");
     
     public static final QName NAMESPACE = new QName("Namespace");
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    public static final String NO_PASSWORD = "NoPassword";
+    
+    public static final String HASH_PASSWORD = "HashPassword";
+    
+
     
 
 }
