@@ -23,11 +23,13 @@ import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.secpolicy.model.AsymmetricBinding;
 import org.apache.ws.secpolicy.model.Binding;
+import org.apache.ws.secpolicy.model.ContentEncryptedElements;
 import org.apache.ws.secpolicy.model.EncryptionToken;
 import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.InitiatorToken;
 import org.apache.ws.secpolicy.model.ProtectionToken;
 import org.apache.ws.secpolicy.model.RecipientToken;
+import org.apache.ws.secpolicy.model.RequiredElements;
 import org.apache.ws.secpolicy.model.SignatureToken;
 import org.apache.ws.secpolicy.model.SignedEncryptedElements;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
@@ -95,7 +97,11 @@ public class RampartPolicyBuilder {
                         rpd);
             } else if (assertion instanceof SignedEncryptedParts) {
                 processSignedEncryptedParts((SignedEncryptedParts) assertion, rpd);
-            } else if (assertion instanceof SupportingToken) {
+            } else if ( assertion instanceof RequiredElements) {   
+                processRequiredElements((RequiredElements)assertion, rpd);
+            } else if (assertion instanceof ContentEncryptedElements) { 
+                processContentEncryptedElements((ContentEncryptedElements) assertion, rpd);
+            }else if (assertion instanceof SupportingToken) {
                 processSupportingTokens((SupportingToken) assertion, rpd);
             } else if (assertion instanceof Trust10) {
                 processTrust10((Trust10)assertion, rpd);
@@ -224,19 +230,40 @@ public class RampartPolicyBuilder {
         Iterator it = sep.getHeaders().iterator();
         if (sep.isSignedParts()) {
             rpd.setSignBody(sep.isBody());
+            rpd.setSignAttachments(sep.isAttachments());
             while (it.hasNext()) {
                 Header header = (Header) it.next();
                 rpd.addSignedPart(header.getNamespace(), header.getName());
             }
         } else {
             rpd.setEncryptBody(sep.isBody());
+            rpd.setEncryptAttachments(sep.isAttachments());
             while (it.hasNext()) {
                 Header header = (Header) it.next();
                 rpd.setEncryptedParts(header.getNamespace(), header.getName(),"Header");
             }
         }
     }
+    
+    private static void processContentEncryptedElements(ContentEncryptedElements cee,
+            RampartPolicyData rpd) {
+        
+        Iterator it = cee.getXPathExpressions().iterator();     
+        while (it.hasNext()) {
+            rpd.setContentEncryptedElements((String) it.next());
+        }
+        rpd.addDeclaredNamespaces(cee.getDeclaredNamespaces());
+    }
 
+    private static void processRequiredElements(RequiredElements req,
+            RampartPolicyData rpd) {
+        
+        Iterator it = req.getXPathExpressions().iterator();     
+        while (it.hasNext()) {
+            rpd.setRequiredElements((String) it.next());
+        }
+        rpd.addDeclaredNamespaces(req.getDeclaredNamespaces());
+    }
     /**
      * Evaluate policy data that is common to all bindings.
      * 
