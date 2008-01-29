@@ -83,6 +83,9 @@ public class SP11Constants {
 
     public static final QName ENCRYPTED_ELEMENTS = new QName(SP11Constants.SP_NS,
             SPConstants.ENCRYPTED_ELEMENTS, SP11Constants.SP_PREFIX);
+    
+    public static final QName REQUIRED_ELEMENTS = new QName(SP11Constants.SP_NS,
+            SPConstants.REQUIRED_ELEMENTS, SP11Constants.SP_PREFIX);
 
     public static final QName USERNAME_TOKEN = new QName(SP11Constants.SP_NS,
             SPConstants.USERNAME_TOKEN , SP11Constants.SP_PREFIX);
