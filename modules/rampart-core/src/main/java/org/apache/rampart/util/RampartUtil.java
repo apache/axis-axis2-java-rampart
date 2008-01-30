@@ -36,6 +36,8 @@ import org.apache.rahas.Token;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.client.STSClient;
+import org.apache.rampart.PolicyBasedResultsValidator;
+import org.apache.rampart.PolicyValidatorCallbackHandler;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -145,6 +147,48 @@ public class RampartUtil {
         
         return cbHandler;
     }
+    
+   /**
+    * Returns an instance of PolicyValidatorCallbackHandler to be used to validate ws-security results.
+    * 
+    * @param msgContext {@link MessageContext}
+    * @param rpd {@link RampartPolicyData}
+    * @return {@link PolicyValidatorCallbackHandler}
+    * @throws RampartException RampartException
+    */ 
+   public static PolicyValidatorCallbackHandler getPolicyValidatorCB(MessageContext msgContext, RampartPolicyData rpd) throws RampartException {
+        
+       PolicyValidatorCallbackHandler cbHandler;
+
+        if (rpd.getRampartConfig() != null && rpd.getRampartConfig().getPolicyValidatorCbClass() != null) {
+            
+            String cbHandlerClass = rpd.getRampartConfig().getPolicyValidatorCbClass();
+            ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
+                
+            log.debug("loading class : " + cbHandlerClass);
+            
+            Class cbClass;
+            try {
+                cbClass = Loader.loadClass(classLoader, cbHandlerClass);
+            } catch (ClassNotFoundException e) {
+                throw new RampartException("cannotLoadPolicyValidatorCbClass", 
+                        new String[]{cbHandlerClass}, e);
+            }
+            try {
+                cbHandler = (PolicyValidatorCallbackHandler) cbClass.newInstance();
+            } catch (java.lang.Exception e) {
+                throw new RampartException("cannotCreatePolicyValidatorCallbackInstance",
+                        new String[]{cbHandlerClass}, e);
+            }
+            
+        } else { // Initialise default PolicyValidatorCallbackHandler...
+            cbHandler = new PolicyBasedResultsValidator();
+        }
+        
+        return cbHandler;
+    }
+    
+   
     
     /**
      * Perform a callback to get a password.

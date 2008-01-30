@@ -197,8 +197,9 @@ public class RampartEngine {
 		//Convert back to llom since the inflow cannot use DOOM
 		msgCtx.setEnvelope(env);
 		Axis2Util.useDOOM(false);
-
-		PolicyBasedResultsValidator validator = new PolicyBasedResultsValidator();
+				
+		PolicyValidatorCallbackHandler validator = RampartUtil.getPolicyValidatorCB(msgCtx, rpd);
+		
 		validator.validate(data, results);
 
 		if(dotDebug){

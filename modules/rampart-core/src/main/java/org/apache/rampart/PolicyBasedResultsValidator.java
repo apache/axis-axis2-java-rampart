@@ -45,10 +45,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-public class PolicyBasedResultsValidator {
+public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandler {
     
     private static Log log = LogFactory.getLog(PolicyBasedResultsValidator.class);
     
+    /** {@inheritDoc}
+     */
     public void validate(ValidatorData data, Vector results) 
     throws RampartException {
         
@@ -193,7 +195,7 @@ public class PolicyBasedResultsValidator {
      * @param encryptedParts
      * @param signatureParts
      */
-    private void validateEncrSig(ValidatorData data,Vector encryptedParts, Vector signatureParts, Vector results) 
+    protected void validateEncrSig(ValidatorData data,Vector encryptedParts, Vector signatureParts, Vector results) 
     throws RampartException {
         ArrayList actions = getSigEncrActions(results);
         boolean sig = false; 
@@ -252,7 +254,7 @@ public class PolicyBasedResultsValidator {
      * @param data
      * @param results
      */
-    private void validateSupportingTokens(ValidatorData data, Vector results) 
+    protected void validateSupportingTokens(ValidatorData data, Vector results) 
     throws RampartException {
         
         //Check for UsernameToken
@@ -272,7 +274,7 @@ public class PolicyBasedResultsValidator {
      * @param suppTok
      * @throws RampartException
      */
-    private void handleSupportingTokens(Vector results, SupportingToken suppTok) throws RampartException {
+    protected void handleSupportingTokens(Vector results, SupportingToken suppTok) throws RampartException {
         
         if(suppTok == null) {
             return;
@@ -310,7 +312,7 @@ public class PolicyBasedResultsValidator {
      * @param data
      * @param results
      */
-    private void validateProtectionOrder(ValidatorData data, Vector results) 
+    protected void validateProtectionOrder(ValidatorData data, Vector results) 
     throws RampartException {
         
         String protectionOrder = data.getRampartMessageData().getPolicyData().getProtectionOrder();
@@ -381,7 +383,7 @@ public class PolicyBasedResultsValidator {
     }
 
 
-    private ArrayList getSigEncrActions(Vector results) {
+    protected ArrayList getSigEncrActions(Vector results) {
         ArrayList sigEncrActions = new ArrayList();
         for (Iterator iter = results.iterator(); iter.hasNext();) {
             Integer actInt = (Integer) ((WSSecurityEngineResult) iter.next())
@@ -395,7 +397,7 @@ public class PolicyBasedResultsValidator {
         return sigEncrActions;
     }
 
-    private void validateEncryptedParts(ValidatorData data, Vector encryptedParts, Vector results) 
+    protected void validateEncryptedParts(ValidatorData data, Vector encryptedParts, Vector results) 
     throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
@@ -430,7 +432,7 @@ public class PolicyBasedResultsValidator {
         
     }
 
-    private void validateSignedPartsHeaders(ValidatorData data, Vector signatureParts, Vector results) 
+    protected void validateSignedPartsHeaders(ValidatorData data, Vector signatureParts, Vector results) 
     throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
@@ -473,7 +475,7 @@ public class PolicyBasedResultsValidator {
     }
 
     
-    private boolean isSignatureRequired(RampartMessageData rmd) {
+    protected boolean isSignatureRequired(RampartMessageData rmd) {
         RampartPolicyData rpd = rmd.getPolicyData();
         return (rpd.isSymmetricBinding() && rpd.getSignatureToken() != null) ||
                 (!rpd.isSymmetricBinding() && !rpd.isTransportBinding() && 
@@ -486,7 +488,7 @@ public class PolicyBasedResultsValidator {
      * Verify that ts->Created is before 'now'
      * - testing that timestamp has not expired ('now' is before ts->Expires) is handled earlier by WSS4J
      */
-    private boolean verifyTimestamp(Timestamp timestamp, RampartMessageData rmd) throws RampartException {
+    protected boolean verifyTimestamp(Timestamp timestamp, RampartMessageData rmd) throws RampartException {
 
         Calendar cre = timestamp.getCreated();
         if (cre != null) {
@@ -660,7 +662,7 @@ public class PolicyBasedResultsValidator {
     }
 
     
-    private ArrayList getEncryptedReferences(Vector results) {
+    protected ArrayList getEncryptedReferences(Vector results) {
         
         //there can be multiple ref lists
         ArrayList encrResults = getResults(results, WSConstants.ENCR);
@@ -687,7 +689,7 @@ public class PolicyBasedResultsValidator {
     
     
     
-    private ArrayList getResults(Vector results, int action) {
+    protected ArrayList getResults(Vector results, int action) {
         
         ArrayList list = new ArrayList();
         
@@ -703,7 +705,7 @@ public class PolicyBasedResultsValidator {
         return list;
     }
     
-    private boolean isUsernameTokenPresent(ValidatorData data) {
+    protected boolean isUsernameTokenPresent(ValidatorData data) {
         
         //TODO This can be integrated with supporting token processing
         // which also checks whether Username Tokens present
@@ -735,7 +737,7 @@ public class PolicyBasedResultsValidator {
         
     }
     
-    private boolean isUsernameTokenPresent(SupportingToken suppTok) {
+    protected boolean isUsernameTokenPresent(SupportingToken suppTok) {
         
         if(suppTok == null) {
             return false;

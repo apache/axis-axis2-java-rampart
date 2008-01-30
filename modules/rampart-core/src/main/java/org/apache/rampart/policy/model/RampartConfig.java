@@ -34,6 +34,7 @@ import javax.xml.stream.XMLStreamWriter;
  *  &lt;ramp:user&gt;alice&lt;/ramp:user&gt;
  *  &lt;ramp:encryptionUser&gt;bob&lt;/ramp:encryptionUser&gt;
  *  &lt;ramp:passwordCallbackClass&gt;org.apache.axis2.security.PWCallback&lt;/ramp:passwordCallbackClass&gt;
+ *  &lt;ramp:policyValidatorCbClass&gt;org.apache.axis2.security.ramp:PolicyValidatorCallbackHandler&lt;/ramp:policyValidatorCbClass&gt;
  *  &lt;ramp:timestampTTL&gt;300&lt;/ramp:timestampTTL&gt;
  *  &lt;ramp:timestampMaxSkew&gt;0&lt;/ramp:timestampMaxSkew&gt;
  *  &lt;ramp:tokenStoreClass&gt;org.apache.rahas.StorageImpl&lt;/ramp:tokenStoreClass&gt;
@@ -76,6 +77,8 @@ public class RampartConfig implements Assertion {
     public final static String ENCRYPTION_USER_LN = "encryptionUser";
 
     public final static String PW_CB_CLASS_LN = "passwordCallbackClass";
+    
+    public final static String POLICY_VALIDATOR_CB_CLASS_LN = "policyValidatorCbClass";
 
     public final static String SIG_CRYPTO_LN = "signatureCrypto";
 
@@ -100,6 +103,8 @@ public class RampartConfig implements Assertion {
     private String encryptionUser;
 
     private String pwCbClass;
+    
+    private String policyValidatorCbClass;
 
     private CryptoConfig sigCryptoConfig;
 
@@ -172,6 +177,14 @@ public class RampartConfig implements Assertion {
     public void setPwCbClass(String pwCbClass) {
         this.pwCbClass = pwCbClass;
     }
+    
+    public String getPolicyValidatorCbClass() {
+        return this.policyValidatorCbClass;
+    }
+    
+    public void setPolicyValidatorCbClass(String policyValidatorCbClass) {
+        this.policyValidatorCbClass = policyValidatorCbClass;
+    }
 
     public CryptoConfig getSigCryptoConfig() {
         return sigCryptoConfig;
@@ -243,6 +256,12 @@ public class RampartConfig implements Assertion {
         if (getPwCbClass() != null) {
             writer.writeStartElement(NS, PW_CB_CLASS_LN);
             writer.writeCharacters(getPwCbClass());
+            writer.writeEndElement();
+        }
+        
+        if (getPolicyValidatorCbClass() != null) {
+            writer.writeStartElement(NS, POLICY_VALIDATOR_CB_CLASS_LN);
+            writer.writeCharacters(getPolicyValidatorCbClass());
             writer.writeEndElement();
         }
         
