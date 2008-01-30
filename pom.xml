@@ -489,7 +489,7 @@
         <neethi.version>SNAPSHOT</neethi.version>
         <axiom.version>SNAPSHOT</axiom.version>
         <wss4j.version>SNAPSHOT</wss4j.version>
-        <woden.version>1.0-incubating-SNAPSHOT</woden.version>
+        <woden.version>1.0-SNAPSHOT</woden.version>
         <addressing.mar.version>SNAPSHOT</addressing.mar.version>
 
         <xmlsec.version>1.4.0</xmlsec.version>
