@@ -103,11 +103,6 @@
                                     </fileset>
                                 </copy>
 
-				                <copy todir="target/clover/test-classes">
-                                    <fileset dir="target/generated-code/resources">
-                                        <include name="**/*"/>
-                                    </fileset>
-                                </copy>
 								
 								<javac srcdir="target/generated-code" destdir="target/classes" fork="true">
                     					<classpath refid="maven.dependency.classpath"/>
@@ -115,12 +110,6 @@
                                     	<classpath refid="maven.runtime.classpath"/>
 								</javac>
 								
-								<mkdir dir="target/clover/classes"/>
-								<javac srcdir="target/generated-code" destdir="target/clover/classes" fork="true">
-                    					<classpath refid="maven.dependency.classpath"/>
-                                    	<classpath refid="maven.compile.classpath"/>
-                                    	<classpath refid="maven.runtime.classpath"/>
-								</javac>
 							</tasks>
                         </configuration>
                     </execution>

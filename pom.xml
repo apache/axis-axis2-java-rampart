@@ -138,21 +138,6 @@
 
     </pluginRepositories>
 
-	<reporting>
-		<excludeDefaults>true</excludeDefaults>
-		<plugins>
-		  <plugin>
-			<artifactId>maven-clover-plugin</artifactId>
-			<configuration>
-			  <generateHistorical>true</generateHistorical>
-				<!-- Verify that we can generate all types of Clover reports -->
-				<generateHtml>true</generateHtml>
-				<generatePdf>true</generatePdf>
-				<generateXml>true</generateXml>
-			</configuration>
-		  </plugin>
-		</plugins>
-	</reporting>
 
     <build>
         <plugins>
@@ -172,39 +157,6 @@
                 <version>2.0-beta-5</version>
                 <inherited>false</inherited>
             </plugin>
-
-			<plugin>
-				<artifactId>maven-clover-plugin</artifactId>
-				<configuration>
-				  <flushPolicy>threaded</flushPolicy>
-				  <flushInterval>100</flushInterval>
-				  <targetPercentage>0%</targetPercentage>
-				</configuration>
-				<executions>
-				  <execution>
-					<id>main</id>
-					<phase>verify</phase>
-					<goals>
-					  <goal>instrument</goal>
-					  <goal>aggregate</goal>
-					  <goal>check</goal>
-					  <goal>log</goal>
-					</goals>
-				  </execution>
-				  <execution>
-					<id>site</id>
-					<phase>pre-site</phase>
-					<goals>
-					  <goal>instrument</goal>
-					  <goal>aggregate</goal>
-				
-					  <!-- We save a history point in order to have data to generate a historical report -->
-					  <goal>save-history</goal>
-				
-					</goals>
-				  </execution>
-				</executions>
-			</plugin>
         </plugins>
     </build>
 
