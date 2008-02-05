@@ -53,6 +53,10 @@ public class SecureConversationTokenBuilder implements AssertionBuilder {
         if (element != null) {
             if (element.getFirstChildWithName(SP12Constants.REQUIRE_DERIVED_KEYS) != null) {
                 conversationToken.setDerivedKeys(true);
+            } else if (element.getFirstChildWithName(SP12Constants.REQUIRE_IMPLIED_DERIVED_KEYS) != null) {
+                conversationToken.setImpliedDerivedKeys(true);
+            } else if (element.getFirstChildWithName(SP12Constants.REQUIRE_EXPLICIT_DERIVED_KEYS) != null) {
+                conversationToken.setExplicitDerivedKeys(true);
             }
 
             if (element

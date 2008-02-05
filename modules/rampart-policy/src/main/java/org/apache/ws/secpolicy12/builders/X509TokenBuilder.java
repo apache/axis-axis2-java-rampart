@@ -50,6 +50,10 @@ public class X509TokenBuilder implements AssertionBuilder {
             
             if (policyElement.getFirstChildWithName(SP12Constants.REQUIRE_DERIVED_KEYS) != null) {
                 x509Token.setDerivedKeys(true);
+            } else if (policyElement.getFirstChildWithName(SP12Constants.REQUIRE_IMPLIED_DERIVED_KEYS) != null) {
+                x509Token.setImpliedDerivedKeys(true);
+            } else if (policyElement.getFirstChildWithName(SP12Constants.REQUIRE_EXPLICIT_DERIVED_KEYS) != null) {
+                x509Token.setExplicitDerivedKeys(true);
             }
             
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
@@ -101,20 +105,17 @@ public class X509TokenBuilder implements AssertionBuilder {
                 parent.setTokenVersionAndType(SPConstants.WSS_X509_V3_TOKEN11);
 
             } else if (SP12Constants.WSS_X509_PKCS7_TOKEN_10.equals(name)) {
-                parent
-                        .setTokenVersionAndType(SPConstants.WSS_X509_PKCS7_TOKEN10);
-
+                parent.setTokenVersionAndType(SPConstants.WSS_X509_PKCS7_TOKEN10);
+                
             } else if (SP12Constants.WSS_X509_PKCS7_TOKEN_11.equals(name)) {
-                parent
-                        .setTokenVersionAndType(SPConstants.WSS_X509_PKCS7_TOKEN11);
-
+                parent.setTokenVersionAndType(SPConstants.WSS_X509_PKCS7_TOKEN11);
+                
             } else if (SP12Constants.WSS_X509_PKI_PATH_V1_TOKEN_10.equals(name)) {
-                parent
-                        .setTokenVersionAndType(SPConstants.WSS_X509_PKI_PATH_V1_TOKEN10);
-
+                parent.setTokenVersionAndType(SPConstants.WSS_X509_PKI_PATH_V1_TOKEN10);
+                
             } else if (SP12Constants.WSS_X509_PKI_PATH_V1_TOKEN_11.equals(name)) {
-                parent
-                        .setTokenVersionAndType(SPConstants.WSS_X509_PKI_PATH_V1_TOKEN11);
+                parent.setTokenVersionAndType(SPConstants.WSS_X509_PKI_PATH_V1_TOKEN11);
+                
             }
         }
     }
