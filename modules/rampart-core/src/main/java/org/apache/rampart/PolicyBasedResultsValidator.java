@@ -16,6 +16,7 @@
 
 package org.apache.rampart;
 
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -136,6 +137,8 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         validateEncryptedParts(data, encryptedParts, results);
 
         validateSignedPartsHeaders(data, signatureParts, results);
+        
+        validateRequiredElements(data);
 
         //Supporting tokens
         if(!rmd.isInitiator()) {
@@ -429,6 +432,27 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
 //            throw new RampartException("invalidNumberOfEncryptedParts", 
 //                    new String[]{Integer.toString(refCount)});
 //        }
+        
+    }
+    
+    public void validateRequiredElements(ValidatorData data) throws RampartException {
+        
+        RampartMessageData rmd = data.getRampartMessageData();
+        
+        RampartPolicyData rpd = rmd.getPolicyData();
+        
+        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+        
+        Iterator elementsIter = rpd.getRequiredElements().iterator();
+        
+        while (elementsIter.hasNext()) {
+            
+            String expression = (String) elementsIter.next();
+            
+            if ( !RampartUtil.checkRequiredElements(envelope, rpd.getDeclaredNamespaces(), expression)) {
+                throw new RampartException("requiredElementsMissing", new String[] { expression } );
+            }
+        }
         
     }
 

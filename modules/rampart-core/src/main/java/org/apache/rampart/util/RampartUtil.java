@@ -813,6 +813,42 @@ public class RampartUtil {
         return result;
     }
     
+    /**
+     * Get a element for SOAP 
+     * @param envelope
+     * @param namespaces
+     * @param xpath
+     * @return
+     */
+    public static boolean checkRequiredElements(SOAPEnvelope envelope, HashMap decNamespaces, String expression ) {
+        
+        
+        Set namespaces = findAllPrefixNamespaces(envelope, decNamespaces);
+
+        try {
+                        XPath xp = new AXIOMXPath(expression);
+                        Iterator nsIter = namespaces.iterator();
+                        
+                        while (nsIter.hasNext())
+                        {
+                                OMNamespace tmpNs = (OMNamespace)nsIter.next();
+                                xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
+                        }
+                        
+                        List selectedNodes = xp.selectNodes(envelope);
+                        
+                        if (selectedNodes.size() == 0 ) {
+                            return false;
+                        }
+                
+        } catch (JaxenException e) {
+                // This has to be changed to propagate an instance of a RampartException up
+                throw new RuntimeException(e);
+        }
+        
+        return true;
+    }
+    
     
     public static KeyGenerator getEncryptionKeyGenerator(String symEncrAlgo) throws WSSecurityException {
         KeyGenerator keyGen;
