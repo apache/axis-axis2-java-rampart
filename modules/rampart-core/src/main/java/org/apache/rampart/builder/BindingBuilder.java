@@ -139,8 +139,7 @@ public abstract class BindingBuilder {
             //First check options object for a password
             String password = options.getPassword();
             
-            if((password == null || password.length() == 0) &&
-                    rpd.getRampartConfig() != null) {
+            if(password == null || password.length() == 0) {
                 
                 //Then try to get the password from the given callback handler
                 CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
