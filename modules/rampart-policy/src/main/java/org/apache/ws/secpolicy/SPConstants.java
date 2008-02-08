@@ -165,6 +165,14 @@ public class SPConstants {
     
     public final static String SIGNED_ENDORSING_SUPPORTING_TOKENS = "SignedEndorsingSupportingTokens";
     
+    public final static String ENCRYPTED_SUPPORTING_TOKENS = "EncryptedSupportingTokens";
+    
+    public final static String SIGNED_ENCRYPTED_SUPPORTING_TOKENS = "SignedEncryptedSupportingTokens";
+    
+    public final static String ENDORSING_ENCRYPTED_SUPPORTING_TOKENS = "EndorsingEncryptedSupportingTokens";
+    
+    public final static String SIGNED_ENDORSING_ENCRYPTED_SUPPORTING_TOKENS = "SignedEndorsingEncryptedSupportingTokens";   
+    
     public final static int SUPPORTING_TOKEN_SUPPORTING = 1;
 
     public final static int SUPPORTING_TOKEN_ENDORSING = 2;
@@ -173,7 +181,14 @@ public class SPConstants {
 
     public final static int SUPPORTING_TOKEN_SIGNED_ENDORSING = 4;
     
-     
+    public final static int SUPPORTING_TOKEN_SIGNED_ENCRYPTED = 5;
+    
+    public final static int SUPPORTING_TOKEN_ENCRYPTED = 6;
+    
+    public final static int SUPPORTING_TOKEN_ENDORSING_ENCRYPTED = 7;
+    
+    public final static int SUPPORTING_TOKEN_SIGNED_ENDORSING_ENCRYPTED = 8;
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     
@@ -361,6 +376,10 @@ public class SPConstants {
     public static final String REQUIRE_SERVER_ENTROPY = "RequireServerEntropy";
     
     public static final String MUST_SUPPORT_ISSUED_TOKENS = "MustSupportIssuedTokens";
+    
+    public static final String REQUIRE_REQUEST_SECURITY_TOKEN_COLLECTION = "RequireRequestSecurityTokenCollection";
+    
+    public static final String REQUIRE_APPLIES_TO = "RequireAppliesTo";
     
     public static final String ISSUER = "Issuer";
     
