@@ -122,6 +122,14 @@ public class RampartPolicyData {
 
     private SupportingToken signedEndorsingSupportingTokens;
     
+    private SupportingToken encryptedSupportingTokens;
+
+    private SupportingToken signedEncryptedSupportingTokens;
+
+    private SupportingToken endorsingEncryptedSupportingTokens;
+
+    private SupportingToken signedEndorsingEncryptedSupportingTokens;
+    
     private AlgorithmSuite algorithmSuite;
     
     private RampartConfig rampartConfig;
@@ -482,6 +490,14 @@ public class RampartPolicyData {
             endorsingSupportingTokens = suppTokens;
         } else if (tokenType == SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING) {
             signedEndorsingSupportingTokens = suppTokens;
+        } else if (tokenType == SPConstants.SUPPORTING_TOKEN_ENCRYPTED) {
+            encryptedSupportingTokens = suppTokens;
+        } else if (tokenType == SPConstants.SUPPORTING_TOKEN_SIGNED_ENCRYPTED) {
+            signedEncryptedSupportingTokens = suppTokens;
+        } else if (tokenType == SPConstants.SUPPORTING_TOKEN_ENDORSING_ENCRYPTED) {
+            endorsingEncryptedSupportingTokens = suppTokens;
+        } else if (tokenType == SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING_ENCRYPTED) {
+            signedEndorsingEncryptedSupportingTokens = suppTokens;
         }
     }
     
@@ -586,6 +602,21 @@ public class RampartPolicyData {
             SupportingToken signedEndorsingSupportingTokens) {
         this.signedEndorsingSupportingTokens = signedEndorsingSupportingTokens;
     }
+    
+    /**
+     * @return Returns the signedEndorsingEncryptedSupportingToken.
+     */
+    public SupportingToken getSignedEndorsingEncryptedSupportingTokens() {
+        return signedEndorsingEncryptedSupportingTokens;
+    }
+
+    /**
+     * @param signedEndorsingEncryptedSupportingTokens The signedEndorsingEncryptedSupportingToken to set.
+     */
+    public void setSignedEndorsingEncryptedSupportingTokens(
+            SupportingToken signedEndorsingEncryptedSupportingTokens) {
+        this.signedEndorsingEncryptedSupportingTokens = signedEndorsingEncryptedSupportingTokens;
+    }
 
     /**
      * @return Returns the signedSupportingToken.
@@ -600,12 +631,40 @@ public class RampartPolicyData {
     public void setSignedSupportingTokens(SupportingToken signedSupportingTokens) {
         this.signedSupportingTokens = signedSupportingTokens;
     }
+    
+    /**
+     * @return Returns the signedEncryptedSupportingToken.
+     */
+    public SupportingToken getSignedEncryptedSupportingTokens() {
+        return signedEncryptedSupportingTokens;
+    }
+
+    /**
+     * @param signedEncryptedSupportingTokens The signedEncryptedSupportingToken to set.
+     */
+    public void setSignedEncryptedSupportingTokens(SupportingToken signedEncryptedSupportingTokens) {
+        this.signedEncryptedSupportingTokens = signedEncryptedSupportingTokens;
+    }
 
     /**
      * @return Returns the supportingToken.
      */
     public SupportingToken getSupportingTokens() {
         return supportingTokens;
+    }
+    
+    /**
+     * @param encryptedSupportingTokens The encryptedSupportingToken to set.
+     */
+    public void setEncryptedSupportingTokens(SupportingToken encryptedSupportingTokens) {
+        this.encryptedSupportingTokens = encryptedSupportingTokens;
+    }
+    
+    /**
+     * @return Returns the encryptedSupportingToken.
+     */
+    public SupportingToken getEncryptedSupportingTokens() {
+        return encryptedSupportingTokens;
     }
 
     /**
@@ -620,6 +679,20 @@ public class RampartPolicyData {
      */
     public SupportingToken getEndorsingSupportingTokens() {
         return endorsingSupportingTokens;
+    }
+    
+    /**
+     * @param endorsingEncryptedSupportingTokens The endorsingEncryptedSupportingToken to set.
+     */
+    public void setEndorsingEncryptedSupportingTokens(SupportingToken endorsingEncryptedSupportingTokens) {
+        this.endorsingEncryptedSupportingTokens = endorsingEncryptedSupportingTokens;
+    }
+
+    /**
+     * @return Returns the endorsingEncryptedSupportingToken.
+     */
+    public SupportingToken getEndorsingEncryptedSupportingTokens() {
+        return endorsingEncryptedSupportingTokens;
     }
 
     /**
