@@ -163,6 +163,19 @@ public class SP12Constants {
     public static final QName SIGNED_ENDORSING_SUPPORTING_TOKENS = new QName(
             SP12Constants.SP_NS, SPConstants.SIGNED_ENDORSING_SUPPORTING_TOKENS,
             SP12Constants.SP_PREFIX);
+    
+    public static final QName ENCRYPTED_SUPPORTING_TOKENS = new QName(SP12Constants.SP_NS,
+            SPConstants.ENCRYPTED_SUPPORTING_TOKENS , SP12Constants.SP_PREFIX);
+
+    public static final QName SIGNED_ENCRYPTED_SUPPORTING_TOKENS = new QName(
+            SP12Constants.SP_NS, SPConstants.SIGNED_ENCRYPTED_SUPPORTING_TOKENS , SP12Constants.SP_PREFIX);
+
+    public static final QName ENDORSING_ENCRYPTED_SUPPORTING_TOKENS = new QName(
+            SP12Constants.SP_NS, SPConstants.ENDORSING_ENCRYPTED_SUPPORTING_TOKENS , SP12Constants.SP_PREFIX);
+
+    public static final QName SIGNED_ENDORSING_ENCRYPTED_SUPPORTING_TOKENS = new QName(
+            SP12Constants.SP_NS, SPConstants.SIGNED_ENDORSING_ENCRYPTED_SUPPORTING_TOKENS,
+            SP12Constants.SP_PREFIX);
 
     public static final QName PROTECTION_TOKEN = new QName(SP12Constants.SP_NS,
             SPConstants.PROTECTION_TOKEN, SP12Constants.SP_PREFIX);
@@ -243,6 +256,12 @@ public class SP12Constants {
 
     public static final QName MUST_SUPPORT_ISSUED_TOKENS = new QName(
             SP12Constants.SP_NS, SPConstants.MUST_SUPPORT_ISSUED_TOKENS , SP12Constants.SP_PREFIX);
+    
+    public static final QName REQUIRE_REQUEST_SECURITY_TOKEN_COLLECTION = new QName(
+            SP12Constants.SP_NS, SPConstants.REQUIRE_REQUEST_SECURITY_TOKEN_COLLECTION , SP12Constants.SP_PREFIX);
+    
+    public static final QName REQUIRE_APPLIES_TO = new QName(
+            SP12Constants.SP_NS, SPConstants.REQUIRE_APPLIES_TO, SP12Constants.SP_PREFIX);
 
     public static final QName ISSUER = new QName(SP12Constants.SP_NS, SPConstants.ISSUER ,
             SP12Constants.SP_PREFIX);
