@@ -23,7 +23,7 @@ import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
-import org.apache.ws.secpolicy.model.Trust10;
+import org.apache.ws.secpolicy.model.Trust13;
 
 public class Trust13Builder implements AssertionBuilder {
 
@@ -37,31 +37,39 @@ public class Trust13Builder implements AssertionBuilder {
                     "Trust10 assertion doesn't contain any Policy");
         }
 
-        Trust10 trust10 = new Trust10(SPConstants.SP_V12);
+        Trust13 trust13 = new Trust13(SPConstants.SP_V12);
 
         if (element
                 .getFirstChildWithName(SP12Constants.MUST_SUPPORT_CLIENT_CHALLENGE) != null) {
-            trust10.setMustSupportClientChallenge(true);
+            trust13.setMustSupportClientChallenge(true);
         }
 
         if (element
                 .getFirstChildWithName(SP12Constants.MUST_SUPPORT_SERVER_CHALLENGE) != null) {
-            trust10.setMustSupportServerChallenge(true);
+            trust13.setMustSupportServerChallenge(true);
         }
 
         if (element.getFirstChildWithName(SP12Constants.REQUIRE_CLIENT_ENTROPY) != null) {
-            trust10.setRequireClientEntropy(true);
+            trust13.setRequireClientEntropy(true);
         }
 
         if (element.getFirstChildWithName(SP12Constants.REQUIRE_SERVER_ENTROPY) != null) {
-            trust10.setRequireServerEntropy(true);
+            trust13.setRequireServerEntropy(true);
         }
 
         if (element.getFirstChildWithName(SP12Constants.MUST_SUPPORT_ISSUED_TOKENS) != null) {
-            trust10.setMustSupportIssuedTokens(true);
+            trust13.setMustSupportIssuedTokens(true);
+        }
+        
+        if (element.getFirstChildWithName(SP12Constants.REQUIRE_REQUEST_SECURITY_TOKEN_COLLECTION) != null) {
+            trust13.setRequireRequestSecurityTokenCollection(true);
+        }
+        
+        if (element.getFirstChildWithName(SP12Constants.REQUIRE_APPLIES_TO) != null) {
+            trust13.setRequireAppliesTo(true);
         }
 
-        return trust10;
+        return trust13;
     }
 
     public QName[] getKnownElements() {
