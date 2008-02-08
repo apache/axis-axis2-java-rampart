@@ -27,6 +27,7 @@ import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SupportingToken;
@@ -71,9 +72,11 @@ public abstract class BindingBuilder {
     
     protected String mainSigId = null;
     
-    protected ArrayList usernameTokenIdList = new ArrayList();
+    protected ArrayList encryptedTokensIdList = new ArrayList();
     
     protected Element timestampElement;
+    
+    protected Element mainRefListElement;
     
     
     /**
@@ -336,6 +339,10 @@ public abstract class BindingBuilder {
                                     (Element) endSuppTok.getToken());
                     this.setInsertionLocation(siblingElem);
                     
+                    if (suppTokens.isEncryptedToken()) {
+                        this.encryptedTokensIdList.add(endSuppTok.getId());
+                    }
+                    
                     //Add the extracted token
                     endSuppTokMap.put(token, endSuppTok);
                     
@@ -349,6 +356,10 @@ public abstract class BindingBuilder {
                             bstElem = RampartUtil.insertSiblingAfter(rmd, 
                                     this.getInsertionLocation(), bstElem);
                             this.setInsertionLocation(bstElem);
+                            
+                            if (suppTokens.isEncryptedToken()) {
+                                this.encryptedTokensIdList.add(sig.getBSTTokenId());
+                            }
                         }
                         endSuppTokMap.put(token, sig);
                         
@@ -361,7 +372,7 @@ public abstract class BindingBuilder {
                     Element elem = utBuilder.getUsernameTokenElement();
                     RampartUtil.insertSiblingAfter(rmd, this.getInsertionLocation(), elem);
                     
-                    usernameTokenIdList.add(utBuilder.getId());
+                    encryptedTokensIdList.add(utBuilder.getId());
                     
                     //Move the insert location to the next element
                     this.setInsertionLocation(elem);
@@ -536,16 +547,31 @@ public abstract class BindingBuilder {
                 dkSign.computeSignature();
 
                 //Add elements to header
-                this.setInsertionLocation(RampartUtil
+                
+                if (rpd.getProtectionOrder().equals(SPConstants.ENCRYPT_BEFORE_SIGNING) &&
+                        this.getInsertionLocation() == null ) {
+                    this.setInsertionLocation(RampartUtil
+                            
+                            .insertSiblingBefore(rmd, 
+                                    this.mainRefListElement,
+                                    dkSign.getdktElement()));
+
+                        this.setInsertionLocation(RampartUtil.insertSiblingAfter(
+                                rmd, 
+                                this.getInsertionLocation(), 
+                                dkSign.getSignatureElement()));                
+                } else {
+                    this.setInsertionLocation(RampartUtil
+                
                         .insertSiblingAfter(rmd, 
                                 this.getInsertionLocation(),
                                 dkSign.getdktElement()));
 
-                this.setInsertionLocation(RampartUtil.insertSiblingAfter(
-                        rmd, 
-                        this.getInsertionLocation(), 
-                        dkSign.getSignatureElement()));
-
+                    this.setInsertionLocation(RampartUtil.insertSiblingAfter(
+                            rmd, 
+                            this.getInsertionLocation(), 
+                            dkSign.getSignatureElement()));
+                }
 
                 return dkSign.getSignatureValue();
                 
@@ -617,14 +643,21 @@ public abstract class BindingBuilder {
                 //Do signature
                 sig.computeSignature();
 
-
-                this.setInsertionLocation(RampartUtil.insertSiblingAfter(
-                        rmd,
-                        this.getInsertionLocation(),
-                        sig.getSignatureElement()));
+                if (rpd.getProtectionOrder().equals(SPConstants.ENCRYPT_BEFORE_SIGNING) &&
+                        this.getInsertionLocation() == null) {
+                    this.setInsertionLocation(RampartUtil.insertSiblingBefore(
+                            rmd,
+                            this.mainRefListElement,
+                            sig.getSignatureElement()));                    
+                } else {
+                    this.setInsertionLocation(RampartUtil.insertSiblingAfter(
+                            rmd,
+                            this.getInsertionLocation(),
+                            sig.getSignatureElement()));     
+                }
 
                 return sig.getSignatureValue();
-
+                
             } catch (WSSecurityException e) {
                 throw new RampartException("errorInSignatureWithACustomToken", e);
             }
