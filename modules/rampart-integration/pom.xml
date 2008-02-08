@@ -253,6 +253,30 @@
                                       tofile="target/temp-ramp/META-INF/services.xml"/>
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService16.aar"
                                      basedir="target/temp-ramp"/>
+                               <!-- Service 17 -->
+                               <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-17.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService17.aar"
+                                     basedir="target/temp-ramp"/>  
+                               <!-- Service 18 -->
+                               <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-18.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService18.aar"
+                                     basedir="target/temp-ramp"/>   
+                               <!-- Service 19 -->
+                               <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-19.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService19.aar"
+                                     basedir="target/temp-ramp"/>  
+                               <!-- Service 20 -->
+                               <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-20.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService20.aar"
+                                     basedir="target/temp-ramp"/>  
                                 <!-- Service SC-1 -->
                                 <copy overwrite="yes"
                                       file="src/test/resources/rampart/issuer.properties"
