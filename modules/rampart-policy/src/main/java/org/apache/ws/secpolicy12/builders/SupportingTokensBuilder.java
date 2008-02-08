@@ -53,6 +53,18 @@ public class SupportingTokensBuilder implements AssertionBuilder {
         } else if (SP12Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS.equals(name)) {
             supportingToken = new SupportingToken(
                     SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING, SPConstants.SP_V12);
+        } else if (SP12Constants.ENCRYPTED_SUPPORTING_TOKENS.equals(name)) {
+            supportingToken = new SupportingToken(
+                    SPConstants.SUPPORTING_TOKEN_ENCRYPTED, SPConstants.SP_V12);
+        } else if (SP12Constants.SIGNED_ENCRYPTED_SUPPORTING_TOKENS.equals(name)) {
+            supportingToken = new SupportingToken(
+                    SPConstants.SUPPORTING_TOKEN_SIGNED_ENCRYPTED, SPConstants.SP_V12);            
+        } else if (SP12Constants.ENDORSING_ENCRYPTED_SUPPORTING_TOKENS.equals(name)) {
+            supportingToken = new SupportingToken(
+                    SPConstants.SUPPORTING_TOKEN_ENDORSING_ENCRYPTED, SPConstants.SP_V12); 
+        } else if (SP12Constants.SIGNED_ENDORSING_ENCRYPTED_SUPPORTING_TOKENS.equals(name)) {
+            supportingToken = new SupportingToken(
+                    SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING_ENCRYPTED, SPConstants.SP_V12);             
         }
 
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
@@ -73,7 +85,12 @@ public class SupportingTokensBuilder implements AssertionBuilder {
         return new QName[] { SP12Constants.SUPPORTING_TOKENS,
                 SP12Constants.SIGNED_SUPPORTING_TOKENS,
                 SP12Constants.ENDORSING_SUPPORTING_TOKENS,
-                SP12Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS};
+                SP12Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS,
+                SP12Constants.ENCRYPTED_SUPPORTING_TOKENS,
+                SP12Constants.SIGNED_ENCRYPTED_SUPPORTING_TOKENS,
+                SP12Constants.ENDORSING_ENCRYPTED_SUPPORTING_TOKENS,
+                SP12Constants.SIGNED_ENDORSING_ENCRYPTED_SUPPORTING_TOKENS  
+                };
     }
 
     private void processAlternative(List assertions, SupportingToken supportingToken) {
