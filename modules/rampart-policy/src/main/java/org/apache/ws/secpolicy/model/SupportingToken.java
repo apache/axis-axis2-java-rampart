@@ -173,6 +173,7 @@ public class SupportingToken extends AbstractSecurityAssertion implements
     }
 
     public QName getName() {
+        //TODO Should we refactor this class ?? with a SuppotingTokenBase and sub classes 
         switch (type) {
         case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
             return version == SPConstants.SP_V12 ? SP12Constants.SUPPORTING_TOKENS : 
@@ -186,9 +187,50 @@ public class SupportingToken extends AbstractSecurityAssertion implements
         case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
             return version == SPConstants.SP_V12 ? SP12Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS: 
                                                    SP11Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS;
+        case SPConstants.SUPPORTING_TOKEN_ENCRYPTED:
+            return SP12Constants.ENCRYPTED_SUPPORTING_TOKENS;
+            
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENCRYPTED:
+            return SP12Constants.SIGNED_ENCRYPTED_SUPPORTING_TOKENS;
+            
+        case SPConstants.SUPPORTING_TOKEN_ENDORSING_ENCRYPTED:
+            return SP12Constants.ENDORSING_ENCRYPTED_SUPPORTING_TOKENS;
+            
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING_ENCRYPTED:
+            return SP12Constants.SIGNED_ENDORSING_ENCRYPTED_SUPPORTING_TOKENS;
         default:
             return null;
         }
+    }
+    
+    /**
+     * @return true if the supporting token should be encrypted
+     */
+    
+    public boolean isEncryptedToken() {
+        
+        switch (type) {
+        case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
+            return false;
+        case SPConstants.SUPPORTING_TOKEN_SIGNED:
+            return false;
+        case SPConstants.SUPPORTING_TOKEN_ENDORSING:
+            return false;
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
+            return false;
+        case SPConstants.SUPPORTING_TOKEN_ENCRYPTED:
+            return true;        
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENCRYPTED:
+            return true;         
+        case SPConstants.SUPPORTING_TOKEN_ENDORSING_ENCRYPTED:
+            return true;          
+        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING_ENCRYPTED:
+            return true;
+        default:
+            return false;
+        }
+        
+        
     }
 
     public PolicyComponent normalize() {
@@ -208,24 +250,7 @@ public class SupportingToken extends AbstractSecurityAssertion implements
             writer.setPrefix(prefix, namespaceURI);
         }
 
-        String localname = null;
-
-        switch (getTokenType()) {
-        case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
-            localname = SPConstants.SUPPORTING_TOKENS;
-            break;
-        case SPConstants.SUPPORTING_TOKEN_SIGNED:
-            localname = SPConstants.SIGNED_SUPPORTING_TOKENS;
-            break;
-        case SPConstants.SUPPORTING_TOKEN_ENDORSING:
-            localname = SPConstants.ENDORSING_SUPPORTING_TOKENS;
-            break;
-        case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
-            localname = SPConstants.SIGNED_ENDORSING_SUPPORTING_TOKENS;
-            break;
-        default:
-            throw new RuntimeException("Invalid SupportingTokenType");
-        }
+        String localname = getName().getLocalPart();
 
         // <sp:SupportingToken>
         writer.writeStartElement(prefix, localname, namespaceURI);
