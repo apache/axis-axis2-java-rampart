@@ -314,7 +314,8 @@ public class RampartPolicyBuilder {
             token = binding.getEncryptionToken();
             Assertion token1 = binding.getSignatureToken();
             if (token == null && token1 == null) {
-                // this is an error - throw something
+                throw new WSSPolicyException("Symmetric binding should have a Protection token or" +
+                		                " both Signature and Encryption tokens defined");
             }
             rpd.setEncryptionToken(
                     ((EncryptionToken) token).getEncryptionToken());
@@ -335,7 +336,8 @@ public class RampartPolicyBuilder {
         TokenWrapper tokWrapper = binding.getRecipientToken();
         TokenWrapper tokWrapper1 = binding.getInitiatorToken();
         if (tokWrapper == null && tokWrapper1 == null) {
-            // this is an error - throw something
+            throw new WSSPolicyException("Asymmetric binding should have both Initiator and " +
+            		                                                "Recipient tokens defined");
         }
         rpd.setRecipientToken(((RecipientToken) tokWrapper).getReceipientToken());
         rpd.setInitiatorToken(((InitiatorToken) tokWrapper1).getInitiatorToken());
