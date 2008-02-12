@@ -71,10 +71,13 @@ public class RampartEngine {
 
 		RampartMessageData rmd = new RampartMessageData(msgCtx, false);
 
-		//If there is no policy information or if the message is a security fault or no security
-		// header required by the policy
 		RampartPolicyData rpd = rmd.getPolicyData();
-		if(rpd == null || isSecurityFault(rmd) || !RampartUtil.isSecHeaderRequired(rmd)) {
+		
+		msgCtx.setProperty(RampartMessageData.RAMPART_POLICY_DATA, rpd);
+		
+	        //If there is no policy information or if the message is a security fault or no security
+                // header required by the policy
+		if(rpd == null || isSecurityFault(rmd) || !RampartUtil.isSecHeaderRequired(rpd,rmd.isInitiator())) {
 			SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
 
 			//Convert back to llom since the inflow cannot use llom
@@ -154,39 +157,39 @@ public class RampartEngine {
 			t1 = System.currentTimeMillis();
 		}
 
-		//Store symm tokens
-        //Pick the first SAML token
-        //TODO : This is a hack , MUST FIX
-        //get the sec context id from the req msg ctx
-        
-        for (int j = 0; j < results.size(); j++) {
-            WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
-            final Integer actInt = 
-                (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-            if(WSConstants.ST_UNSIGNED == actInt.intValue()) {
-                final SAMLAssertion assertion = 
-                    ((SAMLAssertion) wser
-                        .get(WSSecurityEngineResult.TAG_SAML_ASSERTION));
-                String id = assertion.getId();
-                Date created = assertion.getNotBefore();
-                Date expires = assertion.getNotOnOrAfter();
-                SAMLKeyInfo samlKi = SAMLUtil.getSAMLKeyInfo(assertion,
-                        signatureCrypto, tokenCallbackHandler);
-                try {
-                    TokenStorage store = rmd.getTokenStorage(); 
-                    if(store.getToken(id) == null) {
-                        Token token = new Token(id, (OMElement)assertion.toDOM(), created, expires);
-                        token.setSecret(samlKi.getSecret());
-                        store.add(token);
-                    }
-                } catch (Exception e) {
-                    throw new RampartException(
-                            "errorInAddingTokenIntoStore", e);
-                }
+                //Store symm tokens
+                //Pick the first SAML token
+                //TODO : This is a hack , MUST FIX
+                //get the sec context id from the req msg ctx
                 
-            }
-
-        }
+                for (int j = 0; j < results.size(); j++) {
+                    WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
+                    final Integer actInt = 
+                        (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
+                    if(WSConstants.ST_UNSIGNED == actInt.intValue()) {
+                        final SAMLAssertion assertion = 
+                            ((SAMLAssertion) wser
+                                .get(WSSecurityEngineResult.TAG_SAML_ASSERTION));
+                        String id = assertion.getId();
+                        Date created = assertion.getNotBefore();
+                        Date expires = assertion.getNotOnOrAfter();
+                        SAMLKeyInfo samlKi = SAMLUtil.getSAMLKeyInfo(assertion,
+                                signatureCrypto, tokenCallbackHandler);
+                        try {
+                            TokenStorage store = rmd.getTokenStorage(); 
+                            if(store.getToken(id) == null) {
+                                Token token = new Token(id, (OMElement)assertion.toDOM(), created, expires);
+                                token.setSecret(samlKi.getSecret());
+                                store.add(token);
+                            }
+                        } catch (Exception e) {
+                            throw new RampartException(
+                                    "errorInAddingTokenIntoStore", e);
+                        }
+                        
+                    }
+        
+                }
 
 		SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
 

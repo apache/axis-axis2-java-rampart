@@ -63,6 +63,11 @@ public class RampartMessageData {
     public final static String KEY_RAMPART_POLICY = "rampartPolicy";
     
     /**
+     * Key to hold the populated RampartPolicyData object
+     */
+    public final static String RAMPART_POLICY_DATA = "rampartPolicyData";
+    
+    /**
      * Key to hold the custom issued token identifier
      */
     public final static String KEY_CUSTOM_ISSUED_TOKEN = "customIssuedToken";
@@ -72,7 +77,7 @@ public class RampartMessageData {
      */
     public final static String KEY_WST_VERSION = "wstVersion";
     
-    private final String PARAM_CLIENT_SIDE = "CLIENT_SIDE";
+    public final static String PARAM_CLIENT_SIDE = "CLIENT_SIDE";
 
     /**
      * Key to hold the WS-SecConv version

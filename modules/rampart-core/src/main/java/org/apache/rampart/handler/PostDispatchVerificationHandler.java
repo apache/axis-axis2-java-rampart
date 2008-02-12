@@ -26,8 +26,11 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
+import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.HandlerParameterDecoder;
+import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.model.Binding;
+import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.security.handler.WSHandlerConstants;
 
 import java.util.Iterator;
@@ -121,15 +124,40 @@ public class PostDispatchVerificationHandler implements Handler {
                 //Check for any *Binding assertion
                 if (assertion instanceof Binding) {
                     securityPolicyPresent = true;
+                    break;
+                // There can be  security policies containing only supporting tokens    
+                } else if (assertion instanceof SupportingToken) {
+                    securityPolicyPresent = true; 
+                    break;
                 }
             }
         }
-
-        //Now check for security processing results if security policy is available
-        if(securityPolicyPresent && msgContext.getProperty(WSHandlerConstants.RECV_RESULTS) == null) {
-            throw new AxisFault("InvalidSecurity");
-        }
         
+        
+        
+        if (securityPolicyPresent) {
+            RampartPolicyData rpd = (RampartPolicyData)msgContext.
+                                                getProperty(RampartMessageData.RAMPART_POLICY_DATA);
+            // Security policy data has not been populated at the time of verification
+            if (rpd == null ) {
+                throw new AxisFault("InvalidSecurity");
+            }
+            
+            boolean isInitiator = false;
+            Parameter clientSideParam = msgContext.getAxisService().
+                                                getParameter(RampartMessageData.PARAM_CLIENT_SIDE);
+            if(clientSideParam != null) {
+                isInitiator = true;
+            }
+            
+            //Now check for security processing results if security policy is available
+            if(RampartUtil.isSecHeaderRequired(rpd,isInitiator) && 
+                                  msgContext.getProperty(WSHandlerConstants.RECV_RESULTS) == null) {
+                throw new AxisFault("InvalidSecurity");
+            }           
+            
+        }
+    
         //Check for an empty security processing results when parameter based 
         //configuration is used
         if(msgContext.getParameter(WSSHandlerConstants.INFLOW_SECURITY) != null ||
