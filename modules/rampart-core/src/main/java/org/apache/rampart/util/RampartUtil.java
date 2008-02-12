@@ -648,7 +648,8 @@ public class RampartUtil {
     public static Vector getEncryptedParts(RampartMessageData rmd) {
         RampartPolicyData rpd =  rmd.getPolicyData();
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        return getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(), rpd.getEncryptedElements(),rpd.getDeclaredNamespaces());
+        Vector encryptedPartsElements  = getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(), rpd.getEncryptedElements(),rpd.getDeclaredNamespaces());
+        return getContentEncryptedElements(encryptedPartsElements, envelope, rpd.getContentEncryptedElements(), rpd.getDeclaredNamespaces());
     }
 
     public static Vector getSignedParts(RampartMessageData rmd) {
@@ -715,6 +716,47 @@ public class RampartUtil {
     	
     	return namespaces;
     	
+    }
+    
+    public static Vector getContentEncryptedElements (Vector encryptedPartsElements, SOAPEnvelope envelope,Vector elements, HashMap decNamespaces ) {
+        
+        Set namespaces = findAllPrefixNamespaces(envelope, decNamespaces);
+        
+        Iterator elementsIter = elements.iterator();
+        while (elementsIter.hasNext())
+        {
+                String expression = (String)elementsIter.next();
+                try {
+                                XPath xp = new AXIOMXPath(expression);
+                                Iterator nsIter = namespaces.iterator();
+                                
+                                while (nsIter.hasNext())
+                                {
+                                        OMNamespace tmpNs = (OMNamespace)nsIter.next();
+                                        xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
+                                }
+                                
+                                List selectedNodes = xp.selectNodes(envelope);
+                                
+                                Iterator nodesIter = selectedNodes.iterator();
+                                
+                            while (nodesIter.hasNext())
+                            {
+                                OMElement e = (OMElement)nodesIter.next();
+
+                                encryptedPartsElements.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content"));
+
+                            }
+                                
+                        } catch (JaxenException e) {
+                                // This has to be changed to propagate an instance of a RampartException up
+                                throw new RuntimeException(e);
+                        }
+        }
+        
+     
+        return encryptedPartsElements;
+        
     }
     
     public static Vector getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody, Vector parts, Vector elements, HashMap decNamespaces) {
@@ -1163,11 +1205,10 @@ public class RampartUtil {
     
     /**
      * Method to check whether security header is required in incoming message
-     * @param rmd 
+     * @param rpd 
      * @return true if a security header is required in the incoming message
      */
-    public static boolean isSecHeaderRequired(RampartMessageData rmd) {
-        RampartPolicyData rpd = rmd.getPolicyData();
+    public static boolean isSecHeaderRequired(RampartPolicyData rpd, boolean initiator ) {
         
         // Checking for time stamp
         if ( rpd.isIncludeTimestamp() ) {
@@ -1189,7 +1230,7 @@ public class RampartUtil {
         // Checking for supporting tokens
         SupportingToken supportingTokens;
         
-        if (!rmd.isInitiator()) {
+        if (!initiator) {
         
             supportingTokens = rpd.getSupportingTokens();
             if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
