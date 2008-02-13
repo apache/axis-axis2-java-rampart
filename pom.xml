@@ -238,6 +238,32 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
+            <exclusions>
+                <exclusion>
+                  <groupId>javax.mail</groupId>
+                  <artifactId>mail</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>javax.jms</groupId>
+                  <artifactId>jms</artifactId>
+                </exclusion>
+               <exclusion>
+                  <groupId>com.sun.jdmk</groupId>
+                  <artifactId>jmxtools</artifactId>
+                </exclusion>
+               <exclusion>
+                  <groupId>com.sun.jmx</groupId>
+                  <artifactId>jmxri</artifactId>
+                </exclusion>
+               <exclusion>
+                  <groupId>oro</groupId>
+                  <artifactId>oro</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>junit</groupId>
+                  <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${stax.impl.groupid}</groupId>
@@ -446,38 +472,38 @@
 
         <xmlsec.version>1.4.0</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
-        <XmlSchema.version>1.3.1</XmlSchema.version>
+        <XmlSchema.version>SNAPSHOT</XmlSchema.version>
 
         <xbean.version>2.1.0</xbean.version>
-        <wsdl4j.version>1.6.1</wsdl4j.version>
+        <wsdl4j.version>1.6.2</wsdl4j.version>
         <annogen.version>0.1.0</annogen.version>
 
         <activation.version>1.1</activation.version>
         <javamail.version>1.4</javamail.version>
-        <jaxen.version>1.1-beta-10</jaxen.version>
+        <jaxen.version>1.1.1</jaxen.version>
         <stax.impl.groupid>org.codehaus.woodstox</stax.impl.groupid>
         <stax.impl.artifactid>wstx-asl</stax.impl.artifactid>
-        <stax.impl.version>3.2.0</stax.impl.version>
+        <stax.impl.version>3.2.4</stax.impl.version>
         <stax.api.version>1.0.1</stax.api.version>
-        <xml.apis.version>1.3.03</xml.apis.version>
+        <xml.apis.version>1.3.04</xml.apis.version>
 
         <bcprov.jdk13.version>132</bcprov.jdk13.version>
         <bcprov.jdk15.version>132</bcprov.jdk15.version>
 
         <commons.codec.version>1.3</commons.codec.version>
-        <commons.httpclient.version>3.0.1</commons.httpclient.version>
-        <commons.logging.version>1.1</commons.logging.version>
-        <backport_util_concurrent.version>2.1</backport_util_concurrent.version>
+        <commons.httpclient.version>3.1</commons.httpclient.version>
+        <commons.logging.version>1.1.1</commons.logging.version>
+        <backport_util_concurrent.version>3.1</backport_util_concurrent.version>
 
         <servletapi.version>2.3</servletapi.version>
 
-        <junit.version>3.8.1</junit.version>
-        <xmlunit.version>1.0</xmlunit.version>
-        <log4j.version>1.2.13</log4j.version>
+        <junit.version>3.8.2</junit.version>
+        <xmlunit.version>1.1</xmlunit.version>
+        <log4j.version>1.2.15</log4j.version>
 
         <jakarta.httpcore.version>4.0-alpha6</jakarta.httpcore.version>
         <commons.collections.version>3.1</commons.collections.version>
-        <commons.fileupload.version>1.1.1</commons.fileupload.version>
+        <commons.fileupload.version>1.2</commons.fileupload.version>
         <commons.discovery.version>0.2</commons.discovery.version>
 
         <ant.version>1.7.0</ant.version>
