@@ -27,6 +27,7 @@ import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
+import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
@@ -229,6 +230,7 @@ public abstract class BindingBuilder {
         RampartPolicyData rpd = rmd.getPolicyData();
         
         WSSecSignature sig = new WSSecSignature();
+        checkForX509PkiPath(sig, token);
         sig.setWsConfig(rmd.getConfig());
         
         log.debug("Token inclusion: " + token.getInclusion());
@@ -743,6 +745,15 @@ public abstract class BindingBuilder {
             RampartUtil.appendChildToSecHeader(rmd, wsc.getSignatureConfirmationElement());
             if(sigParts != null) {
                 sigParts.add(new WSEncryptionPart(wsc.getId()));
+            }
+        }
+    }
+    private void checkForX509PkiPath(WSSecSignature sig, Token token){
+        if (token instanceof X509Token) {
+            X509Token x509Token = (X509Token) token;
+            if (x509Token.getTokenVersionAndType().equals(Constants.WSS_X509_PKI_PATH_V1_TOKEN10)
+                    || x509Token.getTokenVersionAndType().equals(Constants.WSS_X509_PKI_PATH_V1_TOKEN11)) {
+                sig.setUseSingleCertificate(false);
             }
         }
     }
