@@ -492,7 +492,7 @@ public class STSClient {
                                                                 RahasConstants.BIN_SEC_TYPE_NONCE);
                     this.requestorEntropy =
                             WSSecurityUtil.generateNonce(this.algorithmSuite.
-                                    getMaximumSymmetricKeyLength());
+                                    getMaximumSymmetricKeyLength()/8);
                     binSec.setText(Base64.encode(this.requestorEntropy));
 
                     log.debug("Clien entropy : "
