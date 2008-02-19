@@ -21,6 +21,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
+import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.SPConstants;
@@ -35,7 +36,7 @@ public class X509Token extends Token {
     
     private boolean requireThumbprintReference;
     
-    private String tokenVersionAndType;
+    private String tokenVersionAndType = Constants.WSS_X509_V3_TOKEN10;
     
     public X509Token(int version) {
         setVersion(version);
