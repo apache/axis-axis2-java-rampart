@@ -67,6 +67,8 @@ public class RampartMessageData {
      */
     public final static String RAMPART_POLICY_DATA = "rampartPolicyData";
     
+    public final static String RAMPART_STS_POLICY = "rampartStsPolicy";
+    
     /**
      * Key to hold the custom issued token identifier
      */
