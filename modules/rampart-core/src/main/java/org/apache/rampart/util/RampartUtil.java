@@ -25,12 +25,23 @@ import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
+import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.dataretrieval.DRConstants;
+import org.apache.axis2.dataretrieval.client.MexClient;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.mex.MexConstants;
+import org.apache.axis2.mex.MexException;
+import org.apache.axis2.mex.om.Metadata;
+import org.apache.axis2.mex.om.MetadataReference;
+import org.apache.axis2.mex.om.MetadataSection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
+import org.apache.neethi.PolicyEngine;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.Token;
 import org.apache.rahas.TrustException;
@@ -329,6 +340,79 @@ public class RampartUtil {
         }
     }
     
+    /**
+     * Retrieve policy using metadata reference 
+     * <wsa:Metadata xmlns:wsa="http://www.w3.org/2005/08/addressing">
+     *  <mex:Metadata
+     *       xmlns:mex="http://schemas.xmlsoap.org/ws/2004/09/mex"
+     *       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     *           <mex:MetadataSection>
+     *                  <mex:MetadataReference>
+     *                      <wsa:Address>http://address/of/mex/service</wsa:Address>
+     *                  </mex:MetadataReference>
+     *           </mex:MetadataSection>
+     *  </mex:Metadata>
+     * </wsa:Metadata>
+     * @param mex Metadata element 
+     * @return Policy from the mex service
+     */
+    public static Policy getPolicyFromMetadataRef(OMElement mex) throws RampartException {
+        
+        try {
+            Metadata metadata = new Metadata();
+            metadata.fromOM(mex.getFirstElement());
+            
+            MetadataSection[] metadataSections = metadata.getMetadatSections();
+            
+            MetadataReference reference = metadataSections[0].getMetadataReference();
+            
+            MexClient serviceClient = new MexClient();
+
+            Options options = serviceClient.getOptions();
+            options.setTo(reference.getEPR());
+            options.setAction(DRConstants.SPEC.Actions.GET_METADATA_REQUEST);
+            
+            OMElement request = serviceClient.setupGetMetadataRequest(
+                                                        MexConstants.SPEC.DIALECT_TYPE_POLICY,null);
+            OMElement result = serviceClient.sendReceive(request);
+            
+            Metadata metadataResponse = new Metadata();
+            metadata.fromOM(result);
+            
+            MetadataSection[] mexSecs =  metadata.getMetadataSection(MexConstants.SPEC.DIALECT_TYPE_POLICY, null);
+            
+            OMElement policyElement = (OMElement) mexSecs[0].getInlineData();
+            
+            return PolicyEngine.getPolicy(policyElement);
+            
+            
+        } catch (MexException e) {
+            throw new RampartException("Error Retrieving the policy from mex", e);
+        } catch (AxisFault e) {
+            throw new RampartException("Error Retrieving the policy from mex", e);
+        }
+        
+    }
+    
+    public static Policy addRampartConfig (RampartMessageData rmd, Policy policy) {
+        
+        RampartConfig servicRampConf = rmd.getPolicyData().getRampartConfig();        
+        RampartConfig stsRampConf = new RampartConfig();
+        
+        //TODO copy all the properties of service ramp conf to sts ramp conf
+        stsRampConf.setUser(servicRampConf.getUser());
+        stsRampConf.setSigCryptoConfig(servicRampConf.getSigCryptoConfig());
+        stsRampConf.setPwCbClass(servicRampConf.getPwCbClass());
+        
+        stsRampConf.setEncryptionUser(servicRampConf.getStsAlias());
+        stsRampConf.setEncrCryptoConfig(servicRampConf.getStsCryptoConfig());
+        
+        policy.addAssertion(stsRampConf);
+        
+        return policy;
+        
+    }
+    
     
     public static OMElement createRSTTempalteForSCT(int conversationVersion, 
             int wstVersion) throws RampartException {
@@ -483,7 +567,12 @@ public class RampartUtil {
             OMElement rstTemplate = issuedToken.getRstTemplate();
 
             // Get STS policy
-            Policy stsPolicy = rmd.getPolicyData().getIssuerPolicy();
+            Policy stsPolicy = (Policy)rmd.getMsgContext().getProperty(RampartMessageData.RAMPART_STS_POLICY);
+            
+            if( stsPolicy == null && issuedToken.getIssuerMex() != null) {
+                stsPolicy = RampartUtil.getPolicyFromMetadataRef(issuedToken.getIssuerMex());
+                RampartUtil.addRampartConfig(rmd, stsPolicy);
+            }
 
             String id = getToken(rmd, rstTemplate, issuerEprAddress, action,
                     stsPolicy);
