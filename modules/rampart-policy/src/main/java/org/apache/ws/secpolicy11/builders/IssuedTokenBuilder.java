@@ -17,6 +17,7 @@ package org.apache.ws.secpolicy11.builders;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.Policy;
@@ -43,9 +44,20 @@ public class IssuedTokenBuilder implements AssertionBuilder {
         }
         // Extract Issuer
         OMElement issuerElem = element.getFirstChildWithName(SP11Constants.ISSUER);
-        if (issuerElem != null && issuerElem.getFirstElement() != null) {
-            issuedToken.setIssuerEpr(issuerElem.getFirstElement());
+        Iterator iter = issuerElem.getChildrenWithLocalName("Address");
+        if (issuerElem != null &&  iter.hasNext() ) {
+            OMElement issuerEpr = (OMElement)iter.next();
+            issuedToken.setIssuerEpr(issuerEpr);
         }
+        
+        //TODO check why this returns an Address element
+        //iter = issuerElem.getChildrenWithLocalName("Metadata");
+        
+        OMElement issuerMex = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Final.WSA_NAMESPACE,"Metadata"));
+        if (issuerElem != null &&  issuerMex != null ) {
+            issuedToken.setIssuerMex(issuerMex);
+        }
+        
 
         // Extract RSTTemplate
         OMElement rstTmplElem = element.getFirstChildWithName(SP11Constants.REQUEST_SECURITY_TOKEN_TEMPLATE);
