@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
@@ -50,10 +51,9 @@ public class Client {
 			System.out.println("Usage: $java Client endpoint_address client_repo_path policy_xml_path");
 		}
 
-		ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(args[1], null);
-
+		ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(args[1], null);		
 		
-		STSClient stsClient = new STSClient(ctx);
+		STSClient stsClient = new STSClient(ctx);		
 		
 		stsClient.setRstTemplate(getRSTTemplate());
 		String action = TrustUtil.getActionValue(RahasConstants.VERSION_05_02, RahasConstants.RST_ACTION_ISSUE);
@@ -116,7 +116,7 @@ public class Client {
 	OMFactory fac = OMAbstractFactory.getOMFactory();
 	OMElement elem = fac.createOMElement(SP11Constants.REQUEST_SECURITY_TOKEN_TEMPLATE);
 	TrustUtil.createTokenTypeElement(RahasConstants.VERSION_05_02, elem).setText(RahasConstants.TOK_TYPE_SAML_10);
-	TrustUtil.createKeyTypeElement(RahasConstants.VERSION_05_02, elem, RahasConstants.KEY_TYPE_PUBLIC_KEY);
+	TrustUtil.createKeyTypeElement(RahasConstants.VERSION_05_02, elem, RahasConstants.KEY_TYPE_SYMM_KEY);
 	TrustUtil.createKeySizeElement(RahasConstants.VERSION_05_02, elem, 256);
 	return elem;
     }  
