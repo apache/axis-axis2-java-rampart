@@ -31,6 +31,8 @@ import javax.xml.stream.XMLStreamWriter;
 public class IssuedToken extends Token {
 
     private OMElement issuerEpr;
+    
+    private OMElement issuerMex;
 
     private OMElement rstTemplate;
 
@@ -208,6 +210,14 @@ public class IssuedToken extends Token {
 
         // </sp:IssuedToken>
         writer.writeEndElement();
+    }
+
+    public OMElement getIssuerMex() {
+        return issuerMex;
+    }
+
+    public void setIssuerMex(OMElement issuerMex) {
+        this.issuerMex = issuerMex;
     }
 
 }
