@@ -279,7 +279,7 @@ public class RahasData {
                     this.keysize = Integer.parseInt(text.trim());
 
                     //Create an empty array to hold the key
-                    this.ephmeralKey = new byte[this.keysize];
+                    this.ephmeralKey = new byte[this.keysize/8];
                 } catch (NumberFormatException e) {
                     throw new TrustException(TrustException.INVALID_REQUEST,
                                              new String[]{"invalid wst:Keysize value"}, e);
