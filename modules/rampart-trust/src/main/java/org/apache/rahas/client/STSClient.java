@@ -84,7 +84,7 @@ public class STSClient {
 
     private byte[] requestorEntropy;
 
-    private String addressingNs;
+    private String addressingNs = AddressingConstants.Final.WSA_NAMESPACE;
 
     private int keySize;
     
