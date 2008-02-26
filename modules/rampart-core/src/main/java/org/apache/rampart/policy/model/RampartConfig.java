@@ -75,6 +75,8 @@ public class RampartConfig implements Assertion {
     public final static String USER_CERT_ALIAS_LN = "userCertAlias";
 
     public final static String ENCRYPTION_USER_LN = "encryptionUser";
+    
+    public final static String STS_ALIAS_LN = "stsAlias";
 
     public final static String PW_CB_CLASS_LN = "passwordCallbackClass";
     
@@ -85,6 +87,8 @@ public class RampartConfig implements Assertion {
     public final static String ENCR_CRYPTO_LN = "encryptionCrypto";
 
     public final static String DEC_CRYPTO_LN = "decryptionCrypto";
+    
+    public final static String STS_CRYPTO_LN = "stsCrypto";
 
     public final static String TS_TTL_LN = "timestampTTL";
 
@@ -101,6 +105,8 @@ public class RampartConfig implements Assertion {
     private String userCertAlias;
 
     private String encryptionUser;
+    
+    private String stsAlias;
 
     private String pwCbClass;
     
@@ -111,6 +117,8 @@ public class RampartConfig implements Assertion {
     private CryptoConfig encrCryptoConfig;
 
     private CryptoConfig decCryptoConfig;
+    
+    private CryptoConfig stsCryptoConfig;
 
     private String timestampTTL = Integer.toString(DEFAULT_TIMESTAMP_TTL);
     
@@ -253,6 +261,12 @@ public class RampartConfig implements Assertion {
             writer.writeEndElement();
         }
         
+        if (getStsAlias() != null ) {
+            writer.writeStartElement(NS, STS_ALIAS_LN);
+            writer.writeCharacters(getStsAlias());
+            writer.writeEndElement();
+        }
+        
         if (getPwCbClass() != null) {
             writer.writeStartElement(NS, PW_CB_CLASS_LN);
             writer.writeCharacters(getPwCbClass());
@@ -293,6 +307,12 @@ public class RampartConfig implements Assertion {
         if (decCryptoConfig != null) {
             writer.writeStartElement(NS, DEC_CRYPTO_LN);
             decCryptoConfig.serialize(writer);
+            writer.writeEndElement();
+        }
+        
+        if(stsCryptoConfig != null) {
+            writer.writeStartElement(NS, STS_CRYPTO_LN);
+            stsCryptoConfig.serialize(writer);
             writer.writeEndElement();
         }
         
@@ -344,12 +364,28 @@ public class RampartConfig implements Assertion {
         this.timestampMaxSkew = timestampMaxSkew;
     }
 
-	public OptimizePartsConfig getOptimizeParts() {
-		return optimizeParts;
-	}
+    public OptimizePartsConfig getOptimizeParts() {
+        return optimizeParts;
+    }
 
-	public void setOptimizeParts(OptimizePartsConfig optimizeParts) {
-		this.optimizeParts = optimizeParts;
-	}
+    public void setOptimizeParts(OptimizePartsConfig optimizeParts) {
+        this.optimizeParts = optimizeParts;
+    }
+
+    public String getStsAlias() {
+        return stsAlias;
+    }
+
+    public void setStsAlias(String stsAlias) {
+        this.stsAlias = stsAlias;
+    }
+
+    public CryptoConfig getStsCryptoConfig() {
+        return stsCryptoConfig;
+    }
+
+    public void setStsCryptoConfig(CryptoConfig stsCryptoConfig) {
+        this.stsCryptoConfig = stsCryptoConfig;
+    }
     
 }
