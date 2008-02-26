@@ -52,7 +52,7 @@
             <id>ruchith</id>
             <email>ruchith AT wso2.com</email>
             <organization>WSO2</organization>
-        </developer>
+        </developer>      
         <developer>
             <name>Sanka Samaranayake</name>
             <id>sanka</id>
@@ -63,6 +63,12 @@
             <name>Davanum Srinivas</name>
             <id>dims</id>
             <email>dims AT wso2.com</email>
+            <organization>WSO2</organization>
+        </developer>
+        <developer>
+            <name>Nandana Mihindukulasooriya</name>
+            <id>nandana</id>
+            <email>nandana AT wso2.com</email>
             <organization>WSO2</organization>
         </developer>
     </developers>
@@ -180,6 +186,11 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-adb-codegen</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>mex-impl</artifactId>
             <version>${axis2.version}</version>
         </dependency>
         <dependency>
