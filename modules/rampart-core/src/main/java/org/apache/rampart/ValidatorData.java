@@ -56,8 +56,7 @@ public class ValidatorData {
                         && elem.getNamespaceURI().equals(WSConstants.ENC_NS)
                         && elem.getLocalName().equals(
                                 EncryptionConstants._TAG_ENCRYPTEDDATA)) {
-                    if (parent != null
-                            && parent.getLocalName().equals(
+                    if (parent.getLocalName().equals(
                                     SOAP11Constants.BODY_LOCAL_NAME)
                             && parent.getNamespaceURI().equals(
                                     rmd.getSoapConstants().getEnvelopeURI())) {
