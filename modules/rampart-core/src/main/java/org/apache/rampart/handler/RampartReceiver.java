@@ -133,7 +133,10 @@ public class RampartReceiver implements Handler {
             }
         }
 
-        headerBlock.setProcessed();
+        if(headerBlock != null) {
+            headerBlock.setProcessed();
+        }
+        
         return InvocationResponse.CONTINUE;        
 
     }

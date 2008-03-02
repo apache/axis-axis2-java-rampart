@@ -335,8 +335,13 @@ public class RampartUtil {
                 !"".equals(issuerAddress.getText())) {
             return issuerAddress.getText().trim();
         } else {
-            throw new RampartException("invalidIssuerAddress",
+            if(issuerAddress != null) {
+                throw new RampartException("invalidIssuerAddress",
                     new String[] { issuerAddress.toString() });
+            } else {
+                throw new RampartException("invalidIssuerAddress",
+                        new String[] { "Issuer address null" });
+            }
         }
     }
     

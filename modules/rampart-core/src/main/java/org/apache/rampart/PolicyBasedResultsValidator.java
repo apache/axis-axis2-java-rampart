@@ -649,7 +649,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
 
             // If no certificates have been found, there has to be an error:
             // The keystore can find an alias but no certificate(s)
-            if (certs == null | certs.length < 1) {
+            if (certs == null || certs.length < 1) {
                 throw new RampartException("noCertForAlias", new String[] {alias});
             }
 

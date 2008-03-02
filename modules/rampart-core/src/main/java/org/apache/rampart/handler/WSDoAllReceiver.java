@@ -267,7 +267,9 @@ public class WSDoAllReceiver extends WSDoAllHandler {
             }
         }
 
-        headerBlock.setProcessed();
+        if(headerBlock != null) {
+            headerBlock.setProcessed();
+        }
 
         /*
          * Now we can check the certificate used to sign the message. In the

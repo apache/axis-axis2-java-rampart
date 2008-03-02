@@ -115,11 +115,6 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         AlgorithmSuite algorithmSuite = getAlgorithmSuite();
         List configurations = algorithmSuite.getConfigurations();
         
-        if (configurations == null && configurations.size() == 1) {
-            setNormalized(true);
-            return this;
-        }
-        
         Policy policy = new Policy();
         ExactlyOne exactlyOne = new ExactlyOne();
         

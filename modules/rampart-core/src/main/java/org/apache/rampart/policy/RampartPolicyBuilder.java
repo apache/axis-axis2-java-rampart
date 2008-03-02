@@ -335,7 +335,7 @@ public class RampartPolicyBuilder {
             RampartPolicyData rpd) throws WSSPolicyException {
         TokenWrapper tokWrapper = binding.getRecipientToken();
         TokenWrapper tokWrapper1 = binding.getInitiatorToken();
-        if (tokWrapper == null && tokWrapper1 == null) {
+        if (tokWrapper == null || tokWrapper1 == null) {
             throw new WSSPolicyException("Asymmetric binding should have both Initiator and " +
             		                                                "Recipient tokens defined");
         }
