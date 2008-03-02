@@ -44,9 +44,8 @@ public class IssuedTokenBuilder implements AssertionBuilder {
         }
         // Extract Issuer
         OMElement issuerElem = element.getFirstChildWithName(SP11Constants.ISSUER);
-        Iterator iter = issuerElem.getChildrenWithLocalName("Address");
-        if (issuerElem != null &&  iter.hasNext() ) {
-            OMElement issuerEpr = (OMElement)iter.next();
+        if(issuerElem != null) {
+            OMElement issuerEpr = issuerElem.getFirstChildWithName(new QName("Address"));
             issuedToken.setIssuerEpr(issuerEpr);
         }
         

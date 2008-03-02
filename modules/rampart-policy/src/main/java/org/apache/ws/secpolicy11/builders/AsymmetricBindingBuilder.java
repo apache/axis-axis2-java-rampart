@@ -85,10 +85,10 @@ public class AsymmetricBindingBuilder implements AssertionBuilder {
             } else if (SPConstants.SIGN_BEFORE_ENCRYPTING.equals(name.getLocalPart())) {
                 asymmetricBinding.setProtectionOrder(SPConstants.SIGN_BEFORE_ENCRYPTING);
                 
-            } else if (SPConstants.ENCRYPT_SIGNATURE.equals(name)) {
+            } else if (SPConstants.ENCRYPT_SIGNATURE.equals(name.getLocalPart())) {
                 asymmetricBinding.setSignatureProtection(true);
                 
-            } else if (SPConstants.PROTECT_TOKENS.equals(name)) {
+            } else if (SPConstants.PROTECT_TOKENS.equals(name.getLocalPart())) {
                 asymmetricBinding.setTokenProtection(true);
                 
             } else if (SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY.equals(name.getLocalPart())) {

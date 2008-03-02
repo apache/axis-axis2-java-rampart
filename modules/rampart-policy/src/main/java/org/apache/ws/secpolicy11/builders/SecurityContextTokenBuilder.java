@@ -35,9 +35,8 @@ public class SecurityContextTokenBuilder implements AssertionBuilder {
 
         OMAttribute  includeAttr = element.getAttribute(SP11Constants.INCLUDE_TOKEN);
         
-        int inclusion = SP11Constants.getInclusionFromAttributeValue(includeAttr.getAttributeValue());
-        
         if(includeAttr != null) {
+            int inclusion = SP11Constants.getInclusionFromAttributeValue(includeAttr.getAttributeValue());
             contextToken.setInclusion(inclusion);
         }
 

@@ -64,7 +64,7 @@ public class SignedPartsBuilder implements AssertionBuilder {
             
         } else if (SP12Constants.BODY.equals(name)) {
             parent.setBody(true);            
-        } else if (SPConstants.ATTACHMENTS.equals(name)){
+        } else if (SPConstants.ATTACHMENTS.equals(name.getLocalPart())){
             parent.setAttachments(true);
         }
     }

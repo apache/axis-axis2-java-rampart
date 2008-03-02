@@ -91,7 +91,8 @@ public class AsymmetricBindingBuilder implements AssertionBuilder {
             } else if (SP12Constants.PROTECT_TOKENS.equals(name)) {
                 asymmetricBinding.setTokenProtection(true);
                 
-            } else if (SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY.equals(name)) {
+            } else if (SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY
+                    .equals(name.getLocalPart())) {
                 asymmetricBinding.setEntireHeadersAndBodySignatures(true);
             }
         }
