@@ -126,7 +126,7 @@ public abstract class WSDoAllHandler extends WSHandler implements Handler {
      */
     public String toString() {
         String name = this.getName();
-        return (name != null) ? name : null;
+        return (name != null) ? name : "";
     }
 
 

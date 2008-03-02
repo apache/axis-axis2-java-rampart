@@ -114,8 +114,6 @@ public class WSDoAllReceiver extends WSDoAllHandler {
             throw new AxisFault("Configuration error", e);
         }
 
-        reqData = new RequestData();
-
         reqData.setMsgContext(msgContext);
 
         if (((getOption(WSSHandlerConstants.INFLOW_SECURITY)) == null) &&

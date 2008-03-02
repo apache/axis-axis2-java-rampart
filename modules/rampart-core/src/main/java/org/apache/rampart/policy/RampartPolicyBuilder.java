@@ -311,15 +311,15 @@ public class RampartPolicyBuilder {
         if (token != null) {
             rpd.setProtectionToken(((ProtectionToken)token).getProtectionToken());
         } else {
-            token = binding.getEncryptionToken();
-            Assertion token1 = binding.getSignatureToken();
-            if (token == null && token1 == null) {
+            Assertion encrToken = binding.getEncryptionToken();
+            Assertion sigToken = binding.getSignatureToken();
+            if (token == null && sigToken == null) {
                 throw new WSSPolicyException("Symmetric binding should have a Protection token or" +
                 		                " both Signature and Encryption tokens defined");
             }
             rpd.setEncryptionToken(
-                    ((EncryptionToken) token).getEncryptionToken());
-            rpd.setSignatureToken(((SignatureToken) token).getSignatureToken());
+                    ((EncryptionToken) encrToken).getEncryptionToken());
+            rpd.setSignatureToken(((SignatureToken) sigToken).getSignatureToken());
         }
     }
 
