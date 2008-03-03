@@ -20,42 +20,42 @@
 
 <project name="Apache Rampart">
 
-    <bannerLeft>
-        <name>Apache Rampart</name>
-        <href>ws.apache.org/rampart/</href>
-    </bannerLeft>
+	<bannerLeft>
+		<name>Apache Rampart</name>
+		<href>ws.apache.org/rampart/</href>
+	</bannerLeft>
 
-    <skin>
-        <groupId>org.apache.maven.skins</groupId>
-        <artifactId>maven-default-skin</artifactId>
-        <version>1.0</version>
-    </skin>
+	<skin>
+		<groupId>org.apache.maven.skins</groupId>
+		<artifactId>maven-default-skin</artifactId>
+		<version>1.0</version>
+	</skin>
 
-    <publishDate format="dd MMM yyyy"/>
+	<publishDate format="dd MMM yyyy"/>
 
-    <body>
-        <links>
-            <item name="Apache" href="http://www.apache.org/"/>
-            <item name="WebServices" href="http://ws.apache.org/"/>
-        </links>
+	<body>
+		<links>
+			<item name="Apache" href="http://www.apache.org/"/>
+			<item name="WebServices" href="http://ws.apache.org/"/>
+		</links>
 
-        <menu name="Apache Rampart">
-            <item name="About" href="index.html"/>
-            <item name="Downloads">
-                <item name="Releases" href="download.html"/>
-                <item name="Source Code" href="source-repository.html"/>
-            </item>
-            <item name="Documentation">
-                <item name="Quick Start Guide" href="quick-start.html"/>
-		<item name="Rampart Configuration" href="rampartconfig-guide.html"/>
-		<item name="Developer Guide" href="developer-guide.html"/>
-            </item>
-            <item name="Project Information">
-                <item name="Mailing Lists" href="mail-lists.html"/>
-                <item name="Issue Tracking" href="http://issues.apache.org/jira/browse/Rampart"/>
-		<item name="Dependencies" href="dependencies.html"/>
-         </item>
-        </menu>
-	
-    </body>
+		<menu name="Apache Rampart">
+			<item name="About" href="index.html"/>
+			<item name="Downloads">
+				<item name="Releases" href="download.html"/>
+				<item name="Source Code" href="source-repository.html"/>
+			</item>
+			<item name="Documentation">
+				<item name="Quick Start Guide" href="quick-start.html"/>
+				<item name="Rampart Configuration" href="rampartconfig-guide.html"/>
+				<item name="Developer Guide" href="developer-guide.html"/>
+			</item>
+			<item name="Project Information">
+				<item name="Mailing Lists" href="mail-lists.html"/>
+				<item name="Issue Tracking" href="http://issues.apache.org/jira/browse/Rampart"/>
+				<item name="Dependencies" href="dependencies.html"/>
+			</item>
+		</menu>
+
+	</body>
 </project>

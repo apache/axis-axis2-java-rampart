@@ -20,24 +20,24 @@
 
 <document>
 
-  <properties>
-    <title>Apache Rampart</title>
-  </properties>
+	<properties>
+		<title>Apache Rampart</title>
+	</properties>
 
-<body>
-  
-<section name="Apache Rampart">
-<p>Rampart is the security module of Axis2. It secures SOAP messages
+	<body>
+
+		<section name="Apache Rampart">
+			<p>Rampart is the security module of Axis2. It secures SOAP messages
 according to specifications in the WS-Security stack. Rampart implements the
 following specifications:</p>
-<ul>
-  <li>WS - Security 1.0</li>
-  <li>WS - Secure Conversation - February 2005</li>
-  <li>WS - Security Policy - 1.1 - July 2005</li>
-  <li>WS - Trust - February 2005</li>
-  <li>WS - Trust - WS-SX spec - EXPERIMENTAL</li>
-</ul>
-</section>
+			<ul>
+				<li>WS - Security 1.0</li>
+				<li>WS - Secure Conversation - February 2005</li>
+				<li>WS - Security Policy - 1.1 - July 2005</li>
+				<li>WS - Trust - February 2005</li>
+				<li>WS - Trust - WS-SX spec - EXPERIMENTAL</li>
+			</ul>
+		</section>
 
-</body>
+	</body>
 </document>
