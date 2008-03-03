@@ -1,98 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+       "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>Apache Rampart - Source Repository</title>
-    <style type="text/css" media="all">
-      @import url("./css/maven-base.css");
-      @import url("./css/maven-theme.css");
-      @import url("./css/site.css");
-    </style>
-    <link rel="stylesheet" href="./css/print.css" type="text/css" media="print" />
-        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-      </head>
-  <body class="composite">
-    <div id="banner">
-                  <a href="ws.apache.org/rampart/" id="bannerLeft">Apache Rampart</a>
-     <div class="clear">
-        <hr/>
-      </div>
-    </div>
-    <div id="breadcrumbs">
-    <div class="xleft">
-        Last Published: 13 Jul 2007
-    </div>
-    <div class="xright"><a href="http://www.apache.org/">Apache</a>
-          <a href="../">WebServices</a>
-       </div>
-      <div class="clear">
-        <hr/>
-      </div>
-    </div>
-    <div id="leftColumn">
-      <div id="navcolumn">
-                   <h5>Apache Rampart</h5>
-        <ul>
-              
-    <li class="none">
-              <a href="index.html">About</a>
-        </li>
-    
-            <li class="expanded">
-              <a href="">Downloads</a>
-                <ul>
-                  
-    <li class="none">
-              <a href="download.cgi">Releases</a>
-        </li>
-                  
-    <li class="none">
-              <a href="source-repository.html">Source Code</a>
-        </li>
-              </ul>
-        </li>
-      <li class="expanded">
-              <a href="">Documentation</a>
-                <ul>
-                  
-    <li class="none">
-              <a href="quick-start.html">Quick Start Guide</a>
-        </li>
-
-    <li class="none">
-              <a href="rampartconfig-guide.html">Rampart Configuration</a>
-    </li>
-                  
-    <li class="none">
-              <strong>Developer Guide</strong>
-        </li>
-              </ul>
-        </li>
-              
-    <li class="expanded">
-              <a href="">Project Information</a>
-                <ul>
-                  
-    <li class="none">
-              <a href="mail-lists.html">Mailing Lists</a>
-        </li>
-                  
-    <li class="none">
-              <a href="http://issues.apache.org/jira/browse/Rampart">Issue Tracking</a>
-        </li>
-                  
-    <li class="none">
-              <a href="dependencies.html">Dependencies</a>
-        </li>
-              </ul>
-        </li>
-          </ul>
-                                       <a href="http://maven.apache.org/" title="Built by Maven" id="poweredBy">
-            <img alt="Built by Maven" src="./images/logos/maven-feather.png"></img>
-          </a>
-                       
-     </div>
-    </div>
-    <div id="bodyColumn">
-      <div id="contentBox">
+</head>
+  <body >
 <h2>Getting Involved in Rampart</h2>
 
 <h3>Introduction</h3>
@@ -106,8 +18,7 @@ Components of Rampart
 
 <p></p>
 <img alt="Rampart Components and WS-Security Stack"
-title="Rampart Components and WS-Security Stack"
-src="images/security-stack.jpg" align="middle">
+title="Rampart Components and WS-Security Stack" src="images/security-stack.jpg" align="middle" />
 
 <p><strong><em>Figure 1 : Rampart Components and WS-Security
 Stack</em></strong></p>
@@ -162,7 +73,7 @@ introduces a couple of handlers -
 
 <p></p>
 <img alt="DOOM" title="Rampart in Axis2" src="images/rampart-handlers.jpg"
-align="middle">
+align="middle" />
 
 <p><strong><em>Figure 2 : Rampart in Axis2</em></strong></p>
 
@@ -220,7 +131,7 @@ components of Rampart core are,</p>
 RampartEngine. RampartEngine is responsible for handling validation of
 security in the incoming SOAP message.</p>
 <img alt="Rampart Engine" title="Rampart Engine"
-src="images/rampart-engine.jpg" align="middle">
+src="images/rampart-engine.jpg" align="middle" />
 
 <p><strong><em>Figure 3: Control flow in RampartEngine</em></strong></p>
 
@@ -234,7 +145,7 @@ in the manner required by "RampartEngine" and "MessageBuilder".</p>
 org.apache.rampart.RampartMessageBuilder. It is responsible for enforcing
 security on an outgoing SOAP message.</p>
 <img alt="Message Builder" title="Message Builder"
-src="images/message-builder.jpg" align="middle">
+src="images/message-builder.jpg" align="middle" />
 
 <p><strong><em>Figure 4: Control flow in MessageBuilder</em></strong></p>
 
@@ -267,7 +178,7 @@ validate tokens, i.e., it defines a set of interfaces that must be
 implemented by different token issuing parties. Basically, Rampart Trust
 provides the functionality needed to host a STS - Security Token Service.</p>
 <img alt="Rampart Trust" title="Rampart Trust" src="images/rampart-trust.jpg"
-align="middle">
+align="middle" />
 
 <p><strong><em>Figure 5: Control flow in Rampart Trust</em></strong></p>
 
@@ -276,27 +187,5 @@ align="middle">
 <p></p>
 
 <p></p>
-      </div>
-    </div>
-    <div class="clear">
-      <hr/>
-    </div>
-    <div id="footer">
-      <div class="xright">&#169;  
-          2005-2007
-    
-          Apache Software Foundation
-          
-  
-
-  
-    
-  
-  
-  </div>
-      <div class="clear">
-        <hr/>
-      </div>
-    </div>
   </body>
 </html>
