@@ -81,7 +81,7 @@ public class RampartTest extends TestCase {
                 }
                 Options options = new Options();
                 
-                if(i == 1 || i == 13) {
+                if( i == 13 ) {
                     continue; // Can't test Transport binding with Simple HTTP Server
                     //Username token created with user/pass from options
                     //options.setUserName("alice");
