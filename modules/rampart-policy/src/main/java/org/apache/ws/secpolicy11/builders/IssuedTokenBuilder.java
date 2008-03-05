@@ -45,15 +45,27 @@ public class IssuedTokenBuilder implements AssertionBuilder {
         // Extract Issuer
         OMElement issuerElem = element.getFirstChildWithName(SP11Constants.ISSUER);
         if(issuerElem != null) {
-            OMElement issuerEpr = issuerElem.getFirstChildWithName(new QName("Address"));
+            OMElement issuerEpr = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Final.WSA_NAMESPACE,"Address"));
+            
+            //try the other addressing namespace
+            if (issuerEpr == null) {
+                issuerEpr = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Submission.WSA_NAMESPACE,"Address"));
+            }
+            
             issuedToken.setIssuerEpr(issuerEpr);
         }
         
         //TODO check why this returns an Address element
         //iter = issuerElem.getChildrenWithLocalName("Metadata");
         
-        OMElement issuerMex = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Final.WSA_NAMESPACE,"Metadata"));
-        if (issuerElem != null &&  issuerMex != null ) {
+        if (issuerElem != null ) {
+            OMElement issuerMex = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Final.WSA_NAMESPACE,"Metadata"));
+            
+          //try the other addressing namespace
+            if (issuerMex == null) {
+                issuerMex = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Submission.WSA_NAMESPACE,"Metadata"));
+            }
+                        
             issuedToken.setIssuerMex(issuerMex);
         }
         
