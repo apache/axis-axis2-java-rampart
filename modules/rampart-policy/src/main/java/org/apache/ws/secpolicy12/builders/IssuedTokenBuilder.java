@@ -17,6 +17,7 @@ package org.apache.ws.secpolicy12.builders;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.Policy;
@@ -44,8 +45,30 @@ public class IssuedTokenBuilder implements AssertionBuilder {
         }
         // Extract Issuer
         OMElement issuerElem = element.getFirstChildWithName(SP12Constants.ISSUER);
-        if (issuerElem != null && issuerElem.getFirstElement() != null) {
-            issuedToken.setIssuerEpr(issuerElem.getFirstElement());
+       
+        if(issuerElem != null) {
+            OMElement issuerEpr = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Final.WSA_NAMESPACE,"Address"));
+            
+            //try the other addressing namespace
+            if (issuerEpr == null) {
+                issuerEpr = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Submission.WSA_NAMESPACE,"Address"));
+            }
+            
+            issuedToken.setIssuerEpr(issuerEpr);
+        }
+        
+        //TODO check why this returns an Address element
+        //iter = issuerElem.getChildrenWithLocalName("Metadata");
+        
+        if (issuerElem != null ) {
+            OMElement issuerMex = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Final.WSA_NAMESPACE,"Metadata"));
+            
+          //try the other addressing namespace
+            if (issuerMex == null) {
+                issuerMex = issuerElem.getFirstChildWithName(new QName(AddressingConstants.Submission.WSA_NAMESPACE,"Metadata"));
+            }
+                        
+            issuedToken.setIssuerMex(issuerMex);
         }
 
         // Extract RSTTemplate
