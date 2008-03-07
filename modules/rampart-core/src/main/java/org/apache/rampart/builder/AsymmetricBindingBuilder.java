@@ -30,8 +30,6 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
-import org.apache.ws.secpolicy.model.Wss10;
-import org.apache.ws.secpolicy.model.Wss11;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSecurityException;
@@ -44,7 +42,6 @@ import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.message.WSSecSignature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 import java.util.HashMap;
 import java.util.Iterator;

@@ -50,7 +50,8 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
     
     private static Log log = LogFactory.getLog(PolicyBasedResultsValidator.class);
     
-    /** {@inheritDoc}
+    /** 
+     * {@inheritDoc}
      */
     public void validate(ValidatorData data, Vector results) 
     throws RampartException {
