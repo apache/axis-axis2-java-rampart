@@ -16,10 +16,16 @@
 
 package org.apache.rampart.builder;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Vector;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartException;
@@ -30,6 +36,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.IssuedToken;
+import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
@@ -46,10 +53,6 @@ import org.apache.ws.security.message.WSSecSignature;
 import org.apache.ws.security.message.WSSecUsernameToken;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Vector;
 
 public class TransportBindingBuilder extends BindingBuilder {
 
@@ -139,6 +142,9 @@ public class TransportBindingBuilder extends BindingBuilder {
                         signatureValues.add(doIssuedTokenSignature(rmd, token, signdParts));
                     } else if(token instanceof X509Token) {
                         signatureValues.add(doX509TokenSignature(rmd, token, signdParts));
+                    } else if (token instanceof SecureConversationToken) {
+                        handleSecureConversationTokens(rmd, (SecureConversationToken)token);
+                        signatureValues.add(doSecureConversationSignature(rmd, token, signdParts));                                               
                     }
                 }
             }
@@ -421,4 +427,206 @@ public class TransportBindingBuilder extends BindingBuilder {
             }
         }
     }
+    
+    private byte[] doSecureConversationSignature(RampartMessageData rmd, Token token, SignedEncryptedParts signdParts) throws RampartException {
+        
+        RampartPolicyData rpd = rmd.getPolicyData();
+        Document doc= rmd.getDocument();
+        
+        //Get the issued token
+        String id = rmd.getSecConvTokenId();
+   
+        int inclusion = token.getInclusion();
+        org.apache.rahas.Token tok = null;
+        try {
+          tok = rmd.getTokenStorage().getToken(id);
+        } catch (TrustException e) {
+          throw new RampartException("errorExtractingToken",
+                  new String[]{id} ,e);
+        }
+   
+        boolean tokenIncluded = false;
+        
+        if(inclusion == SPConstants.INCLUDE_TOEKN_ALWAYS ||
+        ((inclusion == SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT 
+                || inclusion == SPConstants.INCLUDE_TOKEN_ONCE) 
+                && rmd.isInitiator())) {
+          
+            //Add the token
+            rmd.getSecHeader().getSecurityHeader().appendChild(
+                  doc.importNode((Element) tok.getToken(), true));
+          
+            tokenIncluded = true;
+        }
+
+        Vector sigParts = new Vector();
+        
+        if(this.timestampElement != null){
+            sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
+        }
+        
+        
+        if(rpd.isTokenProtection() && tokenIncluded) {
+            sigParts.add(new WSEncryptionPart(id));
+        }
+        
+        if(signdParts != null) {
+            if(signdParts.isBody()) {
+                SOAPEnvelope env = rmd.getMsgContext().getEnvelope();
+                sigParts.add(new WSEncryptionPart(RampartUtil.addWsuIdToElement(env.getBody())));
+            }
+    
+            ArrayList headers = signdParts.getHeaders();
+            for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
+                Header header = (Header) iterator.next();
+                WSEncryptionPart wep = new WSEncryptionPart(header.getName(), 
+                        header.getNamespace(),
+                        "Content");
+                sigParts.add(wep);
+            }
+        }
+        
+        //check for derived keys
+        AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
+        if(token.isDerivedKeys()) {
+          //Create a derived key and add
+          try {
+   
+              //Do Signature with derived keys
+              WSSecDKSign dkSign = new WSSecDKSign();
+              
+              OMElement ref = tok.getAttachedReference();
+              if(ref == null) {
+                  ref = tok.getUnattachedReference();
+              }
+              if(ref != null) {
+                  dkSign.setExternalKey(tok.getSecret(), (Element) 
+                          doc.importNode((Element) ref, true));
+              } else {
+                  dkSign.setExternalKey(tok.getSecret(), tok.getId());
+              }
+              
+              //Set the algo info
+              dkSign.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
+              dkSign.setDerivedKeyLength(algorithmSuite.getSignatureDerivedKeyLength());
+              
+              dkSign.prepare(doc);
+              
+              dkSign.appendDKElementToHeader(rmd.getSecHeader());
+              
+              dkSign.setParts(sigParts);
+              
+              dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
+              
+              //Do signature
+              dkSign.computeSignature();
+              
+              dkSign.appendSigToHeader(rmd.getSecHeader());
+              
+              return dkSign.getSignatureValue();
+              
+          } catch (ConversationException e) {
+              throw new RampartException(
+                      "errorInDerivedKeyTokenSignature", e);
+          } catch (WSSecurityException e) {
+              throw new RampartException(
+                      "errorInDerivedKeyTokenSignature", e);
+          }
+          
+        } else {
+            try {
+                WSSecSignature sig = new WSSecSignature();
+                sig.setWsConfig(rmd.getConfig());
+                sig.setCustomTokenId(tok.getId().substring(1));
+                sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
+                        WSConstants.SAML_ASSERTION_ID);
+                sig.setSecretKey(tok.getSecret());
+                sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
+                sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
+                sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
+                        .getRampartConfig(), rmd.getCustomClassLoader()),
+                        rmd.getSecHeader());
+
+                sig.setParts(sigParts);
+                sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+
+                //Do signature
+                sig.computeSignature();
+
+                //Add elements to header
+                this.setInsertionLocation(RampartUtil.insertSiblingAfter(
+                        rmd,
+                        this.getInsertionLocation(),
+                        sig.getSignatureElement()));
+
+                return sig.getSignatureValue();
+
+            } catch (WSSecurityException e) {
+                throw new RampartException("errorInSignatureWithACustomToken", e);
+            }
+        }
+    }
+    
+    private void handleSecureConversationTokens(RampartMessageData rmd, 
+                                      SecureConversationToken secConvTok) throws RampartException {
+            
+            
+            MessageContext msgContext = rmd.getMsgContext();
+            
+            String secConvTokenId = rmd.getSecConvTokenId();
+            
+            //The RSTR has to be secured with the cancelled token
+            String action = msgContext.getOptions().getAction();
+            boolean cancelReqResp = action.equals(RahasConstants.WST_NS_05_02 + RahasConstants.RSTR_ACTION_CANCEL_SCT) || 
+                                       action.equals(RahasConstants.WST_NS_05_02 + RahasConstants.RSTR_ACTION_CANCEL_SCT) ||
+                                       action.equals(RahasConstants.WST_NS_05_02 + RahasConstants.RST_ACTION_CANCEL_SCT) || 
+                                       action.equals(RahasConstants.WST_NS_05_02 + RahasConstants.RST_ACTION_CANCEL_SCT);
+            
+            //In the case of the cancel req or resp we should mark the token as cancelled
+            if(secConvTokenId != null && cancelReqResp) {
+                try {
+                    rmd.getTokenStorage().getToken(secConvTokenId).setState(org.apache.rahas.Token.CANCELLED);
+                    msgContext.setProperty(RampartMessageData.SCT_ID, secConvTokenId);
+                    
+                    //remove from the local map of contexts
+                    String contextIdentifierKey = RampartUtil.getContextIdentifierKey(msgContext);
+                    RampartUtil.getContextMap(msgContext).remove(contextIdentifierKey);
+                } catch (TrustException e) {
+                    throw new RampartException("errorExtractingToken",e);
+                }
+            }
+            
+            if (secConvTokenId == null
+                    || (secConvTokenId != null && 
+                            (!RampartUtil.isTokenValid(rmd, secConvTokenId) && !cancelReqResp))) {
+            
+                log.debug("No SecureConversationToken found, " +
+                        "requesting a new token");
+                
+                try {
+
+                    secConvTokenId = RampartUtil.getSecConvToken(rmd, secConvTok);
+                    rmd.setSecConvTokenId(secConvTokenId);
+                    
+                } catch (TrustException e) {
+                    throw new RampartException("errorInObtainingSct", e);
+                }
+            }
+            
+            org.apache.rahas.Token token;
+            try {
+                token = rmd.getTokenStorage().getToken(secConvTokenId);
+            } catch (TrustException e) {
+                throw new RampartException("errorExtractingToken", e);
+            }
+            
+            
+            //Add the token to the header
+/*            Element siblingElem = RampartUtil
+                    .insertSiblingAfter(rmd, this.getInsertionLocation(),
+                            (Element) token.getToken());
+            this.setInsertionLocation(siblingElem);*/
+            
+        }
 }
