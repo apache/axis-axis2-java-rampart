@@ -564,7 +564,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
      * {@inheritDoc}
      */
     public void setConfigurationFile(String configFile) {
-        // TODO TODO SAMLTokenIssuer setConfigurationFile
+        this.configFile = configFile;
 
     }
     
@@ -572,7 +572,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
      * {@inheritDoc}
      */
     public void setConfigurationElement(OMElement configElement) {
-        // TODO TODO SAMLTokenIssuer setConfigurationElement
+        this.configElement = configElement;
     }
 
     /**
