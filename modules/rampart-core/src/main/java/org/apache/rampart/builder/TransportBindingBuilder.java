@@ -614,7 +614,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 }
             }
             
-            org.apache.rahas.Token token;
+/*          org.apache.rahas.Token token;
             try {
                 token = rmd.getTokenStorage().getToken(secConvTokenId);
             } catch (TrustException e) {
@@ -623,7 +623,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             
             
             //Add the token to the header
-/*            Element siblingElem = RampartUtil
+           Element siblingElem = RampartUtil
                     .insertSiblingAfter(rmd, this.getInsertionLocation(),
                             (Element) token.getToken());
             this.setInsertionLocation(siblingElem);*/
