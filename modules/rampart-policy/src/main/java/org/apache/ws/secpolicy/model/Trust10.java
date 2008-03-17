@@ -147,6 +147,7 @@ public class Trust10 extends AbstractSecurityAssertion {
         
         String wspPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (wspPrefix == null) {
+            wspPrefix = SPConstants.POLICY.getPrefix();
             writer.setPrefix(wspPrefix, SPConstants.POLICY.getNamespaceURI());
         }
         
