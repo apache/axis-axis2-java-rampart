@@ -37,25 +37,38 @@
 		<links>
 			<item name="Apache" href="http://www.apache.org/"/>
 			<item name="WebServices" href="http://ws.apache.org/"/>
+			<item name="Axis2/Java" href="http://ws.apache.org/axis2" />
 		</links>
-
+		
 		<menu name="Apache Rampart">
-			<item name="About" href="index.html"/>
-			<item name="Downloads">
-				<item name="Releases" href="download.html"/>
-				<item name="Source Code" href="source-repository.html"/>
-			</item>
-			<item name="Documentation">
-				<item name="Quick Start Guide" href="quick-start.html"/>
-				<item name="Rampart Configuration" href="rampartconfig-guide.html"/>
-				<item name="Developer Guide" href="developer-guide.html"/>
-			</item>
-			<item name="Project Information">
-				<item name="Mailing Lists" href="mail-lists.html"/>
-				<item name="Issue Tracking" href="http://issues.apache.org/jira/browse/Rampart"/>
-				<item name="Dependencies" href="dependencies.html"/>
-			</item>
+            <item name="Home" href="index.html" />
+        </menu>
+        <menu name="Downloads">
+                <item name="Releases" href="download.html"/>
+                <item name="Source Code" href="source-repository.html"/>
+                <item name="Checkout the Source" href="svn.html" />
+        </menu>
+		<menu name="Documentation">
+                <item name="Quick Start Guide" href="quick-start.html"/>
+                <item name="Rampart Configuration" href="rampartconfig-guide.html"/>
+                <item name="Developer Guide" href="developer-guide.html"/>
+                <item name="Build the Site" href="siteHowTo.html" /> 
+        </menu>
+		<menu name="Resources">
+		  <item name="Articles" href="articles.html" />
+		  <item name="Specifications"></item>
+		  <item name="Online Javadocs"></item>
 		</menu>
+		<menu name="Project Information">
+            <item name="Project Team" href="team-list.html" />
+            <item name="Issue Tracking" href="http://issues.apache.org/jira/browse/Rampart" />
+            <item name="Mailing Lists" href="mail-lists.html"/>
+            <item name="Source Code"
+               href="http://svn.apache.org/viewcvs.cgi/webservices/rampart/trunk/?root=Apache-SVN" />
+            <item name="Dependencies" href="dependencies.html"/>
+            <item name="License"
+                href="http://www.apache.org/licenses/LICENSE-2.0.html" />
+        </menu>
 
 	</body>
 </project>
