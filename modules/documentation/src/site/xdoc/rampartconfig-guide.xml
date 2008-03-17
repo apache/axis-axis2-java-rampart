@@ -20,8 +20,10 @@
     <tr class="a"><td>passwordCallbackClass</td><td>Callback class used to provide the password required to create the
         UsernameToken or to sign the message</td><td>&lt;passwordCallbackClass&gt;
         org.apache.axis2.security.PWCallback&lt;/passwordCallbackClass&gt;</td></tr>
+    <tr class="b"><td>policyValidatorCbClass</td><td>Callback class used to provide custom validater  </td><td>&lt;passwordCallbackClass&gt;
+        org.apache.axis2.security.PWCallback&lt;/passwordCallbackClass&gt;</td></tr>
 
-    <tr class="b"><td>signatureCrypto</td><td>properties to needed perform signature, such as crypto
+    <tr class="a"><td>signatureCrypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>
 <pre>
 &lt;signatureCrypto&gt;
@@ -33,14 +35,14 @@
 &lt;signatureCrypto&gt;
 </pre>
 		</td></tr>
-    <tr class="a"><td>encryptionCypto</td><td>properties to needed perform signature, such as crypto
+    <tr class="b"><td>encryptionCypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>&lt;encryptionCypto&gt;....crypto element ......&lt;/encryptionCypto&gt;</td></tr>
-    <tr class="b"><td>decryptionCrypto</td><td>properties to needed perform signature, such as crypto
+    <tr class="a"><td>decryptionCrypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>&lt;decryptionCrypto&gt;....crypto element ......&lt;/decryptionCrypto&gt;</td></tr>
- <tr class="a"><td>timestampTTL</td><td>Time to live of Timestamp</td><td>The default timestamp time to live is 300 seconds</td></tr>
-    <tr class="b"><td>timestampMaxSkew</td><td>The maximum tolerence limit for timeskew of the timestamp</td><td>Rampart allows timestamps created slightly ahead of the reciever's time.<br/> This parameter allows to specify the tolerence limit</td></tr>
-    <tr class="a"><td>tokenStoreClass</td><td></td><td></td></tr>
-    <tr class="b"><td>sslConfig</td><td>SSL Configuration need for Transportbinding</td><td>Can specify the properties such as "javax.net.ssl.trustStore" and "javax.net.ssl.trustStorePassword". Please see below for more information.</td></tr>
+ <tr class="b"><td>timestampTTL</td><td>Time to live of Timestamp</td><td>The default timestamp time to live is 300 seconds</td></tr>
+    <tr class="a"><td>timestampMaxSkew</td><td>The maximum tolerence limit for timeskew of the timestamp</td><td>Rampart allows timestamps created slightly ahead of the reciever's time.<br/> This parameter allows to specify the tolerence limit</td></tr>
+    <tr class="b"><td>tokenStoreClass</td><td></td><td></td></tr>
+    <tr class="a"><td>sslConfig</td><td>SSL Configuration need for Transportbinding</td><td>Can specify the properties such as "javax.net.ssl.trustStore" and "javax.net.ssl.trustStorePassword". Please see below for more information.</td></tr>
   </tbody></table>
 <h3>Crypto Provider</h3>
   <p>org.apache.ws.security.crypto.provider defines the implementation of
