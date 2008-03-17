@@ -106,7 +106,7 @@ public class RampartTest extends TestCase {
             
             for (int i = 1; i <= 3; i++) { //<-The number of tests we have
                 
-                if (i == 3) {
+                if (i == 2 || i == 3) {
                     continue; // Can't test Transport binding scenarios with Simple HTTP Server
                 }
 
@@ -120,6 +120,8 @@ public class RampartTest extends TestCase {
                 //Blocking invocation
                 serviceClient.sendReceive(getEchoElement());
                 serviceClient.sendReceive(getEchoElement());
+                
+                System.out.println("SSSSSS");
                 
                 //Cancel the token
                 options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_TRUE);
