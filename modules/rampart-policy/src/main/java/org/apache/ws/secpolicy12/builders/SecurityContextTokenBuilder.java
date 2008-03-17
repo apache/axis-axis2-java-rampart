@@ -33,8 +33,6 @@ public class SecurityContextTokenBuilder implements AssertionBuilder {
 
         SecurityContextToken contextToken = new SecurityContextToken(SPConstants.SP_V12);
 
-        OMAttribute attribute = element.getAttribute(SP12Constants.INCLUDE_TOKEN);
-
         OMAttribute  includeAttr = element.getAttribute(SP12Constants.INCLUDE_TOKEN);
         if(includeAttr != null) {
             int inclusion = SP12Constants.getInclusionFromAttributeValue(includeAttr.getAttributeValue());
