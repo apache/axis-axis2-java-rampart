@@ -128,7 +128,9 @@ public class RampartPolicyBuilder {
         binding(binding, rpd);
         rpd.setTransportBinding(true);
         TransportToken transportToken = binding.getTransportToken();
-        rpd.setTransportToken(binding.getTransportToken().getTransportToken());
+        if ( transportToken != null ) {
+            rpd.setTransportToken(transportToken.getTransportToken());
+        }
     }
 
     /**
