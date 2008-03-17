@@ -83,15 +83,10 @@
 				<sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
 					<sp:Body/>
 				</sp:SignedParts>
-				
-				<sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-					<sp:Body/>
-				</sp:EncryptedParts>
-	
-	
+					
 				<sp:EncryptedElements xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-					<sp:XPath>/soapenv:Envelope/soapenv:Header/wsse:Security/wsse:UsernameToken</sp:XPath>
-				</sp:EncryptedElements>
+					<sp:XPath xmlns:S="http://example1.org/example1">//S:example1</sp:XPath>
+				</sp:EncryptedElements> 
 				
 			<ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy"> 
 				<ramp:user>alice</ramp:user>
