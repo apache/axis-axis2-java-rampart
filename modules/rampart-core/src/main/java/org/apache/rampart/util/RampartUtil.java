@@ -368,7 +368,6 @@ public class RampartUtil {
             metadata.fromOM(mex.getFirstElement());
             
             MetadataSection[] metadataSections = metadata.getMetadatSections();
-            
             MetadataReference reference = metadataSections[0].getMetadataReference();
             
             MexClient serviceClient = new MexClient();
@@ -381,11 +380,8 @@ public class RampartUtil {
                                                         MexConstants.SPEC.DIALECT_TYPE_POLICY,null);
             OMElement result = serviceClient.sendReceive(request);
             
-            Metadata metadataResponse = new Metadata();
             metadata.fromOM(result);
-            
             MetadataSection[] mexSecs =  metadata.getMetadataSection(MexConstants.SPEC.DIALECT_TYPE_POLICY, null);
-            
             OMElement policyElement = (OMElement) mexSecs[0].getInlineData();
             
             return PolicyEngine.getPolicy(policyElement);
