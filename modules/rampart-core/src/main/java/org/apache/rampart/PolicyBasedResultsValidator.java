@@ -68,7 +68,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         //Check presence of timestamp
         WSSecurityEngineResult tsResult = null;
-        if(rpd.isIncludeTimestamp()) {
+        if(rpd != null &&  rpd.isIncludeTimestamp()) {
             tsResult = 
                 WSSecurityUtil.fetchActionResult(results, WSConstants.TS);
             if(tsResult == null) {
@@ -79,7 +79,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         //sig/encr
         Vector encryptedParts = RampartUtil.getEncryptedParts(rmd);
-        if(rpd.isSignatureProtection() && isSignatureRequired(rmd)) {
+        if(rpd != null && rpd.isSignatureProtection() && isSignatureRequired(rmd)) {
             encryptedParts.add(new WSEncryptionPart(WSConstants.SIG_LN, 
                     WSConstants.SIG_NS, "Element"));
         }
@@ -87,7 +87,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         Vector signatureParts = RampartUtil.getSignedParts(rmd);
 
         //Timestamp is not included in sig parts
-        if(rpd.isIncludeTimestamp() && !rpd.isTransportBinding()) {
+        if(rpd != null && rpd.isIncludeTimestamp() && !rpd.isTransportBinding()) {
             signatureParts.add(new WSEncryptionPart("timestamp"));
         }
         
@@ -394,7 +394,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                     .get(WSSecurityEngineResult.TAG_ACTION);
             int action = actInt.intValue();
             if(WSConstants.SIGN == action || WSConstants.ENCR == action) {
-                sigEncrActions.add(new Integer(action));
+                sigEncrActions.add(Integer.valueOf(action));
             }
             
         }
