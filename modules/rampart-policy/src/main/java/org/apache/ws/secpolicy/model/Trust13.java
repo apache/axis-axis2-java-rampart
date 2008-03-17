@@ -176,7 +176,9 @@ public class Trust13 extends AbstractSecurityAssertion {
         writer.writeNamespace(prefix, namespaceURI);
         
         String wspPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
+        
         if (wspPrefix == null) {
+            wspPrefix = SPConstants.POLICY.getPrefix();
             writer.setPrefix(wspPrefix, SPConstants.POLICY.getNamespaceURI());
         }
         
