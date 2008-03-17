@@ -348,7 +348,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 
                 if(rmd.isInitiator()) {
                     for (int i = 0 ; i < encryptedTokensIdList.size(); i++) {
-                        encrParts.add(new WSEncryptionPart((String)encryptedTokensIdList.get(i),"Element"));
+                        secondEncrParts.add(new WSEncryptionPart((String)encryptedTokensIdList.get(i),"Element"));
                     }
                 }
                 
