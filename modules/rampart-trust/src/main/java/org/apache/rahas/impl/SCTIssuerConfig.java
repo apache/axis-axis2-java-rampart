@@ -56,7 +56,7 @@ public class SCTIssuerConfig extends AbstractIssuerConfig{
         // else Props should be defined as children of a crypto element
         
         OMElement keyCompElem = elem.getFirstChildWithName(KeyComputation.KEY_COMPUTATION);
-        if (keyCompElem != null && keyCompElem.getText() != null && !"".equals(keyCompElem)) {
+        if (keyCompElem != null && keyCompElem.getText() != null && !"".equals(keyCompElem.getText())) {
             this.keyComputation = Integer.parseInt(keyCompElem.getText());
         }
     }
