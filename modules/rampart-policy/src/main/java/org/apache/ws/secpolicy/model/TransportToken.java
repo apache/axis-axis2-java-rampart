@@ -67,7 +67,9 @@ public class TransportToken extends AbstractSecurityAssertion implements TokenWr
         String namespaceURI = getName().getNamespaceURI();
         
         String prefix = writer.getPrefix(namespaceURI);
+        
         if (prefix == null) {
+            prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
         }
         
@@ -77,6 +79,7 @@ public class TransportToken extends AbstractSecurityAssertion implements TokenWr
         
         String wspPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
         if (wspPrefix == null) {
+            wspPrefix = SPConstants.POLICY.getPrefix();
             writer.setPrefix(wspPrefix, SPConstants.POLICY.getNamespaceURI());
         }
         
