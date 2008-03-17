@@ -10,6 +10,7 @@
 				<xs:element name="userCertAlias" type="xs:string" minOccurs="0"/>
 				<xs:element name="encryptionUser" type="xs:string" minOccurs="0"/>
 				<xs:element name="passwordCallbackClass" type="xs:string" minOccurs="0"/>
+				<xs:element name="policyValidatorCbClass" type="xs:string" minOccurs="0"/>
 				<xs:element name="signatureCrypto" type="ramp:crypto" minOccurs="0"/>
 				<xs:element name="encryptionCypto" type="ramp:crypto" minOccurs="0"/>
 				<xs:element name="decryptionCrypto" type="ramp:crypto" minOccurs="0"/>
