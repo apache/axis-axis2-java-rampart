@@ -121,8 +121,6 @@ public class RampartTest extends TestCase {
                 serviceClient.sendReceive(getEchoElement());
                 serviceClient.sendReceive(getEchoElement());
                 
-                System.out.println("SSSSSS");
-                
                 //Cancel the token
                 options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_TRUE);
                 serviceClient.sendReceive(getEchoElement());
