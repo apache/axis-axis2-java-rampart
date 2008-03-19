@@ -84,7 +84,7 @@ public class STSClient {
 
     private byte[] requestorEntropy;
 
-    private String addressingNs = AddressingConstants.Final.WSA_NAMESPACE;
+    private String addressingNs = AddressingConstants.Submission.WSA_NAMESPACE;
 
     private int keySize;
     
@@ -164,6 +164,41 @@ public class STSClient {
             log.error("errorInCancelingToken", e);
             throw new TrustException("errorInCancelingToken", e);
         }
+    }
+    
+    public boolean validateToken(String tokenId,
+                                 String issuerAddress,
+                                 Policy issuerPolicy) throws TrustException {
+        try {
+            QName rstQn = new QName("requestSecurityToken");
+            String requestType =
+                    TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_VALIDATE;
+            
+            ServiceClient client = getServiceClient(rstQn, issuerAddress);
+            
+            client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
+            client.getOptions().setSoapVersionURI(this.soapVersion);
+            if(this.addressingNs != null) {
+                client.getOptions().setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.addressingNs);
+            }
+            client.engageModule("addressing");
+            client.engageModule("rampart");
+
+            this.processPolicy(issuerPolicy, null);
+            
+            OMElement response = client.sendReceive(rstQn,
+                                                    createValidateRequest(requestType));
+
+            System.out.println(response.toString());
+            
+            return true;
+            
+            
+        } catch (AxisFault e) {
+            log.error("errorInValidatingToken", e);
+            throw new TrustException("errorInObtainingToken", new String[]{issuerAddress});
+        }
+        
     }
     
     private ServiceClient getServiceClient(QName rstQn,
@@ -510,6 +545,28 @@ public class STSClient {
 
         
         return rst;
+        
+    }
+    
+    private OMElement createValidateRequest(String requestType) throws TrustException {
+        
+        log.debug("Creating request with request type: " + requestType);
+        
+        OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
+        
+        TrustUtil.createRequestTypeElement(this.version, rst, requestType);
+        
+        OMElement tokenTypeElem = TrustUtil.createTokenTypeElement(this.version, rst);
+        
+        String tokenType =
+            TrustUtil.getWSTNamespace(version) + RahasConstants.TOK_TYPE_STATUS;
+        
+        tokenTypeElem.setText(tokenType);
+        
+        System.out.println(rst.toString());
+              
+        return rst;
+        
         
     }
 

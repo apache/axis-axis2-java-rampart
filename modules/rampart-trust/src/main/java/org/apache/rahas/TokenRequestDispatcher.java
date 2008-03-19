@@ -20,6 +20,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.impl.SAMLTokenValidator;
 
 public class TokenRequestDispatcher {
 
@@ -79,8 +80,24 @@ public class TokenRequestDispatcher {
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_VALIDATE).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_VALIDATE).equals(reqType)) {
         	log.debug("validate");
-            throw new UnsupportedOperationException("TODO: handle " +
-                    "validate requests");
+                
+                TokenValidator validator;
+                if (tokenType == null ||  tokenType.trim().length() == 0) {
+                    validator = config.getDefaultValidatorInstance();
+                } else {
+                    validator = config.getValidator(tokenType);
+                }
+
+                SOAPEnvelope response = validator.validate(data);
+
+                outMsgCtx.getOptions().setAction(
+                        TrustUtil.getActionValue(data.getVersion(),
+                                RahasConstants.RSTR_ACTION_VALIDATE));
+
+                return response;
+        	
+        	
+        	
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_RENEW).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_RENEW).equals(reqType)) {
         	log.debug("renew");

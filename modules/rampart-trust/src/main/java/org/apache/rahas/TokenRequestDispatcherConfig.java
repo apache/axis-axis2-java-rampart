@@ -34,18 +34,21 @@ public class TokenRequestDispatcherConfig {
     private final static QName DISPATCHER_CONFIG = new QName("token-dispatcher-configuration");
     private final static QName ISSUER = new QName("issuer");
     private final static QName CANCELER = new QName("canceler");
+    private final static QName VALIDATOR = new QName("validator");
     private final static QName TOKEN_TYPE = new QName("tokenType");
     private final static QName CLASS_ATTR = new QName("class");
     private final static QName DEFAULT_ATTR = new QName("default");
     private final static QName CONFIGURATION_ELEMENT = new QName("configuration");
 
     private Map issuers;
+    private Map validators;
     private Map configFiles = new Hashtable();
     private Map configElements = new Hashtable();
     private Map configParamNames = new Hashtable();
 
     private String defaultIssuerClassName;
     private String defaultCancelerClassName;
+    private String defaultValidatorClassName;
 
     public static TokenRequestDispatcherConfig load(OMElement configElem) throws TrustException {
 
@@ -56,6 +59,9 @@ public class TokenRequestDispatcherConfig {
 
         // Issuers
         handleIssuers(configElem, conf);
+        
+        //Validators
+        handleValidators(configElem, conf);
 
         // Cancelers
         handleCancelers(configElem, conf);
@@ -128,6 +134,53 @@ public class TokenRequestDispatcherConfig {
             }
         }
     }
+    
+    private static void handleValidators(OMElement configElem,
+            TokenRequestDispatcherConfig conf) throws TrustException {
+        
+        for (Iterator issuerElems = configElem.getChildrenWithName(VALIDATOR);
+        issuerElems.hasNext();) {
+
+       OMElement element = (OMElement) issuerElems.next();
+
+       //get the class attr
+       String validatorClass = element.getAttributeValue(CLASS_ATTR);
+       if (validatorClass == null) {
+           throw new TrustException("missingClassName");
+       }
+       String isDefault = element.getAttributeValue(DEFAULT_ATTR);
+       if (isDefault != null && "true".equalsIgnoreCase(isDefault)) {
+           //Use the first default issuer as the default isser
+           if (conf.defaultValidatorClassName == null) {
+               conf.defaultValidatorClassName = validatorClass;
+           } else {
+               throw new TrustException("badDispatcherConfigMultipleDefaultValidators");
+           }
+       }
+
+       processConfiguration(element, conf, validatorClass);
+
+       //Process token types
+       for (Iterator tokenTypes = element.getChildrenWithName(TOKEN_TYPE);
+            tokenTypes.hasNext();) {
+           OMElement type = (OMElement) tokenTypes.next();
+           String value = type.getText();
+           if (value == null || value.trim().length() == 0) {
+               throw new TrustException("invalidTokenTypeDefinition",
+                                        new String[]{"Validator", validatorClass});
+           }
+           if (conf.validators == null) {
+               conf.validators = new Hashtable();
+           }
+           //If the token type is not already declared then add it to the
+           //table with the issuer classname
+           if (!conf.validators.keySet().contains(value)) {
+               conf.validators.put(value, validatorClass);
+           }
+       }
+   }
+        
+    }
 
     private static void processConfiguration(OMElement element,
                                              TokenRequestDispatcherConfig conf,
@@ -190,6 +243,20 @@ public class TokenRequestDispatcherConfig {
             return null;
         }
     }
+    
+    public TokenValidator getDefaultValidatorInstance() throws TrustException {
+        if (this.defaultValidatorClassName != null) {
+            try {
+                return createValidator(this.defaultValidatorClassName);
+            } catch (Exception e) {
+                throw new TrustException("cannotLoadClass",
+                                         new String[]{this.defaultValidatorClassName}, e);
+            }
+        } else {
+            return null;
+        }
+    }
+    
 
     public String getDefaultIssuerName() {
         return this.defaultIssuerClassName;
@@ -213,6 +280,24 @@ public class TokenRequestDispatcherConfig {
                                      new String[]{this.defaultIssuerClassName}, e);
         }
     }
+    
+    public TokenValidator getValidator(String tokenType) throws TrustException {
+        String validatorClassName = null;
+        //try to find the validator class name from the tokenType<->validator map
+        if (this.validators != null) {
+            validatorClassName = (String) this.validators.get(tokenType);
+        }
+        //If a specific validator is not found use the default issuer
+        if (validatorClassName == null) {
+            validatorClassName = this.defaultValidatorClassName;
+        }
+        try {
+            return createValidator(validatorClassName);
+        } catch (Exception e) {
+            throw new TrustException("cannotLoadClass",
+                                     new String[]{this.defaultValidatorClassName}, e);
+        }
+    }
 
     /**
      * @param issuerClassName
@@ -232,5 +317,13 @@ public class TokenRequestDispatcherConfig {
         canceler.setConfigurationFile((String) this.configFiles.get(cancelerClassName));
         canceler.setConfigurationParamName((String) this.configParamNames.get(cancelerClassName));
         return canceler;
+    }
+    
+    private TokenValidator createValidator(String validatorClassName) throws Exception {
+        TokenValidator validator = (TokenValidator) Loader.loadClass(validatorClassName).newInstance();
+        validator.setConfigurationElement((OMElement) this.configElements.get(validatorClassName));
+        validator.setConfigurationFile((String) this.configFiles.get(validatorClassName));
+        validator.setConfigurationParamName((String) this.configParamNames.get(validatorClassName));
+        return validator;
     }
 }

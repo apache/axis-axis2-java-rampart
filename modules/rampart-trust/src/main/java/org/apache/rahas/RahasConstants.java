@@ -46,6 +46,15 @@ public class RahasConstants {
         public static final String
                 REQUEST_SECURITY_TOKEN_RESPONSE_COLLECTION = "RequestSecurityTokenResponseCollection";
         public final static String BINARY_SECRET = "BinarySecret";
+        
+       /* <wst:RequestSecurityTokenResponse>
+        * <wst:TokenType>http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Status</wst:TokenType>
+        * <wst:Status>
+        * <wst:Code>http://schemas.xmlsoap.org/ws/2005/02/trust/status/valid</wst:Code>
+        * </wst:Status> ... </wst:RequestSecurityTokenResponse>"
+        */
+        public static final String STATUS = "Status";
+        public static final String CODE = "Code";
     }
 
     public static class IssuanceBindingLocalNames {
@@ -101,12 +110,18 @@ public class RahasConstants {
     public static final String RSTR_ACTION_CANCEL = "/RSTR" + REQ_TYPE_CANCEL;
     public static final String RSTR_ACTION_SCT = "/RSTR/SCT";
     public static final String RSTR_ACTION_CANCEL_SCT = "/RSTR/SCT" + REQ_TYPE_CANCEL;
+    
+    //Status codes
+    public static final String STATUS_CODE_VALID = "/status/valid";
+    public static final String STATUS_CODE_INVALID = "/status/invalid";
+    
+    public static final String TOK_TYPE_STATUS = "/RSTR/Status";
 
     //Token types
     public static final String TOK_TYPE_SAML_10 = "http://docs.oasis-open.org/wss/" +
                                                   "oasis-wss-saml-token-profile-1.1#SAMLV1.1";
 
     //Attrs
-    public static final String ATTR_TYPE 			= "Type";
+    public static final String ATTR_TYPE 	        = "Type";
     public static final String ATTR_CLAIMS_DIALECT 	= "Dialect";
 }

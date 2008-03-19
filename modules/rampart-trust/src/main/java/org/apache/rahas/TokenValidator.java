@@ -16,6 +16,7 @@
 
 package org.apache.rahas;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 
 public interface TokenValidator {
@@ -24,7 +25,7 @@ public interface TokenValidator {
      * Validate the token specified in the given request.
      * 
      * @param data
-     *            A populated <code>RahasData</code> instance
+     *                A populated <code>RahasData</code> instance
      * @return Response SOAPEnveloper
      * @throws TrustException
      */
@@ -47,9 +48,9 @@ public interface TokenValidator {
      * token-dispatcher-configuration
      * 
      * @param configElement
-     *            <code>OMElement</code> representing the configuration
+     *                <code>OMElement</code> representing the configuration
      */
-    public void setConfigurationElement(String configElement);
+    public void setConfigurationElement(OMElement configElement);
 
     /**
      * Set the name of the configuration parameter.
