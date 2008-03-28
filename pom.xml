@@ -99,21 +99,6 @@
             <url>http://people.apache.org/repo/m2-snapshot-repository</url>
             <layout>default</layout>
         </repository>
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-            <id>apache-ws-snapshots2</id>
-            <name>Apache ws.zones - 2</name>
-            <url>http://ws.zones.apache.org/repository2</url>
-        </repository>
     </repositories>
 
 
@@ -512,7 +497,7 @@
         <xmlunit.version>1.1</xmlunit.version>
         <log4j.version>1.2.15</log4j.version>
 
-        <jakarta.httpcore.version>4.0-alpha6</jakarta.httpcore.version>
+        <jakarta.httpcore.version>4.0-beta1</jakarta.httpcore.version>
         <commons.collections.version>3.1</commons.collections.version>
         <commons.fileupload.version>1.2</commons.fileupload.version>
         <commons.discovery.version>0.2</commons.discovery.version>
