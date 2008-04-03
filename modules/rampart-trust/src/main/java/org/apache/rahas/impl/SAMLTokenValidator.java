@@ -81,8 +81,8 @@ public class SAMLTokenValidator implements TokenValidator {
 	    OMElement statusElement = createMessageElement(wstVersion,
 		    rstrElem, RahasConstants.LocalNames.STATUS);
 
-	    //TODO this is wrong, figure out a way to get the token to validate
-	    Token tk = tkStorage.getToken(tkStorage.getTokenIdentifiers()[0]);
+	    // Obtain the token
+	    Token tk = tkStorage.getToken(data.getTokenId());
 
 	    // create the crypto object
 	    PublicKey issuerPBKey = getIssuerPublicKey(inMsgCtx);

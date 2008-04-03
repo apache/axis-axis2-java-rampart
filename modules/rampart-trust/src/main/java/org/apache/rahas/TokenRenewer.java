@@ -16,6 +16,7 @@
 
 package org.apache.rahas;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 
 public interface TokenRenewer {
@@ -39,17 +40,17 @@ public interface TokenRenewer {
      * @param configFile
      */
     public void setConfigurationFile(String configFile);
-
+    
     /**
-     * Set the configuration element of this TokenRenewer.
+     * Set the configuration element of TokenRenewer.
      * 
      * This is the &lt;configuration&gt; element of the
      * token-dispatcher-configuration
      * 
      * @param configElement
-     *            <code>OMElement</code> representing the configuration
+     *                <code>OMElement</code> representing the configuration
      */
-    public void setConfigurationElement(String configElement);
+    public void setConfigurationElement(OMElement configElement);
 
     /**
      * Set the name of the configuration parameter.

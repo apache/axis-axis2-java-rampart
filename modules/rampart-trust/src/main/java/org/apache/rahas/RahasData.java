@@ -17,14 +17,19 @@
 package org.apache.rahas;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
+import org.apache.ws.security.message.token.SecurityTokenReference;
 import org.opensaml.SAMLAssertion;
+import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
 
@@ -48,6 +53,8 @@ public class RahasData {
     private String requestType;
 
     private String tokenType;
+    
+    private String tokenId;
 
     private int keysize = -1;
 
@@ -124,6 +131,10 @@ public class RahasData {
         this.processEntropy();
         
         this.processClaims();
+        
+        this.processValidateTarget();
+        
+        this.processRenewTarget();
 
     }
 
@@ -304,6 +315,55 @@ public class RahasData {
         	}
     	
     }
+    
+    private void processValidateTarget()throws TrustException{
+        
+        OMElement validateTargetElem  = this.rstElement
+                                .getFirstChildWithName(new QName(this.wstNs,
+                                               RahasConstants.LocalNames.VALIDATE_TARGET));
+        
+        if (validateTargetElem != null) {
+        
+            OMElement strElem = validateTargetElem.getFirstChildWithName(new QName(WSConstants.WSSE_NS,
+                                                   "SecurityTokenReference"));
+            
+            Element elem = (Element)(new StAXOMBuilder(new OMDOMFactory(), 
+                    strElem.getXMLStreamReader()).getDocumentElement());
+            
+            try {
+                SecurityTokenReference str = new SecurityTokenReference((Element)elem);
+                if (str.containsReference()) {
+                    tokenId = str.getReference().getURI();
+                }
+            } catch (WSSecurityException e) {
+                throw new TrustException("errorExtractingTokenId",e);
+            } 
+        }
+    }
+    
+    private void processRenewTarget()throws TrustException{
+        
+        OMElement renewTargetElem  = this.rstElement
+                                .getFirstChildWithName(new QName(this.wstNs,
+                                               RahasConstants.LocalNames.RENEW_TARGET));
+        if (renewTargetElem != null) {
+        
+            OMElement strElem = renewTargetElem.getFirstChildWithName(new QName(WSConstants.WSSE_NS,
+                                                   "SecurityTokenReference"));
+            
+            Element elem = (Element)(new StAXOMBuilder(new OMDOMFactory(), 
+                    strElem.getXMLStreamReader()).getDocumentElement());
+            
+            try {
+                SecurityTokenReference str = new SecurityTokenReference((Element)elem);
+                if (str.containsReference()) {
+                    tokenId = str.getReference().getURI();
+                }
+            } catch (WSSecurityException e) {
+                throw new TrustException("errorExtractingTokenId",e);
+            }      
+        }
+    }
 
     /**
      * Process wst:Entropy element in the request.
@@ -443,6 +503,13 @@ public class RahasData {
      */
     public String getSoapNs() {
         return soapNs;
+    }
+
+    /**
+     * @return Returns the tokenId.
+     */
+    public String getTokenId() {
+        return tokenId;
     }
 
     /**

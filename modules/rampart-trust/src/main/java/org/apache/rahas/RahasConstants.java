@@ -46,6 +46,8 @@ public class RahasConstants {
         public static final String
                 REQUEST_SECURITY_TOKEN_RESPONSE_COLLECTION = "RequestSecurityTokenResponseCollection";
         public final static String BINARY_SECRET = "BinarySecret";
+        public final static String VALIDATE_TARGET = "ValidateTarget";
+        public final static String RENEW_TARGET = "RenewTarget";
         
        /* <wst:RequestSecurityTokenResponse>
         * <wst:TokenType>http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Status</wst:TokenType>

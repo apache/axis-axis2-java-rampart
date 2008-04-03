@@ -101,8 +101,22 @@ public class TokenRequestDispatcher {
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_RENEW).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_RENEW).equals(reqType)) {
         	log.debug("renew");
-            throw new UnsupportedOperationException("TODO: handle " +
-                    "renew requests");            
+        	
+                TokenRenewer renewer;
+                if (tokenType == null ||  tokenType.trim().length() == 0) {
+                    renewer = config.getDefaultRenewerInstance();
+                } else {
+                    renewer = config.getRenewer(tokenType);                                       
+                }
+                
+                SOAPEnvelope response = renewer.renew(data);
+
+                outMsgCtx.getOptions().setAction(
+                        TrustUtil.getActionValue(data.getVersion(),
+                                RahasConstants.RSTR_ACTION_RENEW));
+
+                return response;    	
+        	         
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_CANCEL).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_CANCEL).equals(reqType)) {
         	log.debug("cancel");

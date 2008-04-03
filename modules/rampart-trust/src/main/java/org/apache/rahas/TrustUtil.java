@@ -157,6 +157,32 @@ public class TrustUtil {
                                RahasConstants.LocalNames.TOKEN_TYPE,
                                RahasConstants.WST_PREFIX);
     }
+    
+    public static OMElement createValidateTargetElement(int version, OMElement parent, 
+                                                    OMElement str) throws TrustException {
+        OMElement validateTarget = createOMElement(parent,
+                getWSTNamespace(version),
+                RahasConstants.LocalNames.VALIDATE_TARGET,
+                RahasConstants.WST_PREFIX);
+        validateTarget.addChild(str);
+        
+        return validateTarget;
+        
+    }
+    
+    public static OMElement createRenewTargetElement(int version, OMElement parent, 
+            OMElement str) throws TrustException {
+        OMElement renewTarget = createOMElement(parent,
+        getWSTNamespace(version),
+        RahasConstants.LocalNames.RENEW_TARGET,
+        RahasConstants.WST_PREFIX);
+        renewTarget.addChild(str);
+
+     return renewTarget;
+
+}
+    
+    
 
     public static OMElement createBinarySecretElement(
             int version,
