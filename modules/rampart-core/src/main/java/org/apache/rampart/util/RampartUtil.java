@@ -77,6 +77,7 @@ import org.apache.ws.security.message.WSSecBase;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.xml.security.utils.Constants;
 import org.jaxen.JaxenException;
 import org.jaxen.XPath;
 import org.w3c.dom.Document;
@@ -741,7 +742,7 @@ public class RampartUtil {
         Vector encryptedPartsElements  = getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(), rpd.getEncryptedElements(),rpd.getDeclaredNamespaces());
         return getContentEncryptedElements(encryptedPartsElements, envelope, rpd.getContentEncryptedElements(), rpd.getDeclaredNamespaces());
     }
-
+    
     public static Vector getSignedParts(RampartMessageData rmd) {
         RampartPolicyData rpd =  rmd.getPolicyData();
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
@@ -833,9 +834,16 @@ public class RampartUtil {
                             while (nodesIter.hasNext())
                             {
                                 OMElement e = (OMElement)nodesIter.next();
-
-                                encryptedPartsElements.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content"));
-
+                              
+                                WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content");
+                                OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
+                                
+                                if ( wsuId != null ) {
+                                    encryptedElem.setEncId(wsuId.getAttributeValue());
+                                }
+                                
+                                encryptedPartsElements.add(encryptedElem);
+                                
                             }
                                 
                         } catch (JaxenException e) {
@@ -859,7 +867,7 @@ public class RampartUtil {
             if( sign ) {
                 result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody())));
             } else {
-                result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody()), "Content"));
+                result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody()), "Content", WSConstants.PART_TYPE_BODY));
             }
             found.add( envelope.getBody() );
         }
@@ -887,7 +895,15 @@ public class RampartUtil {
                         if( sign ) {
                             result.add(new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Content"));
                         } else {
-                            result.add(new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Element"));
+                            
+                            WSEncryptionPart encryptedHeader = new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Element", WSConstants.PART_TYPE_HEADER);
+                            OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
+                            
+                            if ( wsuId != null ) {
+                                encryptedHeader.setEncId(wsuId.getAttributeValue());
+                            }
+                            
+                            result.add(encryptedHeader);
                         }
                     } 
                 }
@@ -897,7 +913,14 @@ public class RampartUtil {
                 if( e != null ) {
                     if( ! found.contains( e ) ) {
                         // found new (reuse wsep)
-                        found.add( e );
+                        found.add( e );          
+                        wsep.setType(WSConstants.PART_TYPE_HEADER);
+                        OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
+                        
+                        if ( wsuId != null ) {
+                            wsep.setEncId(wsuId.getAttributeValue());
+                        }
+                        
                         result.add( wsep );
                     }
                 } 
@@ -930,10 +953,19 @@ public class RampartUtil {
 			    {
 			    	OMElement e = (OMElement)nodesIter.next();
 			    	
-			    	if (sign)
+			    	if (sign) {
 			    		result.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content"));
-			    	else
-			    		result.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Element"));
+			    	} else {
+			    		
+			    	        WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Element");
+			    		OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
+			    	        
+			    		if ( wsuId != null ) {
+			    		    encryptedElem.setEncId(wsuId.getAttributeValue());
+			    		}
+			    		
+			    		result.add(encryptedElem);
+			    	}
 			    }
 				
 			} catch (JaxenException e) {
@@ -1298,7 +1330,8 @@ public class RampartUtil {
      * @param rpd 
      * @return true if a security header is required in the incoming message
      */
-    public static boolean isSecHeaderRequired(RampartPolicyData rpd, boolean initiator ) {
+    public static boolean isSecHeaderRequired(RampartPolicyData rpd, boolean initiator, 
+                                                                                boolean inflow ) {
         
         // Checking for time stamp
         if ( rpd.isIncludeTimestamp() ) {
@@ -1320,7 +1353,7 @@ public class RampartUtil {
         // Checking for supporting tokens
         SupportingToken supportingTokens;
         
-        if (!initiator) {
+        if (!initiator && inflow || initiator && !inflow ) {
         
             supportingTokens = rpd.getSupportingTokens();
             if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
@@ -1387,6 +1420,40 @@ public class RampartUtil {
             
         }
         
+    }
+    
+    public static String getSigElementId(RampartMessageData rmd) {
+        
+        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+        
+        SOAPHeader header = envelope.getHeader();
+        
+        if (header == null ) {
+            return null;
+        }
+        
+        ArrayList secHeaders = header.getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
+        
+        if (secHeaders != null && secHeaders.size() > 0) {
+            QName sigQName = new QName(Constants.SignatureSpecNS,Constants._TAG_SIGNATURE);
+            QName wsuIdQName = new QName(WSConstants.WSU_NS,"Id");
+            OMElement sigElem = ((SOAPHeaderBlock)secHeaders.get(0)).getFirstChildWithName(sigQName);
+            OMAttribute wsuId = sigElem.getAttribute(wsuIdQName);
+            
+            if (wsuId != null) {
+                return wsuId.getAttributeValue();
+            }
+            
+            wsuId = sigElem.getAttribute(new QName("Id"));
+            
+            if (wsuId != null) {
+                return wsuId.getAttributeValue();
+            }
+            
+            
+        }
+        
+        return null;
     }
 
 }

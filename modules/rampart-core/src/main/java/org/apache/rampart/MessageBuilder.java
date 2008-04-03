@@ -62,7 +62,16 @@ public class MessageBuilder {
         
         
         RampartPolicyData rpd = rmd.getPolicyData();
-        if(rpd == null || isSecurityValidationFault(msgCtx)) {
+        if(rpd == null || isSecurityValidationFault(msgCtx) || 
+                !RampartUtil.isSecHeaderRequired(rpd, rmd.isInitiator(),false)) {
+            
+            Document doc = rmd.getDocument();
+            WSSecHeader secHeader = rmd.getSecHeader();
+            
+            if ( secHeader != null && secHeader.isEmpty(doc) ) {
+                secHeader.removeSecurityHeader(doc);
+            }
+            
             return;
         }
         
@@ -137,6 +146,9 @@ public class MessageBuilder {
             AsymmetricBindingBuilder builder = new AsymmetricBindingBuilder();
             builder.build(rmd);
         }
+       
+       //TODO remove following check, we don't need this check here as we do a check to see whether 
+       // security header required 
        
        Document doc = rmd.getDocument();
        WSSecHeader secHeader = rmd.getSecHeader();

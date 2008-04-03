@@ -80,6 +80,9 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         //sig/encr
         Vector encryptedParts = RampartUtil.getEncryptedParts(rmd);
         if(rpd != null && rpd.isSignatureProtection() && isSignatureRequired(rmd)) {
+            
+            String sigId = RampartUtil.getSigElementId(rmd);
+            
             encryptedParts.add(new WSEncryptionPart(WSConstants.SIG_LN, 
                     WSConstants.SIG_NS, "Element"));
         }
@@ -219,8 +222,8 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         SupportingToken sgndEndorSupTokens = rpd.getSignedEndorsingSupportingTokens();
         
         if(sig && signatureParts.size() == 0 
-                && sgndSupTokens.getTokens().size() == 0
-                 && sgndEndorSupTokens.getTokens().size() == 0) {
+                && (sgndSupTokens == null || sgndSupTokens.getTokens().size() == 0)
+                 && (sgndEndorSupTokens == null || sgndEndorSupTokens.getTokens().size() == 0)) {
             
             //Unexpected signature
             throw new RampartException("unexprectedSignature");
@@ -419,20 +422,37 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             }
         }
 
-//        TODO : IMPORTANT this processing is wrong .. fix it
-//
-//        int refCount = 0;
-//
-//        refCount += encryptedParts.size();
-//        
-//        if(rpd.isSignatureProtection()) {
-//            refCount ++;
-//        }
-//
-//        if(encrRefs.size() != refCount) {
-//            throw new RampartException("invalidNumberOfEncryptedParts", 
-//                    new String[]{Integer.toString(refCount)});
-//        }
+        for (int i = 0 ; i < encryptedParts.size() ; i++) {
+            
+            WSEncryptionPart encPart = (WSEncryptionPart)encryptedParts.get(i);
+            
+            //This is the encrypted Body and we already checked encrypted body
+            if (encPart.getType() == WSConstants.PART_TYPE_BODY) {
+                continue;
+            }
+            
+            //TODO we don't check encrypted headers now
+            // Can't change id when when encrypted header is both signed and encrypted
+            //FIX THIS
+            if (encPart.getType() == WSConstants.PART_TYPE_HEADER) {
+                continue;
+            }
+            
+            //TODO we need to check encrypted signature
+            if (WSConstants.SIG_LN.equals(encPart.getName()) &&
+                    WSConstants.SIG_NS.equals(encPart.getNamespace())) {
+                continue;
+            }
+            
+            if (encPart.getEncId() == null) {
+                throw new RampartException("encryptedPartMissing", 
+                        new String[]{encPart.getNamespace()+":"+encPart.getName()});
+            } else if (!isRefIdPresent(encrRefs, encPart.getEncId())) {
+                throw new RampartException("encryptedPartMissing", 
+                        new String[]{encPart.getNamespace()+":"+encPart.getName()});                
+            }
+            
+        }
         
     }
     
@@ -778,5 +798,25 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         return false;
     }
+    
+    private boolean isRefIdPresent(ArrayList refList , String id) {
+        
+        for (int i = 0; i < refList.size() ; i++) {           
+            String refId = (String)refList.get(i);           
+            if (refId != null && refId.equals(id)) {
+                return true;
+            } else if (refId != null) {
+                //TODO This is a hack to handle the special case Encrypted Header
+                refId = refId.replaceFirst("EncDataId","EncHeader");
+                if (refId.equals(id)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+        
+    }
+
     
 }

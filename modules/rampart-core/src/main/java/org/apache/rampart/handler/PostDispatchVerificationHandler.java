@@ -151,7 +151,7 @@ public class PostDispatchVerificationHandler implements Handler {
             }
             
             //Now check for security processing results if security policy is available
-            if(RampartUtil.isSecHeaderRequired(rpd,isInitiator) && 
+            if(RampartUtil.isSecHeaderRequired(rpd,isInitiator,true) && 
                                   msgContext.getProperty(WSHandlerConstants.RECV_RESULTS) == null) {
                 throw new AxisFault("InvalidSecurity");
             }           
