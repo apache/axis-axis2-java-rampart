@@ -175,7 +175,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
-            <artifactId>mex-impl</artifactId>
+            <artifactId>mex</artifactId>
             <version>${axis2.version}</version>
         </dependency>
         <dependency>
