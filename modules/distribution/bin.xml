@@ -39,6 +39,10 @@
             <directory>../rampart-samples</directory>
             <outputDirectory>${dist.dir}/samples</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>../../legal</directory>
+            <outputDirectory>${dist.dir}/lib</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <files>
