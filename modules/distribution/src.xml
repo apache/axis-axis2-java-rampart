@@ -13,7 +13,7 @@
                 <include>**/modules/**/*</include>
                 <include>**/pom.xml</include>
                 <include>src</include>
-                <include>release-docs</include>
+                <include>release-docs/*</include>
             </includes>
             <excludes>
                 <exclude>**/target</exclude>
