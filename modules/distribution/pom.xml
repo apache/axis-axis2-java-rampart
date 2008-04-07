@@ -24,7 +24,7 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <javadoc packagenames="org.apache.rampart.*"
+                                <javadoc packagenames="org.apache.rampart.*,org.apache.rahas.*"
                                          destdir="target/apidocs"
                                          author="true"
                                          breakiterator="true"
