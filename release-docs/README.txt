@@ -1,5 +1,5 @@
 ======================================================
-Apache Rampart-1.2 build  (May 29, 2007)
+Apache Rampart-1.4 build  (April 03, 2008)
 
 http://ws.apache.org/axis2/modules/rampart/
 ------------------------------------------------------
@@ -13,8 +13,8 @@ lib      - This directory contains all the libraries required by rampart
            release.
 	   
 
-rampart-1.2.mar   - WS-Security and WS-SecureConversation support for Axis2
-rahas-1.2.mar     - STS module - to be used to add STS operations to a service
+rampart-1.4.mar   - WS-Security and WS-SecureConversation support for Axis2
+rahas-1.4.mar     - STS module - to be used to add STS operations to a service
 
 samples  - This contains samples on using Apache Rampart and configuring
            different components to carryout different WS-Sec* operations.
@@ -27,36 +27,17 @@ IMPORTANT:
 Before you build rampart from source distribution, you need provision for 
 unlimited security jurisdiction as some of the test cases use key size of
 256. So you need to download jce_policy-x_y_z.zip (relevant to your JDK version)
-and extract the jar files local_policy.jar and US_export_policy.jar to 
+and replace the old jar files (local_policy.jar and US_export_policy.jar) in 
 $JAVA_HOME/jre/lib/security. These files are listed in sun download site,
 under the your JDK version as Java(TM) Cryptography Extension (JCE) Unlimited 
 Strength Jurisdiction Policy Files.     
 
-Before you engage Rampart 
-You have to make a small change to the default axis2.xml by adding the security 
-phase to OutFaultFlow. Security phase should be added just after the MessageOut 
-phase.
-
-eg.
-<phaseOrder type="OutFaultFlow">
-    <!--      user can add his own phases to this area  -->
-    <phase name="OperationOutFaultPhase"/>
-    <phase name="RMPhase"/>
-    <phase name="PolicyDetermination"/>
-    <phase name="MessageOut"/>
-    *<phase name="Security"/>* 
-</phaseOrder>
- 
-
-Before you try any of the samples makesure you
+Before you try any of the samples make sure you
 
 1.) Have the Axis2 standard binary distribution downloaded and extracted.
 2.) Set the AXIS2_HOME environment variable
 3.) Run ant from the "samples" directory to copy the required libraries and
     modules to relevant directories in AXIS2_HOME.
-4.) Download xalan-2.7.0.jar from here[1] and put under AXIS2_HOME\lib folder,
-    if you use JDK 1.5.
-
 
 ___________________
 Crypto Notice
@@ -92,16 +73,14 @@ ___________________
 Support
 ===================
  
-Any problem with this release can be reported to Axis mailing list
-or in the JIRA issue tracker. If you are sending an email to the mailing
-list make sure to add the [Rampart] prefix to the subject.
+Any problem with this release can be reported to Rampart mailing list
+or in the JIRA issue tracker.
 
 Mailing list subscription:
-    axis-dev-subscribe@ws.apache.org
+    rampart-dev-subscribe@ws.apache.org
 
 Jira:
-    http://issues.apache.org/jira/browse/AXIS2
-    (Component - modules)
+    http://issues.apache.org/jira/browse/Rampart
 
 
 Thank you for using Apache Rampart!
