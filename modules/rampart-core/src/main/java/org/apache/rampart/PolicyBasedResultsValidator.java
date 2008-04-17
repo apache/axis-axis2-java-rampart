@@ -682,8 +682,8 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             x509certs[0] = cert;
             // ... and the other certificates
             for (int j = 0; j < certs.length; j++) {
-                cert = certs[i];
-                x509certs[certs.length + j] = cert;
+                cert = certs[j];
+                x509certs[j + 1] = cert;
             }
             certs = x509certs;
 
