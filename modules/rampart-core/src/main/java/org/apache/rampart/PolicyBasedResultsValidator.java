@@ -30,6 +30,7 @@ import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
 import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSDataRef;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
@@ -45,6 +46,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
+
+import javax.xml.namespace.QName;
 
 public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandler {
     
@@ -416,7 +419,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         //Check for encrypted body
         if(rpd.isEncryptBody()) {
             
-            if(!encrRefs.contains(data.getBodyEncrDataId())){
+            if( !isRefIdPresent(encrRefs, data.getBodyEncrDataId())){
                 throw new RampartException("encryptedPartMissing", 
                         new String[]{data.getBodyEncrDataId()});
             }
@@ -431,16 +434,13 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                 continue;
             }
             
-            //TODO we don't check encrypted headers now
-            // Can't change id when when encrypted header is both signed and encrypted
-            //FIX THIS
-            if (encPart.getType() == WSConstants.PART_TYPE_HEADER) {
-                continue;
-            }
-            
-            //TODO we need to check encrypted signature
-            if (WSConstants.SIG_LN.equals(encPart.getName()) &&
-                    WSConstants.SIG_NS.equals(encPart.getNamespace())) {
+            if ((WSConstants.SIG_LN.equals(encPart.getName()) &&
+                    WSConstants.SIG_NS.equals(encPart.getNamespace()))
+                   || encPart.getType() == WSConstants.PART_TYPE_HEADER ) {
+                if (!isRefIdPresent(encrRefs, new QName(encPart.getNamespace(),encPart.getName()))) {
+                    throw new RampartException("encryptedPartMissing", 
+                            new String[]{encPart.getNamespace()+":"+encPart.getName()}); 
+                }
                 continue;
             }
             
@@ -723,7 +723,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             if(dataRefUris != null) {
                 for (Iterator iterator = dataRefUris.iterator(); iterator
                         .hasNext();) {
-                    String uri = (String) iterator.next();
+                    WSDataRef uri = (WSDataRef) iterator.next();
                     refs.add(uri);
                 }
             }
@@ -802,16 +802,44 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
     private boolean isRefIdPresent(ArrayList refList , String id) {
         
         for (int i = 0; i < refList.size() ; i++) {           
-            String refId = (String)refList.get(i);           
-            if (refId != null && refId.equals(id)) {
-                return true;
-            } else if (refId != null) {
-                //TODO This is a hack to handle the special case Encrypted Header
-                refId = refId.replaceFirst("EncDataId","EncHeader");
-                if (refId.equals(id)) {
-                    return true;
-                }
+            WSDataRef dataRef = (WSDataRef)refList.get(i); 
+            
+            //ArrayList can contain null elements
+            if(dataRef == null) {
+                continue;
             }
+            //Try to get the wsuId of the decrypted element
+            String dataRefUri = dataRef.getWsuId();
+            //If not found, try the reference Id of encrypted element ( we set the same Id when we
+            // decrypted element in WSS4J)  
+            if (dataRefUri == null) {
+                dataRefUri = dataRef.getDataref();
+            }
+            if (dataRefUri != null && dataRefUri.equals(id)) {
+                return true;
+            }
+        }
+        
+        return false;
+        
+    }
+    
+    private boolean isRefIdPresent(ArrayList refList , QName qname) {
+        
+        for (int i = 0; i < refList.size() ; i++) {           
+            WSDataRef dataRef = (WSDataRef)refList.get(i); 
+            
+            //ArrayList can contain null elements
+            if(dataRef == null) {
+                continue;
+            }
+            //QName of the decrypted element
+            QName dataRefQName = dataRef.getName();
+
+            if ( dataRefQName != null &&  dataRefQName.equals(qname)) {
+               return true;
+            }
+
         }
         
         return false;
