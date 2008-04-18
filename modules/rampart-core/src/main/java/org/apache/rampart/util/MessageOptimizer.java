@@ -98,7 +98,6 @@ public class MessageOptimizer {
 			while (cipherValueElements.hasNext()) {
 				OMElement element = (OMElement) cipherValueElements.next();
 				OMText text = (OMText)element.getFirstOMChild();
-				System.out.println(text.getText().length());
 				text.setOptimize(true);
 			}
 		}

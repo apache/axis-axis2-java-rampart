@@ -278,8 +278,28 @@ public class RampartMessageData {
                 }
             }
             
-            this.config = WSSConfig.getDefaultWSConfig();
+           // Check whether RampartConfig is present 
+           if (this.policyData != null && this.policyData.getRampartConfig() != null) {
+               
+               boolean timestampPrecisionInMilliseconds = Boolean.valueOf(this.policyData
+                       .getRampartConfig().getTimestampPrecisionInMilliseconds()).booleanValue();
+               
+               // This is not the default behavior, we clone the default WSSConfig to prevent this 
+               // affecting globally 
+               if (timestampPrecisionInMilliseconds == WSSConfig.getDefaultWSConfig()
+                                                           .isPrecisionInMilliSeconds()) {
+                   this.config = WSSConfig.getDefaultWSConfig();                
+               } else {
+                   this.config = RampartUtil.getWSSConfigInstance();
+                   this.config.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);               
+               }
+           } else {
+               this.config = WSSConfig.getDefaultWSConfig();
+           }
+            
 
+                    
+            
             this.customClassLoader = msgCtx.getAxisService().getClassLoader();
             
             if(this.sender && this.policyData != null) {

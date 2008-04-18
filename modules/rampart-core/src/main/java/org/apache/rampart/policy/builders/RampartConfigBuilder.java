@@ -104,6 +104,12 @@ public class RampartConfigBuilder implements AssertionBuilder {
         }
 
         childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.TS_PRECISION_IN_MS_LN));
+        if (childElement != null) {
+            rampartConfig.setTimestampPrecisionInMilliseconds(childElement.getText().trim());
+        }
+        
+        childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.TS_TTL_LN));
         if (childElement != null) {
             rampartConfig.setTimestampTTL(childElement.getText().trim());

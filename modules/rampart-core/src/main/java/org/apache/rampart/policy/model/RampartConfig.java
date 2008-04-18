@@ -35,6 +35,7 @@ import javax.xml.stream.XMLStreamWriter;
  *  &lt;ramp:encryptionUser&gt;bob&lt;/ramp:encryptionUser&gt;
  *  &lt;ramp:passwordCallbackClass&gt;org.apache.axis2.security.PWCallback&lt;/ramp:passwordCallbackClass&gt;
  *  &lt;ramp:policyValidatorCbClass&gt;org.apache.axis2.security.ramp:PolicyValidatorCallbackHandler&lt;/ramp:policyValidatorCbClass&gt;
+ *  &lt;ramp:timestampPrecisionInMilliseconds&gt;true&lt;/timestampPrecisionInMilliseconds&gt;
  *  &lt;ramp:timestampTTL&gt;300&lt;/ramp:timestampTTL&gt;
  *  &lt;ramp:timestampMaxSkew&gt;0&lt;/ramp:timestampMaxSkew&gt;
  *  &lt;ramp:tokenStoreClass&gt;org.apache.rahas.StorageImpl&lt;/ramp:tokenStoreClass&gt;
@@ -59,7 +60,9 @@ import javax.xml.stream.XMLStreamWriter;
  * 
  */
 public class RampartConfig implements Assertion {
-
+    
+    public static final boolean DEFAULT_TIMESTAMP_PRECISION_IN_MS = true;
+	
     public static final int DEFAULT_TIMESTAMP_TTL = 300;
 
     public static final int DEFAULT_TIMESTAMP_MAX_SKEW = 300;
@@ -90,6 +93,8 @@ public class RampartConfig implements Assertion {
     
     public final static String STS_CRYPTO_LN = "stsCrypto";
 
+    public final static String TS_PRECISION_IN_MS_LN = "timestampPrecisionInMilliseconds";
+    
     public final static String TS_TTL_LN = "timestampTTL";
 
     public final static String TS_MAX_SKEW_LN = "timestampMaxSkew";
@@ -120,6 +125,8 @@ public class RampartConfig implements Assertion {
     
     private CryptoConfig stsCryptoConfig;
 
+    private String timestampPrecisionInMilliseconds = Boolean.toString(DEFAULT_TIMESTAMP_PRECISION_IN_MS);
+    
     private String timestampTTL = Integer.toString(DEFAULT_TIMESTAMP_TTL);
     
     private String timestampMaxSkew = Integer.toString(DEFAULT_TIMESTAMP_MAX_SKEW);
@@ -279,6 +286,12 @@ public class RampartConfig implements Assertion {
             writer.writeEndElement();
         }
         
+        if (getTimestampPrecisionInMilliseconds() != null) {
+            writer.writeStartElement(NS, TS_PRECISION_IN_MS_LN);
+            writer.writeCharacters(getTimestampPrecisionInMilliseconds());
+            writer.writeEndElement();
+        }
+        
         if (getTimestampTTL() != null) {
             writer.writeStartElement(NS, TS_TTL_LN);
             writer.writeCharacters(getTimestampTTL());
@@ -334,6 +347,14 @@ public class RampartConfig implements Assertion {
         return Constants.TYPE_ASSERTION;
     }
 
+    public String getTimestampPrecisionInMilliseconds() {
+    	return timestampPrecisionInMilliseconds;
+    }
+    
+    public void setTimestampPrecisionInMilliseconds(String timestampPrecisionInMilliseconds) {
+        this.timestampPrecisionInMilliseconds = timestampPrecisionInMilliseconds;
+    }
+    
     /**
      * @return Returns the timestampTTL.
      */

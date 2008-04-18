@@ -64,6 +64,7 @@ import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSPasswordCallback;
+import org.apache.ws.security.WSSConfig;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.WSUsernameTokenPrincipal;
@@ -1454,6 +1455,25 @@ public class RampartUtil {
         }
         
         return null;
+    }
+    
+    /**
+     * We use this method to prevent the singleton behavior of WSSConfig
+     * @return WSSConfig object with the latest settings.    
+     */
+    
+    public static WSSConfig getWSSConfigInstance() {
+        
+        WSSConfig defaultWssConfig = WSSConfig.getDefaultWSConfig();
+        WSSConfig wssConfig = WSSConfig.getNewInstance();
+        
+        wssConfig.setEnableSignatureConfirmation(defaultWssConfig.isEnableSignatureConfirmation());
+        wssConfig.setTimeStampStrict(defaultWssConfig.isTimeStampStrict());
+        wssConfig.setWsiBSPCompliant(defaultWssConfig.isWsiBSPCompliant());
+        wssConfig.setPrecisionInMilliSeconds(defaultWssConfig.isPrecisionInMilliSeconds());
+        
+        return  wssConfig;
+       
     }
 
 }
