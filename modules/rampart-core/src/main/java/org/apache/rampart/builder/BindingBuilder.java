@@ -135,6 +135,9 @@ public abstract class BindingBuilder {
                 WSSecUsernameToken utBuilder = new WSSecUsernameToken();
                 utBuilder.setUserInfo(user, null);
                 utBuilder.setPasswordType(null);
+                if (rmd.getConfig() != null) {
+                    utBuilder.setWsConfig(rmd.getConfig());
+                }
                 return utBuilder;
             }
             
@@ -172,7 +175,9 @@ public abstract class BindingBuilder {
                 //If the password is available then build the token
                 
                 WSSecUsernameToken utBuilder = new WSSecUsernameToken();
-                
+                if(rmd.getConfig() != null) {
+                    utBuilder.setWsConfig(rmd.getConfig());
+                }
                 if (token.isHashPassword()) {
                     utBuilder.setPasswordType(WSConstants.PASSWORD_DIGEST);  
                 } else {
