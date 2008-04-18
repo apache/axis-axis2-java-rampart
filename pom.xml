@@ -34,7 +34,10 @@
             <subscribe>rampart-dev-subscribe@ws.apache.org</subscribe>
             <unsubscribe>rampart-dev-unsubscribe@ws.apache.org</unsubscribe>
             <post>rampart-dev@ws.apache.org</post>
-            <archive>http://mail-archives.apache.org/mod_mbox/rampart-dev/</archive>
+            <archive>http://mail-archives.apache.org/mod_mbox/ws-rampart-dev/</archive>
+            <otherArchives>
+                <otherArchive>http://markmail.org/search/list:org.apache.ws.rampart-dev</otherArchive>
+            </otherArchives>
         </mailingList>
     </mailingLists>
 
@@ -98,6 +101,21 @@
             <name>Apache Maven2 SNAPSHOTS</name>
             <url>http://people.apache.org/repo/m2-snapshot-repository</url>
             <layout>default</layout>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>apache-ws-zones2</id>
+            <name>Apache ws.zones - 2</name>
+            <url>http://ws.zones.apache.org/repository2</url>
         </repository>
     </repositories>
 
