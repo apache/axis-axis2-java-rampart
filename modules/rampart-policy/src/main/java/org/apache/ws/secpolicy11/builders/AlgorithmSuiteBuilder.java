@@ -21,6 +21,7 @@ import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 
 import javax.xml.namespace.QName;
@@ -31,7 +32,12 @@ public class AlgorithmSuiteBuilder implements AssertionBuilder {
         AlgorithmSuite algorithmSuite = new AlgorithmSuite(SPConstants.SP_V11);
         
         OMElement policyElem = element.getFirstElement();
-        algorithmSuite.setAlgorithmSuite(policyElem.getFirstElement().getLocalName());
+        
+        try {
+            algorithmSuite.setAlgorithmSuite(policyElem.getFirstElement().getLocalName());
+        } catch (WSSPolicyException e) {
+            throw new IllegalArgumentException(e);
+        }
         
         return algorithmSuite;
     }

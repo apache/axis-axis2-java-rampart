@@ -21,8 +21,8 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
 import org.apache.ws.secpolicy.SP11Constants;
-import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.WSSPolicyException;
 
 public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
@@ -93,7 +93,7 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
      * @see SPConstants#ALGO_SUITE_TRIPLE_DES_SHA256
      * @see SPConstants#ALGO_SUITE_TRIPLE_DES_SHA256_RSA15
      */
-    public void setAlgorithmSuite(String algoSuite) {
+    public void setAlgorithmSuite(String algoSuite) throws WSSPolicyException {
         setAlgoSuiteString(algoSuite);
         this.algoSuiteString = algoSuite;
 
@@ -273,8 +273,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
             this.minimumSymmetricKeyLength = 192;
             this.maximumSymmetricKeyLength = 192; //due to use of 3des
         } else {
-            // throw new WSSPolicyException("Invalid algorithm suite : " +
-            // algoSuite);
+            throw new WSSPolicyException("Invalid algorithm suite : " +
+             algoSuite);
         }
     }
 
