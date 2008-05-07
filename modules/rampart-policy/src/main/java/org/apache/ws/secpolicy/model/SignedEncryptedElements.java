@@ -94,14 +94,11 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix;
-        String writerPrefix = writer.getPrefix(namespaceURI);
+        String prefix = writer.getPrefix(namespaceURI);
 
-        if (writerPrefix == null) {
+        if (prefix == null) {
             prefix = getName().getPrefix();
             writer.setPrefix(prefix, namespaceURI);
-        } else {
-            prefix = writerPrefix;
         }
 
         // <sp:SignedElements> | <sp:EncryptedElements>
@@ -109,11 +106,6 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
         
         // xmlns:sp=".."
         writer.writeNamespace(prefix, namespaceURI);
-
-        if (writerPrefix == null) {
-            // xmlns:sp=".."
-            writer.writeNamespace(prefix, namespaceURI);
-        }
 
         if (xPathVersion != null) {
             writer.writeAttribute(prefix, namespaceURI, SPConstants.XPATH_VERSION, xPathVersion);
