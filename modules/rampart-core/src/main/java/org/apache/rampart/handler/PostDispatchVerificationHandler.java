@@ -17,6 +17,10 @@
 package org.apache.rampart.handler;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.impl.dom.soap11.SOAP11HeaderBlockImpl;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
@@ -31,6 +35,7 @@ import org.apache.rampart.util.HandlerParameterDecoder;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.SupportingToken;
+import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.handler.WSHandlerConstants;
 
 import java.util.Iterator;
@@ -170,8 +175,47 @@ public class PostDispatchVerificationHandler implements Handler {
                 }
             }
         }
-
+        
+        // If a security header is there and Rampart is engaged, it has to be processed.  
+        // If it is not processed, there must have been a problem in picking the policy 
+        
+        SOAPHeaderBlock secHeader = getSecurityHeader(msgContext);
+        
+        if (secHeader != null && (secHeader.isProcessed() == false)) {
+            throw new AxisFault("InvalidSecurity - Security policy not found");
+        }
+        
         return InvocationResponse.CONTINUE;
+        
+    }
+    
+    private SOAPHeaderBlock getSecurityHeader(MessageContext msgContext) throws AxisFault {
+        
+        SOAPHeader header = null;
+        try {
+            header = msgContext.getEnvelope().getHeader();
+        } catch (OMException ex) {
+            throw new AxisFault(
+                "PostDispatchVerificationHandler: cannot get SOAP header after security processing",
+                    ex);
+        }
+
+        Iterator headers = header.getChildElements();
+
+        SOAPHeaderBlock headerBlock = null;
+
+        while (headers.hasNext()) { 
+            // Find the wsse header
+            SOAPHeaderBlock hb = (SOAPHeaderBlock) headers.next();
+            if (hb.getLocalName().equals(WSConstants.WSSE_LN)
+                    && hb.getNamespace().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
+                headerBlock = hb;
+                break;
+            }
+        }
+        
+        return headerBlock;
+        
         
     }
 
