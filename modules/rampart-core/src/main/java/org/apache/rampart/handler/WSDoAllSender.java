@@ -257,7 +257,7 @@ public class WSDoAllSender extends WSDoAllHandler {
             // of the same handler
             repetition++;
             msgContext.setProperty(WSSHandlerConstants.CURRENT_REPETITON,
-                    Integer.valueOf(repetition));
+                    new Integer(repetition));
             
             this.invoke(msgContext);
         }

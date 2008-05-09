@@ -149,7 +149,7 @@ public class HandlerParameterDecoder {
 			}
 
 			msgCtx.setProperty(WSSHandlerConstants.SENDER_REPEAT_COUNT,
-					Integer.valueOf(repetitionCount));
+					new Integer(repetitionCount));
 		}
 	}
     
