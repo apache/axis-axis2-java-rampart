@@ -32,6 +32,12 @@ $JAVA_HOME/jre/lib/security. These files are listed in sun download site,
 under the your JDK version as Java(TM) Cryptography Extension (JCE) Unlimited 
 Strength Jurisdiction Policy Files.     
 
+Bouncy castle jars are no longer shipped with Rampart binary distribution
+due some patent issues.But as bouncy castle jars are necessary for Rampart, users 
+will have to manually download and copy the bouncy castle jar corresponding the
+relevant JDK. Bouncy castle jars can be downloaded from 
+http://www.bouncycastle.org/latest_releases.html 
+
 Before you try any of the samples make sure you
 
 1.) Have the Axis2 standard binary distribution downloaded and extracted.
