@@ -21,6 +21,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.neethi.Policy;
@@ -169,13 +170,17 @@ public class RampartMessageData {
                 this.secConvVersion = TrustUtil.getWSTVersion((String)msgCtx.getProperty(KEY_WSSC_VERSION));
             }
             
-            Parameter clientSideParam = msgCtx.getAxisService().getParameter(PARAM_CLIENT_SIDE);
-            if(clientSideParam != null) {
+            // First obtain the axis service as we have to do a null check, there can be situations 
+            // where Axis Service is null
+            AxisService axisService = msgCtx.getAxisService();            
+                    
+            if(axisService != null && axisService.getParameter(PARAM_CLIENT_SIDE) != null) {
                 this.isInitiator = true;
             } else {
                 this.isInitiator = !msgCtx.isServerSide();
-                if(this.isInitiator) {
-                    clientSideParam = new Parameter();
+                //TODO if Axis Service is null at this point, do we have to create a dummy one ??    
+                if(this.isInitiator && axisService != null ) {
+                    Parameter clientSideParam = new Parameter();
                     clientSideParam.setName(PARAM_CLIENT_SIDE);
                     clientSideParam.setLocked(true);
                     msgCtx.getAxisService().addParameter(clientSideParam);
