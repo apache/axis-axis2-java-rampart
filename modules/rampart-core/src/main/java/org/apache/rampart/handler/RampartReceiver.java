@@ -26,6 +26,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
+import org.apache.axis2.namespace.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.RampartConstants;
@@ -168,7 +169,7 @@ public class RampartReceiver implements Handler {
             
             List subfaultCodes = new ArrayList();
             subfaultCodes.add(invalidSecurity);
-            throw new AxisFault(null,subfaultCodes,e.getMessage(),e);
+            throw new AxisFault(Constants.FAULT_SOAP12_SENDER,subfaultCodes,e.getMessage(),e);
         
         }        
         
