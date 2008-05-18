@@ -18,8 +18,6 @@
                 <include>org.apache.santuario:xmlsec:jar</include>
                 <include>opensaml:opensaml:jar</include>
                 <include>org.apache.ws.security:wss4j:jar</include>
-                <include>bouncycastle:bcprov-jdk13:jar</include>
-                <include>bouncycastle:bcprov-jdk15:jar</include>
                 <include>org.apache.rampart:rampart-core:jar</include>
                 <include>org.apache.rampart:rampart-policy:jar</include>
                 <include>org.apache.rampart:rampart-trust:jar</include>
