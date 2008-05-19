@@ -377,7 +377,7 @@ public abstract class BindingBuilder {
                     
                     //Add the UT
                     Element elem = utBuilder.getUsernameTokenElement();
-                    RampartUtil.insertSiblingAfter(rmd, this.getInsertionLocation(), elem);
+                    elem = RampartUtil.insertSiblingAfter(rmd, this.getInsertionLocation(), elem);
                     
                     encryptedTokensIdList.add(utBuilder.getId());
                     
@@ -501,11 +501,25 @@ public abstract class BindingBuilder {
         if(policyToken.isDerivedKeys()) {
             try {
                 WSSecDKSign dkSign = new WSSecDKSign();
-
-                OMElement ref = tok.getAttachedReference();
-                if(ref == null) {
+                              
+                //Check for whether the token is attached in the message or not
+                boolean attached = false;
+                
+                if (SPConstants.INCLUDE_TOEKN_ALWAYS == policyToken.getInclusion() ||
+                    SPConstants.INCLUDE_TOKEN_ONCE == policyToken.getInclusion() ||
+                    (rmd.isInitiator() && SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT 
+                            == policyToken.getInclusion())) {
+                    attached = true;
+                }
+                
+                // Setting the AttachedReference or the UnattachedReference according to the flag
+                OMElement ref;
+                if (attached == true) {
+                    ref = tok.getAttachedReference();
+                } else {
                     ref = tok.getUnattachedReference();
                 }
+                
                 if(ref != null) {
                     dkSign.setExternalKey(tok.getSecret(), (Element) 
                             doc.importNode((Element) ref, true));
