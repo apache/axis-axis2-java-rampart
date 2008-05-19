@@ -355,10 +355,14 @@ public class TransportBindingBuilder extends BindingBuilder {
               //Do Signature with derived keys
               WSSecDKSign dkSign = new WSSecDKSign();
               
-              OMElement ref = tok.getAttachedReference();
-              if(ref == null) {
+              // Setting the AttachedReference or the UnattachedReference according to the flag
+              OMElement ref;
+              if (tokenIncluded == true) {
+                  ref = tok.getAttachedReference();
+              } else {
                   ref = tok.getUnattachedReference();
               }
+              
               if(ref != null) {
                   dkSign.setExternalKey(tok.getSecret(), (Element) 
                           doc.importNode((Element) ref, true));
@@ -495,10 +499,14 @@ public class TransportBindingBuilder extends BindingBuilder {
               //Do Signature with derived keys
               WSSecDKSign dkSign = new WSSecDKSign();
               
-              OMElement ref = tok.getAttachedReference();
-              if(ref == null) {
+              // Setting the AttachedReference or the UnattachedReference according to the flag
+              OMElement ref;
+              if (tokenIncluded == true) {
+                  ref = tok.getAttachedReference();
+              } else {
                   ref = tok.getUnattachedReference();
               }
+              
               if(ref != null) {
                   dkSign.setExternalKey(tok.getSecret(), (Element) 
                           doc.importNode((Element) ref, true));
