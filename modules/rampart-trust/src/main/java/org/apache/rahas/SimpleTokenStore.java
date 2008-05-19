@@ -173,7 +173,7 @@ public class SimpleTokenStore implements TokenStorage {
             token = (Token) this.tokens.get(id);
             
             if(token == null) {
-                //Try the unattached refs
+                //Try to find the token using attached refs & unattached refs
                 for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
                     Token tempToken = (Token) iterator.next();
                     OMElement elem = tempToken.getAttachedReference();
