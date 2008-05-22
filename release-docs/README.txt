@@ -78,7 +78,7 @@ Crypto Notice
 ___________________
 Support
 ===================
- 
+
 Any problem with this release can be reported to Rampart mailing list
 or in the JIRA issue tracker.
 
@@ -86,11 +86,11 @@ Mailing list subscription:
     rampart-dev-subscribe@ws.apache.org
 
 Jira:
-    http://issues.apache.org/jira/browse/Rampart
+    http://issues.apache.org/jira/browse/RAMPART
 
 
 Thank you for using Apache Rampart!
 
-The Apache Rampart team. 
+The Apache Rampart team.
 
 [1] http://www.apache.org/dist/java-repository/xalan/jars/
