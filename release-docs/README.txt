@@ -38,6 +38,16 @@ will have to manually download and copy the bouncy castle jar corresponding the
 relevant JDK. Bouncy castle jars can be downloaded from 
 http://www.bouncycastle.org/latest_releases.html 
 
+Adding bouncycastle as a security provider 
+
+1.) Download bouncycastle according to your java version. You can download 
+bouncycastle from the following link.
+http://www.bouncycastle.org/latest_releases.html
+2.) Add the bcprov-jdkXX-139.jar to your service's / client's classpath. 
+3.) Add the following line to java.security file which can be found in JRE's 
+lib/security directory as the last line.
+security.provider.X=org.bouncycastle.jce.provider.BouncyCastleProvider
+
 Before you try any of the samples make sure you
 
 1.) Have the Axis2 standard binary distribution downloaded and extracted.
