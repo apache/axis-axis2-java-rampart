@@ -73,7 +73,7 @@ public class InteropScenarioClient {
                 new javax.xml.namespace.QName("rampart"));
         
 
-        PingResponseDocument pingResDoc = stub.Ping(pingDoc);
+        PingResponseDocument pingResDoc = stub.ping(pingDoc);
 
         PingResponse pingRes = pingResDoc.getPingResponse();
 
@@ -115,7 +115,7 @@ public class InteropScenarioClient {
                     WSSHandlerConstants.INFLOW_SECURITY,
                     inflowConfig.getProperty());
         }
-        PingResponseDocument pingResDoc = stub.Ping(pingDoc);
+        PingResponseDocument pingResDoc = stub.ping(pingDoc);
 
         PingResponse pingRes = pingResDoc.getPingResponse();
 
@@ -170,7 +170,7 @@ public class InteropScenarioClient {
             }
         }
         
-        PingResponseDocument pingResDoc = stub.Ping(pingDoc);
+        PingResponseDocument pingResDoc = stub.ping(pingDoc);
 
         PingResponse pingRes = pingResDoc.getPingResponse();
 
