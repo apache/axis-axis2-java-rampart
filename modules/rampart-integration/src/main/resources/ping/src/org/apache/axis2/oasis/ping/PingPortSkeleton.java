@@ -39,7 +39,7 @@ public class PingPortSkeleton{
      *
      * @param param0
      */
-    public PingResponseDocument Ping
+    public PingResponseDocument ping
             (PingDocument param0) {
         Vector results = null;
         MessageContext msgCtx = MessageContext.getCurrentMessageContext();
