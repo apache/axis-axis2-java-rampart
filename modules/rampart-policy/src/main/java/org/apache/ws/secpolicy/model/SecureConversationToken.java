@@ -99,8 +99,7 @@ public class SecureConversationToken extends SecurityContextToken {
         }
 
         if (inclusion != null) {
-            writer.writeAttribute(prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, 
-                                                                     namespaceURI + inclusion);
+            writer.writeAttribute(prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
         }
 
         if (issuerEpr != null) {
