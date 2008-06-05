@@ -134,11 +134,12 @@ public class RampartEngine {
 			if(doDebug){
 				log.debug("Processing security header using SymetricBinding");
 			}
-
 			results = engine.processSecurityHeader(rmd.getDocument(), 
 					actorValue, 
 					tokenCallbackHandler,
-					signatureCrypto);
+					signatureCrypto, 
+					        RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), 
+					                msgCtx.getAxisService().getClassLoader()));
 		} else {
 			if(doDebug){
 				log.debug("Processing security header in normal path");
