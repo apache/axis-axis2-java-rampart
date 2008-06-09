@@ -167,12 +167,9 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         // <sp:SymmetricBinding>
         writer.writeStartElement(prefix, localname, namespaceURI);
         
-        if (writerPrefix == null) {
-            // xmlns:sp=".."
-            writer.writeNamespace(prefix, namespaceURI);
-        }
-        
-        
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
+               
         String policyLocalName = SPConstants.POLICY.getLocalPart();
         String policyNamespaceURI = SPConstants.POLICY.getNamespaceURI();
         
