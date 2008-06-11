@@ -20,7 +20,6 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
@@ -67,9 +66,15 @@ public class TransportTokenBuilder implements AssertionBuilder {
                 OMElement element = primtive.getValue().getFirstChildWithName(SPConstants.POLICY);
                 
                 if (element != null) {
-
-                    if (element.getFirstChildWithName(SP12Constants.REQUIRE_CLIENT_CERTIFICATE) != null) {
-                        httpsToken.setRequireClientCertificate(true);
+                    OMElement child = element.getFirstElement();
+                    if (child != null) {
+                        if (SP12Constants.HTTP_BASIC_AUTHENTICATION.equals(child.getQName())) {
+                            httpsToken.setHttpBasicAuthentication(true);
+                        } else if (SP12Constants.HTTP_DIGEST_AUTHENTICATION.equals(child.getQName())) {
+                            httpsToken.setHttpDigestAuthentication(true);
+                        } else if (SP12Constants.REQUIRE_CLIENT_CERTIFICATE.equals(child.getQName())) {
+                            httpsToken.setRequireClientCertificate(true);
+                        }
                     }
                 }
                 
