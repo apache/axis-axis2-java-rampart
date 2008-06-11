@@ -31,6 +31,10 @@ public class SP12Constants {
     
     public final static QName REQUIRE_CLIENT_CERTIFICATE = new QName(SP12Constants.SP_NS, "RequireClientCertificate", SP12Constants.SP_PREFIX); 
     
+    public final static QName HTTP_BASIC_AUTHENTICATION = new QName(SP12Constants.SP_NS, "HttpBasicAuthentication", SP12Constants.SP_PREFIX);
+    
+    public final static QName HTTP_DIGEST_AUTHENTICATION = new QName(SP12Constants.SP_NS, "HttpDigestAuthentication", SP12Constants.SP_PREFIX);
+    
     // /////////////////////////////////////////////////////////////////////
 
     public static final QName ATTR_XPATH_VERSION = new QName(SP_NS, SPConstants.XPATH_VERSION, SP12Constants.SP_PREFIX);
