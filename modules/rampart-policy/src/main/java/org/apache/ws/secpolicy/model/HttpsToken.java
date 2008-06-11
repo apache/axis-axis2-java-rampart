@@ -36,6 +36,8 @@ public class HttpsToken extends Token {
     }
     
     private boolean requireClientCertificate = false;
+    private boolean httpBasicAuthentication = false;
+    private boolean httpDigestAuthentication = false;
 
     public boolean isRequireClientCertificate() {
         return requireClientCertificate;
@@ -43,6 +45,38 @@ public class HttpsToken extends Token {
 
     public void setRequireClientCertificate(boolean requireClientCertificate) {
         this.requireClientCertificate = requireClientCertificate;
+    }
+    
+    /**
+     * @return the httpBasicAuthentication
+     */
+    public boolean isHttpBasicAuthentication()
+    {
+        return httpBasicAuthentication;
+    }
+
+    /**
+     * @param httpBasicAuthentication the httpBasicAuthentication to set
+     */
+    public void setHttpBasicAuthentication(boolean httpBasicAuthentication)
+    {
+        this.httpBasicAuthentication = httpBasicAuthentication;
+    }
+
+    /**
+     * @return the httpDigestAuthentication
+     */
+    public boolean isHttpDigestAuthentication()
+    {
+        return httpDigestAuthentication;
+    }
+
+    /**
+     * @param httpDigestAuthentication the httpDigestAuthentication to set
+     */
+    public void setHttpDigestAuthentication(boolean httpDigestAuthentication)
+    {
+        this.httpDigestAuthentication = httpDigestAuthentication;
     }
 
     public QName getName() {
@@ -71,10 +105,38 @@ public class HttpsToken extends Token {
         // <sp:HttpsToken
         writer.writeStartElement(prefix, localname, namespaceURI);
 
-        // RequireClientCertificate=".."
-        writer
-                .writeAttribute(SPConstants.REQUIRE_CLIENT_CERTIFICATE.getLocalPart(), Boolean
-                        .toString(isRequireClientCertificate()));
+
+        if (version == SPConstants.SP_V12) {
+            
+            if (isRequireClientCertificate() ||
+                isHttpBasicAuthentication() ||
+                isHttpDigestAuthentication()) {
+                // <wsp:Policy>
+                writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+                
+                /*
+                 *  The ws policy 1.2 specification states that only one of those should be present, although
+                 * a web server (say tomcat) could be normally configured to require both a client certificate and 
+                 * a http user/pwd authentication. Nevertheless stick to the specification.
+                 */
+                if(isHttpBasicAuthentication()) {
+                    writer.writeStartElement(prefix, SPConstants.HTTP_BASIC_AUTHENTICATION.getLocalPart(), namespaceURI);
+                    writer.writeEndElement();
+                } else if(isHttpDigestAuthentication()) {
+                    writer.writeStartElement(prefix, SPConstants.HTTP_DIGEST_AUTHENTICATION.getLocalPart(), namespaceURI);
+                    writer.writeEndElement();
+                } else if(isRequireClientCertificate()) {
+                    writer.writeStartElement(prefix, SPConstants.REQUIRE_CLIENT_CERTIFICATE.getLocalPart(), namespaceURI);
+                    writer.writeEndElement();
+                }
+                // </wsp:Policy>
+                writer.writeEndElement();
+            }
+        } else {
+            // RequireClientCertificate=".."
+            writer.writeAttribute(SPConstants.REQUIRE_CLIENT_CERTIFICATE.getLocalPart(), Boolean
+                            .toString(isRequireClientCertificate()));
+        }
 
         writer.writeEndElement();
         // </sp:HttpsToken>
