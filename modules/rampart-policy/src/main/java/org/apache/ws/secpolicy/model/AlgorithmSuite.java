@@ -474,7 +474,7 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
         writer.writeEndElement();
 
         if (SPConstants.C14N.equals(getInclusiveC14n())) {
-            writer.writeStartElement(prefix, SPConstants.INCLUSIVE_C14N, prefix);
+            writer.writeStartElement(prefix, SPConstants.INCLUSIVE_C14N, namespaceURI);
             writer.writeEndElement();
         }
 
