@@ -63,6 +63,10 @@ public class RampartMessageData {
      */
     public final static String KEY_RAMPART_POLICY = "rampartPolicy";
     
+    public final static String KEY_RAMPART_IN_POLICY = "rampartInPolicy";
+        
+    public final static String KEY_RAMPART_OUT_POLICY = "rampartOutPolicy";
+    
     /**
      * Key to hold the populated RampartPolicyData object
      */
@@ -191,6 +195,35 @@ public class RampartMessageData {
                 this.servicePolicy = (Policy)msgCtx.getProperty(KEY_RAMPART_POLICY);
             }
             
+            
+            // Checking which flow we are in
+            int flow = msgCtx.getFLOW();
+            
+            // If we are IN flow or IN_FAULT flow and the KEY_RAMPART_IN_POLICY is set , we set the
+            // merge that policy to the KEY_RAMPART_POLICY if it is present. Else we set 
+            // KEY_RAMPART_IN_POLICY as the service policy
+            if ( (flow == MessageContext.IN_FLOW || flow == MessageContext.IN_FAULT_FLOW ) 
+                    &&  msgCtx.getProperty(KEY_RAMPART_IN_POLICY) != null) {
+                if ( this.servicePolicy == null ) {
+                    this.servicePolicy = (Policy)msgCtx.getProperty(KEY_RAMPART_IN_POLICY);
+                } else {
+                    this.servicePolicy = this.servicePolicy.merge((Policy)msgCtx
+                            .getProperty(KEY_RAMPART_IN_POLICY));
+                }
+                
+            // If we are OUT flow or OUT_FAULT flow and the KEY_RAMPART_OUT_POLICY is set , we set 
+            // the merge that policy to the KEY_RAMPART_POLICY if it is present. Else we set 
+            // KEY_RAMPART_OUT_POLICY as the service policy    
+            } else if ( (flow == MessageContext.OUT_FLOW || flow == MessageContext.OUT_FAULT_FLOW ) 
+                    &&  msgCtx.getProperty(KEY_RAMPART_OUT_POLICY) != null) {
+                if (this.servicePolicy == null) {
+                    this.servicePolicy = (Policy)msgCtx.getProperty(KEY_RAMPART_OUT_POLICY);
+                } else {
+                    this.servicePolicy = this.servicePolicy.merge((Policy)msgCtx
+                            .getProperty(KEY_RAMPART_OUT_POLICY));
+                }
+            }
+            
             /*
              * Init policy:
              * When creating the RampartMessageData instance we 
@@ -238,6 +271,7 @@ public class RampartMessageData {
                         rc.setSigCryptoConfig(rampartConfig.getSigCryptoConfig());
                         rc.setDecCryptoConfig(rampartConfig.getDecCryptoConfig());
                         rc.setUser(rampartConfig.getUser());
+                        rc.setUserCertAlias(rc.getUserCertAlias());
                         rc.setEncryptionUser(rampartConfig.getEncryptionUser());
                         rc.setPwCbClass(rampartConfig.getPwCbClass());
                         rc.setSSLConfig(rampartConfig.getSSLConfig());
