@@ -2,10 +2,9 @@
        "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Apache Rampart - Configuration Guide</title>
-      </head>
+</head>
   <body>
-
+<h1>Apache Rampart - Configuration Guide</h1>
 <h2>Rampart Configurations</h2>
 <p>RampartConfig element can have any of the following child elements. Schema is available <a href="rampart-config.xsd">here</a></p>
 <table class="bodyTable"><tbody>
@@ -15,14 +14,21 @@
         &lt;user&gt; bob&lt;/user&gt;</td></tr>
     <tr class="a"><td>userCertAlias</td><td>The user's cert alias</td><td>Set alias of the key to be used to sign<br></br>
         &lt;userCertAlias&gt; bob&lt;/userCertAlias&gt;</td></tr>
-    <tr class="b"><td>encryptionUser</td><td>The user's name for encryption.</td><td><br></br>
+    <tr class="b"><td>encryptionUser</td><td>The user's name for encryption.</td><td>
         &lt;encryptionUser&gt;alice&lt;/encryptionUser&gt;</td></tr>
     <tr class="a"><td>passwordCallbackClass</td><td>Callback class used to provide the password required to create the
-        UsernameToken or to sign the message</td><td>&lt;passwordCallbackClass&gt;
-        org.apache.axis2.security.PWCallback&lt;/passwordCallbackClass&gt;</td></tr>
-    <tr class="b"><td>policyValidatorCbClass</td><td>Callback class used to provide custom validater  </td><td>&lt;policyValidatorCbClass&gt;
-        org.apache.axis2.security.CustomPolicyValidater&lt;/policyValidatorCbClass&gt;</td></tr>
-
+        UsernameToken or to sign the message</td><td>
+<pre>
+&lt;passwordCallbackClass&gt;
+    org.apache.axis2.security.PWCallback
+&lt;/passwordCallbackClass&gt;
+</pre></td></tr>
+    <tr class="b"><td>policyValidatorCbClass</td><td>Callback class used to provide custom validater  </td><td>
+<pre>
+&lt;policyValidatorCbClass&gt;
+    org.apache.axis2.security.CustomPolicyValidater
+&lt;/policyValidatorCbClass&gt;
+</pre></td></tr>
     <tr class="a"><td>signatureCrypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>
 <pre>
@@ -36,20 +42,35 @@
 </pre>
 		</td></tr>
     <tr class="b"><td>encryptionCypto</td><td>properties to needed perform signature, such as crypto
-        provider, keystore and its password</td><td>&lt;encryptionCypto&gt;....crypto element ......&lt;/encryptionCypto&gt;</td></tr>
+        provider, keystore and its password</td><td>
+<pre>        
+&lt;encryptionCypto&gt;
+    ....crypto element ......
+&lt;/encryptionCypto&gt;
+</pre></td></tr>
     <tr class="a"><td>decryptionCrypto</td><td>properties to needed perform signature, such as crypto
-        provider, keystore and its password</td><td>&lt;decryptionCrypto&gt;....crypto element ......&lt;/decryptionCrypto&gt;</td></tr>
+        provider, keystore and its password</td><td>
+<pre>  
+&lt;decryptionCrypto&gt;
+    ....crypto element ......
+&lt;/decryptionCrypto&gt;</pre></td></tr>
  <tr class="b"><td>timestampTTL</td><td>Time to live of Timestamp</td><td>The default timestamp time to live is 300 seconds</td></tr>
     <tr class="a"><td>timestampMaxSkew</td><td>The maximum tolerence limit for timeskew of the timestamp</td><td>Rampart allows timestamps created slightly ahead of the reciever's time.<br/> This parameter allows to specify the tolerence limit</td></tr>
+    <tr class="b"><td>timestampPrecisionInMilliseconds</td><td> Whether the timestamps precision should be milliseconds </td><td>When this value is set false, generated timestamps doesn't contain milliseconds </td></tr>
+    <tr class="a"><td>optimizeParts</td><td></td><td></td></tr>
     <tr class="b"><td>tokenStoreClass</td><td></td><td></td></tr>
     <tr class="a"><td>sslConfig</td><td>SSL Configuration need for Transportbinding</td><td>Can specify the properties such as "javax.net.ssl.trustStore" and "javax.net.ssl.trustStorePassword". Please see below for more information.</td></tr>
   </tbody></table>
+<br></br>
 <h3>Crypto Provider</h3>
   <p>org.apache.ws.security.crypto.provider defines the implementation of
 the org.apache.ws.security.components.crypto.Crypto interface to provide the
 crypto information required by WSS4J. The other properties defined are the
 configuration properties used by the implementation class
-(org.apache.ws.security.components.crypto.Merlin). <a name="ref"></a><a name="references"></a></p>
-<a name="References"></a><h3>References</h3>1. <a href="http://ws.apache.org/wss4j">Apache WSS4J -Home</a>
+(org.apache.ws.security.components.crypto.Merlin). 
+<br></br>
+<a name="ref"></a><a name="references"></a></p>
+<a name="References"></a>
+<h3>References</h3>1. <a href="http://ws.apache.org/wss4j">Apache WSS4J -Home</a>
   </body>
 </html>
