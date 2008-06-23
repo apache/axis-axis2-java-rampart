@@ -21,7 +21,6 @@
   "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Apache Rampart References</title>
 </head>
 <body>
 <h1>Apache Rampart Knowledge Base</h1>
@@ -46,7 +45,9 @@ Integrating WS-Security and WS-SecureConversation Implementations with Apache Sa
 Ruchith Fernando</li>
 <li><a href="http://wso2.org/library/174">Setting Up Keystores for a Client and a Service</a>- By
 Ruchith Fernando</li>
-<li><a href="http://wso2.org/library/3190">Web Services Security with Apache Rampart - Part 1 ( Transport Level Security )</a>- By
+<li><a href="http://wso2.org/library/3190">Web Services Security with Apache Rampart - Part 1 (Transport Level Security)</a>- By
+Nandana Mihindukulasooriya</li>
+<li><a href="http://wso2.org/library/3415">Web Services Security with Apache Rampart - Part 2 (Message-Level Security)</a>- By
 Nandana Mihindukulasooriya</li>
 </ul>
 
