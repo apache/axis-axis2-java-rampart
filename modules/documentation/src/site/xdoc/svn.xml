@@ -32,7 +32,7 @@ build the project is also included here.</p>
 <h2>Content</h2>
 <ul>
 <li><a href="#svn">Working with Subversion (SVN)</a></li>
-<li><a href="#checkout">Checkout Axis2 from Subversion</a></li>
+<li><a href="#checkout">Checkout Rampart from Subversion</a></li>
 <li><a href="#maven">Installing Maven 2</a></li>
 <li><a href="#ide">Configuring your IDE</a></li>
 </ul>
