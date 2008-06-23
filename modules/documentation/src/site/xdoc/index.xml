@@ -21,25 +21,53 @@
 <document>
 
 	<properties>
-		<title>Apache Rampart</title>
+		
 	</properties>
 
 	<body>
-
-		<section name="Apache Rampart">
+        <h1>Apache Rampart - Axis2 Security Module</h1>
+		<section name="Welcome to Apache Rampart">
 			<p>Rampart is the security module of Axis2. It secures SOAP messages
 according to specifications in the WS-Security stack. Rampart implements the
 following specifications:</p>
-			<ul>
-				<li>WS - Security 1.0</li>
-				<li>WS - Security 1.1</li>
-				<li>WS - Secure Conversation - February 2005</li>
-				<li>WS - Security Policy - 1.1 - July 2005</li>
-				<li>WS - Security Policy - 1.2 </li>
-				<li>WS - Trust - February 2005</li>
-				<li>WS - Trust - WS-SX spec - EXPERIMENTAL</li>
-			</ul>
 		</section>
-
+		
+		<h2>Features of Rampart Latest Version</h2>
+		
+		    <ul>
+                <li>WS - Security 1.0</li>
+                <li>WS - Security 1.1</li>
+                <li>WS - Secure Conversation - February 2005</li>
+                <li>WS - Security Policy - 1.1 - July 2005</li>
+                <li>WS - Security Policy - 1.2 </li>
+                <li>WS - Trust - February 2005</li>
+                <li>WS - Trust - WS-SX spec - EXPERIMENTAL</li>
+            </ul>
+         
+        <h2>Apache Rampart News</h2>    
+        <h3>Jun 12, 2008 : Apache Rampart 1.4 released</h3>  
+        <p>Apache Rampart 1.4 was released with lots of bug fixes and new features.<br></br>
+        New features include</p>
+            <ul>
+                <li>WS Security 1.1</li>
+                <ul>
+                   <li>Encrypted headers</li>
+                   <li>Encrypted SHA1 references</li>
+                </ul>
+                <li>WS Security Policy 1.2 support</li>
+                <li>WS Trust</li>
+                <ul>
+                    <li>Renew binding</li>
+                    <li>Validation binding</li>
+                </ul>
+                <li>New configuration options</li>
+                <ul>
+                    <li>Ability to plug in Custom policy validators</li>
+                    <li>Ability to define certAlias different from username for signature</li>
+                    <li>Ability turn off mili second precision</li>
+                </ul>
+                <li>Ability to secure messages faults </li>
+                <li>Increased interoparability with WCF 3.5 </li>
+            </ul>   
 	</body>
 </document>
