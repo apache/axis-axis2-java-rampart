@@ -47,6 +47,7 @@ import org.opensaml.SAMLAssertion;
 
 import javax.xml.namespace.QName;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -159,7 +160,9 @@ public class RampartEngine {
                 //Store symm tokens
                 //Pick the first SAML token
                 //TODO : This is a hack , MUST FIX
-                //get the sec context id from the req msg ctx
+                //get the sec context id from the req msg ctx 
+		
+		//Store username in MessageContext property
                 
                 for (int j = 0; j < results.size(); j++) {
                     WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
@@ -186,6 +189,10 @@ public class RampartEngine {
                                     "errorInAddingTokenIntoStore", e);
                         }
                         
+                    } else if (WSConstants.UT == actInt.intValue()) {
+                        String username = ((Principal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL))
+                                .getName();
+                        msgCtx.setProperty(RampartMessageData.USERNAME, username);
                     }
         
                 }
