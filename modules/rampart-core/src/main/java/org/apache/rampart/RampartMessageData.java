@@ -80,6 +80,11 @@ public class RampartMessageData {
     public final static String KEY_CUSTOM_ISSUED_TOKEN = "customIssuedToken";
     
     /**
+     * Key to hold username which was used to authenticate
+     */
+    public final static String USERNAME = "username";
+    
+    /**
      * Key to hold the WS-Trust version
      */
     public final static String KEY_WST_VERSION = "wstVersion";
