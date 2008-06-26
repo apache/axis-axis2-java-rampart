@@ -49,6 +49,7 @@ import org.apache.rahas.TrustUtil;
 import org.apache.rahas.client.STSClient;
 import org.apache.rampart.PolicyBasedResultsValidator;
 import org.apache.rampart.PolicyValidatorCallbackHandler;
+import org.apache.rampart.RampartConfigCallbackHandler;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -183,7 +184,7 @@ public class RampartUtil {
             Class cbClass;
             try {
                 cbClass = Loader.loadClass(classLoader, cbHandlerClass);
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) { 
                 throw new RampartException("cannotLoadPolicyValidatorCbClass", 
                         new String[]{cbHandlerClass}, e);
             }
@@ -200,6 +201,41 @@ public class RampartUtil {
         
         return cbHandler;
     }
+   
+   public static RampartConfigCallbackHandler getRampartConfigCallbackHandler(MessageContext msgContext, 
+           RampartPolicyData rpd) throws RampartException {
+       
+       RampartConfigCallbackHandler rampartConfigCB;
+   
+       if (rpd.getRampartConfig() != null && rpd.getRampartConfig().getRampartConfigCbClass() != null) {
+           
+           String cbHandlerClass = rpd.getRampartConfig().getRampartConfigCbClass();
+           ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
+               
+           log.debug("loading class : " + cbHandlerClass);
+           
+           Class cbClass;
+           try {
+               cbClass = Loader.loadClass(classLoader, cbHandlerClass);
+           } catch (ClassNotFoundException e) {
+               throw new RampartException("cannotLoadRampartConfigCallbackClass", 
+                       new String[]{cbHandlerClass}, e);
+           }
+           try {
+               rampartConfigCB = (RampartConfigCallbackHandler) cbClass.newInstance();
+           } catch (java.lang.Exception e) {
+               throw new RampartException("cannotCreateRampartConfigCallbackInstance",
+                       new String[]{cbHandlerClass}, e);
+           }
+           
+           return rampartConfigCB;
+           
+       }
+       
+       return null;
+       
+       
+   }
     
    
     
