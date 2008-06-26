@@ -84,6 +84,8 @@ public class RampartConfig implements Assertion {
     public final static String PW_CB_CLASS_LN = "passwordCallbackClass";
     
     public final static String POLICY_VALIDATOR_CB_CLASS_LN = "policyValidatorCbClass";
+    
+    public final static String RAMPART_CONFIG_CB_CLASS_LN = "rampartConfigCallbackClass";
 
     public final static String SIG_CRYPTO_LN = "signatureCrypto";
 
@@ -116,6 +118,8 @@ public class RampartConfig implements Assertion {
     private String pwCbClass;
     
     private String policyValidatorCbClass;
+    
+    private String rampartConfigCbClass;
 
     private CryptoConfig sigCryptoConfig;
 
@@ -201,6 +205,14 @@ public class RampartConfig implements Assertion {
         this.policyValidatorCbClass = policyValidatorCbClass;
     }
 
+    public String getRampartConfigCbClass() {
+        return rampartConfigCbClass;
+    }
+
+    public void setRampartConfigCbClass(String rampartConfigCbClass) {
+        this.rampartConfigCbClass = rampartConfigCbClass;
+    }
+
     public CryptoConfig getSigCryptoConfig() {
         return sigCryptoConfig;
     }
@@ -284,6 +296,12 @@ public class RampartConfig implements Assertion {
             writer.writeStartElement(NS, POLICY_VALIDATOR_CB_CLASS_LN);
             writer.writeCharacters(getPolicyValidatorCbClass());
             writer.writeEndElement();
+        }
+        
+        if (getRampartConfigCbClass() != null) {
+            writer.writeStartElement(NS, RAMPART_CONFIG_CB_CLASS_LN);
+            writer.writeCharacters(getRampartConfigCbClass());
+            writer.writeEndElement();     
         }
         
         if (getTimestampPrecisionInMilliseconds() != null) {
