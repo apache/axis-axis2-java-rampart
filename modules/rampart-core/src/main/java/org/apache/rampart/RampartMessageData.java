@@ -243,7 +243,6 @@ public class RampartMessageData {
                 }
             }
             
-            
             if(this.servicePolicy != null){
                 List it = (List)this.servicePolicy.getAlternatives().next();
 
@@ -253,6 +252,16 @@ public class RampartMessageData {
             
             
             if(this.policyData != null) {
+                
+                // Update the Rampart Config if RampartConfigCallbackHandler is present in the
+                // RampartConfig
+                
+                RampartConfigCallbackHandler rampartConfigCallbackHandler = RampartUtil
+                        .getRampartConfigCallbackHandler(msgCtx, policyData);
+                
+                if (rampartConfigCallbackHandler != null) {
+                    rampartConfigCallbackHandler.update(policyData.getRampartConfig());
+                }
                 
                 //Check for RST and RSTR for an SCT
                 if((WSSHandlerConstants.RST_ACTON_SCT.equals(msgContext.getWSAAction())
