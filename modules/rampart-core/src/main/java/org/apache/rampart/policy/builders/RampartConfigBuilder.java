@@ -69,7 +69,13 @@ public class RampartConfigBuilder implements AssertionBuilder {
                 RampartConfig.NS, RampartConfig.POLICY_VALIDATOR_CB_CLASS_LN));
         if (childElement != null) {
             rampartConfig.setPolicyValidatorCbClass(childElement.getText().trim());
-        }        
+        }
+        
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.RAMPART_CONFIG_CB_CLASS_LN));
+        if (childElement != null) {
+            rampartConfig.setRampartConfigCbClass(childElement.getText().trim());
+        }
                       
         // handle ssl config	
 		childElement = element.getFirstChildWithName(new QName(
