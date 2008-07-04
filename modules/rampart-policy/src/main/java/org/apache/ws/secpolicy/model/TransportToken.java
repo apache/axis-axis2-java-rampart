@@ -87,7 +87,9 @@ public class TransportToken extends AbstractSecurityAssertion implements TokenWr
         writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
         // serialization of the token ..
-        transportToken.serialize(writer);
+        if (transportToken != null) {
+            transportToken.serialize(writer);
+        }
         
         // </wsp:Policy>
         writer.writeEndElement();
