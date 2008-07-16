@@ -38,6 +38,8 @@ import org.apache.axis2.mex.MexException;
 import org.apache.axis2.mex.om.Metadata;
 import org.apache.axis2.mex.om.MetadataReference;
 import org.apache.axis2.mex.om.MetadataSection;
+import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
@@ -672,6 +674,15 @@ public class RampartUtil {
                 if(addrVersionNs != null) {
                     client.setAddressingNs((String)addrVersionNs);
                 }
+                
+                Options options = new Options();
+                if (msgContext.getProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER) != null) {
+                    Protocol protocolHandler =
+                        (Protocol)msgContext.getProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER);;
+                    options.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER, protocolHandler);                 
+                } 
+                
+                client.setOptions(options);
                 
                 //Set soap version
                 client.setSoapVersion(msgContext.getOptions().getSoapVersionURI());
