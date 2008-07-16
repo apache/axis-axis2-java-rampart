@@ -682,6 +682,11 @@ public class RampartUtil {
                     options.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER, protocolHandler);                 
                 } 
                 
+                if (msgContext.getParameter(WSHandlerConstants.PW_CALLBACK_REF) != null ) {
+                    Parameter pwCallback = msgContext.getParameter(WSHandlerConstants.PW_CALLBACK_REF);
+                    client.addParameter(pwCallback);
+                }
+                
                 client.setOptions(options);
                 
                 //Set soap version
