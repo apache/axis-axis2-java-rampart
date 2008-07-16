@@ -676,6 +676,10 @@ public class RampartUtil {
                 }
                 
                 Options options = new Options();
+                
+                options.setUserName(rmd.getMsgContext().getOptions().getUserName());
+                options.setPassword(rmd.getMsgContext().getOptions().getPassword());
+                
                 if (msgContext.getProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER) != null) {
                     Protocol protocolHandler =
                         (Protocol)msgContext.getProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER);;
