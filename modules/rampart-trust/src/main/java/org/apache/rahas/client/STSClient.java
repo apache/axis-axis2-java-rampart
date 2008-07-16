@@ -16,11 +16,23 @@
 
 package org.apache.rahas.client;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.om.util.Base64;
+import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
@@ -31,7 +43,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.OutInAxisOperation;
-import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
@@ -51,20 +63,9 @@ import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.token.Reference;
-import org.apache.ws.security.message.token.SecurityTokenReference;
 import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Element;
-
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.xml.namespace.QName;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
 
 public class STSClient {
 
@@ -83,6 +84,8 @@ public class STSClient {
     private Trust10 trust10;
 
     private AlgorithmSuite algorithmSuite;
+    
+    private ArrayList parameters = new ArrayList();
 
     private byte[] requestorEntropy;
 
@@ -120,6 +123,11 @@ public class STSClient {
             
             ServiceClient client = getServiceClient(rstQn, issuerAddress);
             
+            for (int i = 0; i < parameters.size(); i++) {
+                Parameter param = (Parameter)parameters.get(i);
+                client.getAxisService().addParameter(param.getName(), param.getValue());
+            }
+            
             client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
             client.getOptions().setSoapVersionURI(this.soapVersion);
             if(this.addressingNs != null) {
@@ -136,9 +144,8 @@ public class STSClient {
 
             return processIssueResponse(version, response, issuerAddress);
         } catch (AxisFault e) {
-            e.printStackTrace();
             log.error("errorInObtainingToken", e);
-            throw new TrustException("errorInObtainingToken", new String[]{issuerAddress});
+            throw new TrustException("errorInObtainingToken", new String[]{issuerAddress},e);
         }
     }
 
@@ -190,15 +197,13 @@ public class STSClient {
             
             OMElement response = client.sendReceive(rstQn,
                                                     createValidateRequest(requestType,tokenId));
-
-            System.out.println(response.toString());
             
             return true;
             
             
         } catch (AxisFault e) {
             log.error("errorInValidatingToken", e);
-            throw new TrustException("errorInValidatingToken", new String[]{issuerAddress});
+            throw new TrustException("errorInValidatingToken", new String[]{issuerAddress},e);
         }
         
     }
@@ -231,7 +236,7 @@ public class STSClient {
         
         } catch (AxisFault e) {
             log.error("errorInRenewingToken", e);
-            throw new TrustException("errorInRenewingToken", new String[]{issuerAddress}); 
+            throw new TrustException("errorInRenewingToken", new String[]{issuerAddress},e); 
         }
         
     }
@@ -768,6 +773,10 @@ public class STSClient {
 
     public void setSoapVersion(String soapVersion) {
         this.soapVersion = soapVersion;
+    }
+    
+    public void addParameter(Parameter param) {
+        parameters.add(param);
     }
 
 }
