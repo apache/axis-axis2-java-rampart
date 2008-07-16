@@ -50,6 +50,8 @@ public class Rampart implements Module, ModulePolicyExtension  {
     }
 
     public boolean canSupportAssertion(Assertion assertion) {
+        //TODO doesn't we need to check whether policy is security policy or
+        // RampartConfig assertion
         return true;
     }
 }
