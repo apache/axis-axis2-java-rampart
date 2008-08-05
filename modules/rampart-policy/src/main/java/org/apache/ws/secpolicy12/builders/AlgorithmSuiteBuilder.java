@@ -15,9 +15,14 @@
  */
 package org.apache.ws.secpolicy12.builders;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
+import org.apache.neethi.Policy;
+import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
@@ -29,16 +34,30 @@ import javax.xml.namespace.QName;
 public class AlgorithmSuiteBuilder implements AssertionBuilder {
         
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
+        
         AlgorithmSuite algorithmSuite = new AlgorithmSuite(SPConstants.SP_V12);
         
-        OMElement policyElem = element.getFirstElement();
+        Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
+        policy = (Policy) policy.normalize(false);
+                 
+        Iterator iterAlterns = policy.getAlternatives();
+        List assertions = ((List) iterAlterns.next());
         
+        processAlternative(assertions, algorithmSuite);
+                
+        return algorithmSuite;
+        
+    }
+    
+    private void processAlternative(List assertions, AlgorithmSuite algorithmSuite) {        
+        Iterator iterator = assertions.iterator();
+        Assertion assertion = ((Assertion) iterator.next());
+        String name = assertion.getName().getLocalPart();
         try {
-            algorithmSuite.setAlgorithmSuite(policyElem.getFirstElement().getLocalName());
+            algorithmSuite.setAlgorithmSuite(name);
         } catch (WSSPolicyException e) {
             throw new IllegalArgumentException(e);
         }
-        return algorithmSuite;
     }
     
     public QName[] getKnownElements() {
