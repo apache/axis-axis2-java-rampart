@@ -47,8 +47,30 @@
        	  		<includeDependencies>false</includeDependencies>
 			<moduleXmlFile>module.xml</moduleXmlFile>
         	</configuration>
-      	     </plugin> 
-           </plugins>
+      	     </plugin>    
+           <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>aar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>target/${pom.artifactId}-${pom.version}.mar</file>
+                                    <type>jar</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            </plugins>
     </build>
     
     <dependencies>
