@@ -40,6 +40,7 @@ import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.conversation.ConversationConstants;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
@@ -500,7 +501,12 @@ public abstract class BindingBuilder {
         
         if(policyToken.isDerivedKeys()) {
             try {
-                WSSecDKSign dkSign = new WSSecDKSign();
+                WSSecDKSign dkSign = new WSSecDKSign();  
+                
+                //Check whether it is security policy 1.2 and use the secure conversation accordingly
+                if (SPConstants.SP_V12 == policyToken.getVersion()) {
+                    dkSign.setWscVersion(ConversationConstants.VERSION_05_12);
+                }
                               
                 //Check for whether the token is attached in the message or not
                 boolean attached = false;

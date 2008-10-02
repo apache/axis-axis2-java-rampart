@@ -39,6 +39,7 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.conversation.ConversationConstants;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
@@ -574,6 +575,11 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 
                 try {
                     WSSecDKEncrypt dkEncr = new WSSecDKEncrypt();
+                    
+                    //Check whether it is security policy 1.2 and use the secure conversation accordingly
+                    if (SPConstants.SP_V12 == encrToken.getVersion()) {
+                        dkEncr.setWscVersion(ConversationConstants.VERSION_05_12);
+                    }                    
                     
                     if(encrTokElem != null && encrTok.getAttachedReference() != null) {
                         
