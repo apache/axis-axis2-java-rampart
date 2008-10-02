@@ -29,6 +29,8 @@ import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
 import org.apache.ws.secpolicy.model.X509Token;
+import org.apache.ws.security.SOAP11Constants;
+import org.apache.ws.security.SOAP12Constants;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSDataRef;
 import org.apache.ws.security.WSEncryptionPart;
@@ -38,6 +40,8 @@ import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import com.ibm.wsdl.extensions.soap.SOAPConstants;
 
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
@@ -502,20 +506,44 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         for(int i=0; i<signatureParts.size(); i++) {
             WSEncryptionPart wsep = (WSEncryptionPart) signatureParts.get( i );
             
-            Element headerElement = (Element) WSSecurityUtil.findElement(
-                    envelope, wsep.getName(), wsep.getNamespace() );
-            if( headerElement == null ) {
-                // The signedpart header we are checking is not present in Soap header - this is allowed
-                continue;
-            }
+            if (wsep.getType() == WSConstants.PART_TYPE_BODY) {
+                
+                Element body;
+                
+                if (WSConstants.URI_SOAP11_ENV.equals(envelope.getNamespaceURI())) {
+                    body = WSSecurityUtil.findBodyElement(rmd.getDocument(), new SOAP11Constants());
+                } else {
+                    body = WSSecurityUtil.findBodyElement(rmd.getDocument(), new SOAP12Constants());
+                }
+                
+                if (!actuallySigned.contains(body)) {
+                    // soap body is not signed
+                    throw new RampartException("bodyNotSigned");
+                }
             
-            // header element present - verify that it is part of signature
-            if( actuallySigned.contains( headerElement) ) {
-                continue;
-            }
+            } else if (wsep.getType() == WSConstants.PART_TYPE_HEADER || 
+                    wsep.getType() == WSConstants.PART_TYPE_ELEMENT) {            
+               
+                Element element = (Element) WSSecurityUtil.findElement(
+                        envelope, wsep.getName(), wsep.getNamespace() );
+                if( element == null ) {
+                    // The signedpart header or element we are checking is not present in 
+                    // soap envelope - this is allowed
+                    continue;
+                }
+                
+                // header or the element present in soap envelope - verify that it is part of signature
+                if( actuallySigned.contains( element) ) {
+                    continue;
+                }
+                
+                String msg = wsep.getType() == WSConstants.PART_TYPE_HEADER ? 
+                        "signedPartHeaderNotSigned" : "signedElementNotSigned"; 
+                
+                // header or the element defined in policy is present but not signed
+                throw new RampartException(msg, new String[] { wsep.getNamespace()+":"+wsep.getName() });
             
-            // header defined in policy is present but not signed
-            throw new RampartException("signedPartHeaderNotSigned", new String[] { wsep.getName() });
+            } 
         }
     }
 

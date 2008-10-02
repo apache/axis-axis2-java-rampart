@@ -22,6 +22,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.xpath.AXIOMXPath;
+import org.apache.axiom.soap.SOAP11Constants;
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -654,6 +656,8 @@ public class RampartUtil {
                 // Set request action
                 client.setAction(action);
                 
+                client.setVersion(rmd.getWstVersion());
+                
                 client.setRstTemplate(rstTemplate);
         
                 // Set crypto information
@@ -694,7 +698,12 @@ public class RampartUtil {
                 client.setOptions(options);
                 
                 //Set soap version
-                client.setSoapVersion(msgContext.getOptions().getSoapVersionURI());
+                if (msgContext.isSOAP11()) {
+                    client.setSoapVersion(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI);
+                } else {
+                    client.setSoapVersion(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI); 
+                }
+                
                 
                 //Make the request
                 org.apache.rahas.Token rst = 
@@ -922,7 +931,7 @@ public class RampartUtil {
         // check body
         if(includeBody) {
             if( sign ) {
-                result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody())));
+                result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody()),null,WSConstants.PART_TYPE_BODY));
             } else {
                 result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody()), "Content", WSConstants.PART_TYPE_BODY));
             }
@@ -950,7 +959,7 @@ public class RampartUtil {
                         found.add( e );
                         
                         if( sign ) {
-                            result.add(new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Content"));
+                            result.add(new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Content", WSConstants.PART_TYPE_HEADER));
                         } else {
                             
                             WSEncryptionPart encryptedHeader = new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Element", WSConstants.PART_TYPE_HEADER);
@@ -1011,10 +1020,10 @@ public class RampartUtil {
 			    	OMElement e = (OMElement)nodesIter.next();
 			    	
 			    	if (sign) {
-			    		result.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content"));
+			    		result.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content", WSConstants.PART_TYPE_ELEMENT));
 			    	} else {
 			    		
-			    	        WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Element");
+			    	        WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Element",WSConstants.PART_TYPE_ELEMENT);
 			    		OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
 			    	        
 			    		if ( wsuId != null ) {
