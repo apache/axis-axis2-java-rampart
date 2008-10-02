@@ -41,8 +41,6 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.ibm.wsdl.extensions.soap.SOAPConstants;
-
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
