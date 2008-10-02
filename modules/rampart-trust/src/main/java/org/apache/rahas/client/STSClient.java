@@ -56,6 +56,7 @@ import org.apache.rahas.TrustUtil;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.Trust10;
+import org.apache.ws.secpolicy.model.Trust13;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.WSSecurityException;
@@ -82,6 +83,8 @@ public class STSClient {
     private Options options;
 
     private Trust10 trust10;
+    
+    private Trust13 trust13;
 
     private AlgorithmSuite algorithmSuite;
     
@@ -497,6 +500,10 @@ public class STSClient {
                     log.debug("Extracting Trust10 assertion from " +
                               "service policy");
                     this.trust10 = (Trust10) tempAssertion;
+                } else if (tempAssertion instanceof Trust13) {
+                    log.debug("Extracting Trust13 assertion from " +
+                    "service policy");
+                    this.trust13 = (Trust13) tempAssertion;
                 }
             }
         }
@@ -553,7 +560,7 @@ public class STSClient {
             // Handle entropy
             if (this.trust10 != null) {
 
-                log.debug("Processing Trust10 assertion");
+                log.debug("Processing Trust assertion");
 
                 if (this.trust10.isRequireClientEntropy()) {
 
@@ -576,9 +583,38 @@ public class STSClient {
                     // Add the ComputedKey element
                     TrustUtil.createComputedKeyAlgorithm(this.version, rst,
                                                          RahasConstants.COMPUTED_KEY_PSHA1);
-
                 }
+                
+            } else if (this.trust13 != null) {
+                
+                if (this.trust13.isRequireClientEntropy()) {
+
+                    log.debug("Requires client entropy");
+
+                    // setup requestor entropy
+                    OMElement ent = TrustUtil.createEntropyElement(this.version, rst);
+                    OMElement binSec =
+                            TrustUtil.createBinarySecretElement(this.version,
+                                                                ent,
+                                                                RahasConstants.BIN_SEC_TYPE_NONCE);
+                    this.requestorEntropy =
+                            WSSecurityUtil.generateNonce(this.algorithmSuite.
+                                    getMaximumSymmetricKeyLength()/8);
+                    binSec.setText(Base64.encode(this.requestorEntropy));
+
+                    log.debug("Clien entropy : "
+                              + Base64.encode(this.requestorEntropy));
+
+                    // Add the ComputedKey element
+                    TrustUtil.createComputedKeyAlgorithm(this.version, rst,
+                                                         RahasConstants.COMPUTED_KEY_PSHA1);
+                }
+                
             }
+            
+            
+            
+            
         } catch (Exception e) {
             throw new TrustException("errorSettingUpRequestorEntropy", e);
         }
@@ -607,8 +643,7 @@ public class STSClient {
         
         Token token = store.getToken(tokenId);
         
-        if ( token != null) {
-            
+        if ( token != null) {            
             OMElement str = token.getUnattachedReference();     
             
             if (str == null) {
@@ -677,6 +712,16 @@ public class STSClient {
      */
     public void setTrust10(Trust10 trust10) {
         this.trust10 = trust10;
+    }
+    
+    /**
+     * Set this to set the entropy configurations.
+     * If this is provided in the given policy it will be overridden.
+     *
+     * @param trust13 The trust13 to set.
+     */
+    public void setTrust13(Trust13 trust13) {
+        this.trust13 = trust13;
     }
 
     /**
