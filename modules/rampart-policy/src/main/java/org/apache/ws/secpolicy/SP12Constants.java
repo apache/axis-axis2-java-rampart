@@ -26,8 +26,8 @@ public class SP12Constants {
     public final static String INCLUDE_ALWAYS = SP12Constants.SP_NS
         + SPConstants.INCLUDE_TOEKN_ALWAYS_SUFFIX;
     
-    public static final QName TRUST_13 = new QName(SP11Constants.SP_NS, SPConstants.TRUST_13,
-            SP11Constants.SP_PREFIX);
+    public static final QName TRUST_13 = new QName(SP12Constants.SP_NS, SPConstants.TRUST_13,
+            SP12Constants.SP_PREFIX);
     
     public final static QName REQUIRE_CLIENT_CERTIFICATE = new QName(SP12Constants.SP_NS, "RequireClientCertificate", SP12Constants.SP_PREFIX); 
     
