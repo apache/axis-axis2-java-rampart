@@ -486,7 +486,7 @@
 
         <xmlsec.version>1.4.1</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
-        <XmlSchema.version>SNAPSHOT</XmlSchema.version>
+        <XmlSchema.version>1.4-SNAPSHOT</XmlSchema.version>
 
         <wsdl4j.version>1.6.2</wsdl4j.version>
         <annogen.version>0.1.0</annogen.version>
