@@ -199,6 +199,10 @@ public class PostDispatchVerificationHandler implements Handler {
                 "PostDispatchVerificationHandler: cannot get SOAP header after security processing",
                     ex);
         }
+        
+        if(header == null) {
+            return null;
+        }
 
         Iterator headers = header.getChildElements();
 
