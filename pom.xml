@@ -526,6 +526,7 @@
 
         <!-- distribution properties -->
         <dist.dir>rampart-${pom.version}</dist.dir>
+        <failIfNoTests>false</failIfNoTests>
 
     </properties>
     <distributionManagement>
