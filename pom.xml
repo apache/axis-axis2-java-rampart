@@ -194,7 +194,7 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-transports</artifactId>
-            <version>${axis2.version}</version>
+            <version>${axis2.transport.version}</version>
         </dependency> 
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -478,6 +478,7 @@
         <rampart.mar.version>SNAPSHOT</rampart.mar.version>
 		<rahas.mar.version>SNAPSHOT</rahas.mar.version>
 		<axis2.version>SNAPSHOT</axis2.version>
+		<axis2.transport.version>SNAPSHOT</axis2.transport.version>
         <neethi.version>SNAPSHOT</neethi.version>
         <axiom.version>SNAPSHOT</axiom.version>
         <wss4j.version>SNAPSHOT</wss4j.version>
