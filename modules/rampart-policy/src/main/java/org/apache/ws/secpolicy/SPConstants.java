@@ -335,7 +335,7 @@ public class SPConstants {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////
     
-    public static final String REQUIRE_KEY_IDENTIFIRE_REFERENCE = "RequireKeyIdentifireReference";
+    public static final String REQUIRE_KEY_IDENTIFIRE_REFERENCE = "RequireKeyIdentifierReference";
     
     public static final String REQUIRE_ISSUER_SERIAL_REFERENCE = "RequireIssuerSerialReference";
     
