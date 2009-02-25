@@ -73,8 +73,11 @@ public class RampartEngine {
 		RampartPolicyData rpd = rmd.getPolicyData();
 		
 		msgCtx.setProperty(RampartMessageData.RAMPART_POLICY_DATA, rpd);
-		
-	        //If there is no policy information or if the message is a security fault or no security
+
+        RampartUtil.validateTransport(rmd);
+
+
+	    //If there is no policy information or if the message is a security fault or no security
                 // header required by the policy
 		if(rpd == null || isSecurityFault(rmd) || !RampartUtil.isSecHeaderRequired(rpd,rmd.isInitiator(),true)) {
 			SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);

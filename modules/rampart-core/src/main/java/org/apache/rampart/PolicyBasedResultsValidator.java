@@ -22,34 +22,17 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.SPConstants;
-import org.apache.ws.secpolicy.model.HttpsToken;
-import org.apache.ws.secpolicy.model.IssuedToken;
-import org.apache.ws.secpolicy.model.SignedEncryptedParts;
-import org.apache.ws.secpolicy.model.SupportingToken;
-import org.apache.ws.secpolicy.model.Token;
-import org.apache.ws.secpolicy.model.UsernameToken;
-import org.apache.ws.secpolicy.model.X509Token;
-import org.apache.ws.security.SOAP11Constants;
-import org.apache.ws.security.SOAP12Constants;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSDataRef;
-import org.apache.ws.security.WSEncryptionPart;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.secpolicy.model.*;
+import org.apache.ws.security.*;
 import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.xml.namespace.QName;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.xml.namespace.QName;
+import java.util.*;
 
 public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandler {
     
@@ -132,16 +115,6 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         if(!rpd.isTransportBinding()) {
             validateProtectionOrder(data, results);
         }  
-        
-        if(rpd.isTransportBinding() && !rmd.isInitiator()){
-            if (rpd.getTransportToken() instanceof HttpsToken) {
-                String incomingTransport = rmd.getMsgContext().getIncomingTransportName();
-                if(!incomingTransport.equals(org.apache.axis2.Constants.TRANSPORT_HTTPS)){
-                    throw new RampartException("invalidTransport", 
-                            new String[]{incomingTransport});
-                }
-            }
-        }
         
         validateEncryptedParts(data, encryptedParts, results);
 
