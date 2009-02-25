@@ -106,8 +106,8 @@
         </dependency>
         <dependency>
             <groupId>bouncycastle</groupId>
-            <artifactId>bcprov-jdk13</artifactId>
-            <version>${bcprov.jdk13.version}</version>
+            <artifactId>bcprov-jdk14</artifactId>
+            <version>${bcprov.jdk14.version}</version>
         </dependency>
         <dependency>
             <groupId>bouncycastle</groupId>
