@@ -21,16 +21,10 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.message.token.Reference;
 
 import javax.xml.namespace.QName;
-
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-
-import edu.emory.mathcs.backport.java.util.concurrent.locks.Lock;
-import edu.emory.mathcs.backport.java.util.concurrent.locks.ReadWriteLock;
-import edu.emory.mathcs.backport.java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * In-memory implementation of the token storage
