@@ -6,6 +6,7 @@
         <groupId>org.apache.rampart</groupId>
         <artifactId>rampart-project</artifactId>
         <version>SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>rampart-documentaion</artifactId>
