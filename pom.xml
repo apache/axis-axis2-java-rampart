@@ -397,6 +397,16 @@
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
             <version>${opensaml.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>opensaml</groupId>
@@ -435,11 +445,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.5.6</version>
         </dependency>
-	 <dependency>
-	    <groupId>org.slf4j</groupId>
-	    <artifactId>slf4j-simple</artifactId>
-	    <version>1.5.6</version>
-	</dependency>
     </dependencies>
 
 
