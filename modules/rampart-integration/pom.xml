@@ -724,6 +724,21 @@
             <artifactId>axis2-transports</artifactId>
             <version>${axis2.transport.version}</version>
         </dependency> 
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-codegen</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-xmlbeans</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-adb-codegen</artifactId>
+            <version>${axis2.version}</version>
+        </dependency> 
     </dependencies>
 
     <reporting>

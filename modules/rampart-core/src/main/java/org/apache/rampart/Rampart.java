@@ -21,12 +21,10 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
-import org.apache.axis2.wsdl.codegen.extension.ModulePolicyExtension;
-import org.apache.axis2.wsdl.codegen.extension.PolicyExtension;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 
-public class Rampart implements Module, ModulePolicyExtension  {
+public class Rampart implements Module /* , ModulePolicyExtension */  {
 
     public void init(ConfigurationContext configContext, AxisModule module)
             throws AxisFault {
@@ -41,9 +39,9 @@ public class Rampart implements Module, ModulePolicyExtension  {
         // at the moment, nothing needs to be done ..
     }
 
-    public PolicyExtension getPolicyExtension() {
-        throw new UnsupportedOperationException("TODO");
-    }
+//    public PolicyExtension getPolicyExtension() {
+//        throw new UnsupportedOperationException("TODO");
+//    }
 
     public void applyPolicy(Policy policy, AxisDescription axisDescription) throws AxisFault {
         //Do not do anything
