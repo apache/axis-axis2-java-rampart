@@ -217,7 +217,11 @@ public class SimpleTokenStore implements TokenStorage {
         if (child.getQName().equals(new QName(WSConstants.SIG_NS, "KeyInfo"))) {
             return child.getText();
         } else if(child.getQName().equals(Reference.TOKEN)) {
-            return child.getAttributeValue(new QName("URI")).substring(1);
+            String uri = child.getAttributeValue(new QName("URI"));
+            if (uri.charAt(0) == '#') {
+	        uri = uri.substring(1);
+            }
+            return uri;
         } else {
             return null;
         }

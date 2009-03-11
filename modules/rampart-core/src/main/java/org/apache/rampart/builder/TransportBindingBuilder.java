@@ -401,7 +401,11 @@ public class TransportBindingBuilder extends BindingBuilder {
             try {
                 WSSecSignature sig = new WSSecSignature();
                 sig.setWsConfig(rmd.getConfig());
-                sig.setCustomTokenId(tok.getId().substring(1));
+                String tokId = tok.getId();
+                if (tokId.charAt(0) == '#') {
+		    tokId = tokId.substring(1);
+                }
+                sig.setCustomTokenId(tokId);
                 sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
                         WSConstants.SAML_ASSERTION_ID);
                 sig.setSecretKey(tok.getSecret());

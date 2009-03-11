@@ -105,7 +105,11 @@ public class TokenCancelerImpl implements TokenCanceler {
                 OMAttribute uri = referenceEle.getAttribute(new QName(
                         RahasConstants.CancelBindingLocalNames.URI));
                 if (uri != null) {
-                    tokenId = uri.getAttributeValue().substring(1);
+
+                    tokenId = uri.getAttributeValue();
+                    if (tokenId.charAt(0) == '#') {
+                        tokenId = tokenId.substring(1);
+                    }
                 } else {
                     throw new TrustException("cannotDetermineTokenId");
                 }
