@@ -15,18 +15,17 @@
     <name>Rampart - Test Suite</name>
 
     <build>
-        <sourceDirectory>src/test/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
-        <resources>
-            <resource>
+        <testResources>
+            <testResource>
                 <directory>test-resources</directory>
                 <includes>
                     <include>**/*.properties</include>
                     <include>**/*.xml</include>
                     <include>**/*.xsl</include>
                 </includes>
-            </resource>
-        </resources>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
