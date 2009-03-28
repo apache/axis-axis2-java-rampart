@@ -7,7 +7,8 @@
     <artifactId>rampart-project</artifactId>
     <packaging>pom</packaging>
     <description>WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache
-        Axis2</description>
+        Axis2
+    </description>
     <version>SNAPSHOT</version>
     <name>Apache Rampart</name>
     <url>http://ws.apache.org/rampart</url>
@@ -55,7 +56,7 @@
             <id>ruchith</id>
             <email>ruchith AT wso2.com</email>
             <organization>WSO2</organization>
-        </developer>      
+        </developer>
         <developer>
             <name>Sanka Samaranayake</name>
             <id>sanka</id>
@@ -78,9 +79,11 @@
 
     <scm>
         <connection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</connection>
+            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
+        </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
+        </developerConnection>
         <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
     </scm>
 
@@ -201,58 +204,7 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-mtompolicy</artifactId>
             <version>${axis2.version}</version>
-	    <scope>compile</scope>
-        </dependency>
-
-        <!-- AIOM Dependencies -->
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-impl</artifactId>
-            <version>${axiom.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-api</artifactId>
-            <version>${axiom.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-dom</artifactId>
-            <version>${axiom.version}</version>
-        </dependency>
-
-        <!-- Thrid party dependencies -->
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>${commons.logging.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-            <version>${commons.httpclient.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>${commons.collections.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-discovery</groupId>
-            <artifactId>commons-discovery</artifactId>
-            <version>${commons.discovery.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>${commons.codec.version}</version>
-        </dependency>
-         <dependency>
-            <groupId>backport-util-concurrent</groupId>
-            <artifactId>backport-util-concurrent</artifactId>
-            <version>3.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -260,65 +212,30 @@
             <version>${log4j.version}</version>
             <exclusions>
                 <exclusion>
-                  <groupId>javax.mail</groupId>
-                  <artifactId>mail</artifactId>
+                    <groupId>javax.mail</groupId>
+                    <artifactId>mail</artifactId>
                 </exclusion>
                 <exclusion>
-                  <groupId>javax.jms</groupId>
-                  <artifactId>jms</artifactId>
-                </exclusion>
-               <exclusion>
-                  <groupId>com.sun.jdmk</groupId>
-                  <artifactId>jmxtools</artifactId>
-                </exclusion>
-               <exclusion>
-                  <groupId>com.sun.jmx</groupId>
-                  <artifactId>jmxri</artifactId>
-                </exclusion>
-               <exclusion>
-                  <groupId>oro</groupId>
-                  <artifactId>oro</artifactId>
+                    <groupId>javax.jms</groupId>
+                    <artifactId>jms</artifactId>
                 </exclusion>
                 <exclusion>
-                  <groupId>junit</groupId>
-                  <artifactId>junit</artifactId>
+                    <groupId>com.sun.jdmk</groupId>
+                    <artifactId>jmxtools</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jmx</groupId>
+                    <artifactId>jmxri</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>oro</groupId>
+                    <artifactId>oro</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>${stax.impl.groupid}</groupId>
-            <artifactId>${stax.impl.artifactid}</artifactId>
-            <version>${stax.impl.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>stax</groupId>
-            <artifactId>stax-api</artifactId>
-            <version>${stax.api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.woden</groupId>
-            <artifactId>woden-api</artifactId>
-            <version>${woden.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.woden</groupId>
-            <artifactId>woden-impl-dom</artifactId>
-            <version>${woden.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>wsdl4j</groupId>
-            <artifactId>wsdl4j</artifactId>
-            <version>${wsdl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>${javamail.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>${activation.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.security</groupId>
@@ -337,66 +254,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>jaxen</groupId>
-            <artifactId>jaxen</artifactId>
-            <version>${jaxen.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>dom4j</artifactId>
-                    <groupId>dom4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>xom</artifactId>
-                    <groupId>xom</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jdom</artifactId>
-                    <groupId>jdom</groupId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xmlParserAPIs</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>${servletapi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.commons.schema</groupId>
-            <artifactId>XmlSchema</artifactId>
-            <version>${XmlSchema.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.neethi</groupId>
-            <artifactId>neethi</artifactId>
-            <version>${neethi.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
             <version>${opensaml.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>addressing</artifactId>
             <type>mar</type>
             <version>${addressing.mar.version}</version>
-	    <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>${commons.fileupload.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.5.6</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -457,11 +329,11 @@
     </modules>
 
     <properties>
-		<rampart.version>${pom.version}</rampart.version>
+        <rampart.version>${pom.version}</rampart.version>
         <rampart.mar.version>SNAPSHOT</rampart.mar.version>
-		<rahas.mar.version>SNAPSHOT</rahas.mar.version>
-		<axis2.version>SNAPSHOT</axis2.version>
-		<axis2.transport.version>SNAPSHOT</axis2.transport.version>
+        <rahas.mar.version>SNAPSHOT</rahas.mar.version>
+        <axis2.version>SNAPSHOT</axis2.version>
+        <axis2.transport.version>SNAPSHOT</axis2.transport.version>
         <neethi.version>SNAPSHOT</neethi.version>
         <axiom.version>SNAPSHOT</axiom.version>
         <wss4j.version>1.5.6</wss4j.version>
@@ -509,7 +381,8 @@
             <id>apache-repo</id>
             <name>Maven Central Repository</name>
             <url>
-                scpexe://people.apache.org//www/people.apache.org/repo/m2-ibiblio-rsync-repository</url>
+                scpexe://people.apache.org//www/people.apache.org/repo/m2-ibiblio-rsync-repository
+            </url>
         </repository>
         <snapshotRepository>
             <id>apache-snapshots</id>

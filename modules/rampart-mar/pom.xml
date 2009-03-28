@@ -7,18 +7,20 @@
         <version>SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.rampart</groupId>
     <artifactId>rampart</artifactId>
     <packaging>mar</packaging>
-    <version>${rampart.mar.version}</version><!-- TODO need to remove this-->  
+    <version>${rampart.mar.version}</version>
+    <!-- TODO need to remove this-->
     <name>Rampart - Mar</name>
 
     <scm>
         <connection>scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
+        </developerConnection>
         <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
     </scm>
 
@@ -38,17 +40,17 @@
                     <target>1.4</target>
                 </configuration>
             </plugin>
-	    <plugin>
-        	<groupId>org.apache.axis2</groupId>
-        	<artifactId>axis2-mar-maven-plugin</artifactId>
-        	<version>1.2</version>
-        	<extensions>true</extensions>
-        	<configuration>
-       	  		<includeDependencies>false</includeDependencies>
-			<moduleXmlFile>module.xml</moduleXmlFile>
-        	</configuration>
-      	     </plugin>    
-           <plugin>
+            <plugin>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-mar-maven-plugin</artifactId>
+                <version>1.2</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <includeDependencies>false</includeDependencies>
+                    <moduleXmlFile>module.xml</moduleXmlFile>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>1.0</version>
@@ -70,16 +72,16 @@
                     </execution>
                 </executions>
             </plugin>
-            </plugins>
+        </plugins>
     </build>
-    
+
     <dependencies>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
             <version>${pom.version}</version>
         </dependency>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-trust</artifactId>
             <version>${pom.version}</version>
@@ -116,7 +118,7 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
-	<distributionManagement>
+    <distributionManagement>
         <repository>
             <id>apache-repo</id>
             <name>Maven Central Repository</name>
