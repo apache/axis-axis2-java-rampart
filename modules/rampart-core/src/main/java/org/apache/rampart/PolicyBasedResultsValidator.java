@@ -799,7 +799,11 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
     }
     
     private boolean isRefIdPresent(ArrayList refList , String id) {
-        
+
+        if(id != null && id.charAt(0) == '#') {
+           id = id.substring(1);
+        }               
+
         for (int i = 0; i < refList.size() ; i++) {           
             WSDataRef dataRef = (WSDataRef)refList.get(i); 
             
