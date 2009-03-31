@@ -118,6 +118,15 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
             xpathExpression = (String) iterator.next();
             // <sp:XPath ..>
             writer.writeStartElement(prefix, SPConstants.XPATH_EXPR, namespaceURI);
+
+            Iterator<String> namespaces = declaredNamespaces.keySet().iterator();
+
+            while(namespaces.hasNext()) {
+                prefix = (String) namespaces.next();
+                namespaceURI = (String) declaredNamespaces.get(prefix);
+                writer.writeNamespace(prefix,namespaceURI);
+            }
+
             writer.writeCharacters(xpathExpression);
             writer.writeEndElement();
         }
