@@ -67,7 +67,7 @@ public class Client {
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMNamespace ns = factory.createOMNamespace("http://sample02.policy.samples.rampart.apache.org","ns1");
         OMElement elem = factory.createOMElement("echo", ns);
-        OMElement childElem = factory.createOMElement("param0", null);
+        OMElement childElem = factory.createOMElement("param0", ns);
         childElem.setText(value);
         elem.addChild(childElem);
         
