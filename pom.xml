@@ -324,6 +324,33 @@
             </modules>
         </profile>
 
+        <profile>
+            <id>axiom-managed</id>
+            <activation>
+                <property>
+                    <name>axiom.version</name>
+                </property>
+            </activation>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ws.commons.axiom</groupId>
+                        <artifactId>axiom-api</artifactId>
+                        <version>${axiom.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.ws.commons.axiom</groupId>
+                        <artifactId>axiom-impl</artifactId>
+                        <version>${axiom.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.ws.commons.axiom</groupId>
+                        <artifactId>axiom-dom</artifactId>
+                        <version>${axiom.version}</version>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
+        </profile>
     </profiles>
 
     <modules>
