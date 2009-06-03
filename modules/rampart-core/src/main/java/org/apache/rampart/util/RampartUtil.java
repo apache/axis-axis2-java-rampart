@@ -861,10 +861,10 @@ public class RampartUtil {
     	List namespaces = new ArrayList();
 
     	// put default namespaces here (sp, soapenv, wsu, etc...)
-    	namespaces.add(factory.createOMNamespace(WSConstants.ENC_PREFIX, WSConstants.ENC_NS));
-    	namespaces.add(factory.createOMNamespace(WSConstants.SIG_PREFIX, WSConstants.SIG_NS));
-    	namespaces.add(factory.createOMNamespace(WSConstants.WSSE_PREFIX, WSConstants.WSSE_NS));
-    	namespaces.add(factory.createOMNamespace(WSConstants.WSU_PREFIX, WSConstants.WSU_NS));
+    	namespaces.add(factory.createOMNamespace(WSConstants.ENC_NS, WSConstants.ENC_PREFIX));
+    	namespaces.add(factory.createOMNamespace(WSConstants.SIG_NS, WSConstants.SIG_PREFIX));
+    	namespaces.add(factory.createOMNamespace(WSConstants.WSSE_NS, WSConstants.WSSE_PREFIX));
+    	namespaces.add(factory.createOMNamespace(WSConstants.WSU_NS, WSConstants.WSU_PREFIX));
     	
     	return namespaces;
     	
