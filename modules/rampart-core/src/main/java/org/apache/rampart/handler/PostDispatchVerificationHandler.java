@@ -95,9 +95,13 @@ public class PostDispatchVerificationHandler implements Handler {
      */
     public InvocationResponse invoke(MessageContext msgContext)
             throws AxisFault {
+        
+        if (!msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
+          return InvocationResponse.CONTINUE;
+        }
+
         Policy policy = msgContext.getEffectivePolicy();
-        
-        
+
         if(msgContext.getProperty(RampartMessageData.KEY_RAMPART_POLICY) != null) {
             policy = (Policy)msgContext.getProperty(RampartMessageData.KEY_RAMPART_POLICY);
         }
