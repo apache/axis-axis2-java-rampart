@@ -74,7 +74,7 @@ public class RampartTest extends TestCase {
                         "Unlimited Strength Jurisdiction Policy !!!");
             }
             
-            for (int i = 1; i <= 22; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 23; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
                     continue;
