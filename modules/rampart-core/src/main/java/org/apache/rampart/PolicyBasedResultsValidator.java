@@ -17,6 +17,8 @@
 package org.apache.rampart;
 
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.om.xpath.AXIOMXPath;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -28,6 +30,8 @@ import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.jaxen.XPath;
+import org.jaxen.JaxenException;
 
 import javax.xml.namespace.QName;
 import java.math.BigInteger;
@@ -390,6 +394,45 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         ArrayList encrRefs = getEncryptedReferences(results);
         
         RampartPolicyData rpd = rmd.getPolicyData();
+
+        // build the list of encrypted nodes based on the dataRefs xpath expressions
+        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+        Set namespaces = RampartUtil.findAllPrefixNamespaces(envelope,
+                                                             rpd.getDeclaredNamespaces());
+
+        Map decryptedElements = new HashMap();
+        for (int i = 0; i < encrRefs.size() ; i++) {
+            WSDataRef dataRef = (WSDataRef)encrRefs.get(i);
+
+            if(dataRef == null || dataRef.getXpath() == null) {
+                continue;
+            }
+
+            try {
+                XPath xp = new AXIOMXPath(dataRef.getXpath());
+
+                Iterator nsIter = namespaces.iterator();
+
+                while (nsIter.hasNext())
+                {
+                    OMNamespace tmpNs = (OMNamespace)nsIter.next();
+                    xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
+                }
+
+                Iterator nodesIterator = xp.selectNodes(envelope).iterator();
+
+                while (nodesIterator.hasNext()) {
+                    decryptedElements.put(nodesIterator.next(), Boolean.valueOf(dataRef.isContent()));
+                }
+
+
+            } catch (JaxenException e) {
+                // This has to be changed to propagate an instance of a RampartException up
+                throw new RampartException("An error occurred while searching for decrypted elements.", e);
+            }
+
+        }
+
         
         //Check for encrypted body
         if(rpd.isEncryptBody()) {
@@ -418,14 +461,41 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                 }
                 continue;
             }
-            
-            if (encPart.getEncId() == null) {
-                throw new RampartException("encryptedPartMissing", 
-                        new String[]{encPart.getNamespace()+":"+encPart.getName()});
-            } else if (!isRefIdPresent(encrRefs, encPart.getEncId())) {
-                throw new RampartException("encryptedPartMissing", 
-                        new String[]{encPart.getNamespace()+":"+encPart.getName()});                
-            }
+
+            // it is not a header or body part... verify encrypted xpath elements
+            String xpath = encPart.getXpath();
+            boolean found = false;
+            try {
+                XPath xp = new AXIOMXPath(xpath);
+                Iterator nsIter = namespaces.iterator();
+
+                while (nsIter.hasNext()) {
+                    OMNamespace tmpNs = (OMNamespace) nsIter.next();
+                    xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
+                }
+
+                Iterator nodesIterator = xp.selectNodes(envelope).iterator();
+
+                while (nodesIterator.hasNext()) {
+                    Object result = decryptedElements.get(nodesIterator.next());
+                    if (result != null &&
+                            ("Element".equals(encPart.getEncModifier())
+                                    ^ ((Boolean) result).booleanValue())) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    throw new RampartException("encryptedPartMissing",
+                            new String[]{xpath});
+                }
+
+
+            } catch (JaxenException e) {
+                // This has to be changed to propagate an instance of a RampartException up
+                throw new RampartException("An error occurred while searching for decrypted elements.", e);
+            }           
             
         }
         

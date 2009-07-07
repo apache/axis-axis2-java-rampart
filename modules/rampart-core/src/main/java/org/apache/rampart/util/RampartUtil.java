@@ -810,7 +810,7 @@ public class RampartUtil {
         return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd.getSignedElements(), rpd.getDeclaredNamespaces());
     }
     
-    private static Set findAllPrefixNamespaces(OMElement currentElement, HashMap decNamespacess)
+    public static Set findAllPrefixNamespaces(OMElement currentElement, HashMap decNamespacess)
     {
     	Set results = new HashSet();
     	
@@ -896,7 +896,12 @@ public class RampartUtil {
                             {
                                 OMElement e = (OMElement)nodesIter.next();
                               
-                                WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content");
+                                WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), 
+                                                                                      e.getNamespace().getNamespaceURI(), 
+                                                                                      "Content",
+                                                                                      WSConstants.PART_TYPE_ELEMENT);
+                                
+                                encryptedElem.setXpath(expression);
                                 OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
                                 
                                 if ( wsuId != null ) {
@@ -1015,10 +1020,15 @@ public class RampartUtil {
 			    	OMElement e = (OMElement)nodesIter.next();
 			    	
 			    	if (sign) {
-			    		result.add(new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content", WSConstants.PART_TYPE_ELEMENT));
-			    	} else {
-			    		
-			    	        WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Element",WSConstants.PART_TYPE_ELEMENT);
+                        WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content", WSConstants.PART_TYPE_ELEMENT);
+                        encryptedElem.setXpath(expression);
+                        result.add(encryptedElem);
+
+                    } else {
+
+                        WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Element", WSConstants.PART_TYPE_ELEMENT);
+                        encryptedElem.setXpath(expression);
+
 			    		OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
 			    	        
 			    		if ( wsuId != null ) {
@@ -1400,13 +1410,13 @@ public class RampartUtil {
         } 
         
         // Checking for signed parts and elements
-        if (rpd.isSignBody() || rpd.getSignedParts().size() != 0 && 
+        if (rpd.isSignBody() || rpd.getSignedParts().size() != 0 || 
                                     rpd.getSignedElements().size() != 0) {
             return true;
         }
         
         // Checking for encrypted parts and elements
-        if (rpd.isEncryptBody() || rpd.getEncryptedParts().size() != 0 && 
+        if (rpd.isEncryptBody() || rpd.getEncryptedParts().size() != 0 || 
                                     rpd.getEncryptedElements().size() != 0 ) {
             return true;
         }   
@@ -1470,9 +1480,13 @@ public class RampartUtil {
                         Element encHeader = (Element)encDataElem.getParentNode();
                         String encHeaderId = encHeader.getAttributeNS(WSConstants.WSU_NS, "Id");
                         
-                        signedParts.remove(signedPart);
-                        WSEncryptionPart encHeaderToSign = new WSEncryptionPart(encHeaderId);
-                        signedParts.add(encHeaderToSign);
+                        //For some reason the id might not be available
+                        // so the part/element with empty/null id won't be recognized afterwards. 
+                        if (encHeaderId != null && !"".equals(encHeaderId.trim())) {
+                            signedParts.remove(signedPart);
+                            WSEncryptionPart encHeaderToSign = new WSEncryptionPart(encHeaderId);
+                            signedParts.add(encHeaderToSign);
+                        }
                         
                     }
                 }
