@@ -373,7 +373,7 @@
         <axis2.transport.version>1.0-SNAPSHOT</axis2.transport.version>
         <addressing.mar.version>1.5</addressing.mar.version>
 
-        <wss4j.version>1.5.8-SNAPSHOT</wss4j.version>
+        <wss4j.version>1.5.8</wss4j.version>
         <xmlsec.version>1.4.2</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
 
