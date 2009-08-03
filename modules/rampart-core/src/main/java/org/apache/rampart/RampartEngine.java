@@ -76,10 +76,16 @@ public class RampartEngine {
 
         RampartUtil.validateTransport(rmd);
 
+        // If there is no policy information return immediately
+        if (rpd == null) {
+           return null;
+        }
 
-	    //If there is no policy information or if the message is a security fault or no security
-                // header required by the policy
-		if(rpd == null || isSecurityFault(rmd) || !RampartUtil.isSecHeaderRequired(rpd,rmd.isInitiator(),true)) {
+
+        //TODO these checks have to be done before the convertion to avoid unnecessary convertion to LLOM -> DOOM
+        // If the message is a security fault or no security
+        // header required by the policy
+        if(isSecurityFault(rmd) || !RampartUtil.isSecHeaderRequired(rpd,rmd.isInitiator(),true)) {
 			SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
 
 			//Convert back to llom since the inflow cannot use llom

@@ -159,16 +159,7 @@ public class RampartMessageData {
         this.msgContext = msgCtx;
         
         try {
-            
-            /*
-             * First get the SOAP envelope as document, then create a security
-             * header and insert into the document (Envelope)
-             */
-            this.document = Axis2Util.getDocumentFromSOAPEnvelope(msgCtx.getEnvelope(), true);
-            msgCtx.setEnvelope((SOAPEnvelope)this.document.getDocumentElement());
-            
-            this.soapConstants = WSSecurityUtil.getSOAPConstants(this.document.getDocumentElement());
-            
+
             //Extract known properties from the msgCtx
             
             if(msgCtx.getProperty(KEY_WST_VERSION) != null) {
@@ -257,7 +248,15 @@ public class RampartMessageData {
             
             
             if(this.policyData != null) {
-                
+
+                // Get the SOAP envelope as document, then create a security
+                // header and insert into the document (Envelope)
+                // WE SHOULD ONLY DO THE CONVERTION IF THERE IS AN APPLICABLE POLICY
+                this.document = Axis2Util.getDocumentFromSOAPEnvelope(msgCtx.getEnvelope(), true);
+                msgCtx.setEnvelope((SOAPEnvelope)this.document.getDocumentElement());
+
+                this.soapConstants = WSSecurityUtil.getSOAPConstants(this.document.getDocumentElement());
+                                
                 // Update the Rampart Config if RampartConfigCallbackHandler is present in the
                 // RampartConfig
                 
