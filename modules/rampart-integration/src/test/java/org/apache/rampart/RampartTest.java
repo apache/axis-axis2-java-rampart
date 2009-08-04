@@ -22,23 +22,26 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.Constants;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.ServiceContext;
+import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.integration.UtilServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
+import org.apache.ws.security.handler.WSHandlerConstants;
 
 import junit.framework.TestCase;
 
 
 public class RampartTest extends TestCase {
-    
+
     public final static int PORT = UtilServer.TESTING_PORT;
-    
+
     public RampartTest(String name) {
         super(name);
     }
@@ -74,7 +77,7 @@ public class RampartTest extends TestCase {
                         "Unlimited Strength Jurisdiction Policy !!!");
             }
             
-            for (int i = 1; i <= 23; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 24; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
                     continue;
@@ -103,6 +106,40 @@ public class RampartTest extends TestCase {
                 serviceClient.sendReceive(getEchoElement());
             }
 
+            System.out.println("--------------Testing negative scenarios----------------------------");
+
+            for (int i = 1; i <= 22; i++) {
+                if (!basic256Supported && (i == 3 || i == 4 || i == 5)) {
+                    //Skip the Basic256 tests
+                    continue;
+                }
+                Options options = new Options();
+
+                if (i == 13) {
+                    continue;
+                }
+
+                System.out.println("Testing WS-Sec: negative scenario " + i);
+                options.setAction("urn:returnError");
+                options.setTo(new EndpointReference("http://127.0.0.1:" +
+                        PORT +
+                        "/axis2/services/SecureService" + i));
+
+                ServiceContext context = serviceClient.getServiceContext();
+                context.setProperty(RampartMessageData.KEY_RAMPART_POLICY,
+                        loadPolicy("/rampart/policy/" + i + ".xml"));
+                serviceClient.setOptions(options);
+
+                try {
+                    //Blocking invocation
+                    serviceClient.sendReceive(getOMElement());
+                    fail("Service Should throw an error..");
+
+                } catch (AxisFault axisFault) {
+                    assertEquals("Testing negative scenarios with Apache Rampart. Intentional Exception", axisFault.getMessage());
+                }
+            }
+
             
             for (int i = 1; i <= 3; i++) { //<-The number of tests we have
                 
@@ -120,11 +157,11 @@ public class RampartTest extends TestCase {
                 //Blocking invocation
                 serviceClient.sendReceive(getEchoElement());
                 serviceClient.sendReceive(getEchoElement());
-                
+
                 //Cancel the token
                 options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_TRUE);
                 serviceClient.sendReceive(getEchoElement());
-                
+
                 options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_FALSE);
                 serviceClient.sendReceive(getEchoElement());
                 options.setProperty(RampartMessageData.CANCEL_REQUEST, Constants.VALUE_TRUE);
@@ -136,7 +173,7 @@ public class RampartTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     private OMElement getEchoElement() {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace omNs = fac.createOMNamespace(
@@ -148,12 +185,23 @@ public class RampartTest extends TestCase {
 
         return method;
     }
-    
+
+    private OMElement getOMElement() {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMNamespace omNs = fac.createOMNamespace(
+                "http://example1.org/example1", "example1");
+        OMElement method = fac.createOMElement("returnError", omNs);
+        OMElement value = fac.createOMElement("Text", omNs);
+        value.addChild(fac.createOMText(value, "Testing Rampart with WS-SecPolicy"));
+        method.addChild(value);
+
+        return method;
+    }
+
     private Policy loadPolicy(String xmlPath) throws Exception {
         StAXOMBuilder builder = new StAXOMBuilder(RampartTest.class.getResourceAsStream(xmlPath));
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
-    
 
-    
+
 }

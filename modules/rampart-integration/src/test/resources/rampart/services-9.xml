@@ -10,7 +10,12 @@
 		<actionMapping>urn:echo</actionMapping>
 	</operation>
 	
-	<wsp:Policy wsu:Id="SigEncrTripleDesRSA15" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+	 <operation name="returnError">
+        <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
+        <actionMapping>urn:returnError</actionMapping>
+    </operation>
+
+    <wsp:Policy wsu:Id="SigEncrTripleDesRSA15" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
 	<wsp:ExactlyOne>
 		<wsp:All>
 			<sp:AsymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">

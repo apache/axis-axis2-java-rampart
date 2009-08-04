@@ -9,8 +9,13 @@
 		<messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
 		<actionMapping>urn:echo</actionMapping>
 	</operation>
-	
-	<wsp:Policy wsu:Id="SigEncrDK" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+
+	<operation name="returnError">
+        <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
+        <actionMapping>urn:returnError</actionMapping>
+    </operation>
+
+    <wsp:Policy wsu:Id="SigEncrDK" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
 		<wsp:ExactlyOne>
 			<wsp:All>
 				<sp:AsymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
@@ -62,11 +67,11 @@
 					<sp:Body/>
 				</sp:EncryptedParts>
 
-				<ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy"> 
+				<ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
 					<ramp:user>alice</ramp:user>
 					<ramp:encryptionUser>bob</ramp:encryptionUser>
 					<ramp:passwordCallbackClass>org.apache.rampart.PWCallback</ramp:passwordCallbackClass>
-					
+
 					<ramp:signatureCrypto>
 						<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
 							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>

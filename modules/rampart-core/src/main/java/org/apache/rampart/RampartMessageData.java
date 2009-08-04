@@ -19,6 +19,8 @@ package org.apache.rampart;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.util.PolicyUtil;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.description.AxisService;
@@ -26,6 +28,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
+import org.apache.neethi.PolicyComponent;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.SimpleTokenStore;
 import org.apache.rahas.TokenStorage;
@@ -55,6 +58,7 @@ import org.w3c.dom.Document;
 
 import java.util.List;
 import java.util.Vector;
+import java.util.ArrayList;
 
 public class RampartMessageData {
     
@@ -226,11 +230,22 @@ public class RampartMessageData {
              * extract the service policy is set in the msgCtx.
              * If it is missing then try to obtain from the configuration files.
              */
-            
-            if(this.servicePolicy == null) {
-                this.servicePolicy = msgCtx.getEffectivePolicy();
+
+            if (this.servicePolicy == null) {
+                try {
+                    this.servicePolicy = msgCtx.getEffectivePolicy();
+                } catch (NullPointerException e) {
+                    //TODO remove this once AXIS2-4114 is fixed
+                    if (axisService != null) {
+                        List<PolicyComponent> policyList = new ArrayList<PolicyComponent>();
+                        policyList.addAll(axisService.getPolicySubject().getAttachedPolicyComponents());
+                        AxisConfiguration axisConfiguration = axisService.getAxisConfiguration();
+                        policyList.addAll(axisConfiguration.getPolicySubject().getAttachedPolicyComponents());
+                        this.servicePolicy = PolicyUtil.getMergedPolicy(policyList, axisService);
+                    }
+                }
             }
-            
+
             if(this.servicePolicy == null) {
                 Parameter param = msgCtx.getParameter(RampartMessageData.KEY_RAMPART_POLICY);
                 if(param != null) {

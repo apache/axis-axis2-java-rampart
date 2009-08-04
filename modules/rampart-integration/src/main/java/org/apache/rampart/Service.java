@@ -22,8 +22,17 @@ public class Service {
 	public OMElement echo(OMElement elem) {
 		elem.build();
 		elem.detach();
-        System.out.println("Service invoked");
-		return elem;
-	}
-	
+        return elem;
+    }
+
+    /**
+     * New service method for testing negative scenario where service throws an exception
+     * @param element
+     * @return
+     * @throws Exception
+     */
+    public OMElement returnError(OMElement element) throws Exception {
+        throw new Exception("Testing negative scenarios with Apache Rampart. Intentional Exception");
+    }
+
 }
