@@ -36,9 +36,17 @@ public class EncryptedPartsBuilder implements AssertionBuilder {
         
         SignedEncryptedParts signedEncryptedParts = new SignedEncryptedParts(false, SPConstants.SP_V11);
         
-        for (Iterator iterator = element.getChildElements(); iterator.hasNext();) {
-            processElement((OMElement) iterator.next(), signedEncryptedParts);
-        }
+        Iterator iterator = element.getChildElements();
+		if (iterator.hasNext()) {
+			for (; iterator.hasNext();) {
+				processElement((OMElement) iterator.next(),
+						signedEncryptedParts);
+			}
+		} else {
+			// If we have only <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy"/>
+			// then we need to encrypt the whole body (refer to http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/ws-securitypolicy-1.2-spec-os.html#_Toc161826515).
+			signedEncryptedParts.setBody(true);
+		}
         
         return signedEncryptedParts;
     }
