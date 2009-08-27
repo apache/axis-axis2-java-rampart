@@ -48,6 +48,17 @@ http://www.bouncycastle.org/latest_releases.html
 lib/security directory as the last line.
 security.provider.X=org.bouncycastle.jce.provider.BouncyCastleProvider
 
+Test cases written for SAML 2.0 support requires endorsing the JDK's default JAXP 
+implementation with Xerces(http://xerces.apache.org/mirrors.cgi#binary) and 
+Xalan(http://xml.apache.org/xalan-j/downloads.html#latest-release). So before building Rampart from the
+source distribution, you need to copy resolver-x.x.x.jar, serializer-x.x.x.jar, xercesImpl-x.x.x.jar 
+and xml-apis-x.x.x.jar from the Xerces binary distribution and xalan-x.x.x.jar from the xalan binary 
+distribution to the endorsed directory. If you are using Sun JDK, endorsed directory is located at 
+$JAVA_HOME/jre/lib/endorsed.
+
+When Rampart is deployed in a particular application server, please refer to the endorsing mechanism 
+recommended for that server and endorse the JAXP implementation using the set of jars mentioned above. 
+
 Before you try any of the samples make sure you
 
 1.) Have the Axis2 standard binary distribution downloaded and extracted.
