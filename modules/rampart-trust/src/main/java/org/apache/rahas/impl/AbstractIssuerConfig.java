@@ -66,6 +66,9 @@ public abstract class AbstractIssuerConfig {
     public void setKeyComputation(int keyComputation) {
         this.keyComputation = keyComputation;
     }
+    public int getKeyComputation() {
+        return keyComputation;
+    }
     public void setProofKeyType(String proofKeyType) {
         this.proofKeyType = proofKeyType;
     }
@@ -74,6 +77,9 @@ public abstract class AbstractIssuerConfig {
     }
     public void setKeySize(int keySize) {
         this.keySize = keySize;
+    }
+    public int getKeySize() {
+        return keySize;
     }
     public String getProofKeyType() {
         return proofKeyType;

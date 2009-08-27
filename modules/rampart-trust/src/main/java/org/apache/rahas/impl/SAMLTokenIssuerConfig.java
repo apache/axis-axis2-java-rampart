@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.security.cert.X509Certificate;
 
 import javax.xml.namespace.QName;
 
@@ -35,6 +36,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.impl.util.SAMLCallbackHandler;
+import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.WSSecurityException;
 
 /**
  * Configuration manager for the <code>SAMLTokenIssuer</code>
@@ -322,8 +325,16 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         this.issuerKeyAlias = issuerKeyAlias;
     }
 
+    public String getIssuerKeyAlias() {
+        return issuerKeyAlias;
+    }
+
     public void setIssuerKeyPassword(String issuerKeyPassword) {
         this.issuerKeyPassword = issuerKeyPassword;
+    }
+
+    public String getIssuerKeyPassword() {
+        return issuerKeyPassword;
     }
 
     public void setIssuerName(String issuerName) {
@@ -388,6 +399,31 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
 		this.callbackHander = callbackHander;
 	}
 
-	
-    
+    /**
+     * Uses the <code>wst:AppliesTo</code> to figure out the certificate to
+     * encrypt the secret in the SAML token
+     *
+     * @param crypto
+     * @param serviceAddress
+     *            The address of the service
+     * @return
+     * @throws org.apache.ws.security.WSSecurityException
+     */
+    public X509Certificate getServiceCert(Crypto crypto, String serviceAddress) throws WSSecurityException {
+
+        if (serviceAddress != null && !"".equals(serviceAddress)) {
+            String alias = (String) this.trustedServices.get(serviceAddress);
+            if (alias != null) {
+                return crypto.getCertificates(alias)[0];
+            } else {
+                alias = (String) this.trustedServices.get("*");
+                return crypto.getCertificates(alias)[0];
+            }
+        } else {
+            String alias = (String) this.trustedServices.get("*");
+            return crypto.getCertificates(alias)[0];
+        }
+
+    }
+
 }

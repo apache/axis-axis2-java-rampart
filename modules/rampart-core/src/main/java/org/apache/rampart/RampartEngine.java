@@ -17,21 +17,15 @@
 package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFault;
-import org.apache.axiom.soap.SOAPFaultCode;
-import org.apache.axiom.soap.SOAPFaultSubCode;
-import org.apache.axiom.soap.SOAPFaultValue;
-import org.apache.axiom.soap.SOAPHeader;
-import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
+import org.apache.rahas.impl.util.SAML2KeyInfo;
+import org.apache.rahas.impl.util.SAML2Utils;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
@@ -44,10 +38,13 @@ import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.saml.SAMLKeyInfo;
 import org.apache.ws.security.saml.SAMLUtil;
 import org.opensaml.SAMLAssertion;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.SubjectConfirmationData;
 
 import javax.xml.namespace.QName;
-
 import java.security.Principal;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -172,39 +169,76 @@ public class RampartEngine {
                 //get the sec context id from the req msg ctx 
 		
 		//Store username in MessageContext property
-                
-                for (int j = 0; j < results.size(); j++) {
-                    WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
-                    final Integer actInt = 
-                        (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-                    if(WSConstants.ST_UNSIGNED == actInt.intValue()) {
-                        final SAMLAssertion assertion = 
-                            ((SAMLAssertion) wser
-                                .get(WSSecurityEngineResult.TAG_SAML_ASSERTION));
-                        String id = assertion.getId();
-                        Date created = assertion.getNotBefore();
-                        Date expires = assertion.getNotOnOrAfter();
-                        SAMLKeyInfo samlKi = SAMLUtil.getSAMLKeyInfo(assertion,
-                                signatureCrypto, tokenCallbackHandler);
-                        try {
-                            TokenStorage store = rmd.getTokenStorage(); 
-                            if(store.getToken(id) == null) {
-                                Token token = new Token(id, (OMElement)assertion.toDOM(), created, expires);
-                                token.setSecret(samlKi.getSecret());
-                                store.add(token);
-                            }
-                        } catch (Exception e) {
-                            throw new RampartException(
-                                    "errorInAddingTokenIntoStore", e);
+
+        for (int j = 0; j < results.size(); j++) {
+            WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
+            final Integer actInt =
+                    (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
+            if (WSConstants.ST_UNSIGNED == actInt.intValue()) {
+
+                // If this is a SAML2.0 assertion
+                if (wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION) instanceof Assertion) {
+
+                    final Assertion assertion = (Assertion) wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
+                    String id = assertion.getID();
+                    Subject subject = assertion.getSubject();
+                    SubjectConfirmationData scData = subject.getSubjectConfirmations()
+                            .get(0).getSubjectConfirmationData();
+                    Date dateOfCreation = scData.getNotBefore().toDate();
+                    Date dateOfExpiration = scData.getNotOnOrAfter().toDate();
+
+                    // TODO : SAML2KeyInfo element needs to be moved to WSS4J.
+                    SAML2KeyInfo saml2KeyInfo = SAML2Utils.
+                            getSAML2KeyInfo(assertion, signatureCrypto, tokenCallbackHandler);
+
+                    //Store the token
+                    try {
+                        TokenStorage store = rmd.getTokenStorage();
+                        if (store.getToken(id) == null) {
+                            Token token = new Token(id, (OMElement) SAML2Utils.getElementFromAssertion(assertion), dateOfCreation, dateOfExpiration);
+                            token.setSecret(saml2KeyInfo.getSecret());
+                            store.add(token);
                         }
-                        
-                    } else if (WSConstants.UT == actInt.intValue()) {
-                        String username = ((Principal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL))
-                                .getName();
-                        msgCtx.setProperty(RampartMessageData.USERNAME, username);
+                    } catch (Exception e) {
+                        throw new RampartException(
+                                "errorInAddingTokenIntoStore", e);
                     }
-        
+
                 }
+                //if this is a SAML1.1 assertion
+                else {
+                    final SAMLAssertion assertion =
+
+                            ((SAMLAssertion) wser
+                                    .get(WSSecurityEngineResult.TAG_SAML_ASSERTION));
+                    String id = assertion.getId();
+                    Date created = assertion.getNotBefore();
+                    Date expires = assertion.getNotOnOrAfter();
+                    SAMLKeyInfo samlKi = SAMLUtil.getSAMLKeyInfo(assertion,
+                            signatureCrypto, tokenCallbackHandler);
+                    try {
+                        TokenStorage store = rmd.getTokenStorage();
+                        if (store.getToken(id) == null) {
+                            Token token = new Token(id, (OMElement) assertion.toDOM(), created, expires);
+                            token.setSecret(samlKi.getSecret());
+                            store.add(token);
+                        }
+                    } catch (Exception e) {
+                        throw new RampartException(
+                                "errorInAddingTokenIntoStore", e);
+                    }
+
+                }
+            } else if (WSConstants.UT == actInt.intValue()) {
+                String username = ((Principal) wser.get(WSSecurityEngineResult.TAG_PRINCIPAL))
+                        .getName();
+                msgCtx.setProperty(RampartMessageData.USERNAME, username);
+            } else if (WSConstants.SIGN == actInt.intValue()) {
+                X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+                msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
+            }
+
+        }
 
 		SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
 

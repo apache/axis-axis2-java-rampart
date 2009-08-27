@@ -123,7 +123,13 @@ public class RahasConstants {
     public static final String TOK_TYPE_SAML_10 = "http://docs.oasis-open.org/wss/" +
                                                   "oasis-wss-saml-token-profile-1.1#SAMLV1.1";
 
+    public static final String TOK_TYPE_SAML_20 = "http://docs.oasis-open.org/wss/" +
+                                                  "oasis-wss-saml-token-profile-1.1#SAMLV2.0";
     //Attrs
     public static final String ATTR_TYPE 	        = "Type";
     public static final String ATTR_CLAIMS_DIALECT 	= "Dialect";
+
+    //Constants required for SAML2 assertion generation
+    public final static String X509_CERT ="X509Certificate";
+    public final static String USERNAME = "username";
 }

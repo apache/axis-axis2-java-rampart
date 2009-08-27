@@ -105,6 +105,8 @@ public class RampartMessageData {
     public final static String CANCEL_REQUEST = "cancelrequest";
     
     public final static String SCT_ID = "sctID";
+
+    public final static String X509_CERT ="X509Certificate";
     
     private MessageContext msgContext = null;
 

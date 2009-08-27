@@ -27,7 +27,11 @@
 					<configuration type="parameter">saml-issuer-config</configuration>
 					<tokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</tokenType>
 				</issuer>
-				
+                <issuer class="org.apache.rahas.impl.SAML2TokenIssuer">
+                        <configuration type="parameter">saml-issuer-config</configuration>
+                        <tokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0</tokenType>
+                </issuer>
+                
 				<validator class="org.apache.rahas.impl.SAMLTokenValidator" default="true">
                     <configuration type="parameter">saml-issuer-config</configuration>
                     <tokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</tokenType>
