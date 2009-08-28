@@ -45,6 +45,7 @@ import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Base64;
+import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.apache.xml.security.signature.XMLSignature;
 import org.apache.xml.security.utils.EncryptionConstants;
@@ -438,6 +439,27 @@ public class SAMLTokenIssuer implements TokenIssuer {
             	SAMLCallbackHandler handler = config.getCallbackHander();
             	handler.handle(cb);
             	attrs = cb.getAttributes();
+            } else if (config.getCallbackHandlerName() != null
+					&& config.getCallbackHandlerName().trim().length() > 0) {
+				SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
+				SAMLCallbackHandler handler = null;
+				MessageContext msgContext = data.getInMessageContext();
+				ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
+				Class cbClass = null;
+				try {
+					cbClass = Loader.loadClass(classLoader, config.getCallbackHandlerName());
+				} catch (ClassNotFoundException e) {
+					throw new TrustException("cannotLoadPWCBClass", new String[]{config
+							.getCallbackHandlerName()}, e);
+				}
+				try {
+					handler = (SAMLCallbackHandler) cbClass.newInstance();
+				} catch (java.lang.Exception e) {
+					throw new TrustException("cannotCreatePWCBInstance", new String[]{config
+							.getCallbackHandlerName()}, e);
+				}
+				handler.handle(cb);
+				attrs = cb.getAttributes();
             }else{
             	//TODO Remove this after discussing
                 SAMLAttribute attribute = new SAMLAttribute("Name",

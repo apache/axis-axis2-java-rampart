@@ -61,10 +61,15 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     private final static QName ISSUER_KEY_ALIAS = new QName("issuerKeyAlias");
 
     /**
-     * Element name to include the password of the private key to sign the
-     * response or the issued token
-     */
-    private final static QName ISSUER_KEY_PASSWD = new QName("issuerKeyPassword");
+	 * Element name to include the password of the private key to sign the response or the issued
+	 * token
+	 */
+	private final static QName ISSUER_KEY_PASSWD = new QName("issuerKeyPassword");
+
+	/**
+	 * Element name of the attribute call-back handler
+	 */
+	private final static QName ATTR_CALLBACK_HANDLER_NAME = new QName("attrCallbackHandlerName");
 
     /**
      * Element to specify the lifetime of the SAMLToken
@@ -94,6 +99,7 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     protected Map trustedServices = new HashMap();
     protected String trustStorePropFile;
     protected SAMLCallbackHandler callbackHander;
+    protected String callbackHandlerName;
   
     /**
      * Create a new configuration with issuer name and crypto information
@@ -140,6 +146,11 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
             this.proofKeyType = proofKeyElem.getText().trim();
         }
 
+        OMElement callbackNameElem = elem.getFirstChildWithName(ATTR_CALLBACK_HANDLER_NAME);
+        if (callbackNameElem != null) {
+            this.callbackHandlerName = callbackNameElem.getText().trim();
+        }
+        
         //The alias of the private key
         OMElement userElem = elem.getFirstChildWithName(ISSUER_KEY_ALIAS);
         if (userElem != null) {
@@ -286,6 +297,9 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         OMElement issuerKeyPasswd = fac.createOMElement(ISSUER_KEY_PASSWD, configElem);
         issuerKeyPasswd.setText(this.issuerKeyPassword);
         
+        OMElement callbackHandlerName = fac.createOMElement(ATTR_CALLBACK_HANDLER_NAME, configElem);
+        callbackHandlerName.setText(this.callbackHandlerName);
+        
         configElem.addChild(this.cryptoPropertiesElement);
         
         OMElement keySizeElem = fac.createOMElement(KEY_SIZE, configElem);
@@ -397,6 +411,14 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
 
 	public void setCallbackHander(SAMLCallbackHandler callbackHander) {
 		this.callbackHander = callbackHander;
+	}
+	
+	public String getCallbackHandlerName() {
+		return callbackHandlerName;
+	}
+
+	public void setCallbackHandlerName(String callbackHandlerName) {
+		this.callbackHandlerName = callbackHandlerName;
 	}
 
     /**
