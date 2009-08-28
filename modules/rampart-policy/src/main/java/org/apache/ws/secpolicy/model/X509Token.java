@@ -38,6 +38,26 @@ public class X509Token extends Token {
     
     private String tokenVersionAndType = Constants.WSS_X509_V3_TOKEN10;
     
+    private String encryptionUser;
+
+    private String userCertAlias;
+
+    public String getEncryptionUser() {
+        return encryptionUser;
+    }
+
+    public void setEncryptionUser(String encryptionUser) {
+        this.encryptionUser = encryptionUser;
+    }
+
+    public String getUserCertAlias() {
+        return userCertAlias;
+    }
+
+    public void setUserCertAlias(String userCertAlias) {
+        this.userCertAlias = userCertAlias;
+    }
+    
     public X509Token(int version) {
         setVersion(version);
     }

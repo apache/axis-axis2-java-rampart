@@ -56,6 +56,7 @@ import org.apache.rampart.RampartConfigCallbackHandler;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.policy.model.CryptoConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.SPConstants;
@@ -810,6 +811,19 @@ public class RampartUtil {
         return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd.getSignedElements(), rpd.getDeclaredNamespaces());
     }
     
+    public static Vector getSupportingEncryptedParts(RampartMessageData rmd,
+            SupportingPolicyData rpd) {
+        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+        return getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(),
+                rpd.getEncryptedElements(), rpd.getDeclaredNamespaces());
+    }
+
+    public static Vector getSupportingSignedParts(RampartMessageData rmd, SupportingPolicyData rpd) {
+        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+        return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd
+                .getSignedElements(), rpd.getDeclaredNamespaces());
+    }
+    
     public static Set findAllPrefixNamespaces(OMElement currentElement, HashMap decNamespacess)
     {
     	Set results = new HashSet();
@@ -1149,10 +1163,22 @@ public class RampartUtil {
         } 
     }
     
-    public static void setEncryptionUser(RampartMessageData rmd, WSSecEncryptedKey encrKeyBuilder) throws RampartException {
+    public static void setEncryptionUser(RampartMessageData rmd, WSSecEncryptedKey encrKeyBuilder)
+            throws RampartException {
         RampartPolicyData rpd = rmd.getPolicyData();
         String encrUser = rpd.getRampartConfig().getEncryptionUser();
-        if(encrUser == null || "".equals(encrUser)) {
+        setEncryptionUser(rmd, encrKeyBuilder, encrUser);
+    }
+    
+    public static void setEncryptionUser(RampartMessageData rmd, WSSecEncryptedKey encrKeyBuilder,
+            String encrUser) throws RampartException {
+        RampartPolicyData rpd = rmd.getPolicyData();
+        
+        if (encrUser == null) {
+            encrUser = rpd.getRampartConfig().getEncryptionUser();
+        }
+        
+        if (encrUser == null || "".equals(encrUser)) {
             throw new RampartException("missingEncryptionUser");
         }
         if(encrUser.equals(WSHandlerConstants.USE_REQ_SIG_CERT)) {
@@ -1426,9 +1452,12 @@ public class RampartUtil {
         
         if (!initiator && inflow || initiator && !inflow ) {
         
-            supportingTokens = rpd.getSupportingTokens();
-            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
-                return true;
+            Vector supportingToks = rpd.getSupportingTokensList();
+            for (int i = 0; i < supportingToks.size(); i++) {
+                supportingTokens = (SupportingToken) supportingToks.get(i);
+                if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                    return true;
+                }
             }
             
             supportingTokens = rpd.getSignedSupportingTokens();

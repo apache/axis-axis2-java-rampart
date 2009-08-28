@@ -150,8 +150,10 @@ public class TransportBindingBuilder extends BindingBuilder {
             }
             
             
-            SupportingToken supportingToks = rpd.getSupportingTokens();
-            this.handleSupportingTokens(rmd, supportingToks);
+            Vector supportingToks = rpd.getSupportingTokensList();
+            for (int i = 0; i < supportingToks.size(); i++) {
+                this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
+            } 
             
             
             //Store the signature values vector

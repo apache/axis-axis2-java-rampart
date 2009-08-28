@@ -32,6 +32,19 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.X509Token;
 
 public class X509TokenBuilder implements AssertionBuilder {
+	
+    public final static String USER_CERT_ALIAS_LN = "userCertAlias";
+
+    public final static String ENCRYPTION_USER_LN = "encryptionUser";
+
+    public static final QName RAMPART_CONFIG = new QName("http://ws.apache.org/rampart/policy",
+            "RampartConfig");
+
+    public static final QName USER_CERT_ALIAS = new QName("http://ws.apache.org/rampart/policy",
+            USER_CERT_ALIAS_LN);
+
+    public static final QName ENCRYPTION_USER = new QName("http://ws.apache.org/rampart/policy",
+            ENCRYPTION_USER_LN);
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {
@@ -66,6 +79,21 @@ public class X509TokenBuilder implements AssertionBuilder {
                 break;
             }
         }
+        
+        if (x509Token != null && policyElement != null) {
+            OMElement ramp = null;
+            ramp = policyElement.getFirstChildWithName(RAMPART_CONFIG);
+            if (ramp != null) {
+                OMElement child = null;
+                if ((child = ramp.getFirstChildWithName(USER_CERT_ALIAS)) != null) {
+                    x509Token.setUserCertAlias(child.getText());
+                }
+                if ((child = ramp.getFirstChildWithName(ENCRYPTION_USER)) != null) {
+                    x509Token.setEncryptionUser(child.getText());
+                }
+            }
+        }
+        
         return x509Token;
     }
 

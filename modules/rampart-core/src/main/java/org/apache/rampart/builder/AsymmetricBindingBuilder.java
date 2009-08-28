@@ -24,12 +24,14 @@ import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
+import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSecurityException;
@@ -236,8 +238,10 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 SupportingToken sgndEndEncSuppTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();           
                 sgndEndEncSuppTokMap = this.handleSupportingTokens(rmd, sgndEndEncSuppTokens);
                 
-                SupportingToken supportingToks = rpd.getSupportingTokens();
-                this.handleSupportingTokens(rmd, supportingToks);
+                Vector supportingToks = rpd.getSupportingTokensList();
+                for (int i = 0; i < supportingToks.size(); i++) {
+                    this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
+                } 
                 
                 SupportingToken encryptedSupportingToks = rpd.getEncryptedSupportingTokens();
                 this.handleSupportingTokens(rmd, encryptedSupportingToks);
@@ -390,8 +394,10 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             SupportingToken sgndEndEncSuppTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();           
             sgndEndEncSuppTokMap = this.handleSupportingTokens(rmd, sgndEndEncSuppTokens);
             
-            SupportingToken supportingToks = rpd.getSupportingTokens();
-            this.handleSupportingTokens(rmd, supportingToks);
+            Vector supportingToks = rpd.getSupportingTokensList();
+            for (int i = 0; i < supportingToks.size(); i++) {
+                this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
+            } 
             
             SupportingToken encryptedSupportingToks = rpd.getEncryptedSupportingTokens();
             this.handleSupportingTokens(rmd, encryptedSupportingToks);
@@ -411,6 +417,23 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 (!rmd.isInitiator() && rpd.getRecipientToken() != null))) {
             // Do signature
             this.doSignature(rmd);
+        }
+        
+        Vector supportingToks = rpd.getSupportingPolicyData();
+        for (int i = 0; i < supportingToks.size(); i++) {
+            SupportingPolicyData policyData = null;
+            if (supportingToks.get(i) != null) {
+                policyData = (SupportingPolicyData) supportingToks.get(i);
+                Vector supportingSigParts = RampartUtil.getSupportingSignedParts(rmd,
+                        policyData);
+
+                if (supportingSigParts.size() > 0
+                        && ((rmd.isInitiator() && rpd.getInitiatorToken() != null) || (!rmd
+                                .isInitiator() && rpd.getRecipientToken() != null))) {
+                    // Do signature for policies defined under SupportingToken.
+                    this.doSupportingSignature(rmd, supportingSigParts,policyData);
+                }
+            }
         }
         
         //Do endorsed signature
@@ -546,12 +569,79 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
+        Vector supportingTokens = rpd.getSupportingPolicyData();
+        for (int i = 0; i < supportingTokens.size(); i++) {
+            SupportingPolicyData policyData = null;
+            if (supportingTokens.get(i) != null) {
+                policyData = (SupportingPolicyData) supportingTokens.get(i);
+                Token supportingEncrToken = policyData.getEncryptionToken();
+                Vector supoortingEncrParts = RampartUtil.getSupportingEncryptedParts(rmd,
+                        policyData);
+
+                if (supportingEncrToken != null && supoortingEncrParts.size() > 0) {
+                    doEncryptionWithSupportingToken(rpd, rmd, supportingEncrToken, doc,
+                            supoortingEncrParts);
+                }
+            }
+        }
+        
         if(dotDebug){
     		t2 = System.currentTimeMillis();
     		tlog.debug("Signature took :" + (t1 - t0)
     				+", Encryption took :" + (t2 - t1) );
     	}
         
+    }
+    
+    private void doSupportingSignature(RampartMessageData rmd, Vector supportingSigParts,
+            SupportingPolicyData supportingData) throws RampartException {
+
+        Token supportingSigToken;
+        WSSecSignature supportingSig;
+        Element supportingSignatureElement;
+
+        long t0 = 0, t1 = 0;
+        if (dotDebug) {
+            t0 = System.currentTimeMillis();
+        }
+
+        supportingSigToken = supportingData.getSignatureToken();
+
+        if (!(supportingSigToken instanceof X509Token)) {
+            return;
+        }
+        supportingSig = this.getSignatureBuider(rmd, supportingSigToken,
+                ((X509Token) supportingSigToken).getUserCertAlias());
+        Element bstElem = supportingSig.getBinarySecurityTokenElement();
+        if (bstElem != null) {
+            bstElem = RampartUtil.insertSiblingAfter(rmd, this.getInsertionLocation(), bstElem);
+            this.setInsertionLocation(bstElem);
+        }
+
+        if (rmd.getPolicyData().isTokenProtection() && supportingSig.getBSTTokenId() != null) {
+            supportingSigParts.add(new WSEncryptionPart(supportingSig.getBSTTokenId()));
+        }
+
+        try {
+            supportingSig.addReferencesToSign(supportingSigParts, rmd.getSecHeader());
+            supportingSig.computeSignature();
+
+            supportingSignatureElement = supportingSig.getSignatureElement();
+
+            this.setInsertionLocation(RampartUtil.insertSiblingAfter(rmd, this
+                    .getInsertionLocation(), supportingSignatureElement));
+
+        } catch (WSSecurityException e) {
+            throw new RampartException("errorInSignatureWithX509Token", e);
+        }
+
+        signatureValues.add(supportingSig.getSignatureValue());
+
+        if (dotDebug) {
+            t1 = System.currentTimeMillis();
+            tlog.debug("Signature took :" + (t1 - t0));
+        }
+
     }
 
     private void doSignature(RampartMessageData rmd) throws RampartException {
@@ -658,6 +748,55 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
     	}
 
     }
+    
+    private void doEncryptionWithSupportingToken(RampartPolicyData rpd, RampartMessageData rmd,
+            Token encrToken, Document doc, Vector encrParts) throws RampartException {
+        Element refList = null;
+        try {
+            if (!(encrToken instanceof X509Token)) {
+                return;
+            }
+
+            WSSecEncrypt encr = new WSSecEncrypt();
+
+            RampartUtil.setKeyIdentifierType(rpd, encr, encrToken);
+
+            encr.setWsConfig(rmd.getConfig());
+
+            encr.setDocument(doc);
+            RampartUtil.setEncryptionUser(rmd, encr, ((X509Token) encrToken).getEncryptionUser());
+            encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
+            encr.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
+            encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), rmd
+                    .getCustomClassLoader()));
+
+            if (this.timestampElement != null) {
+                this.setInsertionLocation(this.timestampElement);
+            } else {
+                this.setInsertionLocation(null);
+            }
+
+            if (encr.getBSTTokenId() != null) {
+                this.setInsertionLocation(RampartUtil.insertSiblingAfterOrPrepend(rmd, this
+                        .getInsertionLocation(), encr.getBinarySecurityTokenElement()));
+            }
+
+            Element encryptedKeyElement = encr.getEncryptedKeyElement();
+
+            // Encrypt, get hold of the ref list and add it
+            refList = encr.encryptForInternalRef(null, encrParts);
+
+            // Add internal refs
+            encryptedKeyElement.appendChild(refList);
+
+            this.setInsertionLocation(RampartUtil.insertSiblingAfterOrPrepend(rmd, this
+                    .getInsertionLocation(), encryptedKeyElement));
+
+        } catch (WSSecurityException e) {
+            throw new RampartException("errorInEncryption", e);
+        }
+    }
+
 
     /**
      * @param rmd

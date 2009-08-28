@@ -285,8 +285,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 SupportingToken sgndEndEncSuppTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();           
                 sgndEndEncSuppTokMap = this.handleSupportingTokens(rmd, sgndEndEncSuppTokens);
                 
-                SupportingToken supportingToks = rpd.getSupportingTokens();
-                this.handleSupportingTokens(rmd, supportingToks);
+                Vector supportingToks = rpd.getSupportingTokensList();
+                for (int i = 0; i < supportingToks.size(); i++) {
+                    this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
+                } 
                 
                 SupportingToken encryptedSupportingToks = rpd.getEncryptedSupportingTokens();
                 this.handleSupportingTokens(rmd, encryptedSupportingToks);
@@ -484,8 +486,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             SupportingToken sgndEndEncSuppTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();           
             sgndEndEncSuppTokMap = this.handleSupportingTokens(rmd, sgndEndEncSuppTokens);
             
-            SupportingToken supportingToks = rpd.getSupportingTokens();
-            this.handleSupportingTokens(rmd, supportingToks);
+            Vector supportingToks = rpd.getSupportingTokensList();
+            for (int i = 0; i < supportingToks.size(); i++) {
+                this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
+            } 
             
             SupportingToken encryptedSupportingToks = rpd.getEncryptedSupportingTokens();
             this.handleSupportingTokens(rmd, encryptedSupportingToks);

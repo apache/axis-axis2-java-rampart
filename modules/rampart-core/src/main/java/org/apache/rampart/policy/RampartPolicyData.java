@@ -114,7 +114,7 @@ public class RampartPolicyData {
     /*
      * Holds the supporting tokens elements
      */
-    private SupportingToken supportingTokens;
+    //private SupportingToken supportingTokens;
 
     private SupportingToken signedSupportingTokens;
 
@@ -147,6 +147,18 @@ public class RampartPolicyData {
     private Wss11 wss11;
     
     private Policy issuerPolicy;
+    
+    private Vector supportingPolicyData = new Vector();
+    
+    private Vector supportingTokens = new Vector();
+    
+    public Vector getSupportingPolicyData() {
+        return supportingPolicyData;
+    }
+
+    public void addSupportingPolicyData(SupportingPolicyData supportingPolicyData) {
+        this.supportingPolicyData.add(supportingPolicyData);
+    }
     
     /**
      * @return Returns the symmetricBinding.
@@ -483,7 +495,7 @@ public class RampartPolicyData {
 
         int tokenType = suppTokens.getTokenType();
         if (tokenType == SPConstants.SUPPORTING_TOKEN_SUPPORTING) {
-            supportingTokens = suppTokens;
+            supportingTokens.add(suppTokens);
         } else if (tokenType == SPConstants.SUPPORTING_TOKEN_SIGNED) {
             signedSupportingTokens = suppTokens;
         } else if (tokenType == SPConstants.SUPPORTING_TOKEN_ENDORSING) {
@@ -647,10 +659,18 @@ public class RampartPolicyData {
     }
 
     /**
-     * @return Returns the supportingToken.
+     * @return Returns the supportingTokenList.
      */
-    public SupportingToken getSupportingTokens() {
+    public Vector getSupportingTokensList() {
         return supportingTokens;
+    }
+    
+    public SupportingToken getSupportingTokens() {
+        if (supportingTokens.size() > 0) {
+            return (SupportingToken) supportingTokens.get(0);
+        } else {
+            return null;
+        }
     }
     
     /**

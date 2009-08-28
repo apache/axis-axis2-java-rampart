@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.*;
@@ -110,6 +111,17 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                                 rpd.isIncludeTimestamp()) {
                     signatureParts.add(
                             new WSEncryptionPart("SignedEndorsingSupportingTokens"));
+                }
+            }
+            
+            Vector supportingToks = rpd.getSupportingTokensList();
+            for (int i = 0; i < supportingToks.size(); i++) {
+                SupportingToken supportingToken = (SupportingToken) supportingToks.get(i);
+                if (supportingToken != null) {
+                    SupportingPolicyData policyData = new SupportingPolicyData();
+                    policyData.build(supportingToken);
+                    encryptedParts.addAll(RampartUtil.getSupportingEncryptedParts(rmd, policyData));
+                    signatureParts.addAll(RampartUtil.getSupportingSignedParts(rmd, policyData));
                 }
             }
         }
@@ -248,8 +260,11 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         //Check for UsernameToken
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
-        SupportingToken suppTok = rpd.getSupportingTokens();
-        handleSupportingTokens(results, suppTok);
+        Vector supportingToks = rpd.getSupportingTokensList();
+        for (int i = 0; i < supportingToks.size(); i++) {
+            SupportingToken suppTok = (SupportingToken) supportingToks.get(i);
+            handleSupportingTokens(results, suppTok);
+        }
         SupportingToken signedSuppToken = rpd.getSignedSupportingTokens();
         handleSupportingTokens(results, signedSuppToken);
         SupportingToken signedEndSuppToken = rpd.getSignedEndorsingSupportingTokens();
@@ -529,18 +544,22 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         Node envelope = rmd.getDocument().getFirstChild();
         
-        WSSecurityEngineResult actionResult = WSSecurityUtil.fetchActionResult(
-                results, WSConstants.SIGN);
+        WSSecurityEngineResult[] actionResults = fetchActionResults(results, WSConstants.SIGN);
 
         // Find elements that are signed
         Vector actuallySigned = new Vector();
-        if( actionResult != null ) { 
-            Set signedIDs = (Set)actionResult.get(WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS);
-            for (Iterator i = signedIDs.iterator(); i.hasNext();) {
-                String e = (String) i.next();
-                
-                Element element = WSSecurityUtil.findElementById(envelope, e, WSConstants.WSU_NS);
-                actuallySigned.add( element );
+        if (actionResults != null) {
+            for (int j = 0; j < actionResults.length; j++) {
+                WSSecurityEngineResult actionResult = actionResults[j];
+                Set signedIDs = (Set) actionResult
+                        .get(WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS);
+                for (Iterator i = signedIDs.iterator(); i.hasNext();) {
+                    String e = (String) i.next();
+
+                    Element element = WSSecurityUtil.findElementById(envelope, e,
+                            WSConstants.WSU_NS);
+                    actuallySigned.add(element);
+                }
             }
         }
         
@@ -826,9 +845,12 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
         
-        SupportingToken suppTok = rpd.getSupportingTokens();
-        if(isUsernameTokenPresent(suppTok)){
-            return true;
+        Vector supportingToks = rpd.getSupportingTokensList();
+        for (int i = 0; i < supportingToks.size(); i++) {
+            SupportingToken suppTok = (SupportingToken) supportingToks.get(i);
+            if (isUsernameTokenPresent(suppTok)) {
+                return true;
+            }
         }
         
         SupportingToken signedSuppToken = rpd.getSignedSupportingTokens();
@@ -895,6 +917,24 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         return false;
         
+    }
+    
+    public static WSSecurityEngineResult[] fetchActionResults(Vector wsResultVector, int action) {
+        List wsResult = new ArrayList();
+
+        // Find the part of the security result that matches the given action
+        for (int i = 0; i < wsResultVector.size(); i++) {
+            // Check the result of every action whether it matches the given action
+            WSSecurityEngineResult result = (WSSecurityEngineResult) wsResultVector.get(i);
+            int resultAction = ((java.lang.Integer) result.get(WSSecurityEngineResult.TAG_ACTION))
+                    .intValue();
+            if (resultAction == action) {
+                wsResult.add((WSSecurityEngineResult) wsResultVector.get(i));
+            }
+        }
+
+        return (WSSecurityEngineResult[]) wsResult.toArray(new WSSecurityEngineResult[wsResult
+                .size()]);
     }
     
     private boolean isRefIdPresent(ArrayList refList , QName qname) {

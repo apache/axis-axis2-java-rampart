@@ -26,6 +26,7 @@ import org.apache.rahas.TrustException;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.SPConstants;
@@ -230,8 +231,13 @@ public abstract class BindingBuilder {
         }
     }
     
+    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, Token token)
+            throws RampartException {
+        return getSignatureBuider(rmd, token, null);
+    }
     
-    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, Token token) throws RampartException {
+    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, Token token,
+            String userCertAlias) throws RampartException {
 
         RampartPolicyData rpd = rmd.getPolicyData();
         
@@ -245,8 +251,14 @@ public abstract class BindingBuilder {
 
         String user = null;
         
+        if (userCertAlias != null) {
+            user = userCertAlias;
+        }
+
         // Get the user - First check whether userCertAlias present
-        user = rpd.getRampartConfig().getUserCertAlias();
+        if (user == null) {
+            user = rpd.getRampartConfig().getUserCertAlias();
+        }
         
         // If userCertAlias is not present, use user property as Alias
         
@@ -364,6 +376,12 @@ public abstract class BindingBuilder {
                             bstElem = RampartUtil.insertSiblingAfter(rmd, 
                                     this.getInsertionLocation(), bstElem);
                             this.setInsertionLocation(bstElem);
+                            
+                            SupportingPolicyData supportingPolcy = new SupportingPolicyData();
+                            supportingPolcy.build(suppTokens);
+                            supportingPolcy.setSignatureToken(token);
+                            supportingPolcy.setEncryptionToken(token);
+                            rmd.getPolicyData().addSupportingPolicyData(supportingPolcy);
                             
                             if (suppTokens.isEncryptedToken()) {
                                 this.encryptedTokensIdList.add(sig.getBSTTokenId());
