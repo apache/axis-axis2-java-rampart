@@ -366,9 +366,9 @@ public class RampartMessageData {
                this.config = WSSConfig.getDefaultWSConfig();
            }
             
+           // To handle scenarios where password type is not set by default.
+            this.config.setHandleCustomPasswordTypes(true);
 
-                    
-            
             this.customClassLoader = msgCtx.getAxisService().getClassLoader();
             
             if(this.sender && this.policyData != null) {
