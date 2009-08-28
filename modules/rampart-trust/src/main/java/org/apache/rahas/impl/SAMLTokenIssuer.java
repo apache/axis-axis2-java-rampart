@@ -187,13 +187,11 @@ public class SAMLTokenIssuer implements TokenIssuer {
             }
 
             if (config.addRequestedAttachedRef) {
-                TrustUtil.createRequestedAttachedRef(wstVersion, rstrElem, "#"
-                        + assertion.getId(), RahasConstants.TOK_TYPE_SAML_10);
+            	TrustUtil.createRequestedAttachedRef(rstrElem, assertion.getId(),wstVersion);
             }
 
             if (config.addRequestedUnattachedRef) {
-                TrustUtil.createRequestedUnattachedRef(wstVersion, rstrElem,
-                        assertion.getId(), RahasConstants.TOK_TYPE_SAML_10);
+            	TrustUtil.createRequestedUnattachedRef(rstrElem, assertion.getId(),wstVersion);   
             }
 
             if (data.getAppliesToAddress() != null) {
