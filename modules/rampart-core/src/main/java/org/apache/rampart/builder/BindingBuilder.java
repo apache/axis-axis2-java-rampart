@@ -634,26 +634,27 @@ public abstract class BindingBuilder {
                 
                 // If a EncryptedKeyToken is used, set the correct value type to
                 // be used in the wsse:Reference in ds:KeyInfo
-                if(policyToken instanceof X509Token) {
-                	if (rmd.isInitiator()) {
-	                    sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS
-	                                          + WSConstants.ENC_KEY_VALUE_TYPE);
-	                    sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
-                	} else {
-                	    //the tok has to be an EncryptedKey token
-                	    sig.setEncrKeySha1value(((EncryptedKeyToken)tok).getSHA1());
-                		sig.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
-                	}
-                    
-                } else {
-				    sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS
-                                          + WSConstants.SAML_ASSERTION_ID);
-	                sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                if (policyToken instanceof X509Token) {
+                    if (rmd.isInitiator()) {
+                        sig.setCustomTokenValueType(WSConstants.SOAPMESSAGE_NS11 + "#"
+                                + WSConstants.ENC_KEY_VALUE_TYPE);
+                        sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                    } else {
+                        // the tok has to be an EncryptedKey token
+                        sig.setEncrKeySha1value(((EncryptedKeyToken) tok).getSHA1());
+                        sig.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
+                    }
+
+                } else if (policyToken instanceof IssuedToken) {
+                    sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS
+                            + WSConstants.SAML_ASSERTION_ID);
+                    sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                 }
                 
                 String sigTokId; 
                 
                 if ( policyToken instanceof SecureConversationToken) {
+                    sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                     OMElement ref = tok.getAttachedReference();
                     if(ref == null) {
                         ref = tok.getUnattachedReference();

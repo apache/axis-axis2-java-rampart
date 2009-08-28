@@ -444,8 +444,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             sigTokElem = RampartUtil.appendChildToSecHeader(rmd, 
                                                             sigTok.getToken());
             this.setInsertionLocation(sigTokElem);
-        } else if ( rmd.isInitiator() && sigToken instanceof X509Token) {
-        	sigTokElem = RampartUtil.appendChildToSecHeader(rmd, sigTok.getToken());
+        } else if ((rmd.isInitiator() && sigToken instanceof X509Token)
+                || sigToken instanceof SecureConversationToken) {
+            sigTokElem = RampartUtil.appendChildToSecHeader(rmd, sigTok.getToken());
             
             //Set the insertion location
             this.setInsertionLocation(sigTokElem);
