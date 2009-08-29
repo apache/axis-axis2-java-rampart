@@ -909,11 +909,12 @@ public class RampartUtil {
                             while (nodesIter.hasNext())
                             {
                                 OMElement e = (OMElement)nodesIter.next();
-                              
-                                WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), 
-                                                                                      e.getNamespace().getNamespaceURI(), 
-                                                                                      "Content",
-                                                                                      WSConstants.PART_TYPE_ELEMENT);
+                                
+                                String localName = e.getLocalName();
+                                String namespace = e.getNamespace() != null ? e.getNamespace().getNamespaceURI() : null;
+                                                            
+                                WSEncryptionPart encryptedElem = new WSEncryptionPart(localName, namespace,
+                            "Content", WSConstants.PART_TYPE_ELEMENT);
                                 
                                 encryptedElem.setXpath(expression);
                                 OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
@@ -1032,15 +1033,17 @@ public class RampartUtil {
 			    while (nodesIter.hasNext())
 			    {
 			    	OMElement e = (OMElement)nodesIter.next();
+			    	String localName = e.getLocalName();
+                    String namespace = e.getNamespace() != null ? e.getNamespace().getNamespaceURI() : null;
 			    	
 			    	if (sign) {
-                        WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Content", WSConstants.PART_TYPE_ELEMENT);
+                        WSEncryptionPart encryptedElem = new WSEncryptionPart(localName,namespace, "Content", WSConstants.PART_TYPE_ELEMENT);
                         encryptedElem.setXpath(expression);
                         result.add(encryptedElem);
 
                     } else {
 
-                        WSEncryptionPart encryptedElem = new WSEncryptionPart(e.getLocalName(), e.getNamespace().getNamespaceURI(), "Element", WSConstants.PART_TYPE_ELEMENT);
+                        WSEncryptionPart encryptedElem = new WSEncryptionPart(localName,namespace, "Element", WSConstants.PART_TYPE_ELEMENT);
                         encryptedElem.setXpath(expression);
 
 			    		OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
@@ -1064,9 +1067,9 @@ public class RampartUtil {
     
     /**
      * Get a element for SOAP 
-     * @param envelope
-     * @param namespaces
-     * @param xpath
+     * @param envelope   SOAP Envelope of which we should check required elements
+     * @param decNamespaces  Declared namespaces in RequiredElements assertion
+     * @param expression  XPATH expression of required elements
      * @return
      */
     public static boolean checkRequiredElements(SOAPEnvelope envelope, HashMap decNamespaces, String expression ) {
