@@ -308,6 +308,24 @@
                                       tofile="target/temp-ramp/META-INF/services.xml"/>
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService25.aar"
                                      basedir="target/temp-ramp"/>
+                                <!-- Service 26 -->
+                                <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-26.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService26.aar"
+                                     basedir="target/temp-ramp"/>
+                                 <!-- Service 27 -->
+                                <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-27.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService27.aar"
+                                     basedir="target/temp-ramp"/>
+                                <!-- Service 28 -->
+                                <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-28.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService28.aar"
+                                     basedir="target/temp-ramp"/>
                                 <!-- Service SC-1 -->
                                 <copy overwrite="yes"
                                       file="src/test/resources/rampart/issuer.properties"
