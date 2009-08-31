@@ -99,6 +99,16 @@
         <create.and.run.client sample.number="06"/>
     </target>
 
+    <!-- Sample Service 07 -->
+    <target name="service.07" if="env.AXIS2_HOME" depends="check.dependency">
+        <create.trust.service.repo sample.number="07"/>
+    </target>
+
+    <!-- Sample Client 07 -->
+    <target name="client.07" if="env.AXIS2_HOME" depends="check.dependency">
+        <create.and.run.client sample.number="07"/>
+    </target>
+
 	<target name="clean">
 		<delete dir="build" />
 	</target>
