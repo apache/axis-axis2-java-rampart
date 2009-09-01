@@ -68,6 +68,7 @@
 							<wsp:Policy>
 								<sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
 									<wsp:Policy>
+										<sp:RequireThumbprintReference/>
 										<sp:WssX509V3Token10/>
 									</wsp:Policy>
 								</sp:X509Token>
@@ -77,6 +78,7 @@
 							<wsp:Policy>
 								<sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
 									<wsp:Policy>
+										<sp:RequireThumbprintReference/>
 										<sp:WssX509V3Token10/>
 									</wsp:Policy>
 								</sp:X509Token>
@@ -185,12 +187,10 @@
 								<sp:RequireInternalReference/>
 							</wsp:Policy>
 						</sp:IssuedToken>
-						<sp:SignedParts>
-							<sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing"/>
-						</sp:SignedParts>
 					</wsp:Policy>
 		     </sp:SupportingTokens>
 			<sp:SignedParts>
+				<sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing"/>
 				<sp:Body/>
 			</sp:SignedParts>
 			<sp:Wss11>

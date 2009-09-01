@@ -46,12 +46,10 @@
 								<sp:RequireInternalReference/>
 							</wsp:Policy>
 						</sp:IssuedToken>
-						<sp:SignedParts>
-							<sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing"/>
-						</sp:SignedParts>
 					</wsp:Policy>
 		     </sp:SupportingTokens>
 			<sp:SignedParts>
+				<sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing"/>
 				<sp:Body/>
 			</sp:SignedParts>
 			<sp:Wss11>
