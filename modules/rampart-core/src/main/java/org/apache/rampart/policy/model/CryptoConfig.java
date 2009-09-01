@@ -45,8 +45,29 @@ public class CryptoConfig implements Assertion {
     public final static String PROVIDER_ATTR = "provider";
     public final static String PROPERTY_LN = "property";
     public final static String PROPERTY_NAME_ATTR = "name";
+    public final static String CRYPTO_KEY_ATTR = "cryptoKey";
+    public final static String CACHE_REFRESH_INTVL = "cacheRefreshInterval";
 
     private String provider;
+    private String cryptoKey;
+    private String cacheRefreshInterval;
+
+    public String getCryptoKey() {
+        return cryptoKey;
+    }
+
+    public void setCryptoKey(String cryptoKey) {
+        this.cryptoKey = cryptoKey;
+    }
+
+    public String getCacheRefreshInterval() {
+        return cacheRefreshInterval;
+    }
+
+    public void setCacheRefreshInterval(String cacheRefreshInterval) {
+        this.cacheRefreshInterval = cacheRefreshInterval;
+    }
+
     private Properties prop;
     
     public Properties getProp() {
@@ -89,6 +110,16 @@ public class CryptoConfig implements Assertion {
         if (getProvider() != null) {
             writer.writeAttribute(PROVIDER_ATTR, getProvider());
         }
+
+        if(getCryptoKey() != null){
+            writer.writeAttribute(CRYPTO_KEY_ATTR, getCryptoKey());
+        }
+
+        if(getCacheRefreshInterval() != null){
+            writer.writeAttribute(CACHE_REFRESH_INTVL, getCacheRefreshInterval());    
+        }
+
+
         
         String key;
         String value;

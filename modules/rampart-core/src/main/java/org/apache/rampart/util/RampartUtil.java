@@ -22,11 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.xpath.AXIOMXPath;
-import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeader;
-import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.client.Options;
@@ -93,21 +89,24 @@ import javax.servlet.http.HttpServletRequest;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 public class RampartUtil {
 
     private static final String CRYPTO_PROVIDER = "org.apache.ws.security.crypto.provider";
     private static Log log = LogFactory.getLog(RampartUtil.class);
-    
+
+    private static Map cryptoStore = new Hashtable();
+
+    private static class CachedCrypto {
+        private Crypto crypto;
+        private long creationTime;
+
+        public CachedCrypto(Crypto crypto, long creationTime) {
+            this.crypto = crypto;
+            this.creationTime = creationTime;
+        }
+    }
 
     public static CallbackHandler getPasswordCB(RampartMessageData rmd) throws RampartException {
 
@@ -292,28 +291,74 @@ public class RampartUtil {
             throws RampartException {
         log.debug("Loading encryption crypto");
         
-        if(config != null && config.getEncrCryptoConfig() != null) {
-            CryptoConfig cryptoConfig = config.getEncrCryptoConfig();
-            String provider = cryptoConfig.getProvider();
-            log.debug("Usig provider: " + provider);
-            Properties prop = cryptoConfig.getProp();
-            prop.put(CRYPTO_PROVIDER, provider);
-            return CryptoFactory.getInstance(prop, loader);
-        } else {
-            log.debug("Trying the signature crypto info");
+        if (config != null && config.getEncrCryptoConfig() != null) {
+                       CryptoConfig cryptoConfig = config.getEncrCryptoConfig();
+                       String provider = cryptoConfig.getProvider();
+                       log.debug("Usig provider: " + provider);
+                       Properties prop = cryptoConfig.getProp();
+                       prop.put(CRYPTO_PROVIDER, provider);
 
-            //Try using signature crypto infomation
-            if(config != null && config.getSigCryptoConfig() != null) {
-                CryptoConfig cryptoConfig = config.getSigCryptoConfig();
-                String provider = cryptoConfig.getProvider();
-                log.debug("Usig provider: " + provider);
-                Properties prop = cryptoConfig.getProp();
-                prop.put(CRYPTO_PROVIDER, provider);
-                return CryptoFactory.getInstance(prop, loader);
-            } else {
-                return null;
-            }
-        }
+                       String cryptoKey = null;
+                       String interval = null;
+                       if (cryptoConfig.getCryptoKey() != null) {
+                               cryptoKey = prop.getProperty(cryptoConfig.getCryptoKey());
+                               interval = cryptoConfig.getCacheRefreshInterval();
+                       }
+
+                       Crypto crypto = null;
+
+                       if (cryptoKey != null) {
+                               // cache enabled
+                               crypto = retrieveCrytpoFromCache(cryptoKey.trim() + "#" + provider.trim(), interval);
+                       }
+
+                       if (crypto == null) {
+                               // cache miss
+                               crypto = CryptoFactory.getInstance(prop, loader);
+                               if (cryptoKey != null) {
+                                       // cache enabled - let's cache
+                                       cacheCrypto(cryptoKey.trim() + "#" + provider.trim(), crypto);
+                               }
+                       }
+                       return crypto;
+
+               } else {
+                       log.debug("Trying the signature crypto info");
+
+                       // Try using signature crypto information
+                       if (config != null && config.getSigCryptoConfig() != null) {
+                               CryptoConfig cryptoConfig = config.getSigCryptoConfig();
+                               String provider = cryptoConfig.getProvider();
+                               log.debug("Usig provider: " + provider);
+                               Properties prop = cryptoConfig.getProp();
+                               prop.put(CRYPTO_PROVIDER, provider);
+                               String cryptoKey = null;
+                               String interval = null;
+                               if (cryptoConfig.getCryptoKey() != null) {
+                                       cryptoKey = prop.getProperty(cryptoConfig.getCryptoKey());
+                                       interval = cryptoConfig.getCacheRefreshInterval();
+                               }
+
+                               Crypto crypto = null;
+                               if (cryptoKey != null) {
+                                       // cache enabled
+                                       crypto = retrieveCrytpoFromCache(cryptoKey.trim() + "#" + provider.trim(),
+                                                       interval);
+                               }
+
+                               if (crypto == null) {
+                                       // cache miss
+                                       crypto = CryptoFactory.getInstance(prop, loader);
+                                       if (cryptoKey != null) {
+                                               // cache enabled - let's cache
+                                               cacheCrypto(cryptoKey.trim() + "#" + provider.trim(), crypto);
+                                       }
+                               }
+                               return crypto;
+                       } else {
+                               return null;
+                       }
+               }
     }
     
     /**
@@ -328,16 +373,40 @@ public class RampartUtil {
             throws RampartException {
         log.debug("Loading Signature crypto");
         
-        if(config != null && config.getSigCryptoConfig() != null) {
-            CryptoConfig cryptoConfig = config.getSigCryptoConfig();
-            String provider = cryptoConfig.getProvider();
-            log.debug("Usig provider: " + provider);
-            Properties prop = cryptoConfig.getProp();
-            prop.put(CRYPTO_PROVIDER, provider);
-            return CryptoFactory.getInstance(prop, loader);
-        } else {
-            return null;
-        }
+               if (config != null && config.getSigCryptoConfig() != null) {
+                       CryptoConfig cryptoConfig = config.getSigCryptoConfig();
+                       String provider = cryptoConfig.getProvider();
+                       log.debug("Usig provider: " + provider);
+                       Properties prop = cryptoConfig.getProp();
+                       prop.put(CRYPTO_PROVIDER, provider);
+                       String cryptoKey = null;
+                       String interval = null;
+                       if (cryptoConfig.getCryptoKey() != null) {
+                               cryptoKey = prop.getProperty(cryptoConfig.getCryptoKey());
+                               interval = cryptoConfig.getCacheRefreshInterval();
+                       }
+
+                       Crypto crypto = null;
+
+                       if (cryptoKey != null) {
+                               // cache enabled
+                               crypto = retrieveCrytpoFromCache(cryptoKey.trim() + "#" + provider.trim(), interval);
+                       }
+
+                       if (crypto == null) {
+                               // cache miss
+                               crypto = CryptoFactory.getInstance(prop, loader);
+                               if (cryptoKey != null) {
+                                       // cache enabled - let's cache
+                                       cacheCrypto(cryptoKey.trim() + "#" + provider.trim(), crypto);
+                               }
+                       }
+
+                       return crypto;
+
+               } else {
+                       return null;
+               }
     }
     
     
@@ -697,7 +766,7 @@ public class RampartUtil {
                 if (msgContext.isSOAP11()) {
                     client.setSoapVersion(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI);
                 } else {
-                    client.setSoapVersion(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI); 
+                    client.setSoapVersion(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI);
                 }
                 
                 
@@ -1609,5 +1678,48 @@ public class RampartUtil {
             }
         }
     }
+
+    private static Crypto retrieveCrytpoFromCache(String cryptoKey, String refreshInterval) {
+        // cache hit
+        if (cryptoStore.containsKey(cryptoKey)) {
+            CachedCrypto cachedCrypto = (CachedCrypto) cryptoStore.get(cryptoKey);
+            if (refreshInterval != null) {
+                if (cachedCrypto.creationTime + new Long(refreshInterval).longValue() > Calendar
+                        .getInstance().getTimeInMillis()) {
+                    if (log.isDebugEnabled()) {
+                        log.info("Cache Hit : Crypto Object was found in cache.");
+                    }
+                    return cachedCrypto.crypto;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.info("Cache Miss : Crypto Object found in cache is expired.");
+                    }
+                    return null;
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.info("Cache Hit : Crypto Object was found in cache.");
+                }
+                return cachedCrypto.crypto;
+            }
+        }
+        // cache miss
+        else {
+            if (log.isDebugEnabled()) {
+                log.info("Cache Miss : Crypto Object was not found in cache.");
+            }
+            return null;
+        }
+    }
+
+    private static void cacheCrypto(String cryptoKey, Crypto crypto) {
+        cryptoStore.put(cryptoKey, new CachedCrypto(crypto, Calendar.getInstance()
+                .getTimeInMillis()));
+        if (log.isDebugEnabled()) {
+            log.info("Crypto object is inserted into the Cache.");
+        }
+
+    }
+
 
 }

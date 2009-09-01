@@ -37,6 +37,16 @@ public class CryptoConfigBuilder implements AssertionBuilder {
         
         OMAttribute attribute = element.getAttribute(new QName(CryptoConfig.PROVIDER_ATTR));
         cryptoCofig.setProvider(attribute.getAttributeValue().trim());
+
+        OMAttribute cryptoKeyAttr = element.getAttribute(new QName(CryptoConfig.CRYPTO_KEY_ATTR));
+        if(cryptoKeyAttr != null){
+            cryptoCofig.setCryptoKey(cryptoKeyAttr.getAttributeValue().trim());
+        }
+
+        OMAttribute cacheRefreshIntAttr = element.getAttribute(new QName(CryptoConfig.CACHE_REFRESH_INTVL));
+        if(cacheRefreshIntAttr != null){
+            cryptoCofig.setCacheRefreshInterval(cacheRefreshIntAttr.getAttributeValue().trim());
+        }
         
         Properties properties = new Properties();
 
