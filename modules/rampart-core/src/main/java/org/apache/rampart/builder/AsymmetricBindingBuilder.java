@@ -477,7 +477,13 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         }
 
         //Do encryption
-        Token encrToken = rpd.getRecipientToken();
+        Token encrToken;
+        if (rmd.isInitiator()) {
+            encrToken = rpd.getRecipientToken();
+        } else {
+            encrToken = rpd.getInitiatorToken();
+        }
+
         if(encrToken != null && encrParts.size() > 0) {
             Element refList = null;
             AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
