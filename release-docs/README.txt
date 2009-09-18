@@ -23,6 +23,22 @@ README.txt - This file
 
 build.xml - Setup file to copy all jars to required places
 
+____________
+Installation
+============
+
+Using Ant
+---------
+Run ant script on extracted binary distribution and it will copy the required files to Axis2. You have to set the AXIS2_HOME system variable to point to your Axis2 binary distribution.
+
+Manual Installation
+-------------------
+You can copy the required libraries and module files manually. You need copy all the libraries in the lib directory of Rampart binary distribution to Axis2 lib directory and all the module files to in the modules directory of  Rampart binary distribution to Axis2 modules directory.
+
+Axis2 lib directory – AXIS2_HOME/lib (Standard binary distribution ) or axis2/WEB-INF/lib (WAR)
+
+Axis2 modules directory – AXIS2_HOME/repository/modules (Standard binary distribution ) or axis2/WEB-INF/modules (WAR)
+
 IMPORTANT: 
 Before you build rampart from source distribution, you need provision for 
 unlimited security jurisdiction as some of the test cases use key size of
