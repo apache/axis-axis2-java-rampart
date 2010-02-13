@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<document>
+
+	<properties>
+		
+	</properties>
+
+	<body>
+        <h1>Apache Rampart - Axis2 Security Module</h1>
+		<section name="Welcome to Apache Rampart">
+			<p>Rampart is the security module of Axis2. With Rampary module, you can secure Axis2
+                web services for authentication, integrity, confidentiality and non - repudiation.
+                Rampart secures SOAP messages according to specifications in the WS-Security stack.
+                Please go through the <a href="articles.html">Apache Rampart Knowledge Base</a> to
+                get more information about Rampart and it's usage.
+            </p>
+		</section>
+		
+		<h2>Features of Rampart Latest Version</h2>
+		    <p>
+               Rampart supports the following specifications:
+		    </p>
+		    <ul>
+                <li>WS - Security 1.0</li>
+                <li>WS - Security 1.1</li>
+                <li>WS - Secure Conversation - February 2005</li>
+                <li>WS - Security Policy - 1.1 - July 2005</li>
+                <li>WS - Security Policy - 1.2 </li>
+                <li>WS - Trust - February 2005</li>
+                <li>WS - Trust - WS-SX</li>
+                <li>SAML 1.1</li>
+                <li>SAML 2.0 - Issurance</li>
+            </ul>
+         
+        <h2>Apache Rampart News</h2>    
+        <h3>Oct xx, 2009 : Apache Rampart 1.5 released</h3>
+        <p>Apache Rampart 1.5 was released with lots of bug fixes and new features.<br></br>
+        New features include</p>
+            <ul>
+                <li>SAML 2.0 support</li>
+                <li>Key store caching</li>
+                <li>Signing / Encrypting with multiple keys</li>
+                <li>Tests for negative scenarios</li>
+            </ul>   
+	</body>
+</document>
