@@ -868,30 +868,39 @@ public class RampartUtil {
     }
     
     public static Vector getEncryptedParts(RampartMessageData rmd) {
-        RampartPolicyData rpd =  rmd.getPolicyData();
-        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        Vector encryptedPartsElements  = getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(), rpd.getEncryptedElements(),rpd.getDeclaredNamespaces());
-        return getContentEncryptedElements(encryptedPartsElements, envelope, rpd.getContentEncryptedElements(), rpd.getDeclaredNamespaces());
-    }
-    
-    public static Vector getSignedParts(RampartMessageData rmd) {
-        RampartPolicyData rpd =  rmd.getPolicyData();
-        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd.getSignedElements(), rpd.getDeclaredNamespaces());
-    }
-    
-    public static Vector getSupportingEncryptedParts(RampartMessageData rmd,
-            SupportingPolicyData rpd) {
-        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        return getPartsAndElements(false, envelope, rpd.isEncryptBody(), rpd.getEncryptedParts(),
-                rpd.getEncryptedElements(), rpd.getDeclaredNamespaces());
-    }
+		RampartPolicyData rpd = rmd.getPolicyData();
+		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+		Vector encryptedPartsElements = getPartsAndElements(false, envelope,
+				rpd.isEncryptBody() && !rpd.isEncryptBodyOptional(), rpd
+						.getEncryptedParts(), rpd.getEncryptedElements(), rpd
+						.getDeclaredNamespaces());
+		return getContentEncryptedElements(encryptedPartsElements, envelope,
+				rpd.getContentEncryptedElements(), rpd.getDeclaredNamespaces());
+	}
 
-    public static Vector getSupportingSignedParts(RampartMessageData rmd, SupportingPolicyData rpd) {
-        SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        return getPartsAndElements(true, envelope, rpd.isSignBody(), rpd.getSignedParts(), rpd
-                .getSignedElements(), rpd.getDeclaredNamespaces());
-    }
+	public static Vector getSignedParts(RampartMessageData rmd) {
+		RampartPolicyData rpd = rmd.getPolicyData();
+		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+		return getPartsAndElements(true, envelope, rpd.isSignBody()
+				&& !rpd.isSignBodyOptional(), rpd.getSignedParts(), rpd
+				.getSignedElements(), rpd.getDeclaredNamespaces());
+	}
+
+	public static Vector getSupportingEncryptedParts(RampartMessageData rmd,
+			SupportingPolicyData rpd) {
+		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+		return getPartsAndElements(false, envelope, rpd.isEncryptBody()
+				&& !rpd.isEncryptBodyOptional(), rpd.getEncryptedParts(), rpd
+				.getEncryptedElements(), rpd.getDeclaredNamespaces());
+	}
+
+	public static Vector getSupportingSignedParts(RampartMessageData rmd,
+			SupportingPolicyData rpd) {
+		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+		return getPartsAndElements(true, envelope, rpd.isSignBody()
+				&& !rpd.isSignBodyOptional(), rpd.getSignedParts(), rpd
+				.getSignedElements(), rpd.getDeclaredNamespaces());
+	}
     
     public static Set findAllPrefixNamespaces(OMElement currentElement, HashMap decNamespacess)
     {

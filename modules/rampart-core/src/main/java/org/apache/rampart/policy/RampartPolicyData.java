@@ -98,6 +98,14 @@ public class RampartPolicyData {
     private boolean signAttachments;
     
     private boolean encryptAttachments;
+    
+    private boolean signBodyOptional;
+
+    private boolean encryptBodyOptional;
+    
+    private boolean signAttachmentsOptional;
+    
+    private boolean encryptAttachmentsOptional;
 
     private Vector signedParts = new Vector();
 
@@ -160,9 +168,41 @@ public class RampartPolicyData {
 
     public void addSupportingPolicyData(SupportingPolicyData supportingPolicyData) {
         this.supportingPolicyData.add(supportingPolicyData);
-    }
+    }       
     
-    /**
+    public boolean isSignBodyOptional() {
+		return signBodyOptional;
+	}
+
+	public void setSignBodyOptional(boolean signBodyOptional) {
+		this.signBodyOptional = signBodyOptional;
+	}
+
+	public boolean isEncryptBodyOptional() {
+		return encryptBodyOptional;
+	}
+
+	public void setEncryptBodyOptional(boolean encryptBodyOptional) {
+		this.encryptBodyOptional = encryptBodyOptional;
+	}
+
+	public boolean isSignAttachmentsOptional() {
+		return signAttachmentsOptional;
+	}
+
+	public void setSignAttachmentsOptional(boolean signAttachmentsOptional) {
+		this.signAttachmentsOptional = signAttachmentsOptional;
+	}
+
+	public boolean isEncryptAttachmentsOptional() {
+		return encryptAttachmentsOptional;
+	}
+
+	public void setEncryptAttachmentsOptional(boolean encryptAttachmentsOptional) {
+		this.encryptAttachmentsOptional = encryptAttachmentsOptional;
+	}
+
+	/**
      * @return Returns the symmetricBinding.
      */
     public boolean isSymmetricBinding() {

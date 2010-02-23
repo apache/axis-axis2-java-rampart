@@ -233,6 +233,8 @@ public class RampartPolicyBuilder {
         if (sep.isSignedParts()) {
             rpd.setSignBody(sep.isBody());
             rpd.setSignAttachments(sep.isAttachments());
+           	rpd.setSignBodyOptional(sep.isOptional());
+           	rpd.setSignAttachmentsOptional(sep.isOptional());
             while (it.hasNext()) {
                 Header header = (Header) it.next();
                 rpd.addSignedPart(header.getNamespace(), header.getName());
@@ -240,6 +242,8 @@ public class RampartPolicyBuilder {
         } else {
             rpd.setEncryptBody(sep.isBody());
             rpd.setEncryptAttachments(sep.isAttachments());
+            rpd.setEncryptBodyOptional(sep.isOptional());
+           	rpd.setEncryptAttachmentsOptional(sep.isOptional());
             while (it.hasNext()) {
                 Header header = (Header) it.next();
                 rpd.setEncryptedParts(header.getNamespace(), header.getName(),"Header");

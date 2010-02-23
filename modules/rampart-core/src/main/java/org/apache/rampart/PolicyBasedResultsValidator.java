@@ -453,7 +453,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
 
         
         //Check for encrypted body
-        if(rpd.isEncryptBody()) {
+        if(rpd.isEncryptBody()&& !rpd.isEncryptBodyOptional()) {
             
             if( !isRefIdPresent(encrRefs, data.getBodyEncrDataId())){
                 throw new RampartException("encryptedPartMissing", 
@@ -579,7 +579,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                     body = WSSecurityUtil.findBodyElement(rmd.getDocument(), new SOAP12Constants());
                 }
                 
-                if (!actuallySigned.contains(body)) {
+                if (!actuallySigned.contains(body) && !rmd.getPolicyData().isSignBodyOptional()) {
                     // soap body is not signed
                     throw new RampartException("bodyNotSigned");
                 }
