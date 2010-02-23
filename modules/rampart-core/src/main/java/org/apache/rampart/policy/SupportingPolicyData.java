@@ -9,7 +9,7 @@ public class SupportingPolicyData extends RampartPolicyData {
 
 	public void build(SupportingToken token) {
 
-		if (token.getSignedParts() != null) {
+		if (token.getSignedParts() != null && !token.getSignedParts().isOptional()) {
 			Iterator it = token.getSignedParts().getHeaders().iterator();
 			this.setSignBody(token.getSignedParts().isBody());
 			while (it.hasNext()) {
@@ -18,7 +18,7 @@ public class SupportingPolicyData extends RampartPolicyData {
 			}
 		}
 
-		if (token.getEncryptedParts() != null) {
+		if (token.getEncryptedParts() != null && !token.getEncryptedParts().isOptional()) {
 			Iterator it = token.getEncryptedParts().getHeaders().iterator();
 			this.setEncryptBody(token.getEncryptedParts().isBody());
 			while (it.hasNext()) {
@@ -28,7 +28,7 @@ public class SupportingPolicyData extends RampartPolicyData {
 			}
 		}
 
-		if (token.getSignedElements() != null) {
+		if (token.getSignedElements() != null && !token.getSignedElements().isOptional()) {
 			Iterator it = token.getSignedElements().getXPathExpressions()
 					.iterator();
 			while (it.hasNext()) {
@@ -38,7 +38,7 @@ public class SupportingPolicyData extends RampartPolicyData {
 					.getDeclaredNamespaces());
 		}
 
-		if (token.getEncryptedElements() != null) {
+		if (token.getEncryptedElements() != null && !token.getEncryptedElements().isOptional()) {
 			Iterator it = token.getEncryptedElements().getXPathExpressions()
 					.iterator();
 			while (it.hasNext()) {

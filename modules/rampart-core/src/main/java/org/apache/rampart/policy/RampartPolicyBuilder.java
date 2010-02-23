@@ -277,6 +277,7 @@ public class RampartPolicyBuilder {
     private static void binding(Binding binding, RampartPolicyData rpd) {
         rpd.setLayout(binding.getLayout().getValue());
         rpd.setIncludeTimestamp(binding.isIncludeTimestamp());
+        rpd.setIncludeTimestampOptional(binding.isIncludeTimestampOptional());
         rpd.setAlgorithmSuite(binding.getAlgorithmSuite());
     }
 

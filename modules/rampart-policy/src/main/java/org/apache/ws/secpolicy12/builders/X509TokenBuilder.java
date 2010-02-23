@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
+import org.apache.neethi.Constants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
@@ -58,6 +59,12 @@ public class X509TokenBuilder implements AssertionBuilder {
             int inclusion = SP12Constants.getInclusionFromAttributeValue(includeAttr.getAttributeValue());
             x509Token.setInclusion(inclusion);
         }
+        
+        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
+		if (isOptional != null) {
+			x509Token.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
+		}
 
         if (policyElement != null) {
             

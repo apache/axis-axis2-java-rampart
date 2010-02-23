@@ -49,6 +49,8 @@ public class RampartPolicyData {
     private String layout;
 
     private boolean includeTimestamp;
+    
+    private boolean includeTimestampOptional;
 
     private boolean entireHeadersAndBodySignatures;
 
@@ -218,9 +220,17 @@ public class RampartPolicyData {
      */
     public void setIncludeTimestamp(boolean includeTimestamp) {
         this.includeTimestamp = includeTimestamp;
-    }
+    } 
+    
+    public boolean isIncludeTimestampOptional() {
+		return includeTimestampOptional;
+	}
 
-    /**
+	public void setIncludeTimestampOptional(boolean includeTimestampOptional) {
+		this.includeTimestampOptional = includeTimestampOptional;
+	}
+
+	/**
      * @return Returns the layout.
      */
     public String getLayout() {

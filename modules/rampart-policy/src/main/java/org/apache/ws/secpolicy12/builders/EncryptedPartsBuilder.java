@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
+import org.apache.neethi.Constants;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
@@ -46,6 +47,13 @@ public class EncryptedPartsBuilder implements AssertionBuilder {
 			// If we have only <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy"/>
 			// then we need to encrypt the whole body (refer to http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/ws-securitypolicy-1.2-spec-os.html#_Toc161826515).
 			signedEncryptedParts.setBody(true);
+		}
+		
+		OMAttribute isOptional = element
+				.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
+		if (isOptional != null) {
+			signedEncryptedParts.setOptional((new Boolean(isOptional
+					.getAttributeValue()).booleanValue()));
 		}
         
         return signedEncryptedParts;

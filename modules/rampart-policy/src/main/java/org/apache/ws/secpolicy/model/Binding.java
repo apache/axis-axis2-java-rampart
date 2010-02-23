@@ -16,10 +16,15 @@
 
 package org.apache.ws.secpolicy.model;
 
+/**
+ * @author prabath
+ *
+ */
 public abstract class Binding extends AbstractSecurityAssertion implements AlgorithmWrapper {
 
     private AlgorithmSuite algorithmSuite;
     private boolean includeTimestamp;
+    private boolean includeTimestampOptional;
     private Layout layout;
     private SupportingToken signedSupportingToken;
     private SupportingToken signedEndorsingSupportingTokens;
@@ -55,9 +60,17 @@ public abstract class Binding extends AbstractSecurityAssertion implements Algor
      */
     public void setIncludeTimestamp(boolean includeTimestamp) {
         this.includeTimestamp = includeTimestamp;
-    }
+    }     
     
-    /**
+    public boolean isIncludeTimestampOptional() {
+		return includeTimestampOptional;
+	}
+
+	public void setIncludeTimestampOptional(boolean includeTimestampOptional) {
+		this.includeTimestampOptional = includeTimestampOptional;
+	}
+
+	/**
      * @return Returns the layout.
      */
     public Layout getLayout() {

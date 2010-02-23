@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
+import org.apache.neethi.Constants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
@@ -43,6 +44,12 @@ public class UsernameTokenBuilder implements AssertionBuilder {
             int inclusion = SP12Constants.getInclusionFromAttributeValue(attribute.getAttributeValue());
             usernameToken.setInclusion(inclusion);
         }
+        
+        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
+		if (isOptional != null) {
+			usernameToken.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
+		}
         
         OMElement policyElement = element.getFirstElement();
         

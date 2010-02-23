@@ -78,6 +78,7 @@ public class AsymmetricBindingBuilder implements AssertionBuilder {
                 
             } else if (SP12Constants.INCLUDE_TIMESTAMP.equals(name)) {
                 asymmetricBinding.setIncludeTimestamp(true);
+                asymmetricBinding.setIncludeTimestampOptional(assertion.isOptional());
 
             } else if (SP12Constants.ENCRYPT_BEFORE_SIGNING.equals(name)) {
                 asymmetricBinding.setProtectionOrder(SPConstants.ENCRYPT_BEFORE_SIGNING);

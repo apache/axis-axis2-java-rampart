@@ -64,7 +64,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         if(rpd != null &&  rpd.isIncludeTimestamp()) {
             tsResult = 
                 WSSecurityUtil.fetchActionResult(results, WSConstants.TS);
-            if(tsResult == null) {
+            if(tsResult == null && !rpd.isIncludeTimestampOptional()) {
                 throw new RampartException("timestampMissing");
             }
             
@@ -83,17 +83,20 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         Vector signatureParts = RampartUtil.getSignedParts(rmd);
 
         //Timestamp is not included in sig parts
-        if(rpd != null && rpd.isIncludeTimestamp() && !rpd.isTransportBinding()) {
-            signatureParts.add(new WSEncryptionPart("timestamp"));
-        }
+		if (tsResult != null || !rpd.isIncludeTimestampOptional()) {
+			if (rpd != null && rpd.isIncludeTimestamp()
+					&& !rpd.isTransportBinding()) {
+				signatureParts.add(new WSEncryptionPart("timestamp"));
+			}
+		}
         
         if(!rmd.isInitiator()) {
                         
             //Just an indicator for EndorsingSupportingToken signature
             SupportingToken endSupportingToken = rpd.getEndorsingSupportingTokens();
-            if(endSupportingToken !=  null) {
+            if(endSupportingToken !=  null && !endSupportingToken.isOptional()) {
                 SignedEncryptedParts endSignedParts = endSupportingToken.getSignedParts();
-                if((endSignedParts != null && 
+                if((endSignedParts != null && !endSignedParts.isOptional() &&
                         (endSignedParts.isBody() || 
                                 endSignedParts.getHeaders().size() > 0)) ||
                                 rpd.isIncludeTimestamp()) {
@@ -103,9 +106,9 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             }
             //Just an indicator for SignedEndorsingSupportingToken signature
             SupportingToken sgndEndSupportingToken = rpd.getSignedEndorsingSupportingTokens();
-            if(sgndEndSupportingToken != null) {
+            if(sgndEndSupportingToken != null && !sgndEndSupportingToken.isOptional()) {
                 SignedEncryptedParts sgndEndSignedParts = sgndEndSupportingToken.getSignedParts();
-                if((sgndEndSignedParts != null && 
+                if((sgndEndSignedParts != null && !sgndEndSignedParts.isOptional() &&
                         (sgndEndSignedParts.isBody() || 
                                 sgndEndSignedParts.getHeaders().size() > 0)) || 
                                 rpd.isIncludeTimestamp()) {
@@ -117,7 +120,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             Vector supportingToks = rpd.getSupportingTokensList();
             for (int i = 0; i < supportingToks.size(); i++) {
                 SupportingToken supportingToken = (SupportingToken) supportingToks.get(i);
-                if (supportingToken != null) {
+                if (supportingToken != null && !supportingToken.isOptional()) {
                     SupportingPolicyData policyData = new SupportingPolicyData();
                     policyData.build(supportingToken);
                     encryptedParts.addAll(RampartUtil.getSupportingEncryptedParts(rmd, policyData));

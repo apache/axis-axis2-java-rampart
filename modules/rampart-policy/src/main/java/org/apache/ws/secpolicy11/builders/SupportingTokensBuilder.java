@@ -20,9 +20,11 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
+import org.apache.neethi.Constants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
@@ -50,7 +52,13 @@ public class SupportingTokensBuilder implements AssertionBuilder {
         } else if (SP11Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS.equals(name)) {
             supportingToken = new SupportingToken(SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING, SPConstants.SP_V11);
         }
-
+        
+        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
+		if (isOptional != null) {
+			supportingToken.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
+		}
+   
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
 
@@ -85,18 +93,22 @@ public class SupportingTokensBuilder implements AssertionBuilder {
             } else if (SP11Constants.SIGNED_PARTS.equals(qname)) {
                 supportingToken
                         .setSignedParts((SignedEncryptedParts) primitive);
+                supportingToken.setSignedPartsOptional(primitive.isOptional());
 
             } else if (SP11Constants.SIGNED_ELEMENTS.equals(qname)) {
                 supportingToken
                         .setSignedElements((SignedEncryptedElements) primitive);
+                supportingToken.setSignedElementsOptional(primitive.isOptional());
 
             } else if (SP11Constants.ENCRYPTED_PARTS.equals(qname)) {
                 supportingToken
                         .setEncryptedParts((SignedEncryptedParts) primitive);
+                supportingToken.setEncryptedPartsOptional(primitive.isOptional());
 
             } else if (SP11Constants.ENCRYPTED_ELEMENTS.equals(qname)) {
                 supportingToken
                         .setEncryptedElements((SignedEncryptedElements) primitive);
+                supportingToken.setEncryptedElementsOptional(primitive.isOptional());
 
             } else if (primitive instanceof Token) {
                 supportingToken.addToken((Token) primitive);

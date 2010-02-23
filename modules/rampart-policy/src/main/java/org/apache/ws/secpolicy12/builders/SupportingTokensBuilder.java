@@ -20,9 +20,11 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
+import org.apache.neethi.Constants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
@@ -66,6 +68,12 @@ public class SupportingTokensBuilder implements AssertionBuilder {
             supportingToken = new SupportingToken(
                     SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING_ENCRYPTED, SPConstants.SP_V12);             
         }
+        
+        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
+		if (isOptional != null) {
+			supportingToken.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
+		}
 
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);

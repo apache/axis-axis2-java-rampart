@@ -52,6 +52,14 @@ public class SupportingToken extends AbstractSecurityAssertion implements
     private SignedEncryptedParts signedParts;
 
     private SignedEncryptedParts encryptedParts;
+    
+    private boolean signedElementsOptional;
+
+    private boolean encryptedElementsOptional;
+
+    private boolean signedPartsOptional;
+
+    private boolean encryptedPartsOptional;
 
     public SupportingToken(int type, int version ) {
         this.type = type;
@@ -171,8 +179,40 @@ public class SupportingToken extends AbstractSecurityAssertion implements
     public void setToken(Token tok) {
         this.addToken(tok);
     }
+    
+    public boolean isSignedElementsOptional() {
+		return signedElementsOptional;
+	}
 
-    public QName getName() {
+	public void setSignedElementsOptional(boolean signedElementsOptional) {
+		this.signedElementsOptional = signedElementsOptional;
+	}
+
+	public boolean isEncryptedElementsOptional() {
+		return encryptedElementsOptional;
+	}
+
+	public void setEncryptedElementsOptional(boolean encryptedElementsOptional) {
+		this.encryptedElementsOptional = encryptedElementsOptional;
+	}
+
+	public boolean isSignedPartsOptional() {
+		return signedPartsOptional;
+	}
+
+	public void setSignedPartsOptional(boolean signedPartsOptional) {
+		this.signedPartsOptional = signedPartsOptional;
+	}
+
+	public boolean isEncryptedPartsOptional() {
+		return encryptedPartsOptional;
+	}
+
+	public void setEncryptedPartsOptional(boolean encryptedPartsOptional) {
+		this.encryptedPartsOptional = encryptedPartsOptional;
+	}
+
+	public QName getName() {
         //TODO Should we refactor this class ?? with a SuppotingTokenBase and sub classes 
         switch (type) {
         case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
