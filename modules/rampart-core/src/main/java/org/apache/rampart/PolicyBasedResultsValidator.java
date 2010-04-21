@@ -291,9 +291,10 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         for (Iterator iter = tokens.iterator(); iter.hasNext();) {
             Token token = (Token) iter.next();
             if(token instanceof UsernameToken) {
+                UsernameToken ut = (UsernameToken) token;
                 //Check presence of a UsernameToken
                 WSSecurityEngineResult utResult = WSSecurityUtil.fetchActionResult(results, WSConstants.UT);
-                if(utResult == null) {
+                if(utResult == null && !ut.isOptional()) {
                     throw new RampartException("usernameTokenMissing");
                 }
                 
@@ -304,8 +305,9 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                     throw new RampartException("samlTokenMissing");
                 }
             } else if ( token instanceof X509Token) {
+                X509Token x509Token = (X509Token) token;
                 WSSecurityEngineResult x509Result = WSSecurityUtil.fetchActionResult(results, WSConstants.BST);
-                if(x509Result == null) {
+                if(x509Result == null && !x509Token.isOptional()) {
                     throw new RampartException("binaryTokenMissing");
                 }
             }
