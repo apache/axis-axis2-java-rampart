@@ -126,6 +126,12 @@ public class RampartConfigBuilder implements AssertionBuilder {
         if (childElement != null) {
             rampartConfig.setTimestampMaxSkew(childElement.getText().trim());
         }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.NONCE_LIFE_TIME));
+        if (childElement != null) {
+            rampartConfig.setNonceLifeTime(childElement.getText().trim());
+        }
         
 		childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.OPTIMISE_PARTS));

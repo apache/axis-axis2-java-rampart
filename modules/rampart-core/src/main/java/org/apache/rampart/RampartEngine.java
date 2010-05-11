@@ -18,6 +18,8 @@ package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.*;
+import org.apache.axiom.soap.SOAP11Constants;
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
@@ -30,10 +32,7 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityEngine;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.saml.SAMLKeyInfo;
 import org.apache.ws.security.saml.SAMLUtil;
@@ -53,7 +52,8 @@ import java.util.Vector;
 public class RampartEngine {
 
 	private static Log log = LogFactory.getLog(RampartEngine.class);
-	private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
+	private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);
+    private static ServiceNonceCache serviceNonceCache = new ServiceNonceCache();
 
 	public Vector process(MessageContext msgCtx) throws WSSPolicyException,
 	RampartException, WSSecurityException, AxisFault {
@@ -230,9 +230,42 @@ public class RampartEngine {
 
                 }
             } else if (WSConstants.UT == actInt.intValue()) {
-                String username = ((Principal) wser.get(WSSecurityEngineResult.TAG_PRINCIPAL))
-                        .getName();
+
+		        WSUsernameTokenPrincipal userNameTokenPrincipal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
+
+                String username = userNameTokenPrincipal.getName();
                 msgCtx.setProperty(RampartMessageData.USERNAME, username);
+                
+                if (userNameTokenPrincipal.getNonce() != null) {
+                    // Check whether this is a replay attack. To verify that we need to check whether nonce value
+                    // is a repeating one
+                    int nonceLifeTimeInSeconds = 0;
+
+                    if (rpd.getRampartConfig() != null) {
+                        
+                        String stringLifeTime = rpd.getRampartConfig().getNonceLifeTime();
+
+                        try {
+                            nonceLifeTimeInSeconds = Integer.parseInt(stringLifeTime);
+
+                        } catch (NumberFormatException e) {
+                            log.error("Invalid value for nonceLifeTime in rampart configuration file.", e);
+                            throw new RampartException(
+                                        "invalidNonceLifeTime", e);
+
+                        }
+                    }
+
+                    String serviceEndpointName = msgCtx.getAxisService().getEndpointName();
+
+                    boolean valueRepeating = serviceNonceCache.isNonceRepeatingForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce());
+
+                    if (valueRepeating){
+                        throw new RampartException("repeatingNonceValue", new Object[]{ userNameTokenPrincipal.getNonce(), username} );
+                    }
+
+                    serviceNonceCache.addNonceForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce(), nonceLifeTimeInSeconds);
+                }
             } else if (WSConstants.SIGN == actInt.intValue()) {
                 X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
