@@ -52,10 +52,7 @@ import org.opensaml.xml.io.*;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.impl.AssertionBuilder;
-import org.opensaml.saml2.core.impl.IssuerBuilder;
-import org.opensaml.saml2.core.impl.NameIDBuilder;
-import org.opensaml.saml2.core.impl.SubjectBuilder;
+import org.opensaml.saml2.core.impl.*;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.EntitiesDescriptor;
 import org.joda.time.DateTime;
@@ -190,6 +187,11 @@ public class SAML2TokenIssuer implements TokenIssuer {
             // These variables are used to build the trust assertion
             Date creationTime = creationDate.toDate();
             Date expirationTime = expirationDate.toDate();
+
+            Conditions conditions = new ConditionsBuilder().buildObject();
+            conditions.setNotBefore(creationDate);
+            conditions.setNotOnOrAfter(expirationDate);
+            assertion.setConditions(conditions);
 
             // Create the subject
             Subject subject = createSubject(config, doc, crypto, creationDate, expirationDate, data);

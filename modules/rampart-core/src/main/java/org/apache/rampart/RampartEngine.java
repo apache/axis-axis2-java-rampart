@@ -40,6 +40,7 @@ import org.opensaml.SAMLAssertion;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.SubjectConfirmationData;
+import org.opensaml.saml2.core.Conditions;
 
 import javax.xml.namespace.QName;
 import java.security.Principal;
@@ -182,10 +183,29 @@ public class RampartEngine {
                     final Assertion assertion = (Assertion) wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
                     String id = assertion.getID();
                     Subject subject = assertion.getSubject();
-                    SubjectConfirmationData scData = subject.getSubjectConfirmations()
-                            .get(0).getSubjectConfirmationData();
-                    Date dateOfCreation = scData.getNotBefore().toDate();
-                    Date dateOfExpiration = scData.getNotOnOrAfter().toDate();
+
+                    Date dateOfCreation = null;
+                    Date dateOfExpiration = null;
+
+                    //Read the validity period from the 'Conditions' element, else read it from SC Data
+                    if (assertion.getConditions() != null) {
+                        Conditions conditions = assertion.getConditions();
+                        if (conditions.getNotBefore() != null) {
+                            dateOfCreation = conditions.getNotBefore().toDate();
+                        }
+                        if (conditions.getNotOnOrAfter() != null) {
+                            dateOfExpiration = conditions.getNotOnOrAfter().toDate();
+                        }
+                    } else {
+                        SubjectConfirmationData scData = subject.getSubjectConfirmations()
+                                .get(0).getSubjectConfirmationData();
+                        if (scData.getNotBefore() != null) {
+                            dateOfCreation = scData.getNotBefore().toDate();
+                        }
+                        if (scData.getNotOnOrAfter() != null) {
+                            dateOfExpiration = scData.getNotOnOrAfter().toDate();
+                        }
+                    }
 
                     // TODO : SAML2KeyInfo element needs to be moved to WSS4J.
                     SAML2KeyInfo saml2KeyInfo = SAML2Utils.
