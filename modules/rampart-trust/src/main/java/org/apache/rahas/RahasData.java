@@ -359,6 +359,11 @@ public class RahasData {
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
                 }
+                if(tokenId == null){
+                    if(str.containsKeyIdentifier()){
+                        tokenId = str.getKeyIdentifierValue();
+                    }
+                }
             } catch (WSSecurityException e) {
                 throw new TrustException("errorExtractingTokenId",e);
             }      
