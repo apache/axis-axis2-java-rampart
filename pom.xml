@@ -230,6 +230,21 @@
             <groupId>org.apache.ws.security</groupId>
             <artifactId>wss4j</artifactId>
             <version>${wss4j.version}</version>
+            <exclusions>
+                <!-- We exclude xalan:xalan as a transitive dependency, but include
+                     org.apache.xalan:xalan as a direct dependency. This avoids
+                     conflicts with the dependencies of org.opensaml:opensaml
+                     (which uses org.apache.xalan:xalan). -->
+                <exclusion>
+                    <artifactId>xalan</artifactId>
+                    <groupId>xalan</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xalan</groupId>
+            <artifactId>xalan</artifactId>
+            <version>2.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.santuario</groupId>
