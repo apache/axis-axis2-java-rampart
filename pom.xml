@@ -94,39 +94,6 @@
 
     <repositories>
 
-       <repository>
-            <releases>
-                <enabled>false</enabled>
-                <updatePolicy>always</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-                <checksumPolicy>fail</checksumPolicy>
-            </snapshots>
-            <id>apache-snapshots</id>
-            <name>Apache Maven2 SNAPSHOTS</name>
-            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
-            <layout>default</layout>
-        </repository>
-
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-            <id>apache-ws-zones2</id>
-            <name>Apache ws.zones - 2</name>
-            <url>http://ws.zones.apache.org/repository2</url>
-        </repository>
-
         <repository>
             <releases>
                 <enabled>true</enabled>
@@ -252,8 +219,8 @@
             <version>${xmlsec.version}</version>
         </dependency>
         <dependency>
-            <groupId>opensaml</groupId>
-            <artifactId>opensaml</artifactId>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml1</artifactId>
             <version>1.1</version>
         </dependency>
 	<dependency>
