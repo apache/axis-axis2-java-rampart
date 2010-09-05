@@ -142,10 +142,14 @@ public class STSClient {
             //Process the STS and service policy policy
             this.processPolicy(issuerPolicy, servicePolicy);
             
-            OMElement response = client.sendReceive(rstQn,
-                                                    createIssueRequest(requestType, appliesTo));
-
-            return processIssueResponse(version, response, issuerAddress);
+            try {
+                OMElement response = client.sendReceive(rstQn,
+                                                        createIssueRequest(requestType, appliesTo));
+    
+                return processIssueResponse(version, response, issuerAddress);
+            } finally {
+                client.cleanupTransport();
+            }
         } catch (AxisFault e) {
             log.error("errorInObtainingToken", e);
             throw new TrustException("errorInObtainingToken", new String[]{issuerAddress},e);
