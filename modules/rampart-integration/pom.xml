@@ -48,7 +48,7 @@
                                 <artifactItem>
                                     <groupId>org.apache.axis2</groupId>
                                     <artifactId>addressing</artifactId>
-                                    <version>${addressing.mar.version}</version>
+                                    <version>${axis2.version}</version>
                                     <type>mar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>target/artifacts</outputDirectory>
@@ -119,9 +119,9 @@
                         <phase>process-test-resources</phase>
                         <configuration>
                             <tasks>
-                                <property name="addressing.mar" value="addressing-${addressing.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-classes/modules/addressing-${addressing.mar.version}.mar"/>
+                                <property name="addressing.mar" value="addressing-${axis2.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-classes/modules/addressing-${axis2.version}.mar"/>
                                 <copy file="target/artifacts/rampart-${rampart.mar.version}.mar"
                                       tofile="target/test-classes/modules/rampart-${rampart.mar.version}.mar"/>
 
@@ -145,8 +145,8 @@
                                       tofile="target/test-resources/rampart_client_repo/modules/rampart-${rampart.mar.version}.mar"/>
                                 <copy file="target/artifacts/rahas-${rahas.mar.version}.mar"
                                       tofile="target/test-resources/rampart_client_repo/modules/rahas-${rahas.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/rampart_client_repo/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/rampart_client_repo/modules/addressing-${axis2.version}.mar"/>
                                 <mkdir dir="target/test-resources/rampart_service_repo"/>
                                 <mkdir dir="target/test-resources/rampart_service_repo/conf"/>
                                 <mkdir dir="target/test-resources/rampart_service_repo/services"/>
@@ -155,8 +155,8 @@
                                       tofile="target/test-resources/rampart_service_repo/modules/rampart-${rampart.mar.version}.mar"/>
                                 <copy file="target/artifacts/rahas-${rahas.mar.version}.mar"
                                       tofile="target/test-resources/rampart_service_repo/modules/rahas-${rahas.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/rampart_service_repo/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/rampart_service_repo/modules/addressing-${axis2.version}.mar"/>
 
                                 <!-- Service 1 -->
                                 <copy overwrite="yes"
@@ -386,8 +386,8 @@
                                 <mkdir dir="target/test-resources/rahas_client_repo"/>
                                 <mkdir dir="target/test-resources/rahas_client_repo/conf"/>
                                 <mkdir dir="target/test-resources/rahas_client_repo/modules"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/rahas_client_repo/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/rahas_client_repo/modules/addressing-${axis2.version}.mar"/>
                                 <copy file="target/artifacts/rampart-${rampart.mar.version}.mar"
                                       tofile="target/test-resources/rahas_client_repo/modules/rampart-${rampart.mar.version}.mar"/>
                                 <!-- Rahas Test1: SAML Token test -->
@@ -399,8 +399,8 @@
                                       tofile="target/test-resources/rahas_service_repo_1/modules/rampart-${rampart.mar.version}.mar"/>
                                 <copy file="target/artifacts/rahas-${rahas.mar.version}.mar"
                                       tofile="target/test-resources/rahas_service_repo_1/modules/rahas-${rahas.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/rahas_service_repo_1/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/rahas_service_repo_1/modules/addressing-${axis2.version}.mar"/>
                                 <!-- copy the services.xml and create the aar -->
                                 <copy overwrite="yes"
                                       file="src/test/resources/rahas/s1-services.xml"
@@ -419,8 +419,8 @@
                                       tofile="target/test-resources/rahas_service_repo_3/modules/rampart-${rampart.mar.version}.mar"/>
                                 <copy file="target/artifacts/rahas-${rahas.mar.version}.mar"
                                       tofile="target/test-resources/rahas_service_repo_3/modules/rahas-${rahas.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/rahas_service_repo_3/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/rahas_service_repo_3/modules/addressing-${axis2.version}.mar"/>
                                 <!-- copy the services.xml and create the aar -->
                                 <copy overwrite="yes"
                                       file="src/test/resources/rahas/s3-services.xml"
@@ -435,8 +435,8 @@
                                 <mkdir dir="target/test-resources/default_security_client_repo/modules"/>
                                 <copy file="target/artifacts/rampart-${rampart.mar.version}.mar"
                                       tofile="target/test-resources/default_security_client_repo/modules/rampart-${rampart.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/default_security_client_repo/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/default_security_client_repo/modules/addressing-${axis2.version}.mar"/>
                                 <copy file="src/test/resources/conf/axis2.xml"
                                       tofile="target/test-resources/default_security_client_repo/conf/axis2.xml"/>
                                 <!--
@@ -450,8 +450,8 @@
                                       tofile="target/test-resources/rahas_service_repo_5/modules/rampart-${rampart.mar.version}.mar"/>
                                 <copy file="target/artifacts/rahas-${rahas.mar.version}.mar"
                                       tofile="target/test-resources/rahas_service_repo_5/modules/rahas-${rahas.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/rahas_service_repo_5/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/rahas_service_repo_5/modules/addressing-${axis2.version}.mar"/>
                                 <!-- copy the services.xml and create the aar -->
                                 <copy overwrite="yes"
                                       file="src/test/resources/rahas/s5-services.xml"
@@ -698,15 +698,15 @@
                                       tofile="target/test-resources/complete_client_repo/conf/axis2.xml"/>
                                 <copy file="target/artifacts/rampart-${rampart.mar.version}.mar"
                                       tofile="target/test-resources/complete_client_repo/modules/rampart-${rampart.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/complete_client_repo/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/complete_client_repo/modules/addressing-${axis2.version}.mar"/>
                                 <!-- Test with addressing and MTOMservice repository-->
                                 <copy file="src/test/resources/security/complete.service.axis2.xml"
                                       tofile="target/test-resources/complete_service_repo/conf/axis2.xml"/>
                                 <copy file="target/artifacts/rampart-${rampart.mar.version}.mar"
                                       tofile="target/test-resources/complete_service_repo/modules/rampart-${rampart.mar.version}.mar"/>
-                                <copy file="target/artifacts/addressing-${addressing.mar.version}.mar"
-                                      tofile="target/test-resources/complete_service_repo/modules/addressing-${addressing.mar.version}.mar"/>
+                                <copy file="target/artifacts/addressing-${axis2.version}.mar"
+                                      tofile="target/test-resources/complete_service_repo/modules/addressing-${axis2.version}.mar"/>
                                 <copy file="src/test/resources/security/complete.service.xml"
                                       tofile="target/temp-interop/META-INF/services.xml"
                                       overwrite="true"/>

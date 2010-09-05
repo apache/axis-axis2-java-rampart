@@ -188,7 +188,7 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>addressing</artifactId>
             <type>mar</type>
-            <version>${addressing.mar.version}</version>
+            <version>${axis2.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -367,7 +367,6 @@
         <rahas.mar.version>SNAPSHOT</rahas.mar.version>
 
         <axis2.version>SNAPSHOT</axis2.version>
-        <addressing.mar.version>SNAPSHOT</addressing.mar.version>
 
         <wss4j.version>1.5.8</wss4j.version>
 	<xmlsec.version>1.4.2</xmlsec.version>
