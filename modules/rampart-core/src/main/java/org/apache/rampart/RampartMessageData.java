@@ -56,6 +56,7 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.opensaml.SAMLAssertion;
 import org.w3c.dom.Document;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import java.util.ArrayList;
@@ -621,18 +622,17 @@ public class RampartMessageData {
             return this.tokenStorage;
         }
 
-        TokenStorage storage = (TokenStorage) this.msgContext.getProperty(
+        TokenStorage storage = (TokenStorage) this.msgContext.getConfigurationContext().getProperty(
                         TokenStorage.TOKEN_STORAGE_KEY);
 
         if (storage != null) {
             this.tokenStorage = storage;
         } else {
-
             if (this.policyData.getRampartConfig() != null &&
                     this.policyData.getRampartConfig().getTokenStoreClass() != null) {
                 Class stClass = null;
                 String storageClass = this.policyData.getRampartConfig()
-                        .getTokenStoreClass(); 
+                        .getTokenStoreClass();
                 try {
                     stClass = Loader.loadClass(msgContext.getAxisService()
                             .getClassLoader(), storageClass);
