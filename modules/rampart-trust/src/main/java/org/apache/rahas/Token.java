@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -466,8 +468,8 @@ public class Token implements Externalizable {
         }
 
         try {
-            InputStream is = new ByteArrayInputStream(stringElement.getBytes("UTF-8"));
-            XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(is);
+            Reader in = new StringReader(stringElement);
+            XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(in);
             StAXOMBuilder builder = new StAXOMBuilder(parser);
             OMElement documentElement = builder.getDocumentElement();
 
@@ -476,12 +478,12 @@ public class Token implements Externalizable {
             StAXOMBuilder doomBuilder = new StAXOMBuilder(doomFactory, llomReader);
             return doomBuilder.getDocumentElement();
             
-        } catch (UnsupportedEncodingException e) {
-            log.error("Cannot convert de-serialized string to OMElement. Incorrect encoding format", e);
-            throw new IOException("Cannot convert de-serialized string to OMElement. Incorrect encoding format", e);
         } catch (XMLStreamException e) {
             log.error("Cannot convert de-serialized string to OMElement. Could not create XML stream.", e);
-            throw new IOException("Cannot convert de-serialized string to OMElement. Could not create XML stream.", e);
+            // IOException only has a constructor supporting exception chaining starting with Java 1.6
+            IOException ex = new IOException("Cannot convert de-serialized string to OMElement. Could not create XML stream.");
+            ex.initCause(e);
+            throw ex;
         }
     }
 }
