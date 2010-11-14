@@ -166,7 +166,7 @@
 
     <dependencies>
 
-        <!-- Axis2 Dependencies -->
+        <!-- Axis2 and Axiom Dependencies -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
@@ -190,6 +190,10 @@
             <type>mar</type>
             <version>${axis2.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-dom</artifactId>
         </dependency>
 
         <!-- Other Rampart Dependencies -->
@@ -277,6 +281,27 @@
 
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Since Rampart depends on DOOM, but axiom-dom is not a transitive
+                 dependency, we need to manage the Axiom version. -->
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-dom</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <profiles>
         <profile>
@@ -320,34 +345,6 @@
                 <module>modules/distribution</module>
             </modules>
         </profile>
-
-        <profile>
-            <id>axiom-managed</id>
-            <activation>
-                <property>
-                    <name>axiom.version</name>
-                </property>
-            </activation>
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.ws.commons.axiom</groupId>
-                        <artifactId>axiom-api</artifactId>
-                        <version>${axiom.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.ws.commons.axiom</groupId>
-                        <artifactId>axiom-impl</artifactId>
-                        <version>${axiom.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.ws.commons.axiom</groupId>
-                        <artifactId>axiom-dom</artifactId>
-                        <version>${axiom.version}</version>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
-        </profile>
     </profiles>
 
     <modules>
@@ -367,6 +364,7 @@
         <rahas.mar.version>SNAPSHOT</rahas.mar.version>
 
         <axis2.version>SNAPSHOT</axis2.version>
+        <axiom.version>1.2.11-SNAPSHOT</axiom.version>
 
         <wss4j.version>1.5.10-SNAPSHOT</wss4j.version>
 	<xmlsec.version>1.4.2</xmlsec.version>
