@@ -338,7 +338,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
                 String subjectNameId = data.getPrincipal().getName();
                 
                 SAMLNameIdentifier nameId = new SAMLNameIdentifier(
-                        subjectNameId, null, SAMLNameIdentifier.FORMAT_EMAIL);
+                        subjectNameId, null, SAMLNameIdentifier.FORMAT_X509);
 
                 // Create the ds:KeyValue element with the ds:X509Data
                 X509Certificate clientCert = data.getClientCert();
