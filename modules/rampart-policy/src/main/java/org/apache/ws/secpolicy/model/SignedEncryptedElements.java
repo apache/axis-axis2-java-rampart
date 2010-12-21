@@ -122,9 +122,9 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
             Iterator<String> namespaces = declaredNamespaces.keySet().iterator();
 
             while(namespaces.hasNext()) {
-                prefix = (String) namespaces.next();
-                namespaceURI = (String) declaredNamespaces.get(prefix);
-                writer.writeNamespace(prefix,namespaceURI);
+            	final String declaredPrefix = namespaces.next();
+            	final String declaredNamespaceURI = (String) declaredNamespaces.get(declaredPrefix);
+                writer.writeNamespace(declaredPrefix,declaredNamespaceURI); 
             }
 
             writer.writeCharacters(xpathExpression);
