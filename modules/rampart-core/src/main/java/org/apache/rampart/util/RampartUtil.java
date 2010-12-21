@@ -1568,7 +1568,26 @@ public class RampartUtil {
             if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
                 return true;
             }
-        
+       
+            supportingTokens = rpd.getEncryptedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getSignedEncryptedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getEndorsingEncryptedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
         }
         
         return false;
