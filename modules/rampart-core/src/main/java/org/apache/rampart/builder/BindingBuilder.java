@@ -345,6 +345,7 @@ public abstract class BindingBuilder {
         //Create the list to hold the tokens
         HashMap endSuppTokMap = new HashMap();
         
+
         if(suppTokens != null && suppTokens.getTokens() != null &&
                 suppTokens.getTokens().size() > 0) {
             log.debug("Processing supporting tokens");
@@ -411,8 +412,10 @@ public abstract class BindingBuilder {
                     //Add the UT
                     Element elem = utBuilder.getUsernameTokenElement();
                     elem = RampartUtil.insertSiblingAfter(rmd, this.getInsertionLocation(), elem);
-                    
-                    encryptedTokensIdList.add(utBuilder.getId());
+
+                    if (suppTokens.isEncryptedToken()) {
+                        encryptedTokensIdList.add(utBuilder.getId());
+                    }
                     
                     //Move the insert location to the next element
                     this.setInsertionLocation(elem);
