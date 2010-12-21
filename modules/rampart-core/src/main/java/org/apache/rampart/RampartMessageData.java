@@ -636,8 +636,7 @@ public class RampartMessageData {
                 String storageClass = this.policyData.getRampartConfig()
                         .getTokenStoreClass();
                 try {
-                    stClass = Loader.loadClass(msgContext.getAxisService()
-                            .getClassLoader(), storageClass);
+                    stClass = Loader.loadClass(this.customClassLoader, storageClass);
                 } catch (ClassNotFoundException e) {
                     throw new RampartException(
                             "WSHandler: cannot load token storage class: "
