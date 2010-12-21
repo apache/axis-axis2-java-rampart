@@ -616,7 +616,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         if (!(supportingSigToken instanceof X509Token)) {
             return;
         }
-        supportingSig = this.getSignatureBuider(rmd, supportingSigToken,
+        supportingSig = this.getSignatureBuilder(rmd, supportingSigToken,
                 ((X509Token) supportingSigToken).getUserCertAlias());
         Element bstElem = supportingSig.getBinarySecurityTokenElement();
         if (bstElem != null) {
@@ -719,7 +719,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
 
         } else {
-            sig = this.getSignatureBuider(rmd, sigToken);
+            sig = this.getSignatureBuilder(rmd, sigToken);
             Element bstElem = sig.getBinarySecurityTokenElement();
             if(bstElem != null) {
                 bstElem = RampartUtil.insertSiblingAfter(rmd, this

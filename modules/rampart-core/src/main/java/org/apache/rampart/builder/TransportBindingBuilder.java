@@ -256,7 +256,7 @@ public class TransportBindingBuilder extends BindingBuilder {
         } else {
             
             try {
-                WSSecSignature sig = this.getSignatureBuider(rmd, token);
+                WSSecSignature sig = this.getSignatureBuilder(rmd, token);
                 
 
                 sig.appendBSTElementToHeader(rmd.getSecHeader());
