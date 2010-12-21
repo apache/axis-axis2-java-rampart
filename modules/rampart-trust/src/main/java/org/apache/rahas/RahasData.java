@@ -334,6 +334,8 @@ public class RahasData {
                 SecurityTokenReference str = new SecurityTokenReference((Element)elem);
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
+                } else if(str.containsKeyIdentifier()){
+                	tokenId = str.getKeyIdentifierValue();
                 }
             } catch (WSSecurityException e) {
                 throw new TrustException("errorExtractingTokenId",e);
@@ -358,6 +360,8 @@ public class RahasData {
                 SecurityTokenReference str = new SecurityTokenReference((Element)elem);
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
+                } else if(str.containsKeyIdentifier()){
+                	tokenId = str.getKeyIdentifierValue();
                 }
                 if(tokenId == null){
                     if(str.containsKeyIdentifier()){
