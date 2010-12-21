@@ -42,7 +42,13 @@ public class SignedPartsBuilder implements AssertionBuilder {
         for (Iterator iterator = element.getChildElements(); iterator.hasNext();) {
             processElement((OMElement) iterator.next(), signedEncryptedParts);
         }
-        
+
+        // Presense of <sp:SignedParts/> enforces the requirement for sign body and all the header blocks
+        if(!element.getChildren().hasNext()){
+            signedEncryptedParts.setBody(true);
+            signedEncryptedParts.setSignAllHeaders(true);
+        }
+
         return signedEncryptedParts;
     }
        

@@ -233,6 +233,7 @@ public class RampartPolicyBuilder {
         if (sep.isSignedParts()) {
             rpd.setSignBody(sep.isBody());
             rpd.setSignAttachments(sep.isAttachments());
+            rpd.setSignAllHeaders(sep.isSignAllHeaders());
            	rpd.setSignBodyOptional(sep.isOptional());
            	rpd.setSignAttachmentsOptional(sep.isOptional());
             while (it.hasNext()) {

@@ -107,6 +107,8 @@ public class RampartPolicyData {
     
     private boolean encryptAttachmentsOptional;
 
+    private boolean signAllHeaders;
+
     private Vector signedParts = new Vector();
 
     private Vector signedElements = new Vector();
@@ -925,6 +927,14 @@ public class RampartPolicyData {
     
     public MTOMAssertion getMTOMAssertion(){
     	return mtomAssertion;
+    }
+
+    public boolean isSignAllHeaders() {
+        return signAllHeaders;
+    }
+
+    public void setSignAllHeaders(boolean signAllHeaders) {
+        this.signAllHeaders = signAllHeaders;
     }
     
     public boolean isMTOMSerialize(){

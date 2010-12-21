@@ -44,6 +44,12 @@ public class SignedPartsBuilder implements AssertionBuilder {
 			signedEncryptedParts.setOptional((new Boolean(isOptional.getAttributeValue())
 					.booleanValue()));
 		}
+
+        //presense of <sp:SignedParts/> enforces the requirement for sign body and all the header blocks
+        if(!element.getChildren().hasNext()){
+            signedEncryptedParts.setBody(true);
+            signedEncryptedParts.setSignAllHeaders(true);
+        }
         
         return signedEncryptedParts;
     }

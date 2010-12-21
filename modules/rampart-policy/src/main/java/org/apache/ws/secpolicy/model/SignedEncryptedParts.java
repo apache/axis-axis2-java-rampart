@@ -37,6 +37,16 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
     private ArrayList headers = new ArrayList();
     
     private boolean signedParts;
+
+    private boolean signAllHeaders;
+
+    public boolean isSignAllHeaders() {
+        return signAllHeaders;
+    }
+
+    public void setSignAllHeaders(boolean signAllHeaders) {
+        this.signAllHeaders = signAllHeaders;
+    }
     
     public SignedEncryptedParts(boolean signedParts, int version) {
         this.signedParts = signedParts;

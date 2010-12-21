@@ -881,6 +881,19 @@ public class RampartUtil {
 	public static Vector getSignedParts(RampartMessageData rmd) {
 		RampartPolicyData rpd = rmd.getPolicyData();
 		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+
+        //"signAllHeaders" indicates that all the headers should be signed.
+        if (rpd.isSignAllHeaders()) {
+            Iterator childHeaders = envelope.getHeader().getChildElements();
+            while (childHeaders.hasNext()) {
+               OMElement hb = (OMElement) childHeaders.next();
+                if (!(hb.getLocalName().equals(WSConstants.WSSE_LN)
+                        && hb.getNamespace().getNamespaceURI().equals(WSConstants.WSSE_NS))) {
+                    rpd.addSignedPart(hb.getNamespace().getNamespaceURI(),hb.getLocalName());
+                }
+           }
+        }
+
 		return getPartsAndElements(true, envelope, rpd.isSignBody()
 				&& !rpd.isSignBodyOptional(), rpd.getSignedParts(), rpd
 				.getSignedElements(), rpd.getDeclaredNamespaces());
