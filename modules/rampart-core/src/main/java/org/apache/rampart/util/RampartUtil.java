@@ -438,18 +438,18 @@ public class RampartUtil {
      */
     public static String processIssuerAddress(OMElement issuerAddress) 
         throws RampartException {
-        if(issuerAddress != null && issuerAddress.getText() != null && 
-                !"".equals(issuerAddress.getText())) {
-            return issuerAddress.getText().trim();
-        } else {
-            if(issuerAddress != null) {
-                throw new RampartException("invalidIssuerAddress",
-                    new String[] { issuerAddress.toString() });
-            } else {
-                throw new RampartException("invalidIssuerAddress",
-                        new String[] { "Issuer address null" });
-            }
+
+    	if(issuerAddress == null){
+    		throw new RampartException("invalidIssuerAddress", 
+    		                           new String[] { "Issuer address null" });
+    	}
+    	
+    	if(issuerAddress.getText() == null || !"".equals(issuerAddress.getText())) {
+    		throw new RampartException("invalidIssuerAddress", 
+    		                           new String[] { issuerAddress.toString() });
         }
+
+    	return issuerAddress.getText().trim();
     }
     
     /**
