@@ -15,3 +15,7 @@ Please use Apache Ant with the build.xml file available here to copy all jars
 and mars to required places.
 
     - Please copy log4j.jar to AXIS2_HOME/lib directory before trying out samples.
+
+    - Please follow the instructions on endorsing the default JAXP implementation
+      available in README.txt of this distribution before invoking 
+      Sample 08.(Issuing a SAML 2.0 Token)
