@@ -300,6 +300,9 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         OMElement callbackHandlerName = fac.createOMElement(ATTR_CALLBACK_HANDLER_NAME, configElem);
         callbackHandlerName.setText(this.callbackHandlerName);
         
+        OMElement timeToLive = fac.createOMElement(TTL, configElem);
+        timeToLive.setText(String.valueOf(this.ttl));
+        
         configElem.addChild(this.cryptoPropertiesElement);
         
         OMElement keySizeElem = fac.createOMElement(KEY_SIZE, configElem);
