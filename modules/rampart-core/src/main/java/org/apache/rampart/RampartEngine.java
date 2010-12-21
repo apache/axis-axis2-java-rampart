@@ -327,46 +327,41 @@ public class RampartEngine {
 
 	
 	private boolean isSecurityFault(RampartMessageData rmd) {
-	    
-	    SOAPEnvelope soapEnvelope = rmd.getMsgContext().getEnvelope();    
-	    
-	    SOAPFault soapFault = soapEnvelope.getBody().getFault();
-            
-            // This is not a soap fault
-            if (soapFault == null) {
-                return false;
-            }
-            
-            String soapVersionURI =  rmd.getMsgContext().getEnvelope().getNamespace().getNamespaceURI();
-	   	    
-	    if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI) ) {
-	        
-	        SOAPFaultCode faultCode = soapFault.getCode();
-	        
-	        // This is a fault processing the security header 
-                if (faultCode.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-                   return true;
-                }
-	        
-	        	        
-	    } else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-	        
-	        //TODO AXIOM API returns only one fault sub code, there can be many
-	        SOAPFaultSubCode faultSubCode = soapFault.getCode().getSubCode();
-	        
-	        if (faultSubCode != null) {
-        	        SOAPFaultValue faultSubCodeValue = faultSubCode.getValue();
-        	        
-        	        // This is a fault processing the security header 
-        	        if (faultSubCodeValue != null &&
-        	                faultSubCodeValue.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-        	           return true;
-        	        }
-	        }
-	        
-	    }
-	    
-	    return false;
-	}
 
+		SOAPEnvelope soapEnvelope = rmd.getMsgContext().getEnvelope();
+		SOAPFault soapFault = soapEnvelope.getBody().getFault();
+
+		// This is not a soap fault
+		if (soapFault == null) {
+			return false;
+		}
+
+		String soapVersionURI = rmd.getMsgContext().getEnvelope().getNamespace().getNamespaceURI();
+		SOAPFaultCode faultCode = soapFault.getCode();
+		if(faultCode == null){
+			//If no fault code is given, then it can't be security fault
+			return false;
+		}
+		
+		if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+			// This is a fault processing the security header
+			if (faultCode.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
+				return true;
+			}
+		} else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+			// TODO AXIOM API returns only one fault sub code, there can be many
+			SOAPFaultSubCode faultSubCode = faultCode.getSubCode();
+			if (faultSubCode != null) {
+				SOAPFaultValue faultSubCodeValue = faultSubCode.getValue();
+
+				// This is a fault processing the security header
+				if (faultSubCodeValue != null && faultSubCodeValue.getTextAsQName().
+						getNamespaceURI().equals(WSConstants.WSSE_NS)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 }
