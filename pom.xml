@@ -12,7 +12,7 @@
     <artifactId>rampart-project</artifactId>
     <packaging>pom</packaging>
     <description> WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache Axis2 </description>
-    <version>SNAPSHOT</version>
+    <version>1.5.1</version>
     <name>Apache Rampart</name>
     <url>http://ws.apache.org/rampart</url>
 
@@ -36,10 +36,10 @@
     <mailingLists>
         <mailingList>
             <name>Rampart Developers</name>
-            <subscribe>rampart-dev-subscribe@ws.apache.org</subscribe>
-            <unsubscribe>rampart-dev-unsubscribe@ws.apache.org</unsubscribe>
-            <post>rampart-dev@ws.apache.org</post>
-            <archive>http://mail-archives.apache.org/mod_mbox/ws-rampart-dev/</archive>
+            <subscribe>java-dev-subscribe@axis.apache.org</subscribe>
+            <unsubscribe>java-dev-unsubscribe@axis.apache.org</unsubscribe>
+            <post>java-dev@axis.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/axis-java-dev/</archive>
             <otherArchives>
                 <otherArchive>http://markmail.org/search/list:org.apache.ws.rampart-dev</otherArchive>
             </otherArchives>
@@ -70,25 +70,25 @@
         <developer>
             <name>Davanum Srinivas</name>
             <id>dims</id>
-            <email>dims AT wso2.com</email>
-            <organization>WSO2</organization>
+            <email>dims AT apache.org</email>
+            <organization>IBM</organization>
         </developer>
         <developer>
             <name>Nandana Mihindukulasooriya</name>
             <id>nandana</id>
-            <email>nandana AT wso2.com</email>
-            <organization>WSO2</organization>
+            <email>nandana AT apache.org</email>
+            <organization></organization>
         </developer>
     </developers>
 
     <scm>
         <connection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
+            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
+            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
         </developerConnection>
-        <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
+        <url>https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk</url>
     </scm>
 
 
@@ -374,13 +374,13 @@
     <properties>
 
         <rampart.version>${pom.version}</rampart.version>
-        <rampart.mar.version>SNAPSHOT</rampart.mar.version>
-        <rahas.mar.version>SNAPSHOT</rahas.mar.version>
+        <rampart.mar.version>1.51</rampart.mar.version>
+        <rahas.mar.version>1.51</rahas.mar.version>
 
-        <axis2.version>SNAPSHOT</axis2.version>
-        <axiom.version>1.2.11-SNAPSHOT</axiom.version>
+        <axis2.version>1.5.4</axis2.version>
+        <axiom.version>1.2.10</axiom.version>
 
-        <wss4j.version>1.5.10-SNAPSHOT</wss4j.version>
+        <wss4j.version>1.5.10</wss4j.version>
 	<xmlsec.version>1.4.2</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
 
