@@ -218,7 +218,7 @@ public abstract class BindingBuilder {
         WSSecEncryptedKey encrKey = new WSSecEncryptedKey();
         
         try {
-            RampartUtil.setKeyIdentifierType(rpd, encrKey, token);
+            RampartUtil.setKeyIdentifierType(rmd, encrKey, token);
             RampartUtil.setEncryptionUser(rmd, encrKey);
             encrKey.setKeySize(rpd.getAlgorithmSuite().getMaximumSymmetricKeyLength());
             encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
@@ -261,7 +261,7 @@ public abstract class BindingBuilder {
         
         log.debug("Token inclusion: " + token.getInclusion());
         
-        RampartUtil.setKeyIdentifierType(rpd, sig, token);
+        RampartUtil.setKeyIdentifierType(rmd, sig, token);
 
         String user = null;
         
@@ -345,7 +345,6 @@ public abstract class BindingBuilder {
         //Create the list to hold the tokens
         HashMap endSuppTokMap = new HashMap();
         
-
         if(suppTokens != null && suppTokens.getTokens() != null &&
                 suppTokens.getTokens().size() > 0) {
             log.debug("Processing supporting tokens");
@@ -412,10 +411,8 @@ public abstract class BindingBuilder {
                     //Add the UT
                     Element elem = utBuilder.getUsernameTokenElement();
                     elem = RampartUtil.insertSiblingAfter(rmd, this.getInsertionLocation(), elem);
-
-                    if (suppTokens.isEncryptedToken()) {
-                        encryptedTokensIdList.add(utBuilder.getId());
-                    }
+                    
+                    encryptedTokensIdList.add(utBuilder.getId());
                     
                     //Move the insert location to the next element
                     this.setInsertionLocation(elem);

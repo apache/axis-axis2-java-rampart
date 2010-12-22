@@ -1301,10 +1301,16 @@ public class RampartUtil {
      * the WSS11 and WSS10 assertions
      */
     
-    public static void setKeyIdentifierType(RampartPolicyData rpd, WSSecBase secBase,org.apache.ws.secpolicy.model.Token token) {
-		
-    	if (token.getInclusion() == SPConstants.INCLUDE_TOKEN_NEVER) {
-			
+    public static void setKeyIdentifierType(RampartMessageData rmd, WSSecBase secBase,org.apache.ws.secpolicy.model.Token token) {
+
+        // Use a reference rather than the binary security token if: the policy never allows the token to be
+        // included; or this is the recipient and the token should only be included in requests; or this is
+        // the initiator and the token should only be included in responses.
+        final boolean useReference = token.getInclusion() == SPConstants.INCLUDE_TOKEN_NEVER
+                                     || !rmd.isInitiator() && token.getInclusion() == SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT
+                                     || rmd.isInitiator() && token.getInclusion() == SPConstants.INCLUDE_TOEKN_ALWAYS_TO_INITIATOR;
+        if (useReference) {
+
     		boolean tokenTypeSet = false;
     		
     		if(token instanceof X509Token) {
@@ -1323,6 +1329,7 @@ public class RampartUtil {
     		} 
     		
     		if (!tokenTypeSet) {
+                final RampartPolicyData rpd = rmd.getPolicyData();
 	    		Wss10 wss = rpd.getWss11();
 				if (wss == null) {
 					wss = rpd.getWss10();

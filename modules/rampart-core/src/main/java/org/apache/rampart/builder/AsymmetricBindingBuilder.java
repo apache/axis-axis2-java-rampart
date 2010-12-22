@@ -175,7 +175,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     encr.setDocument(doc);
                     RampartUtil.setEncryptionUser(rmd, encr);
                     encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
-                    RampartUtil.setKeyIdentifierType(rpd,encr, encryptionToken);
+                    RampartUtil.setKeyIdentifierType(rmd, encr, encryptionToken);
                     encr.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(config, rmd.getCustomClassLoader()));
 
@@ -528,7 +528,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     
                     WSSecEncrypt encr = new WSSecEncrypt();
                     
-                    RampartUtil.setKeyIdentifierType(rpd, encr, encrToken);
+                    RampartUtil.setKeyIdentifierType(rmd, encr, encrToken);
                     
                     encr.setWsConfig(rmd.getConfig());
                     
@@ -765,7 +765,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
             WSSecEncrypt encr = new WSSecEncrypt();
 
-            RampartUtil.setKeyIdentifierType(rpd, encr, encrToken);
+            RampartUtil.setKeyIdentifierType(rmd, encr, encrToken);
 
             encr.setWsConfig(rmd.getConfig());
 
