@@ -223,8 +223,8 @@
             <version>${xmlsec.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml1</artifactId>
+            <groupId>opensaml</groupId>
+            <artifactId>opensaml</artifactId>
             <version>1.1</version>
         </dependency>
 	<dependency>
