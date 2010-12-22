@@ -40,8 +40,7 @@
 
 	<body>
 		<links>
-			<item name="WebServices" href="http://ws.apache.org/"/>
-			<item name="Axis2/Java" href="http://ws.apache.org/axis2" />
+			<item name="Apache Axis2/Java" href="http://axis.apache.org/axis2/java/core/" />
 		</links>
 		
 		<menu name="Apache Rampart">
@@ -69,7 +68,7 @@
 	            <item name="Issue Tracking" href="http://issues.apache.org/jira/browse/Rampart" />
 	            <item name="Mailing Lists" href="mail-lists.html"/>
 	            <item name="Source Code"
-	               href="http://svn.apache.org/viewcvs.cgi/webservices/rampart/trunk/?root=Apache-SVN" />
+	               href="http://svn.apache.org/viewvc/axis/axis2/java/rampart/" />
 	            <item name="Dependencies" href="dependencies.html"/>
 	            <item name="License"
 	                href="http://www.apache.org/licenses/LICENSE-2.0.html" />
