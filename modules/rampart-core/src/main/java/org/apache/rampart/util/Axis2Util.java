@@ -163,7 +163,13 @@ public class Axis2Util {
 		}
 	}
 
-	
+	/**
+	 * Builds a SOAPEnvelope from DOM Document.
+	 * @param doc - The dom document that contains a SOAP message
+	 * @param useDoom
+	 * @return
+	 * @throws WSSecurityException
+	 */
 	public static SOAPEnvelope getSOAPEnvelopeFromDOMDocument(Document doc, boolean useDoom)
             throws WSSecurityException {
 
