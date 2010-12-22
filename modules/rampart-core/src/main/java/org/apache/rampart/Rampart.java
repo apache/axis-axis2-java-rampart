@@ -23,6 +23,9 @@ import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
+import org.apache.rampart.policy.model.RampartConfig;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
 
 public class Rampart implements Module /* , ModulePolicyExtension */  {
 
@@ -48,8 +51,18 @@ public class Rampart implements Module /* , ModulePolicyExtension */  {
     }
 
     public boolean canSupportAssertion(Assertion assertion) {
-        //TODO doesn't we need to check whether policy is security policy or
-        // RampartConfig assertion
-        return true;
+        if(assertion == null) {
+            return false;
+        }
+
+        String ns = assertion.getName().getNamespaceURI();
+
+        // Rampart module can handle WS-SecurityPolicy 1.1 & 1.2 and RampartConfig assertions 
+        if (SP11Constants.SP_NS.equals(ns) || SP12Constants.SP_NS.equals(ns) || RampartConfig.NS.equals(ns)) {
+            return true;
+        } else {
+            return false;
+        }
+
     }
 }
