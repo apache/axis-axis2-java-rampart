@@ -444,7 +444,7 @@ public class RampartUtil {
     		                           new String[] { "Issuer address null" });
     	}
     	
-    	if(issuerAddress.getText() == null || !"".equals(issuerAddress.getText())) {
+    	if(issuerAddress.getText() == null || "".equals(issuerAddress.getText())) {
     		throw new RampartException("invalidIssuerAddress", 
     		                           new String[] { issuerAddress.toString() });
         }
