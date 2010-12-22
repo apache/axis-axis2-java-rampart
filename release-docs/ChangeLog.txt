@@ -1,8 +1,8 @@
 This file contains a listing of all Jira issues that have been closed
 for a given release.
 
-Release 1.5.1
-=============
+Release 1.5.1 - 23 Dec 2010
+===========================
  
 ** Bug
     * [RAMPART-316] - commons-lang jar is not available with Axis2 which breaks Sample-08
@@ -66,8 +66,8 @@ Release 1.5.1
     * [RAMPART-291] - Possible improvements to SAML2TokenIssuer
     * [RAMPART-265] - Incorrect version references in Rampart 1.4
 
-Release 1.5
-===========
+Release 1.5 01 Feb 2010
+=======================
  
 ** Bug
     * [RAMPART-189] - WS-Security rampart uses wrong token in service response
