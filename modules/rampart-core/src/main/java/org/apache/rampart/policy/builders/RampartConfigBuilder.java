@@ -103,6 +103,13 @@ public class RampartConfigBuilder implements AssertionBuilder {
         }
         
         childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.DEC_CRYPTO_LN));
+        if (childElement != null) {
+            rampartConfig.setDecCryptoConfig((CryptoConfig) factory
+                    .build(childElement.getFirstElement()));
+        }
+        
+        childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.STS_CRYPTO_LN));
         if (childElement != null) {
             rampartConfig.setStsCryptoConfig((CryptoConfig) factory
@@ -131,6 +138,12 @@ public class RampartConfigBuilder implements AssertionBuilder {
                 RampartConfig.NS, RampartConfig.NONCE_LIFE_TIME));
         if (childElement != null) {
             rampartConfig.setNonceLifeTime(childElement.getText().trim());
+        }
+        
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.TOKEN_STORE_CLASS_LN));
+        if (childElement != null) {
+            rampartConfig.setTokenStoreClass(childElement.getText().trim());
         }
         
 		childElement = element.getFirstChildWithName(new QName(

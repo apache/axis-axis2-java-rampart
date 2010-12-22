@@ -100,6 +100,7 @@ public class OptimizePartsConfig implements Assertion{
         	  while(ite.hasNext()){
         		  String strPrefix = (String)ite.next();
         		  String strURI = (String) namespaces.get(strPrefix);
+        		  writer.writeStartElement(RampartConfig.NS, NAMESPACE_LN);
         		  writer.writeAttribute(URI_ATTR , strURI);
         		  writer.writeAttribute(PREFIX_ATTR, strPrefix);
         		  writer.writeEndElement();
