@@ -77,6 +77,9 @@ public class TransportBindingBuilder implements AssertionBuilder {
             } else if (name.equals(SP12Constants.LAYOUT)) {
                 parent.setLayout((Layout) primitive);
                  
+            } else if (name.equals(SP12Constants.PROTECT_TOKENS)) {
+                parent.setTokenProtection(true);
+                 
             } else if (name.equals(SP12Constants.SIGNED_SUPPORTING_TOKENS)) {
                 parent.setSignedSupportingToken((SupportingToken) primitive);
                 

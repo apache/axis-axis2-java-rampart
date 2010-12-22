@@ -127,6 +127,7 @@ public class RampartPolicyBuilder {
     private static void processTransportBinding(TransportBinding binding, RampartPolicyData rpd) {
         binding(binding, rpd);
         rpd.setTransportBinding(true);
+        rpd.setTokenProtection(binding.isTokenProtection());
         TransportToken transportToken = binding.getTransportToken();
         if ( transportToken != null ) {
             rpd.setTransportToken(transportToken.getTransportToken());

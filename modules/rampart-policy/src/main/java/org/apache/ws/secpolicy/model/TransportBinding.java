@@ -37,9 +37,12 @@ public class TransportBinding extends Binding {
     private TransportToken transportToken;
 
     private List transportBindings;
+    
+    private boolean tokenProtection;
 
     public TransportBinding(int version) {
         super(version);
+        this.tokenProtection = false;
     }
     /**
      * @return Returns the transportToken.
@@ -55,6 +58,21 @@ public class TransportBinding extends Binding {
     public void setTransportToken(TransportToken transportToken) {
         this.transportToken = transportToken;
     }
+    
+    /**
+     * @return Returns the tokenProtection.
+     */
+    public boolean isTokenProtection() {
+        return tokenProtection;
+    }
+
+    /**
+     * @param tokenProtection The tokenProtection to set.
+     */
+    public void setTokenProtection(boolean tokenProtection) {
+        this.tokenProtection = tokenProtection;
+    }
+    
 
     public List getConfigurations() {
         return transportBindings;
