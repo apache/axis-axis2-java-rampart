@@ -1164,9 +1164,12 @@ public class RampartUtil {
      * @return
      */
     public static boolean checkRequiredElements(SOAPEnvelope envelope, HashMap decNamespaces, String expression ) {
+
+        // The XPath expression must be evaluated against the SOAP header
+        // http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/ws-securitypolicy-1.2-spec-os.html#_Toc161826519
+        SOAPHeader header = envelope.getHeader();
         
-        
-        Set namespaces = findAllPrefixNamespaces(envelope, decNamespaces);
+        Set namespaces = findAllPrefixNamespaces(header, decNamespaces);
 
         try {
                         XPath xp = new AXIOMXPath(expression);
@@ -1178,7 +1181,7 @@ public class RampartUtil {
                                 xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
                         }
                         
-                        List selectedNodes = xp.selectNodes(envelope);
+                        List selectedNodes = xp.selectNodes(header);
                         
                         if (selectedNodes.size() == 0 ) {
                             return false;
