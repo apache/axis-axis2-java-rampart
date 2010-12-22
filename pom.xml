@@ -241,16 +241,21 @@
             <artifactId>opensaml</artifactId>
             <version>1.1.406</version>
         </dependency>
-	<dependency>
-           <groupId>org.opensaml</groupId>
-           <artifactId>opensaml</artifactId>
-           <version>2.2.3</version>
-       </dependency>
-       	<dependency>
-   		<groupId>org.slf4j</groupId>
-   		<artifactId>slf4j-jdk14</artifactId>
-   		<version>1.5.2</version>
-	</dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.3</version>
+        </dependency>
 
         <dependency>
             <groupId>log4j</groupId>

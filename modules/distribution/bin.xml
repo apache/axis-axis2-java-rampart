@@ -22,14 +22,15 @@
                 <include>org.apache.rampart:rampart-core:jar</include>
                 <include>org.apache.rampart:rampart-policy:jar</include>
                 <include>org.apache.rampart:rampart-trust:jar</include>
-		<include>org.opensaml:opensaml:jar</include>
-		<include>org.opensaml:xmltooling:jar</include>
-		<include>joda-time:joda-time:jar</include>
-		<include>org.slf4j:slf4j-api:jar</include>
-		<include>org.slf4j:slf4j-jdk14:jar</include>
-		<include>velocity:velocity:jar</include>
-		<include>commons-collections:commons-collections:jar</include>
-		<include>org.opensaml:openws:jar</include>
+                <include>org.opensaml:opensaml:jar</include>
+                <include>org.opensaml:xmltooling:jar</include>
+                <include>joda-time:joda-time:jar</include>
+                <include>org.slf4j:slf4j-api:jar</include>
+                <include>org.slf4j:slf4j-jdk14:jar</include>
+                <include>velocity:velocity:jar</include>
+                <include>commons-collections:commons-collections:jar</include>
+                <include>org.opensaml:openws:jar</include>
+                <include>commons-lang:commons-lang:jar</include>
             </includes>
         </dependencySet>
     </dependencySets>
