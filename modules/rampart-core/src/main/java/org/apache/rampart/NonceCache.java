@@ -39,19 +39,24 @@ public class NonceCache extends AbstractUniqueMessageAttributeCache {
         @Override
         public boolean equals(Object another)
         {
+        	if (another == null){
+        		return false;
+        	} 
+        	
+        	if (another == this) {
+        		return true;
+        	}
+        	
+        	if (!(another instanceof Nonce)){
+        		return false;
+        	} 
+        	
+        	
             Nonce otherNonce = (Nonce)another;
-            if (this.userName.equals(otherNonce.userName))
+            if (this.userName.equals(otherNonce.userName) && this.nonceValue.equals(otherNonce.nonceValue))
             {
-                if (this.nonceValue.equals(otherNonce.nonceValue))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
-
             return false;
         }
 
