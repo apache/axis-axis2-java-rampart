@@ -51,29 +51,29 @@ urchinTracker();
 Distribution</strong></td>
 <td>This is the complete version of Apache Rampart and will contain samples
 as well.</td>
-<td><a href="http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-bin.zip" title=
-"http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-bin.zip" onClick=
+<td><a href="http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-bin.zip" title=
+"http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-bin.zip" onClick=
 "javascript:urchinTracker ('/downloads/rampart-1.5.zip');">zip</a>
-<a href="http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-bin.zip.md5"
-title="http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-bin.zip.md5">MD5</a>
-<a href="http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-bin.zip.asc"
-title="http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-bin.zip.asc">PGP</a></td>
+<a href="http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-bin.zip.md5"
+title="http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-bin.zip.md5">MD5</a>
+<a href="http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-bin.zip.asc"
+title="http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-bin.zip.asc">PGP</a></td>
 </tr>
 <tr>
 <td><a name="src" id="src"></a> <strong>Source
 Distribution</strong></td>
 <td>This will contain the sources of Apache Rampart distribution.</td>
-<td><a href="http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-src.zip" title=
-"http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-src.zip" onClick=
+<td><a href="http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-src.zip" title=
+"http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-src.zip" onClick=
 "javascript:urchinTracker ('/downloads/rampart-dist-1.5-src.zip');">zip</a>
 <a href=
-"http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-src.zip.md5"
+"http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-src.zip.md5"
 title=
-"http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-src.zip.md5">MD5</a>
+"http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-src.zip.md5">MD5</a>
 <a href=
-"http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-src.zip.asc"
+"http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-src.zip.asc"
 title=
-"http://archive.apache.org/dist/ws/rampart/1_5/rampart-dist-1.5-src.zip.asc">PGP</a></td>
+"http://archive.apache.org/dist/axis/axis2/java/rampart/1.5/rampart-dist-1.5-src.zip.asc">PGP</a></td>
 </tr>
 </tbody>
 </table>
