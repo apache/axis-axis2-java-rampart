@@ -917,7 +917,7 @@ public class STSClient {
         this.rstTemplate = rstTemplate;
     }
 
-    private class CBHandler implements CallbackHandler {
+    private static class CBHandler implements CallbackHandler {
 
         private String passwd;
 

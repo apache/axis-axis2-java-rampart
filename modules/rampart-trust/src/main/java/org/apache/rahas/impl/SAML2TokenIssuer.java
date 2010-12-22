@@ -456,10 +456,9 @@ public class SAML2TokenIssuer implements TokenIssuer {
                 x509CertElem.appendChild(base64CertText);
                 Element x509DataElem = doc.createElementNS(WSConstants.SIG_NS,
                         "ds:X509Data");
-                x509DataElem.appendChild(x509CertElem);
-
-
+                
                 if (x509DataElem != null) {
+                	x509DataElem.appendChild(x509CertElem);
                     keyInfoElem = doc.createElementNS(WSConstants.SIG_NS, "ds:KeyInfo");
                     ((OMElement) x509DataElem).declareNamespace(
                             WSConstants.SIG_NS, WSConstants.SIG_PREFIX);

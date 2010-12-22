@@ -47,8 +47,8 @@ public class EncryptedElementsBuilder implements AssertionBuilder {
     	OMAttribute isOptional = element
 				.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			signedEncryptedElements.setOptional((new Boolean(isOptional
-					.getAttributeValue()).booleanValue()));
+			signedEncryptedElements.setOptional(Boolean.valueOf(isOptional
+					.getAttributeValue()).booleanValue());
 		}
         
         return signedEncryptedElements;

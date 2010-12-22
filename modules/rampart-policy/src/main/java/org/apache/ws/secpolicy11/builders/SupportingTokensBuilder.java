@@ -55,8 +55,8 @@ public class SupportingTokensBuilder implements AssertionBuilder {
         
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			supportingToken.setOptional((new Boolean(isOptional.getAttributeValue())
-					.booleanValue()));
+			supportingToken.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
+					.booleanValue());
 		}
    
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
