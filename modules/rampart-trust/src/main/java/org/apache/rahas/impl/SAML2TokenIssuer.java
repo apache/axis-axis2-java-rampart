@@ -660,9 +660,9 @@ public class SAML2TokenIssuer implements TokenIssuer {
         Attribute[] attributes = null;
 
         //Call the attribute callback handlers to get any attributes if exists
-        if (config.getCallbackHander() != null) {
+        if (config.getCallbackHandler() != null) {
             SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-            SAMLCallbackHandler handler = config.getCallbackHander();
+            SAMLCallbackHandler handler = config.getCallbackHandler();
             handler.handle(cb);
             attributes = cb.getSAML2Attributes();
         }

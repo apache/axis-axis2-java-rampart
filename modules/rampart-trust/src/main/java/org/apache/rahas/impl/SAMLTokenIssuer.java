@@ -254,10 +254,10 @@ public class SAMLTokenIssuer implements TokenIssuer {
             // In the case where the principal is a UT
             if (principal instanceof WSUsernameTokenPrincipal) {
             	SAMLNameIdentifier nameId = null;
-            	if(config.getCallbackHander() != null){
+            	if(config.getCallbackHandler() != null){
             		SAMLNameIdentifierCallback cb = new SAMLNameIdentifierCallback(data);
             		cb.setUserId(principal.getName());
-            		SAMLCallbackHandler callbackHandler = config.getCallbackHander();
+            		SAMLCallbackHandler callbackHandler = config.getCallbackHandler();
             		callbackHandler.handle(cb);
             		nameId = cb.getNameId();
             	}else{
@@ -432,9 +432,9 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
            
             SAMLAttribute[] attrs = null;
-            if(config.getCallbackHander() != null){
+            if(config.getCallbackHandler() != null){
             	SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-            	SAMLCallbackHandler handler = config.getCallbackHander();
+            	SAMLCallbackHandler handler = config.getCallbackHandler();
             	handler.handle(cb);
             	attrs = cb.getAttributes();
             } else if (config.getCallbackHandlerName() != null
