@@ -332,6 +332,12 @@
                                       tofile="target/temp-ramp/META-INF/services.xml"/>
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService29.aar"
                                      basedir="target/temp-ramp"/>
+                                <!-- Service 30 -->
+                                <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-30.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService30.aar"
+                                     basedir="target/temp-ramp"/>
 
 
                                 <!-- Service SC-1 -->
