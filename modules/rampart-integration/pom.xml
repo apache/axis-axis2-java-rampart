@@ -5,14 +5,14 @@
     <parent>
         <groupId>org.apache.rampart</groupId>
         <artifactId>rampart-project</artifactId>
-        <version>1.5.1</version>
+        <version>SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>rampart-integration</artifactId>
     <packaging>jar</packaging>
-    <version>1.5.1</version>
+    <version>SNAPSHOT</version>
     <name>Rampart - Integration</name>
 
     <build>
@@ -331,6 +331,12 @@
                                       file="src/test/resources/rampart/services-29.xml"
                                       tofile="target/temp-ramp/META-INF/services.xml"/>
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService29.aar"
+                                     basedir="target/temp-ramp"/>
+                                <!-- Service 30 -->
+                                <copy overwrite="yes"
+                                      file="src/test/resources/rampart/services-30.xml"
+                                      tofile="target/temp-ramp/META-INF/services.xml"/>
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService30.aar"
                                      basedir="target/temp-ramp"/>
 
 
