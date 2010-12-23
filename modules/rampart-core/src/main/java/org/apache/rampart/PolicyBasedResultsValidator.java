@@ -31,6 +31,7 @@ import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.jaxen.XPath;
 import org.jaxen.JaxenException;
 
@@ -555,16 +556,34 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         Vector actuallySigned = new Vector();
         if (actionResults != null) {
             for (int j = 0; j < actionResults.length; j++) {
+                
                 WSSecurityEngineResult actionResult = actionResults[j];
-                Set signedIDs = (Set) actionResult
-                        .get(WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS);
-                for (Iterator i = signedIDs.iterator(); i.hasNext();) {
-                    String e = (String) i.next();
+                List wsDataRefs = (List)actionResult.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
+                
+                // if header was encrypted before it was signed, protected
+                // element is 'EncryptedHeader.' the actual element is
+                // first child element
 
-                    Element element = WSSecurityUtil.findElementById(envelope, e,
-                            WSConstants.WSU_NS);
-                    actuallySigned.add(element);
+                for (Iterator k = wsDataRefs.iterator(); k.hasNext();) {
+                    WSDataRef wsDataRef = (WSDataRef)k.next();
+                    Element protectedElement = wsDataRef.getProtectedElement();
+                    if (protectedElement.getLocalName().equals("EncryptedHeader")) {
+                        NodeList nodeList = protectedElement.getChildNodes();
+                        for (int x = 0; x < nodeList.getLength(); x++) {
+                            if (nodeList.item(x).getNodeType() == Node.ELEMENT_NODE) {
+                                String ns = ((Element)nodeList.item(x)).getNamespaceURI();
+                                String ln = ((Element)nodeList.item(x)).getLocalName();
+                                actuallySigned.add(new QName(ns,ln));
+                                break;
+                            }
+                        } 
+                    } else {
+                        String ns = protectedElement.getNamespaceURI();
+                        String ln = protectedElement.getLocalName();
+                        actuallySigned.add(new QName(ns,ln));
+                    }
                 }
+                
             }
         }
         
@@ -573,15 +592,15 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             
             if (wsep.getType() == WSConstants.PART_TYPE_BODY) {
                 
-                Element body;
+                QName bodyQName;
                 
                 if (WSConstants.URI_SOAP11_ENV.equals(envelope.getNamespaceURI())) {
-                    body = WSSecurityUtil.findBodyElement(rmd.getDocument(), new SOAP11Constants());
+                    bodyQName = new SOAP11Constants().getBodyQName();
                 } else {
-                    body = WSSecurityUtil.findBodyElement(rmd.getDocument(), new SOAP12Constants());
+                    bodyQName = new SOAP12Constants().getBodyQName();
                 }
                 
-                if (!actuallySigned.contains(body) && !rmd.getPolicyData().isSignBodyOptional()) {
+                if (!actuallySigned.contains(bodyQName) && !rmd.getPolicyData().isSignBodyOptional()) {
                     // soap body is not signed
                     throw new RampartException("bodyNotSigned");
                 }
@@ -591,6 +610,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                
                 Element element = (Element) WSSecurityUtil.findElement(
                         envelope, wsep.getName(), wsep.getNamespace() );
+                
                 if( element == null ) {
                     // The signedpart header or element we are checking is not present in 
                     // soap envelope - this is allowed
@@ -598,7 +618,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                 }
                 
                 // header or the element present in soap envelope - verify that it is part of signature
-                if( actuallySigned.contains( element) ) {
+                if( actuallySigned.contains( new QName(element.getNamespaceURI(), element.getLocalName())) ) {
                     continue;
                 }
                 
