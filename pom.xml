@@ -14,7 +14,7 @@
     <description> WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache Axis2 </description>
     <version>SNAPSHOT</version>
     <name>Apache Rampart</name>
-    <url>http://ws.apache.org/rampart</url>
+    <url>http://axis.apache.org/axis2/java/rampart</url>
 
     <licenses>
         <license>

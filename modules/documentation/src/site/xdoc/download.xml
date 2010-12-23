@@ -87,11 +87,11 @@
             </tbody>
         </table>
         <p>
-            <strong>Apache Rampart Distributions : <a href="http://people.apache.org/~ruchithf/rampart/SNAPSHOT">Nightly builds</a>
+            <strong>Apache Rampart Distributions : <a href="https://hudson.apache.org/hudson/job/Rampart/lastStableBuild/org.apache.rampart$rampart-dist/">Nightly builds</a>
             </strong>
         </p>
         <p>
-            <strong>Maven Repository: <a href="http://people.apache.org/repo/m2-ibiblio-rsync-repository/">Released Apache Rampart jars</a> | <a href="http://people.apache.org/repo/m2-snapshot-repository/">Nightly SNAPSHOT</a>
+            <strong>Maven Repository: <a href="http://people.apache.org/repo/m2-ibiblio-rsync-repository/">Released Apache Rampart jars</a> | <a href="http://repository.apache.org/snapshots/">Nightly SNAPSHOT</a>
                 <a href=""></a>
             </strong>
         </p>
