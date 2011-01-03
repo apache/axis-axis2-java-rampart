@@ -2,13 +2,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>7</version>
+        <version>8</version>
     </parent>
+
     <groupId>org.apache.rampart</groupId>
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>rampart-project</artifactId>
     <packaging>pom</packaging>
     <description> WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache Axis2 </description>
@@ -93,21 +94,6 @@
 
 
     <repositories>
-	
-	<repository>
-            <id>wso2-maven2-repository</id>
-            <name>WSO2 Maven2 Repository</name>
-            <url>http://dist.wso2.org/maven2</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-                <checksumPolicy>fail</checksumPolicy>
-            </releases>
-        </repository>
-
         <repository>
             <releases>
                 <enabled>true</enabled>
@@ -236,10 +222,10 @@
             <artifactId>xmlsec</artifactId>
             <version>${xmlsec.version}</version>
         </dependency>
-        <dependency>
-            <groupId>opensaml</groupId>
-            <artifactId>opensaml</artifactId>
-            <version>1.1.406</version>
+		<dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml1</artifactId>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
@@ -353,7 +339,7 @@
         </profile>
 
         <profile>
-            <id>distribution</id>
+            <id>apache-release</id>
             <activation>
                 <property>
                     <name>release</name>
@@ -401,24 +387,13 @@
 
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>apache-repo</id>
-            <name>Maven Central Repository</name>
-            <url>
-                scpexe://people.apache.org//www/people.apache.org/repo/m2-ibiblio-rsync-repository
-            </url>
-        </repository>
+   	<distributionManagement>
         <snapshotRepository>
-            <id>apache-snapshots</id>
-            <name>Apache Development Repository</name>
-            <url>scpexe://people.apache.org//www/people.apache.org/repo/m2-snapshot-repository</url>
+            <id>apache.snapshots.https</id>
+            <name>${distMgmtSnapshotsName}</name>
+            <url>${distMgmtSnapshotsUrl}</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
-        <site>
-            <id>website</id>
-            <url>scpexe://people.apache.org/www/ws.apache.org/rampart</url>
-        </site>
-    </distributionManagement>
+    </distributionManagement> 
 
 </project>
