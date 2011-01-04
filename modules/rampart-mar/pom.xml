@@ -34,8 +34,6 @@
     <groupId>org.apache.rampart</groupId>
     <artifactId>rampart</artifactId>
     <packaging>mar</packaging>
-    <version>${rampart.mar.version}</version>
-    <!-- TODO need to remove this-->
     <name>Rampart - Mar</name>
 
     <scm>

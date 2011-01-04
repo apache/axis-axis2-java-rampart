@@ -409,8 +409,8 @@
     <properties>
 
         <rampart.version>${pom.version}</rampart.version>
-        <rampart.mar.version>SNAPSHOT</rampart.mar.version>
-        <rahas.mar.version>SNAPSHOT</rahas.mar.version>
+        <rampart.mar.version>${pom.version}</rampart.mar.version>
+        <rahas.mar.version>${pom.version}</rahas.mar.version>
 
         <axis2.version>SNAPSHOT</axis2.version>
         <axiom.version>1.2.11-SNAPSHOT</axiom.version>
