@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.rampart</groupId>
         <artifactId>rampart-project</artifactId>
-        <version>1.5.1</version>
+        <version>1.5.2-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -35,11 +35,11 @@
     <name>Rampart - Mar</name>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/tags/v1.5.1</connection>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/branches/1_5_x</connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/tags/v1.5.1
+            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/branches/1_5_x
         </developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/tags/v1.5.1</url>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/branches/1_5_x</url>
     </scm>
 
     <build>
