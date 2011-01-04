@@ -34,7 +34,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>rampart-integration</artifactId>
     <packaging>jar</packaging>
-    <version>1.5.1</version>
     <name>Rampart - Integration</name>
 
     <build>
