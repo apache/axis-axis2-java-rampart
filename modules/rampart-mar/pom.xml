@@ -37,11 +37,11 @@
     <name>Rampart - Mar</name>
 
     <scm>
-        <connection>scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</connection>
+		<connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk</connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
+            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
         </developerConnection>
-        <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
+		<url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/trunk</url>
     </scm>
 
     <build>

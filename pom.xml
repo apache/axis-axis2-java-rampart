@@ -106,12 +106,12 @@
 
     <scm>
         <connection>
-            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
+            scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
         </connection>
         <developerConnection>
             scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
         </developerConnection>
-        <url>https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk</url>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/trunk</url>
     </scm>
 
 
