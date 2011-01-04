@@ -35,7 +35,6 @@
     <groupId>org.apache.rampart</groupId>
     <artifactId>rahas</artifactId>
     <packaging>mar</packaging>
-    <version>${rahas.mar.version}</version><!-- TODO need to remove this-->   
     <name>Rampart - Trust-Mar</name>
 
     <scm>

@@ -409,8 +409,8 @@
     <properties>
 
         <rampart.version>${pom.version}</rampart.version>
-        <rampart.mar.version>1.5.1</rampart.mar.version>
-        <rahas.mar.version>1.5.1</rahas.mar.version>
+        <rampart.mar.version>${pom.version}</rampart.mar.version>
+        <rahas.mar.version>${pom.version}</rahas.mar.version>
 
         <axis2.version>1.5.4</axis2.version>
         <axiom.version>1.2.10</axiom.version>
