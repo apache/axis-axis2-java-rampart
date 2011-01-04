@@ -1,5 +1,5 @@
 ======================================================
-Apache Rampart-1.5.1 build  (Dec 23, 2010)
+Apache Rampart-1.5.1 build  (Jan 04, 2011)
 
 http://axis.apache.org/axis2/java/rampart
 ------------------------------------------------------

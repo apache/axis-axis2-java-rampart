@@ -1,7 +1,7 @@
 This file contains a listing of all Jira issues that have been closed
 for a given release.
 
-Release 1.5.1 - 23 Dec 2010
+Release 1.5.1 - 04 Jan 2011
 ===========================
  
 ** Bug
