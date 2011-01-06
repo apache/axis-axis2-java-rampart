@@ -23,6 +23,7 @@
                 <include>org.apache.rampart:rampart-policy:jar</include>
                 <include>org.apache.rampart:rampart-trust:jar</include>
                 <include>org.opensaml:opensaml1:jar</include>
+                <include>org.opensaml:opensaml:jar</include>
                 <include>org.opensaml:xmltooling:jar</include>
                 <include>joda-time:joda-time:jar</include>
                 <include>org.slf4j:slf4j-api:jar</include>
