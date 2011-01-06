@@ -191,6 +191,17 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         return token;
     }
 
+    public void removeToken(String id){
+
+        writeLock.lock();
+
+        try {
+            this.tokens.remove(id);
+        } finally {
+            writeLock.unlock();
+        }        
+    }
+    
     protected void processTokenExpiry() throws TrustException {
         
         readLock.lock();
@@ -227,7 +238,5 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
             return null;
         }
     }
-    
-    
     
 }

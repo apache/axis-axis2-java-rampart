@@ -148,6 +148,14 @@ public class RampartEngine {
 					signatureCrypto, 
 					        RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), 
 					                msgCtx.getAxisService().getClassLoader()));
+
+            // Remove encryption tokens if this is the initiator and if initiator is receiving a message
+
+            if (rmd.isInitiator() && (msgCtx.getFLOW() == MessageContext.IN_FLOW ||
+                    msgCtx.getFLOW() == MessageContext.IN_FAULT_FLOW)) {
+                tokenCallbackHandler.removeEncryptedToken();
+            }
+
 		} else {
 			if(doDebug){
 				log.debug("Processing security header in normal path");
