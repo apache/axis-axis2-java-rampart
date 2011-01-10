@@ -45,6 +45,18 @@ following specifications:</p>
             </ul>
          
         <h2>Apache Rampart News</h2>    
+		<h3>Jan 10, 2011 : Apache Rampart 1.5.1 released</h3>
+        Apache Rampart 1.5.1 was released with lots of bug fixes.<br></br>
+
+		<h3>Feb 01, 2010 : Apache Rampart 1.5 released</h3>
+        Apache Rampart 1.5 was released with lots of bug fixes and new features.<br></br>
+        New features include
+            <ul>
+                <li>SAML 2.0 support - Issuance </li>
+                <li>Key store caching</li>
+                <li>Signing / Encrypting with multiple keys</li>
+                <li>Tests for negative scenarios</li>
+            </ul>
         <h3>Jun 12, 2008 : Apache Rampart 1.4 released</h3>  
         <p>Apache Rampart 1.4 was released with lots of bug fixes and new features.<br></br>
         New features include</p>
