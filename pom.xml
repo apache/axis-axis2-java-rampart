@@ -102,6 +102,12 @@
             <email>nandana AT apache.org</email>
             <organization></organization>
         </developer>
+	<developer>
+            <name>Thilina Buddhika</name>
+            <id>thilinamb</id>
+            <email>thilinamb AT apache.org</email>
+            <organization>WSO2</organization>
+        </developer>
     </developers>
 
     <scm>
