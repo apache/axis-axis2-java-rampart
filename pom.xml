@@ -102,7 +102,7 @@
             <email>nandana AT apache.org</email>
             <organization></organization>
         </developer>
-	<developer>
+        <developer>
             <name>Thilina Buddhika</name>
             <id>thilinamb</id>
             <email>thilinamb AT apache.org</email>
@@ -250,7 +250,7 @@
             <artifactId>xmlsec</artifactId>
             <version>${xmlsec.version}</version>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml1</artifactId>
             <version>1.1</version>
@@ -377,7 +377,7 @@
                 <module>modules/documentation</module>
                 <module>modules/distribution</module>
             </modules>
-			<build>
+            <build>
                 <plugins>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -422,7 +422,7 @@
         <axiom.version>1.2.12-SNAPSHOT</axiom.version>
 
         <wss4j.version>1.5.12-SNAPSHOT</wss4j.version>
-	<xmlsec.version>1.4.2</xmlsec.version>
+        <xmlsec.version>1.4.2</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
 
         <bcprov.jdk14.version>140</bcprov.jdk14.version>
@@ -437,7 +437,7 @@
 
     </properties>
 
-   	<distributionManagement>
+    <distributionManagement>
         <snapshotRepository>
             <id>apache.snapshots.https</id>
             <name>${distMgmtSnapshotsName}</name>
