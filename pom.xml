@@ -436,10 +436,10 @@
         <rampart.mar.version>${pom.version}</rampart.mar.version>
         <rahas.mar.version>${pom.version}</rahas.mar.version>
 
-        <axis2.version>SNAPSHOT</axis2.version>
-        <axiom.version>1.2.12-SNAPSHOT</axiom.version>
+        <axis2.version>1.6.0-SNAPSHOT</axis2.version>
+        <axiom.version>1.2.11</axiom.version>
 
-        <wss4j.version>1.5.12-SNAPSHOT</wss4j.version>
+        <wss4j.version>1.5.11</wss4j.version>
         <xmlsec.version>1.4.2</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
 
