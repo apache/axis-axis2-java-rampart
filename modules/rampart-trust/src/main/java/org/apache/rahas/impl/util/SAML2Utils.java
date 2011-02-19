@@ -101,9 +101,7 @@ public class SAML2Utils {
             Element assertionElement = document.getDocumentElement();
             DocumentBuilderFactoryImpl.setDOOMRequired(false);
 
-            if (log.isDebugEnabled()) {
-                log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
-            }
+            log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
             return assertionElement;
 
         } catch (Exception e) {

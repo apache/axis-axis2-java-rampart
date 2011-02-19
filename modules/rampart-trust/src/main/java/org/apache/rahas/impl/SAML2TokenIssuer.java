@@ -522,10 +522,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
         //set the subject confirmation
         subject.getSubjectConfirmations().add(subjectConfirmation);
-
-        if(log.isDebugEnabled()){
-            log.debug("SAML2.0 subject is constructed successfully.");
-        }
+        log.debug("SAML2.0 subject is constructed successfully.");
         return subject;
     }
 
@@ -576,9 +573,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
             throw new TrustException("errorMarshellingOrSigning", e);
         }
 
-        if(log.isDebugEnabled()){
-            log.debug("SAML2.0 assertion is marshalled and signed..");
-        }
+        log.debug("SAML2.0 assertion is marshalled and signed..");
 
         return assertion;
     }
@@ -632,9 +627,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
             throw new TrustException("Error creating issuer signature");
         }
 
-        if(log.isDebugEnabled()){
-            log.debug("SignKeyHolder object is created with the credentials..");
-        }
+        log.debug("SignKeyHolder object is created with the credentials..");
 
         return signKeyHolder;
     }
@@ -709,9 +702,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         //add attributes to the attribute statement
         attrstmt.getAttributes().addAll(Arrays.asList(attributes));
 
-        if(log.isDebugEnabled()){
-            log.debug("SAML2.0 attribute statement is constructed successfully.");
-        }
+        log.debug("SAML2.0 attribute statement is constructed successfully.");
 
         return attrstmt;
     }
@@ -754,9 +745,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         authContext.setAuthnContextClassRef(authCtxClassRef);
         authStmt.setAuthnContext(authContext);
 
-        if(log.isDebugEnabled()){
-            log.debug("SAML2.0 authentication statement is constructed successfully.");
-        }
+        log.debug("SAML2.0 authentication statement is constructed successfully.");
 
         return authStmt;
     }

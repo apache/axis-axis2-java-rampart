@@ -27,7 +27,6 @@ public class TokenRequestDispatcher {
     
     private static Log mlog = LogFactory.getLog("org.apache.rampart.messages");
     private static Log log = LogFactory.getLog(TokenRequestDispatcher.class.getName());
-    private static boolean doDebug = log.isDebugEnabled();
 
     public TokenRequestDispatcher(TokenRequestDispatcherConfig config) throws TrustException {
         this.config = config;
@@ -59,9 +58,7 @@ public class TokenRequestDispatcher {
         String tokenType = data.getTokenType();
         if ((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_ISSUE).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_ISSUE).equals(reqType)) {
-            if (doDebug) {
-                log.debug("issue");
-            }
+            log.debug("issue");
             TokenIssuer issuer;
             if (tokenType == null ||  tokenType.trim().length() == 0) {
                 issuer = config.getDefaultIssuerInstace();
@@ -81,9 +78,7 @@ public class TokenRequestDispatcher {
             return response;
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_VALIDATE).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_VALIDATE).equals(reqType)) {
-            if (doDebug) {
-                log.debug("validate");
-            }
+            log.debug("validate");
 
             TokenValidator validator;
                 if (tokenType == null ||  tokenType.trim().length() == 0) {
@@ -104,9 +99,7 @@ public class TokenRequestDispatcher {
         	
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_RENEW).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_RENEW).equals(reqType)) {
-            if (doDebug) {
-                log.debug("renew");
-            }
+            log.debug("renew");
 
             TokenRenewer renewer;
                 if (tokenType == null ||  tokenType.trim().length() == 0) {
@@ -125,9 +118,7 @@ public class TokenRequestDispatcher {
         	         
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_CANCEL).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_CANCEL).equals(reqType)) {
-            if (doDebug) {
-                log.debug("cancel");
-            }
+            log.debug("cancel");
             TokenCanceler canceler = config.getDefaultCancelerInstance();
             SOAPEnvelope response = canceler.cancel(data);
 

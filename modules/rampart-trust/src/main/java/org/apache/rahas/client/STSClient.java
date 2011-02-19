@@ -77,7 +77,6 @@ public class STSClient {
     private static final String RAMPART_POLICY = "rampartPolicy";
 
     private static Log log = LogFactory.getLog(STSClient.class);
-    private static boolean doDebug = log.isDebugEnabled();
 
     private String action;
 
@@ -596,9 +595,7 @@ public class STSClient {
         //Assumption: there's only one alternative
 
         if (issuerPolicy != null) {
-            if (doDebug) {
-                log.debug("Processing Issuer policy");
-            }
+            log.debug("Processing Issuer policy");
 
             List issuerAssertions = (List) issuerPolicy.getAlternatives().next();
 
@@ -607,10 +604,7 @@ public class STSClient {
                 //find the AlgorithmSuite assertion
                 if (tempAssertion instanceof Binding) {
 
-                    if (doDebug) {
-                        log.debug("Extracting algo suite from issuer " +
-                                  "policy binding");
-                    }
+                    log.debug("Extracting algo suite from issuer policy binding");
 
                     this.algorithmSuite = ((Binding) tempAssertion)
                             .getAlgorithmSuite();
@@ -620,9 +614,7 @@ public class STSClient {
 
         if (servicePolicy != null) {
 
-            if (doDebug) {
-                log.debug("Processing service policy to find Trust10 assertion");
-            }
+            log.debug("Processing service policy to find Trust10 assertion");
 
             List assertions = (List) servicePolicy.getAlternatives().next();
 
@@ -630,16 +622,10 @@ public class STSClient {
                 Assertion tempAssertion = (Assertion) iter.next();
                 //find the Trust10 assertion
                 if (tempAssertion instanceof Trust10) {
-                    if (doDebug) {
-                        log.debug("Extracting Trust10 assertion from " +
-                                  "service policy");
-                    }
+                    log.debug("Extracting Trust10 assertion from service policy");
                     this.trust10 = (Trust10) tempAssertion;
                 } else if (tempAssertion instanceof Trust13) {
-                    if (doDebug) {
-                        log.debug("Extracting Trust13 assertion from " +
-                        "service policy");
-                    }
+                    log.debug("Extracting Trust13 assertion from service policy");
                     this.trust13 = (Trust13) tempAssertion;
                 }
             }
@@ -657,7 +643,7 @@ public class STSClient {
     private OMElement createIssueRequest(String requestType,
                                          String appliesTo) throws TrustException {
 
-        if (doDebug) {
+        if (log.isDebugEnabled()) {
             log.debug("Creating request with request type: " + requestType +
                       " and applies to: " + appliesTo);
         }
@@ -673,7 +659,7 @@ public class STSClient {
         //Copy over the elements from the template
         if (this.rstTemplate != null) {
 
-            if (doDebug) {
+            if (log.isDebugEnabled()) {
                 log.debug("Using RSTTemplate: " + this.rstTemplate.toString());
             }
 
@@ -686,15 +672,13 @@ public class STSClient {
                     && ((OMElement) child).getQName().equals(
                         new QName(TrustUtil.getWSTNamespace(this.version),
                                   RahasConstants.IssuanceBindingLocalNames.KEY_SIZE))) {
-                    if (doDebug) {
-                        log.debug("Extracting key size from the RSTTemplate: ");
-                    }
+                    log.debug("Extracting key size from the RSTTemplate: ");
                     OMElement childElem = (OMElement) child;
                     this.keySize =
                             (childElem.getText() != null && !"".equals(childElem.getText())) ?
                             Integer.parseInt(childElem.getText()) :
                             -1;
-                    if (doDebug) {
+                    if (log.isDebugEnabled()) {
                         log.debug("Key size from RSTTemplate: " + this.keySize);
                     }
                 }
@@ -705,15 +689,11 @@ public class STSClient {
             // Handle entropy
             if (this.trust10 != null) {
 
-                if (doDebug) {
-                    log.debug("Processing Trust assertion");
-                }
+                log.debug("Processing Trust assertion");
 
                 if (this.trust10.isRequireClientEntropy()) {
 
-                    if (doDebug) {
-                        log.debug("Requires client entropy");
-                    }
+                    log.debug("Requires client entropy");
 
                     // setup requestor entropy
                     OMElement ent = TrustUtil.createEntropyElement(this.version, rst);
@@ -726,7 +706,7 @@ public class STSClient {
                                     getMaximumSymmetricKeyLength()/8);
                     binSec.setText(Base64.encode(this.requestorEntropy));
 
-                    if (doDebug) {
+                    if (log.isDebugEnabled()) {
                         log.debug("Clien entropy : " + Base64.encode(this.requestorEntropy));
                     }
 
@@ -739,9 +719,7 @@ public class STSClient {
                 
                 if (this.trust13.isRequireClientEntropy()) {
 
-                    if (doDebug) {
-                        log.debug("Requires client entropy");
-                    }
+                    log.debug("Requires client entropy");
 
                     // setup requestor entropy
                     OMElement ent = TrustUtil.createEntropyElement(this.version, rst);
@@ -754,7 +732,7 @@ public class STSClient {
                                     getMaximumSymmetricKeyLength()/8);
                     binSec.setText(Base64.encode(this.requestorEntropy));
 
-                    if (doDebug) {
+                    if (log.isDebugEnabled()) {
                         log.debug("Clien entropy : " + Base64.encode(this.requestorEntropy));
                     }
 
@@ -779,7 +757,7 @@ public class STSClient {
     
     private OMElement createValidateRequest(String requestType, String tokenId) throws TrustException {
 
-        if (doDebug) {
+        if (log.isDebugEnabled()) {
             log.debug("Creating request with request type: " + requestType);
         }
 
@@ -821,7 +799,7 @@ public class STSClient {
         String requestType =
             TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_RENEW;
 
-        if (doDebug) {
+        if (log.isDebugEnabled()) {
             log.debug("Creating request with request type: " + requestType);
         }
 

@@ -58,17 +58,13 @@ public class TransportBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(TransportBindingBuilder.class);
     private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
-    private static boolean dotDebug = tlog.isDebugEnabled();
-    private static boolean doDebug = log.isDebugEnabled();
-    
+
     public void build(RampartMessageData rmd) throws RampartException {
 
-        if (doDebug) {
-            log.debug("TransportBindingBuilder build invoked");
-        }
+        log.debug("TransportBindingBuilder build invoked");
 
         long t0 = 0, t1 = 0;
-    	if(dotDebug){
+    	if(tlog.isDebugEnabled()){
     		t1 = System.currentTimeMillis();
     	}
         
@@ -89,9 +85,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             if(sgndSuppTokens != null && sgndSuppTokens.getTokens() != null &&
                     sgndSuppTokens.getTokens().size() > 0) {
 
-                if (doDebug) {
-                    log.debug("Processing signed supporting tokens");
-                }
+                log.debug("Processing signed supporting tokens");
 
                 ArrayList tokens = sgndSuppTokens.getTokens();
                 for (Iterator iter = tokens.iterator(); iter.hasNext();) {
@@ -117,9 +111,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             if(sgndEndSuppTokens != null && sgndEndSuppTokens.getTokens() != null &&
                     sgndEndSuppTokens.getTokens().size() > 0) {
 
-                if (doDebug) {
-                    log.debug("Processing endorsing signed supporting tokens");
-                }
+                log.debug("Processing endorsing signed supporting tokens");
 
                 ArrayList tokens = sgndEndSuppTokens.getTokens();
                 SignedEncryptedParts signdParts = sgndEndSuppTokens.getSignedParts();
@@ -136,9 +128,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             SupportingToken endSupptokens = rpd.getEndorsingSupportingTokens();
             if(endSupptokens != null && endSupptokens.getTokens() != null &&
                     endSupptokens.getTokens().size() > 0) {
-                if (doDebug) {
-                    log.debug("Processing endorsing supporting tokens");
-                }
+                log.debug("Processing endorsing supporting tokens");
                 ArrayList tokens = endSupptokens.getTokens();
                 SignedEncryptedParts signdParts = endSupptokens.getSignedParts();
                 for (Iterator iter = tokens.iterator(); iter.hasNext();) {
@@ -167,7 +157,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             addSignatureConfirmation(rmd, null);
         }
         
-    	if(dotDebug){
+    	if(tlog.isDebugEnabled()){
     		t1 = System.currentTimeMillis();
     		tlog.debug("Transport binding build took "+ (t1 - t0));
     	}
@@ -620,10 +610,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                     || (secConvTokenId != null && 
                             (!RampartUtil.isTokenValid(rmd, secConvTokenId) && !cancelReqResp))) {
 
-                if (doDebug) {
-                    log.debug("No SecureConversationToken found, " +
-                            "requesting a new token");
-                }
+                log.debug("No SecureConversationToken found, requesting a new token");
 
                 try {
 
