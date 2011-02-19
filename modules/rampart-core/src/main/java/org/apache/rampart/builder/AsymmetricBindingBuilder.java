@@ -53,9 +53,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(AsymmetricBindingBuilder.class);
     private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
-    private static boolean doDebug = log.isDebugEnabled();
-    private static boolean dotDebug = tlog.isDebugEnabled();
-    
+
     private Token sigToken;
 
     private WSSecSignature sig;
@@ -79,9 +77,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
     private Element signatureElement; 
     
     public void build(RampartMessageData rmd) throws RampartException {
-        if (doDebug) {
-            log.debug("AsymmetricBindingBuilder build invoked");
-        }
+        log.debug("AsymmetricBindingBuilder build invoked");
 
         RampartPolicyData rpd = rmd.getPolicyData();
         if (rpd.isIncludeTimestamp()) {
@@ -94,16 +90,14 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             this.doSignBeforeEncrypt(rmd);
         }
 
-        if (doDebug) {
-            log.debug("AsymmetricBindingBuilder build invoked : DONE");
-        }
+        log.debug("AsymmetricBindingBuilder build invoked : DONE");
     }
 
     private void doEncryptBeforeSig(RampartMessageData rmd)
             throws RampartException {
     	
     	long t0 = 0, t1 = 0, t2 = 0;
-    	if(dotDebug){
+    	if(tlog.isDebugEnabled()){
     		t0 = System.currentTimeMillis();
     	}
         RampartPolicyData rpd = rmd.getPolicyData();
@@ -198,7 +192,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
             RampartUtil.appendChildToSecHeader(rmd, refList);
             
-            if(dotDebug){
+            if(tlog.isDebugEnabled()){
             	t1 = System.currentTimeMillis();
             }
             
@@ -282,7 +276,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 }
             }
             
-            if(dotDebug){
+            if(tlog.isDebugEnabled()){
             	t2 = System.currentTimeMillis();
             	tlog.debug("Encryption took :" + (t1 - t0)
             				+", Signature tool :" + (t2 - t1) );
@@ -291,7 +285,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             // Check for signature protection
             if (rpd.isSignatureProtection() && this.mainSigId != null) {
             	long t3 = 0, t4 = 0;
-            	if(dotDebug){
+            	if(tlog.isDebugEnabled()){
             		t3 = System.currentTimeMillis();
             	}
                 Vector secondEncrParts = new Vector();
@@ -334,7 +328,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                         throw new RampartException("errorInEncryption", e);
                     }
                 }
-                if(dotDebug){
+                if(tlog.isDebugEnabled()){
             		t4 = System.currentTimeMillis();
             		tlog.debug("Signature protection took :" + (t4 - t3));
             	}
@@ -370,7 +364,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         	this.setInsertionLocation(null);
         }
         
-        if(dotDebug){
+        if(tlog.isDebugEnabled()){
     		t0 = System.currentTimeMillis();
     	}
         
@@ -460,7 +454,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
-        if(dotDebug){
+        if(tlog.isDebugEnabled()){
     		t1 = System.currentTimeMillis();
     	}
              
@@ -592,7 +586,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
-        if(dotDebug){
+        if(tlog.isDebugEnabled()){
     		t2 = System.currentTimeMillis();
     		tlog.debug("Signature took :" + (t1 - t0)
     				+", Encryption took :" + (t2 - t1) );
@@ -608,7 +602,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         Element supportingSignatureElement;
 
         long t0 = 0, t1 = 0;
-        if (dotDebug) {
+        if (tlog.isDebugEnabled()) {
             t0 = System.currentTimeMillis();
         }
 
@@ -644,7 +638,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
         signatureValues.add(supportingSig.getSignatureValue());
 
-        if (dotDebug) {
+        if (tlog.isDebugEnabled()) {
             t1 = System.currentTimeMillis();
             tlog.debug("Signature took :" + (t1 - t0));
         }
@@ -657,7 +651,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         Document doc = rmd.getDocument();
         
         long t0 = 0, t1 = 0;
-        if(dotDebug){
+        if(tlog.isDebugEnabled()){
     		t0 = System.currentTimeMillis();
     	}
         if(rmd.isInitiator()) {
@@ -749,7 +743,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             signatureValues.add(sig.getSignatureValue());
         }
         
-        if(dotDebug){
+        if(tlog.isDebugEnabled()){
     		t1 = System.currentTimeMillis();
     		tlog.debug("Signature took :" + (t1 - t0));
     	}

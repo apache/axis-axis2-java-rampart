@@ -70,7 +70,6 @@ import java.util.Map.Entry;
 
 public abstract class BindingBuilder {
     private static Log log = LogFactory.getLog(BindingBuilder.class);
-    private static boolean doDebug = log.isDebugEnabled();
 
     private Element insertionLocation;
     
@@ -87,9 +86,7 @@ public abstract class BindingBuilder {
      * @param rmd
      */
     protected void addTimestamp(RampartMessageData rmd) {
-        if (doDebug) {
-            log.debug("Adding timestamp");
-        }
+        log.debug("Adding timestamp");
 
         WSSecTimestamp timestampBuilder = new WSSecTimestamp();
         timestampBuilder.setWsConfig(rmd.getConfig());
@@ -101,16 +98,13 @@ public abstract class BindingBuilder {
         timestampBuilder.build(rmd.getDocument(), rmd
                 .getSecHeader());
 
-        if (doDebug) {
+        if (log.isDebugEnabled()) {
             log.debug("Timestamp id: " + timestampBuilder.getId());
         }
-
         rmd.setTimestampId(timestampBuilder.getId());
         
         this.timestampElement = timestampBuilder.getElement();
-        if (doDebug) {
-            log.debug("Adding timestamp: DONE");
-        }
+        log.debug("Adding timestamp: DONE");
     }
     
     /**
@@ -121,9 +115,7 @@ public abstract class BindingBuilder {
      */
     protected WSSecUsernameToken addUsernameToken(RampartMessageData rmd, UsernameToken token) throws RampartException {
 
-        if (doDebug) {
-            log.debug("Adding a UsernameToken");
-        }
+        log.debug("Adding a UsernameToken");
 
         RampartPolicyData rpd = rmd.getPolicyData();
         
@@ -139,7 +131,7 @@ public abstract class BindingBuilder {
         }
         
         if(user != null && !"".equals(user)) {
-            if (doDebug) {
+            if (log.isDebugEnabled()) {
                 log.debug("User : " + user);
             }
 
@@ -182,7 +174,7 @@ public abstract class BindingBuilder {
                 password = cb[0].getPassword();
             }
 
-            if (doDebug) {
+            if (log.isDebugEnabled()) {
                 log.debug("Password : " + password);
             }
 
@@ -209,9 +201,7 @@ public abstract class BindingBuilder {
             }
             
         } else {
-            if (doDebug) {
-                log.debug("No user value specified in the configuration");
-            }
+            log.debug("No user value specified in the configuration");
             throw new RampartException("userMissing");
         }
         
@@ -274,7 +264,7 @@ public abstract class BindingBuilder {
         checkForX509PkiPath(sig, token);
         sig.setWsConfig(rmd.getConfig());
 
-        if (doDebug) {
+        if (log.isDebugEnabled()) {
             log.debug("Token inclusion: " + token.getInclusion());
         }
 
@@ -300,7 +290,7 @@ public abstract class BindingBuilder {
         String password = null;
 
         if(user != null && !"".equals(user)) {
-            if (doDebug) {
+            if (log.isDebugEnabled()) {
                 log.debug("User : " + user);
             }
 
@@ -319,7 +309,7 @@ public abstract class BindingBuilder {
                 handler.handle(cb);
                 if(cb[0].getPassword() != null && !"".equals(cb[0].getPassword())) {
                     password = cb[0].getPassword();
-                    if (doDebug) {
+                    if (log.isDebugEnabled()) {
                         log.debug("Password : " + password);
                     }
                 } else {
@@ -336,9 +326,7 @@ public abstract class BindingBuilder {
             }
             
         } else {
-            if (doDebug) {
-                log.debug("No user value specified in the configuration");
-            }
+            log.debug("No user value specified in the configuration");
             throw new RampartException("userMissing");
         }
         
@@ -370,9 +358,7 @@ public abstract class BindingBuilder {
         
         if(suppTokens != null && suppTokens.getTokens() != null &&
                 suppTokens.getTokens().size() > 0) {
-            if (doDebug) {
-                log.debug("Processing supporting tokens");
-            }
+            log.debug("Processing supporting tokens");
 
             ArrayList tokens = suppTokens.getTokens();
             for (Iterator iter = tokens.iterator(); iter.hasNext();) {
@@ -807,7 +793,7 @@ public abstract class BindingBuilder {
         // prepare a SignatureConfirmation token
         WSSecSignatureConfirmation wsc = new WSSecSignatureConfirmation();
         if (signatureActions.size() > 0) {
-            if (doDebug) {
+            if (log.isDebugEnabled()) {
                 log.debug("Signature Confirmation: number of Signature results: "
                         + signatureActions.size());
             }

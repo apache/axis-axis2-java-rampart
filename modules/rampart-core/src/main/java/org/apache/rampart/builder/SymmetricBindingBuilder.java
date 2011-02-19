@@ -63,14 +63,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(SymmetricBindingBuilder.class);
     private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
-    private static boolean dotDebug = tlog.isDebugEnabled();
-    private static boolean doDebug = log.isDebugEnabled();
 
     public void build(RampartMessageData rmd) throws RampartException {
 
-        if (doDebug) {
-            log.debug("SymmetricBindingBuilder build invoked");
-        }
+        log.debug("SymmetricBindingBuilder build invoked");
 
         RampartPolicyData rpd = rmd.getPolicyData();
         if(rpd.isIncludeTimestamp()) {
@@ -89,10 +85,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             this.doSignBeforeEncrypt(rmd);
         }
 
-
-        if (doDebug) {
-            log.debug("SymmetricBindingBuilder build invoked : DONE");
-        }
+        log.debug("SymmetricBindingBuilder build invoked : DONE");
 
     }
     
@@ -104,7 +97,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         Vector signatureValues = new Vector();
         
-    	if(dotDebug){
+    	if(tlog.isDebugEnabled()){
     		t0 = System.currentTimeMillis();
     	}
         
@@ -125,12 +118,12 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             if(encryptionToken instanceof IssuedToken) {
                 tokenId = rmd.getIssuedEncryptionTokenId();
-                if (doDebug) {
+                if (log.isDebugEnabled()) {
                     log.debug("Issued EncryptionToken Id : " + tokenId);
                 }
             } else if(encryptionToken instanceof SecureConversationToken) {
                 tokenId = rmd.getSecConvTokenId();
-                if (doDebug) {
+                if (log.isDebugEnabled()) {
                     log.debug("SCT Id : " + tokenId);
                 }
             } else if (encryptionToken instanceof X509Token) {
@@ -180,9 +173,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
             AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
             if(encryptionToken.isDerivedKeys()) {
-                if (doDebug) {
-                    log.debug("Use drived keys");
-                }
+                log.debug("Use drived keys");
 
                 dkEncr = new WSSecDKEncrypt();
                 
@@ -214,9 +205,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     throw new RampartException("errorInDKEncr");
                 }
             } else {
-                if (doDebug) {
-                    log.debug("NO derived keys, use the shared secret");
-                }
+                log.debug("NO derived keys, use the shared secret");
                 encr = new WSSecEncrypt();
                 
                 encr.setWsConfig(rmd.getConfig());
@@ -246,7 +235,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             this.mainRefListElement = RampartUtil.appendChildToSecHeader(rmd, refList);
             
-            if(dotDebug){
+            if(tlog.isDebugEnabled()){
             	t1 = System.currentTimeMillis();
             }
             
@@ -336,7 +325,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 }
             }
             
-            if(dotDebug){
+            if(tlog.isDebugEnabled()){
             	t2 = System.currentTimeMillis();
             	tlog.debug("Encryption took :" + (t1 - t0)
             				+", Signature tool :" + (t2 - t1) );
@@ -346,12 +335,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             if(rpd.isSignatureProtection() && this.mainSigId != null || 
                     encryptedTokensIdList.size() > 0 && rmd.isInitiator()) {
             	long t3 = 0, t4 = 0;
-            	if(dotDebug){
+            	if(tlog.isDebugEnabled()){
             		t3 = System.currentTimeMillis();
             	}
-                if (doDebug) {
-                    log.debug("Signature protection");
-                }
+                log.debug("Signature protection");
                 Vector secondEncrParts = new Vector();
                 
                 //Now encrypt the signature using the above token
@@ -391,7 +378,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                         throw new RampartException("errorInEncryption", e);
                     }    
                 }
-                if(dotDebug){
+                if(tlog.isDebugEnabled()){
             		t4 = System.currentTimeMillis();
             		tlog.debug("Signature protection took :" + (t4 - t3));
             	}
@@ -410,7 +397,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
         
-        if(dotDebug){
+        if(tlog.isDebugEnabled()){
     		t0 = System.currentTimeMillis();
     	}
         Token sigToken = rpd.getSignatureToken();
@@ -542,7 +529,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
-        if(dotDebug){
+        if(tlog.isDebugEnabled()){
     		t1 = System.currentTimeMillis();
     	}
         
@@ -697,7 +684,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
-        if(dotDebug){
+        if(tlog.isDebugEnabled()){
     		t2 = System.currentTimeMillis();
     		tlog.debug("Signature took :" + (t1 - t0)
     				+", Encryption took :" + (t2 - t1) );
@@ -827,7 +814,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         MessageContext msgContext = rmd.getMsgContext();
         if(rpd.isSymmetricBinding() && !msgContext.isServerSide()) {
-            if (doDebug) {
+            if (log.isDebugEnabled()) {
                 log.debug("Processing symmetric binding: " +
                         "Setting up encryption token and signature token");
             }
@@ -836,15 +823,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             Token sigTok = rpd.getSignatureToken();
             Token encrTok = rpd.getEncryptionToken();
             if(sigTok instanceof IssuedToken) {
-
-                if (doDebug) {
-                    log.debug("SignatureToken is an IssuedToken");
-                }
-
+                log.debug("SignatureToken is an IssuedToken");
                 if(rmd.getIssuedSignatureTokenId() == null) {
-                    if (doDebug) {
-                        log.debug("No Issuedtoken found, requesting a new token");
-                    }
+                    log.debug("No Issuedtoken found, requesting a new token");
 
                     IssuedToken issuedToken = (IssuedToken)sigTok;
                     
@@ -856,9 +837,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 
             } else if(sigTok instanceof SecureConversationToken) {
 
-                if (doDebug) {
-                    log.debug("SignatureToken is a SecureConversationToken");
-                }
+                log.debug("SignatureToken is a SecureConversationToken");
 
                 //TODO check for an existing token and use it 
                 
@@ -884,15 +863,12 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                         throw new RampartException("errorExtractingToken");
                     }
                 }
-                
-                if (secConvTokenId == null
-                        || (secConvTokenId != null && 
-                                (!RampartUtil.isTokenValid(rmd, secConvTokenId) && !cancelReqResp))) {
 
-                    if (doDebug) {
-                        log.debug("No SecureConversationToken found, " +
-                                "requesting a new token");
-                    }
+                if (secConvTokenId == null
+                    || (secConvTokenId != null &&
+                        (!RampartUtil.isTokenValid(rmd, secConvTokenId) && !cancelReqResp))) {
+
+                    log.debug("No SecureConversationToken found, requesting a new token");
 
                     SecureConversationToken secConvTok = 
                                         (SecureConversationToken) sigTok;
@@ -912,10 +888,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             //same as encrTok
             if(sigTok.equals(encrTok) && sigTok instanceof IssuedToken) {
 
-                if (doDebug) {
-                    log.debug("Symmetric binding uses a ProtectionToken, both" +
+                log.debug("Symmetric binding uses a ProtectionToken, both" +
                             " SignatureToken and EncryptionToken are the same");
-                }
 
                 rmd.setIssuedEncryptionTokenId(rmd.getIssuedEncryptionTokenId());
             } else {
@@ -924,14 +898,11 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 //ProtectionToken therefore we only have to process a issued 
                 //token here
 
-                if (doDebug) {
-                    log.debug("Obtaining the Encryption Token");
-                }
+                log.debug("Obtaining the Encryption Token");
+
                 if(rmd.getIssuedEncryptionTokenId() != null) {
 
-                    if (doDebug) {
-                        log.debug("EncrytionToken not alredy set");
-                    }
+                    log.debug("EncrytionToken not alredy set");
 
                     IssuedToken issuedToken = (IssuedToken)encrTok;
                         

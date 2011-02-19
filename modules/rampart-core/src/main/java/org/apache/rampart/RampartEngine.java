@@ -17,9 +17,15 @@
 package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.*;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAP12Constants;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFault;
+import org.apache.axiom.soap.SOAPFaultCode;
+import org.apache.axiom.soap.SOAPFaultSubCode;
+import org.apache.axiom.soap.SOAPFaultValue;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
@@ -32,18 +38,21 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.*;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSSecurityEngine;
+import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.WSUsernameTokenPrincipal;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.saml.SAMLKeyInfo;
 import org.apache.ws.security.saml.SAMLUtil;
 import org.opensaml.SAMLAssertion;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Conditions;
 import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.SubjectConfirmationData;
-import org.opensaml.saml2.core.Conditions;
 
 import javax.xml.namespace.QName;
-import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,9 +71,7 @@ public class RampartEngine {
 		boolean doDebug = log.isDebugEnabled();
 		boolean dotDebug = tlog.isDebugEnabled();
 		
-		if(doDebug){
-			log.debug("Enter process(MessageContext msgCtx)");
-		}
+		log.debug("Enter process(MessageContext msgCtx)");
 
 		RampartMessageData rmd = new RampartMessageData(msgCtx, false);
 
@@ -89,10 +96,8 @@ public class RampartEngine {
 			//Convert back to llom since the inflow cannot use llom
 			msgCtx.setEnvelope(env);
 			Axis2Util.useDOOM(false);
-			if(doDebug){
-				log.debug("Return process MessageContext msgCtx)");
-			}
-			return null;
+            log.debug("Return process MessageContext msgCtx)");
+            return null;
 		}
 
 
@@ -139,10 +144,8 @@ public class RampartEngine {
         if(rpd.isSymmetricBinding()) {
 			//Here we have to create the CB handler to get the tokens from the 
 			//token storage
-			if(doDebug){
-				log.debug("Processing security header using SymetricBinding");
-			}
-			results = engine.processSecurityHeader(rmd.getDocument(), 
+			log.debug("Processing security header using SymetricBinding");
+			results = engine.processSecurityHeader(rmd.getDocument(),
 					actorValue, 
 					tokenCallbackHandler,
 					signatureCrypto, 
@@ -157,9 +160,7 @@ public class RampartEngine {
             }
 
 		} else {
-			if(doDebug){
-				log.debug("Processing security header in normal path");
-			}
+			log.debug("Processing security header in normal path");
 			results = engine.processSecurityHeader(rmd.getDocument(),
 					actorValue, 
 					tokenCallbackHandler,
@@ -322,9 +323,7 @@ public class RampartEngine {
 					", PolicyBasedResultsValidattor took " + (t3 - t2));
 		}
 
-		if(doDebug){
-			log.debug("Return process(MessageContext msgCtx)");
-		}
+		log.debug("Return process(MessageContext msgCtx)");
 		return results;
 	}
 	
