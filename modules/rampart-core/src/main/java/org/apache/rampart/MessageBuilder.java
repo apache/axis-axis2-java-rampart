@@ -52,6 +52,7 @@ import javax.xml.namespace.QName;
 public class MessageBuilder {
     
     private static Log log = LogFactory.getLog(MessageBuilder.class);
+    private static boolean doDebug = log.isDebugEnabled();
     
     public void build(MessageContext msgCtx) throws WSSPolicyException,
             RampartException, WSSecurityException, AxisFault {
@@ -135,13 +136,17 @@ public class MessageBuilder {
         }
         
        if(rpd.isTransportBinding()) {
-            log.debug("Building transport binding");
-            TransportBindingBuilder building = new TransportBindingBuilder();
-            building.build(rmd);
+           if (doDebug) {
+               log.debug("Building transport binding");
+           }
+           TransportBindingBuilder building = new TransportBindingBuilder();
+           building.build(rmd);
         } else if(rpd.isSymmetricBinding()) {
-            log.debug("Building SymmetricBinding");
-            SymmetricBindingBuilder builder = new SymmetricBindingBuilder();
-            builder.build(rmd);
+           if (doDebug) {
+               log.debug("Building SymmetricBinding");
+           }
+           SymmetricBindingBuilder builder = new SymmetricBindingBuilder();
+           builder.build(rmd);
         } else {
             AsymmetricBindingBuilder builder = new AsymmetricBindingBuilder();
             builder.build(rmd);

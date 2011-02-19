@@ -49,7 +49,8 @@ import java.util.List;
 public class RampartPolicyBuilder {
     
     private static Log log = LogFactory.getLog(RampartPolicyBuilder.class);
-    
+    private static boolean doDebug = log.isDebugEnabled();
+
     /**
      * Compile the parsed security data into one Policy data block.
      * 
@@ -110,8 +111,10 @@ public class RampartPolicyBuilder {
             } else if (assertion instanceof MTOMAssertion){
             	processMTOMSerialization((MTOMAssertion)assertion, rpd);
             } else {
-                log.debug("Unknown top level PED found: "
-                        + assertion.getClass().getName());
+                if (doDebug) {
+                    log.debug("Unknown top level PED found: "
+                            + assertion.getClass().getName());
+                }
             }
         }
         

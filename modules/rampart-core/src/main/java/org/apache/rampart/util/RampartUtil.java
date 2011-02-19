@@ -97,6 +97,7 @@ public class RampartUtil {
 
     private static final String CRYPTO_PROVIDER = "org.apache.ws.security.crypto.provider";
     private static Log log = LogFactory.getLog(RampartUtil.class);
+    private static boolean doDebug = log.isDebugEnabled();
 
     private static Map<String, CachedCrypto> cryptoStore = new ConcurrentHashMap<String, CachedCrypto>();
 
@@ -133,7 +134,9 @@ public class RampartUtil {
             String cbHandlerClass = rpd.getRampartConfig().getPwCbClass();
             ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
 
-            log.debug("loading class : " + cbHandlerClass);
+            if (doDebug) {
+                log.debug("loading class : " + cbHandlerClass);
+            }
 
             Class cbClass;
             try {
@@ -180,7 +183,9 @@ public class RampartUtil {
             String cbHandlerClass = rpd.getRampartConfig().getPolicyValidatorCbClass();
             ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
 
-            log.debug("loading class : " + cbHandlerClass);
+            if (doDebug) {
+                log.debug("loading class : " + cbHandlerClass);
+            }
 
             Class cbClass;
             try {
@@ -213,7 +218,9 @@ public class RampartUtil {
            String cbHandlerClass = rpd.getRampartConfig().getRampartConfigCbClass();
            ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
 
-           log.debug("loading class : " + cbHandlerClass);
+           if (doDebug) {
+               log.debug("loading class : " + cbHandlerClass);
+           }
 
            Class cbClass;
            try {
@@ -292,7 +299,7 @@ public class RampartUtil {
     public static Crypto getEncryptionCrypto(RampartConfig config, ClassLoader loader)
             throws RampartException {
 
-        if (log.isDebugEnabled()) {
+        if (doDebug) {
             log.debug("Loading encryption crypto");
         }
 
@@ -301,7 +308,7 @@ public class RampartUtil {
         if (config != null && config.getEncrCryptoConfig() != null) {
             CryptoConfig cryptoConfig = config.getEncrCryptoConfig();
             String provider = cryptoConfig.getProvider();
-            if (log.isDebugEnabled()) {
+            if (doDebug) {
                 log.debug("Using provider: " + provider);
             }
             Properties prop = cryptoConfig.getProp();
@@ -334,7 +341,7 @@ public class RampartUtil {
                 }
             }
         } else {
-            if (log.isDebugEnabled()) {
+            if (doDebug) {
                 log.debug("Trying the signature crypto info");
             }
             crypto = getSignatureCrypto(config, loader);
@@ -353,7 +360,7 @@ public class RampartUtil {
     public static Crypto getSignatureCrypto(RampartConfig config, ClassLoader loader)
             throws RampartException {
 
-        if (log.isDebugEnabled()) {
+        if (doDebug) {
             log.debug("Loading Signature crypto");
         }
 
@@ -362,7 +369,7 @@ public class RampartUtil {
         if (config != null && config.getSigCryptoConfig() != null) {
             CryptoConfig cryptoConfig = config.getSigCryptoConfig();
             String provider = cryptoConfig.getProvider();
-            if (log.isDebugEnabled()) {
+            if (doDebug) {
                 log.debug("Using provider: " + provider);
             }
             Properties prop = cryptoConfig.getProp();
@@ -513,7 +520,9 @@ public class RampartUtil {
     public static OMElement createRSTTempalteForSCT(int conversationVersion, 
             int wstVersion) throws RampartException {
         try {
-            log.debug("Creating RSTTemplate for an SCT request");
+            if (doDebug) {
+                log.debug("Creating RSTTemplate for an SCT request");
+            }
             OMFactory fac = OMAbstractFactory.getOMFactory();
             
             OMNamespace wspNs = fac.createOMNamespace(SPConstants.P_NS, "wsp");
@@ -617,7 +626,9 @@ public class RampartUtil {
         Policy bsPol = secConvTok.getBootstrapPolicy();
         
         if(bsPol != null) {
-            log.debug("BootstrapPolicy found");
+            if (doDebug) {
+                log.debug("BootstrapPolicy found");
+            }
             bsPol.addAssertion(rmd.getPolicyData().getRampartConfig());           
             //copy the <wsoma:OptimizedMimeSerialization/> to BootstrapPolicy
             if (rmd.getPolicyData().getMTOMAssertion() != null) {
@@ -626,14 +637,18 @@ public class RampartUtil {
             stsPolicy = bsPol;
         } else {
             //No bootstrap policy use issuer policy
-            log.debug("No bootstrap policy, using issuer policy");
+            if (doDebug) {
+                log.debug("No bootstrap policy, using issuer policy");
+            }
             stsPolicy = rmd.getPolicyData().getIssuerPolicy();
         }
         
         String id = getToken(rmd, rstTemplate,
                 issuerEprAddress, action, stsPolicy);
 
-        log.debug("SecureConversationToken obtained: id=" + id);
+        if (doDebug) {
+            log.debug("SecureConversationToken obtained: id=" + id);
+        }
         return id;
     }
     
@@ -673,7 +688,9 @@ public class RampartUtil {
             String id = getToken(rmd, rstTemplate, issuerEprAddress, action,
                     stsPolicy);
 
-            log.debug("Issued token obtained: id=" + id);
+            if (doDebug) {
+                log.debug("Issued token obtained: id=" + id);
+            }
             return id;
         } catch (TrustException e) {
             throw new RampartException("errorInObtainingToken", e);
@@ -1725,18 +1742,18 @@ public class RampartUtil {
             if (refreshInterval != null) {
                 if (cachedCrypto.creationTime + new Long(refreshInterval).longValue() > Calendar
                         .getInstance().getTimeInMillis()) {
-                    if (log.isDebugEnabled()) {
+                    if (doDebug) {
                         log.debug("Cache Hit : Crypto Object was found in cache.");
                     }
                     return cachedCrypto.crypto;
                 } else {
-                    if (log.isDebugEnabled()) {
+                    if (doDebug) {
                         log.debug("Cache Miss : Crypto Object found in cache is expired.");
                     }
                     return null;
                 }
             } else {
-                if (log.isDebugEnabled()) {
+                if (doDebug) {
                     log.debug("Cache Hit : Crypto Object was found in cache.");
                 }
                 return cachedCrypto.crypto;
@@ -1744,7 +1761,7 @@ public class RampartUtil {
         }
         // cache miss
         else {
-            if (log.isDebugEnabled()) {
+            if (doDebug) {
                 log.debug("Cache Miss : Crypto Object was not found in cache.");
             }
             return null;
@@ -1754,7 +1771,7 @@ public class RampartUtil {
     private static void cacheCrypto(String cryptoKey, Crypto crypto) {
         cryptoStore.put(cryptoKey, new CachedCrypto(crypto, Calendar.getInstance()
                 .getTimeInMillis()));
-        if (log.isDebugEnabled()) {
+        if (doDebug) {
             log.debug("Crypto object is inserted into the Cache.");
         }
 

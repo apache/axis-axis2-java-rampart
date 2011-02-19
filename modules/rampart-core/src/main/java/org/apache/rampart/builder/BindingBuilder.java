@@ -70,7 +70,8 @@ import java.util.Map.Entry;
 
 public abstract class BindingBuilder {
     private static Log log = LogFactory.getLog(BindingBuilder.class);
-            
+    private static boolean doDebug = log.isDebugEnabled();
+
     private Element insertionLocation;
     
     protected String mainSigId = null;
@@ -86,8 +87,10 @@ public abstract class BindingBuilder {
      * @param rmd
      */
     protected void addTimestamp(RampartMessageData rmd) {
-        log.debug("Adding timestamp");
-        
+        if (doDebug) {
+            log.debug("Adding timestamp");
+        }
+
         WSSecTimestamp timestampBuilder = new WSSecTimestamp();
         timestampBuilder.setWsConfig(rmd.getConfig());
 
@@ -97,13 +100,17 @@ public abstract class BindingBuilder {
 
         timestampBuilder.build(rmd.getDocument(), rmd
                 .getSecHeader());
-        
-        log.debug("Timestamp id: " + timestampBuilder.getId());
+
+        if (doDebug) {
+            log.debug("Timestamp id: " + timestampBuilder.getId());
+        }
 
         rmd.setTimestampId(timestampBuilder.getId());
         
         this.timestampElement = timestampBuilder.getElement();
-        log.debug("Adding timestamp: DONE");
+        if (doDebug) {
+            log.debug("Adding timestamp: DONE");
+        }
     }
     
     /**
@@ -113,9 +120,11 @@ public abstract class BindingBuilder {
      * @throws RampartException
      */
     protected WSSecUsernameToken addUsernameToken(RampartMessageData rmd, UsernameToken token) throws RampartException {
-       
-        log.debug("Adding a UsernameToken");
-        
+
+        if (doDebug) {
+            log.debug("Adding a UsernameToken");
+        }
+
         RampartPolicyData rpd = rmd.getPolicyData();
         
         //Get the user
@@ -130,8 +139,10 @@ public abstract class BindingBuilder {
         }
         
         if(user != null && !"".equals(user)) {
-            log.debug("User : " + user);
-            
+            if (doDebug) {
+                log.debug("User : " + user);
+            }
+
             // If NoPassword property is set we don't need to set the password
             if (token.isNoPassword()) {
                 WSSecUsernameToken utBuilder = new WSSecUsernameToken();
@@ -170,9 +181,11 @@ public abstract class BindingBuilder {
                 //get the password
                 password = cb[0].getPassword();
             }
-            
-            log.debug("Password : " + password);
-            
+
+            if (doDebug) {
+                log.debug("Password : " + password);
+            }
+
             if(password != null && !"".equals(password)) {
                 //If the password is available then build the token
                 
@@ -196,7 +209,9 @@ public abstract class BindingBuilder {
             }
             
         } else {
-            log.debug("No user value specified in the configuration");
+            if (doDebug) {
+                log.debug("No user value specified in the configuration");
+            }
             throw new RampartException("userMissing");
         }
         
@@ -258,9 +273,11 @@ public abstract class BindingBuilder {
         WSSecSignature sig = new WSSecSignature();
         checkForX509PkiPath(sig, token);
         sig.setWsConfig(rmd.getConfig());
-        
-        log.debug("Token inclusion: " + token.getInclusion());
-        
+
+        if (doDebug) {
+            log.debug("Token inclusion: " + token.getInclusion());
+        }
+
         RampartUtil.setKeyIdentifierType(rmd, sig, token);
 
         String user = null;
@@ -283,8 +300,10 @@ public abstract class BindingBuilder {
         String password = null;
 
         if(user != null && !"".equals(user)) {
-            log.debug("User : " + user);
-            
+            if (doDebug) {
+                log.debug("User : " + user);
+            }
+
             //Get the password
             CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
             
@@ -300,7 +319,9 @@ public abstract class BindingBuilder {
                 handler.handle(cb);
                 if(cb[0].getPassword() != null && !"".equals(cb[0].getPassword())) {
                     password = cb[0].getPassword();
-                    log.debug("Password : " + password);
+                    if (doDebug) {
+                        log.debug("Password : " + password);
+                    }
                 } else {
                     //If there's no password then throw an exception
                     throw new RampartException("noPasswordForUser", 
@@ -315,7 +336,9 @@ public abstract class BindingBuilder {
             }
             
         } else {
-            log.debug("No user value specified in the configuration");
+            if (doDebug) {
+                log.debug("No user value specified in the configuration");
+            }
             throw new RampartException("userMissing");
         }
         
@@ -347,8 +370,10 @@ public abstract class BindingBuilder {
         
         if(suppTokens != null && suppTokens.getTokens() != null &&
                 suppTokens.getTokens().size() > 0) {
-            log.debug("Processing supporting tokens");
-            
+            if (doDebug) {
+                log.debug("Processing supporting tokens");
+            }
+
             ArrayList tokens = suppTokens.getTokens();
             for (Iterator iter = tokens.iterator(); iter.hasNext();) {
                 Token token = (Token) iter.next();
@@ -782,7 +807,7 @@ public abstract class BindingBuilder {
         // prepare a SignatureConfirmation token
         WSSecSignatureConfirmation wsc = new WSSecSignatureConfirmation();
         if (signatureActions.size() > 0) {
-            if (log.isDebugEnabled()) {
+            if (doDebug) {
                 log.debug("Signature Confirmation: number of Signature results: "
                         + signatureActions.size());
             }

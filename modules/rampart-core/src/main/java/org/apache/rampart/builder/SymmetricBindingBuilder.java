@@ -63,17 +63,15 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(SymmetricBindingBuilder.class);
     private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
-    private boolean dotDebug = false;
-    
-    
-    public SymmetricBindingBuilder(){
-    	dotDebug = tlog.isDebugEnabled();
-    }
-    
+    private static boolean dotDebug = tlog.isDebugEnabled();
+    private static boolean doDebug = log.isDebugEnabled();
+
     public void build(RampartMessageData rmd) throws RampartException {
-        
-        log.debug("SymmetricBindingBuilder build invoked");
-        
+
+        if (doDebug) {
+            log.debug("SymmetricBindingBuilder build invoked");
+        }
+
         RampartPolicyData rpd = rmd.getPolicyData();
         if(rpd.isIncludeTimestamp()) {
             this.addTimestamp(rmd);
@@ -91,9 +89,11 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             this.doSignBeforeEncrypt(rmd);
         }
 
-    
-        log.debug("SymmetricBindingBuilder build invoked : DONE");
-        
+
+        if (doDebug) {
+            log.debug("SymmetricBindingBuilder build invoked : DONE");
+        }
+
     }
     
     private void doEncryptBeforeSig(RampartMessageData rmd) throws RampartException {
@@ -125,10 +125,14 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             if(encryptionToken instanceof IssuedToken) {
                 tokenId = rmd.getIssuedEncryptionTokenId();
-                log.debug("Issued EncryptionToken Id : " + tokenId);
+                if (doDebug) {
+                    log.debug("Issued EncryptionToken Id : " + tokenId);
+                }
             } else if(encryptionToken instanceof SecureConversationToken) {
                 tokenId = rmd.getSecConvTokenId();
-                log.debug("SCT Id : " + tokenId);
+                if (doDebug) {
+                    log.debug("SCT Id : " + tokenId);
+                }
             } else if (encryptionToken instanceof X509Token) {
             	if (rmd.isInitiator()) {
             		tokenId = setupEncryptedKey(rmd, encryptionToken);
@@ -176,8 +180,10 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
             AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
             if(encryptionToken.isDerivedKeys()) {
-                log.debug("Use drived keys");
-                
+                if (doDebug) {
+                    log.debug("Use drived keys");
+                }
+
                 dkEncr = new WSSecDKEncrypt();
                 
                 if(attached && tok.getAttachedReference() != null) {
@@ -208,7 +214,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     throw new RampartException("errorInDKEncr");
                 }
             } else {
-                log.debug("NO derived keys, use the shared secret");
+                if (doDebug) {
+                    log.debug("NO derived keys, use the shared secret");
+                }
                 encr = new WSSecEncrypt();
                 
                 encr.setWsConfig(rmd.getConfig());
@@ -341,7 +349,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             	if(dotDebug){
             		t3 = System.currentTimeMillis();
             	}
-            	log.debug("Signature protection");
+                if (doDebug) {
+                    log.debug("Signature protection");
+                }
                 Vector secondEncrParts = new Vector();
                 
                 //Now encrypt the signature using the above token
@@ -809,7 +819,6 @@ public class SymmetricBindingBuilder extends BindingBuilder {
     /**
      * Setup the required tokens
      * @param rmd
-     * @param rpd
      * @throws RampartException
      */
     private void initializeTokens(RampartMessageData rmd) throws RampartException {
@@ -818,19 +827,25 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         MessageContext msgContext = rmd.getMsgContext();
         if(rpd.isSymmetricBinding() && !msgContext.isServerSide()) {
-            log.debug("Processing symmetric binding: " +
-                    "Setting up encryption token and signature token");
+            if (doDebug) {
+                log.debug("Processing symmetric binding: " +
+                        "Setting up encryption token and signature token");
+            }
             //Setting up encryption token and signature token
             
             Token sigTok = rpd.getSignatureToken();
             Token encrTok = rpd.getEncryptionToken();
             if(sigTok instanceof IssuedToken) {
-                
-                log.debug("SignatureToken is an IssuedToken");
-                
+
+                if (doDebug) {
+                    log.debug("SignatureToken is an IssuedToken");
+                }
+
                 if(rmd.getIssuedSignatureTokenId() == null) {
-                    log.debug("No Issuedtoken found, requesting a new token");
-                    
+                    if (doDebug) {
+                        log.debug("No Issuedtoken found, requesting a new token");
+                    }
+
                     IssuedToken issuedToken = (IssuedToken)sigTok;
                     
                     String id = RampartUtil.getIssuedToken(rmd, 
@@ -840,9 +855,11 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 }
                 
             } else if(sigTok instanceof SecureConversationToken) {
-                
-                log.debug("SignatureToken is a SecureConversationToken");
-                
+
+                if (doDebug) {
+                    log.debug("SignatureToken is a SecureConversationToken");
+                }
+
                 //TODO check for an existing token and use it 
                 
                 String secConvTokenId = rmd.getSecConvTokenId();
@@ -871,10 +888,12 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 if (secConvTokenId == null
                         || (secConvTokenId != null && 
                                 (!RampartUtil.isTokenValid(rmd, secConvTokenId) && !cancelReqResp))) {
-                
-                    log.debug("No SecureConversationToken found, " +
-                            "requesting a new token");
-                    
+
+                    if (doDebug) {
+                        log.debug("No SecureConversationToken found, " +
+                                "requesting a new token");
+                    }
+
                     SecureConversationToken secConvTok = 
                                         (SecureConversationToken) sigTok;
                     
@@ -892,21 +911,27 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             //If it was the ProtectionToken assertion then sigTok is the
             //same as encrTok
             if(sigTok.equals(encrTok) && sigTok instanceof IssuedToken) {
-                
-                log.debug("Symmetric binding uses a ProtectionToken, both" +
-                        " SignatureToken and EncryptionToken are the same");
-                
+
+                if (doDebug) {
+                    log.debug("Symmetric binding uses a ProtectionToken, both" +
+                            " SignatureToken and EncryptionToken are the same");
+                }
+
                 rmd.setIssuedEncryptionTokenId(rmd.getIssuedEncryptionTokenId());
             } else {
                 //Now we'll have to obtain the encryption token as well :-)
                 //ASSUMPTION: SecureConversationToken is used as a 
                 //ProtectionToken therefore we only have to process a issued 
                 //token here
-                
-                log.debug("Obtaining the Encryption Token");
+
+                if (doDebug) {
+                    log.debug("Obtaining the Encryption Token");
+                }
                 if(rmd.getIssuedEncryptionTokenId() != null) {
-                    
-                    log.debug("EncrytionToken not alredy set");
+
+                    if (doDebug) {
+                        log.debug("EncrytionToken not alredy set");
+                    }
 
                     IssuedToken issuedToken = (IssuedToken)encrTok;
                         
