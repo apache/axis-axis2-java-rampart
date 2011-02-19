@@ -97,6 +97,11 @@ public class CryptoConfig implements Assertion {
         // TODO TODO
         throw new UnsupportedOperationException("TODO");
     }
+    
+    public boolean isIgnorable() {
+        // TODO TODO
+        throw new UnsupportedOperationException("TODO");
+    }
  
     public PolicyComponent normalize() {
         // TODO TODO

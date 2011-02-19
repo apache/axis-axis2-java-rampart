@@ -25,7 +25,7 @@ import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.Trust10;
 
-public class Trust10Builder implements AssertionBuilder {
+public class Trust10Builder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {

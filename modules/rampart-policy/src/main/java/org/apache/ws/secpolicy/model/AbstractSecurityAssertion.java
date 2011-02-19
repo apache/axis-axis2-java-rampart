@@ -24,6 +24,7 @@ import org.apache.ws.secpolicy.SP12Constants;
 public abstract class AbstractSecurityAssertion implements Assertion {
 
     private boolean isOptional;
+    private boolean isIgnorable;
     
     private boolean normalized = true; 
     
@@ -35,6 +36,13 @@ public abstract class AbstractSecurityAssertion implements Assertion {
     
     public void setOptional(boolean isOptional) {
         this.isOptional = isOptional;
+    }
+    public boolean isIgnorable() {
+        return isIgnorable;
+    }
+    
+    public void setIgnorable(boolean isIgnorable) {
+        this.isIgnorable = isIgnorable;
     }
 
     public short getType() {

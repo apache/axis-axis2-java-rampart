@@ -31,7 +31,7 @@ import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.RecipientToken;
 import org.apache.ws.secpolicy.model.Token;
 
-public class RecipientTokenBuilder implements AssertionBuilder {
+public class RecipientTokenBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {

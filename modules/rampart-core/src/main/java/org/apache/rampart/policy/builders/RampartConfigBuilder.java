@@ -26,7 +26,7 @@ import org.apache.rampart.policy.model.OptimizePartsConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.policy.model.SSLConfig;
 
-public class RampartConfigBuilder implements AssertionBuilder {
+public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {

@@ -24,15 +24,15 @@ import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.Policy;
+import org.apache.neethi.PolicyContainingAssertion;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
-import org.apache.neethi.builders.xml.XmlPrimtiveAssertion;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.HttpsToken;
 import org.apache.ws.secpolicy.model.TransportToken;
 
-public class TransportTokenBuilder implements AssertionBuilder {
+public class TransportTokenBuilder implements AssertionBuilder<OMElement> {
     
    
     
@@ -57,22 +57,21 @@ public class TransportTokenBuilder implements AssertionBuilder {
     private void processAlternative(List assertions, TransportToken parent) {
         
         for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            XmlPrimtiveAssertion primtive = (XmlPrimtiveAssertion) iterator.next();
+            Assertion primtive = (Assertion) iterator.next();
             QName qname = primtive.getName();
             
             if (SP12Constants.HTTPS_TOKEN.equals(qname)) {
                 HttpsToken httpsToken = new HttpsToken(SPConstants.SP_V12);
-                
-                OMElement element = primtive.getValue().getFirstChildWithName(SPConstants.POLICY);
-                
-                if (element != null) {
-                    OMElement child = element.getFirstElement();
-                    if (child != null) {
-                        if (SP12Constants.HTTP_BASIC_AUTHENTICATION.equals(child.getQName())) {
+                Policy child = ((PolicyContainingAssertion)primtive).getPolicy();
+                Iterator<List<Assertion>> alts = child.getAlternatives();
+                while (alts.hasNext()) {
+                    for (Assertion assertion : alts.next()) {
+                        QName qn = assertion.getName();
+                        if (SP12Constants.HTTP_BASIC_AUTHENTICATION.equals(qn)) {
                             httpsToken.setHttpBasicAuthentication(true);
-                        } else if (SP12Constants.HTTP_DIGEST_AUTHENTICATION.equals(child.getQName())) {
+                        } else if (SP12Constants.HTTP_DIGEST_AUTHENTICATION.equals(qn)) {
                             httpsToken.setHttpDigestAuthentication(true);
-                        } else if (SP12Constants.REQUIRE_CLIENT_CERTIFICATE.equals(child.getQName())) {
+                        } else if (SP12Constants.REQUIRE_CLIENT_CERTIFICATE.equals(qn)) {
                             httpsToken.setRequireClientCertificate(true);
                         }
                     }

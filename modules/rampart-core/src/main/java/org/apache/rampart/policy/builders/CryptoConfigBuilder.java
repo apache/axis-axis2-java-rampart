@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class CryptoConfigBuilder implements AssertionBuilder {
+public class CryptoConfigBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {

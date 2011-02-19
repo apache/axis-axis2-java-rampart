@@ -34,7 +34,7 @@ import org.apache.ws.secpolicy.model.InitiatorToken;
 import org.apache.ws.secpolicy.model.Layout;
 import org.apache.ws.secpolicy.model.RecipientToken;
 
-public class AsymmetricBindingBuilder implements AssertionBuilder {
+public class AsymmetricBindingBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         

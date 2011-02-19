@@ -26,7 +26,6 @@ import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
-import org.apache.neethi.builders.xml.XmlPrimtiveAssertion;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.HttpsToken;
@@ -44,7 +43,7 @@ import org.apache.ws.secpolicy.model.HttpsToken;
  * alternatives in the HttpsToken considering both cases whether the policy is normalized or not.
  * 
  */
-public class HttpsTokenBuilder implements AssertionBuilder {
+public class HttpsTokenBuilder implements AssertionBuilder<OMElement> {
     
     /**
      * {@inheritDoc}
@@ -85,7 +84,7 @@ public class HttpsTokenBuilder implements AssertionBuilder {
     private void processAlternative(List assertions, HttpsToken parent) {
         
         for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            XmlPrimtiveAssertion primtive = (XmlPrimtiveAssertion) iterator.next();
+            Assertion primtive = (Assertion) iterator.next();
             QName qname = primtive.getName();
             
             if (qname != null) {
