@@ -58,26 +58,26 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-	    <plugin>
-        	<groupId>org.apache.axis2</groupId>
-        	<artifactId>axis2-mar-maven-plugin</artifactId>
-        	<version>1.2</version>
-        	<extensions>true</extensions>
-        	<configuration>
-       	  		<includeDependencies>false</includeDependencies>
-			<moduleXmlFile>module.xml</moduleXmlFile>
-        	</configuration>
-      	     </plugin> 
-           </plugins>
+            <plugin>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-mar-maven-plugin</artifactId>
+                <version>1.2</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <includeDependencies>false</includeDependencies>
+                    <moduleXmlFile>module.xml</moduleXmlFile>
+                </configuration>
+            </plugin> 
+        </plugins>
     </build>
     
     <dependencies>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
             <version>${pom.version}</version>
         </dependency>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-trust</artifactId>
             <version>${pom.version}</version>
@@ -114,7 +114,7 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
-	<distributionManagement>
+    <distributionManagement>
         <snapshotRepository>
             <id>apache.snapshots.https</id>
             <name>${distMgmtSnapshotsName}</name>
