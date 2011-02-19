@@ -16,19 +16,9 @@
 
 package org.apache.rahas.client;
 
-import java.io.IOException;
-import java.util.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMException;
+import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.om.util.Base64;
@@ -69,11 +59,25 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Element;
 
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
 public class STSClient {
 
     private static final String RAMPART_POLICY = "rampartPolicy";
 
     private static Log log = LogFactory.getLog(STSClient.class);
+    private static boolean doDebug = log.isDebugEnabled();
 
     private String action;
 
@@ -592,7 +596,9 @@ public class STSClient {
         //Assumption: there's only one alternative
 
         if (issuerPolicy != null) {
-            log.debug("Processing Issuer policy");
+            if (doDebug) {
+                log.debug("Processing Issuer policy");
+            }
 
             List issuerAssertions = (List) issuerPolicy.getAlternatives().next();
 
@@ -601,8 +607,10 @@ public class STSClient {
                 //find the AlgorithmSuite assertion
                 if (tempAssertion instanceof Binding) {
 
-                    log.debug("Extracting algo suite from issuer " +
-                              "policy binding");
+                    if (doDebug) {
+                        log.debug("Extracting algo suite from issuer " +
+                                  "policy binding");
+                    }
 
                     this.algorithmSuite = ((Binding) tempAssertion)
                             .getAlgorithmSuite();
@@ -612,7 +620,9 @@ public class STSClient {
 
         if (servicePolicy != null) {
 
-            log.debug("Processing service policy to find Trust10 assertion");
+            if (doDebug) {
+                log.debug("Processing service policy to find Trust10 assertion");
+            }
 
             List assertions = (List) servicePolicy.getAlternatives().next();
 
@@ -620,12 +630,16 @@ public class STSClient {
                 Assertion tempAssertion = (Assertion) iter.next();
                 //find the Trust10 assertion
                 if (tempAssertion instanceof Trust10) {
-                    log.debug("Extracting Trust10 assertion from " +
-                              "service policy");
+                    if (doDebug) {
+                        log.debug("Extracting Trust10 assertion from " +
+                                  "service policy");
+                    }
                     this.trust10 = (Trust10) tempAssertion;
                 } else if (tempAssertion instanceof Trust13) {
-                    log.debug("Extracting Trust13 assertion from " +
-                    "service policy");
+                    if (doDebug) {
+                        log.debug("Extracting Trust13 assertion from " +
+                        "service policy");
+                    }
                     this.trust13 = (Trust13) tempAssertion;
                 }
             }
@@ -643,8 +657,10 @@ public class STSClient {
     private OMElement createIssueRequest(String requestType,
                                          String appliesTo) throws TrustException {
 
-        log.debug("Creating request with request type: " + requestType +
-                  " and applies to: " + appliesTo);
+        if (doDebug) {
+            log.debug("Creating request with request type: " + requestType +
+                      " and applies to: " + appliesTo);
+        }
 
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
 
@@ -657,7 +673,9 @@ public class STSClient {
         //Copy over the elements from the template
         if (this.rstTemplate != null) {
 
-            log.debug("Using RSTTemplate: " + this.rstTemplate.toString());
+            if (doDebug) {
+                log.debug("Using RSTTemplate: " + this.rstTemplate.toString());
+            }
 
             Iterator templateChildren = rstTemplate.getChildElements();
             while (templateChildren.hasNext()) {
@@ -668,13 +686,17 @@ public class STSClient {
                     && ((OMElement) child).getQName().equals(
                         new QName(TrustUtil.getWSTNamespace(this.version),
                                   RahasConstants.IssuanceBindingLocalNames.KEY_SIZE))) {
-                    log.debug("Extracting key size from the RSTTemplate: ");
+                    if (doDebug) {
+                        log.debug("Extracting key size from the RSTTemplate: ");
+                    }
                     OMElement childElem = (OMElement) child;
                     this.keySize =
                             (childElem.getText() != null && !"".equals(childElem.getText())) ?
                             Integer.parseInt(childElem.getText()) :
                             -1;
-                    log.debug("Key size from RSTTemplate: " + this.keySize);
+                    if (doDebug) {
+                        log.debug("Key size from RSTTemplate: " + this.keySize);
+                    }
                 }
             }
         }
@@ -683,11 +705,15 @@ public class STSClient {
             // Handle entropy
             if (this.trust10 != null) {
 
-                log.debug("Processing Trust assertion");
+                if (doDebug) {
+                    log.debug("Processing Trust assertion");
+                }
 
                 if (this.trust10.isRequireClientEntropy()) {
 
-                    log.debug("Requires client entropy");
+                    if (doDebug) {
+                        log.debug("Requires client entropy");
+                    }
 
                     // setup requestor entropy
                     OMElement ent = TrustUtil.createEntropyElement(this.version, rst);
@@ -700,8 +726,9 @@ public class STSClient {
                                     getMaximumSymmetricKeyLength()/8);
                     binSec.setText(Base64.encode(this.requestorEntropy));
 
-                    log.debug("Clien entropy : "
-                              + Base64.encode(this.requestorEntropy));
+                    if (doDebug) {
+                        log.debug("Clien entropy : " + Base64.encode(this.requestorEntropy));
+                    }
 
                     // Add the ComputedKey element
                     TrustUtil.createComputedKeyAlgorithm(this.version, rst,
@@ -712,7 +739,9 @@ public class STSClient {
                 
                 if (this.trust13.isRequireClientEntropy()) {
 
-                    log.debug("Requires client entropy");
+                    if (doDebug) {
+                        log.debug("Requires client entropy");
+                    }
 
                     // setup requestor entropy
                     OMElement ent = TrustUtil.createEntropyElement(this.version, rst);
@@ -725,8 +754,9 @@ public class STSClient {
                                     getMaximumSymmetricKeyLength()/8);
                     binSec.setText(Base64.encode(this.requestorEntropy));
 
-                    log.debug("Clien entropy : "
-                              + Base64.encode(this.requestorEntropy));
+                    if (doDebug) {
+                        log.debug("Clien entropy : " + Base64.encode(this.requestorEntropy));
+                    }
 
                     // Add the ComputedKey element
                     TrustUtil.createComputedKeyAlgorithm(this.version, rst,
@@ -748,9 +778,11 @@ public class STSClient {
     }
     
     private OMElement createValidateRequest(String requestType, String tokenId) throws TrustException {
-        
-        log.debug("Creating request with request type: " + requestType);
-        
+
+        if (doDebug) {
+            log.debug("Creating request with request type: " + requestType);
+        }
+
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
         
         TrustUtil.createRequestTypeElement(this.version, rst, requestType);
@@ -788,9 +820,11 @@ public class STSClient {
         
         String requestType =
             TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_RENEW;
-        
-        log.debug("Creating request with request type: " + requestType);
-        
+
+        if (doDebug) {
+            log.debug("Creating request with request type: " + requestType);
+        }
+
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
         
         TrustUtil.createRequestTypeElement(this.version, rst, requestType);

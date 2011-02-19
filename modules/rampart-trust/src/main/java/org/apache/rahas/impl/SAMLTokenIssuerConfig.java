@@ -16,16 +16,6 @@
 
 package org.apache.rahas.impl;
 
-import java.io.FileInputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.security.cert.X509Certificate;
-
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
@@ -36,8 +26,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.impl.util.SAMLCallbackHandler;
-import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.components.crypto.Crypto;
+
+import javax.xml.namespace.QName;
+import java.io.FileInputStream;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Configuration manager for the <code>SAMLTokenIssuer</code>
@@ -260,13 +259,13 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
 					Class handlerClass = Class.forName(value);
 					this.callbackHandler = (SAMLCallbackHandler)handlerClass.newInstance();
 				} catch (ClassNotFoundException e) {
-					log.debug("Error loading class" , e);
+					log.error("Error loading class" , e);
 					throw new TrustException("Error loading class" , e);
 				} catch (InstantiationException e) {
-					log.debug("Error instantiating class" , e);
+					log.error("Error instantiating class" , e);
 					throw new TrustException("Error instantiating class" , e);
 				} catch (IllegalAccessException e) {
-					log.debug("Illegal Access" , e);
+					log.error("Illegal Access" , e);
 					throw new TrustException("Illegal Access" , e);
 				}
 		}
