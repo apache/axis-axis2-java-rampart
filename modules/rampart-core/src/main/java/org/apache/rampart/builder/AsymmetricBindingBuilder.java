@@ -53,7 +53,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(AsymmetricBindingBuilder.class);
     private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
-    private boolean dotDebug = false;
+    private static boolean doDebug = log.isDebugEnabled();
+    private static boolean dotDebug = tlog.isDebugEnabled();
     
     private Token sigToken;
 
@@ -77,12 +78,10 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
     
     private Element signatureElement; 
     
-    public AsymmetricBindingBuilder(){
-    	dotDebug = tlog.isDebugEnabled();
-    }
-
     public void build(RampartMessageData rmd) throws RampartException {
-        log.debug("AsymmetricBindingBuilder build invoked");
+        if (doDebug) {
+            log.debug("AsymmetricBindingBuilder build invoked");
+        }
 
         RampartPolicyData rpd = rmd.getPolicyData();
         if (rpd.isIncludeTimestamp()) {
@@ -95,7 +94,9 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             this.doSignBeforeEncrypt(rmd);
         }
 
-        log.debug("AsymmetricBindingBuilder build invoked : DONE");
+        if (doDebug) {
+            log.debug("AsymmetricBindingBuilder build invoked : DONE");
+        }
     }
 
     private void doEncryptBeforeSig(RampartMessageData rmd)

@@ -815,7 +815,9 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             }
         }
 
-        log.debug("WSHandler: Certificate path could not be verified for certificate with subject " + subjectString);
+        if (doDebug) {
+            log.debug("WSHandler: Certificate path could not be verified for certificate with subject " + subjectString);
+        }
         return false;
     }
 
