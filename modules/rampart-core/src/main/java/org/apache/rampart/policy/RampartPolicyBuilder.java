@@ -76,6 +76,9 @@ public class RampartPolicyBuilder {
         for (Iterator iter = topLevelAssertions.iterator(); iter.hasNext();) {
             Assertion assertion = (Assertion) iter.next();
             if (assertion instanceof Binding) {
+
+                setWebServiceSecurityPolicyNS(assertion, rpd);
+
                 if (assertion instanceof SymmetricBinding) {
                     processSymmetricPolicyBinding((SymmetricBinding) assertion, rpd);
                 } else if(assertion instanceof AsymmetricBinding) {
@@ -102,6 +105,10 @@ public class RampartPolicyBuilder {
             } else if (assertion instanceof ContentEncryptedElements) { 
                 processContentEncryptedElements((ContentEncryptedElements) assertion, rpd);
             }else if (assertion instanceof SupportingToken) {
+
+                //Set policy version. Cos a supporting token can appear along without a binding
+                setWebServiceSecurityPolicyNS(assertion, rpd);
+
                 processSupportingTokens((SupportingToken) assertion, rpd);
             } else if (assertion instanceof Trust10) {
                 processTrust10((Trust10)assertion, rpd);
@@ -118,6 +125,18 @@ public class RampartPolicyBuilder {
         }
         
         return rpd;
+    }
+
+    /**
+     * Sets web service security policy version. The policy version is extracted from an assertion.
+     * But if namespace is already set this method will just return.
+     * @param assertion The assertion to get policy namespace.
+     */
+    private static void setWebServiceSecurityPolicyNS(Assertion assertion, RampartPolicyData policyData) {
+
+        if (policyData.getWebServiceSecurityPolicyNS() == null) {
+            policyData.setWebServiceSecurityPolicyNS(assertion.getName().getNamespaceURI());
+        }        
     }
 
  
@@ -157,7 +176,7 @@ public class RampartPolicyBuilder {
     /**
      * Evaluate the symmetric policy binding data.
      * 
-     * @param binding
+     * @param symmBinding
      *            The binding data
      * @param rpd
      *            The WSS4J data to initialize
@@ -202,7 +221,7 @@ public class RampartPolicyBuilder {
     /**
      * Populate elements to sign and/or encrypt with the message tokens.
      * 
-     * @param sep
+     * @param see
      *            The data describing the elements (XPath)
      * @param rpd
      *            The WSS4J data to initialize
