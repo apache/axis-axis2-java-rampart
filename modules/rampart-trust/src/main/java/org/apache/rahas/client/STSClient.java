@@ -392,6 +392,22 @@ public class STSClient {
     private Token processIssueResponse(int version, OMElement result, 
             String issuerAddress) throws TrustException {
         OMElement rstr = result;
+
+        /**
+         * TODO :-
+         * There are 3 mechanisms to establish a security context token.
+         * They are,
+         * 1. Security context token created by a security token service
+         * 2. Security context token created by one of the communicating parties and propagated with a
+         * message
+         * 3. Security context token created through negotiation/exchanges
+         *
+         * As per now we are only supporting case 1. Therefore we always expect a
+         * wst:RequestSecurityTokenResponseCollection in the incoming message.
+         *
+         * This only applies when we use specification http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512
+         */
+
         if (version == RahasConstants.VERSION_05_12) {
             //The WS-SX result will be an RSTRC
             rstr = result.getFirstElement();
