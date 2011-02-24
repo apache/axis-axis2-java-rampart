@@ -30,8 +30,10 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.RahasConstants;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
+import org.apache.rahas.TrustUtil;
 import org.apache.rahas.impl.util.SAML2KeyInfo;
 import org.apache.rahas.impl.util.SAML2Utils;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -188,8 +190,15 @@ public class RampartEngine {
 
                 // If this is a SAML2.0 assertion
                 if (wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION) instanceof Assertion) {
+                    final Assertion assertion = (Assertion) wser.get(
+                            WSSecurityEngineResult.TAG_SAML_ASSERTION);
 
-                    final Assertion assertion = (Assertion) wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
+                    // if the subject confirmation method is Bearer, do not try to get the KeyInfo
+                    if(TrustUtil.getSAML2SubjectConfirmationMethod(assertion).equals(
+                            RahasConstants.SAML20_SUBJECT_CONFIRMATION_BEARER)){
+                        break;
+                    }
+
                     String id = assertion.getID();
                     Subject subject = assertion.getSubject();
 
@@ -236,10 +245,15 @@ public class RampartEngine {
                 }
                 //if this is a SAML1.1 assertion
                 else {
-                    final SAMLAssertion assertion =
+                    final SAMLAssertion assertion = ((SAMLAssertion) wser.get(
+                            WSSecurityEngineResult.TAG_SAML_ASSERTION));
 
-                            ((SAMLAssertion) wser
-                                    .get(WSSecurityEngineResult.TAG_SAML_ASSERTION));
+                    // if the subject confirmation method is Bearer, do not try to get the KeyInfo
+                    if(RahasConstants.SAML11_SUBJECT_CONFIRMATION_BEARER.equals(
+                            TrustUtil.getSAML11SubjectConfirmationMethod(assertion))){
+                        break;
+                    }
+
                     String id = assertion.getId();
                     Date created = assertion.getNotBefore();
                     Date expires = assertion.getNotOnOrAfter();
