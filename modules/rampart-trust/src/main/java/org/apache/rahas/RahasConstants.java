@@ -132,4 +132,13 @@ public class RahasConstants {
     //Constants required for SAML2 assertion generation
     public final static String X509_CERT ="X509Certificate";
     public final static String USERNAME = "username";
+
+    //Constants required for SubjectConfirmation methods
+    public static final String SAML11_SUBJECT_CONFIRMATION_HOK = "urn:oasis:names:tc:SAML:1.0:cm:" +
+                                                          "holder-of-key";
+    public static final String SAML11_SUBJECT_CONFIRMATION_BEARER = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
+
+    public static final String SAML20_SUBJECT_CONFIRMATION_HOK = "urn:oasis:names:tc:SAML:2.0:cm:holder-of-key";
+
+    public static final String SAML20_SUBJECT_CONFIRMATION_BEARER = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
 }
