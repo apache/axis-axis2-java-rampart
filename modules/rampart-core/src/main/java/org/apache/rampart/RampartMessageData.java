@@ -19,22 +19,19 @@ package org.apache.rampart;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.util.PolicyUtil;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.util.PolicyUtil;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
-import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.PolicyComponent;
+import org.apache.neethi.PolicyEngine;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.SimpleTokenStore;
 import org.apache.rahas.TokenStorage;
-import org.apache.rahas.TrustException;
-import org.apache.rahas.TrustUtil;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.policy.RampartPolicyBuilder;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -59,7 +56,9 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.opensaml.SAMLAssertion;
 import org.w3c.dom.Document;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 public class RampartMessageData {
     
@@ -88,7 +87,12 @@ public class RampartMessageData {
      * Key to hold username which was used to authenticate
      */
     public final static String USERNAME = "username";
-    
+
+    /**
+     *
+     */
+    public final static String SIGNATURE_CERT_ALIAS = "signatureCertAlias";
+
     /**
      * Key to hold the WS-Trust version
      */
