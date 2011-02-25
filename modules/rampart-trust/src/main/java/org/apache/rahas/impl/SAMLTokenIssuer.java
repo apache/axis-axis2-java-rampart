@@ -16,13 +16,6 @@
 
 package org.apache.rahas.impl;
 
-import java.security.Principal;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Date;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
@@ -61,6 +54,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
+
+import java.security.Principal;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Issuer to issue SAMl tokens
@@ -251,6 +253,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
             Date expirationTime, RahasData data) throws TrustException {
         try {
             Principal principal = data.getPrincipal();
+            SAMLAssertion assertion;
             // In the case where the principal is a UT
             if (principal instanceof WSUsernameTokenPrincipal) {
             	SAMLNameIdentifier nameId = null;
@@ -264,10 +267,10 @@ public class SAMLTokenIssuer implements TokenIssuer {
               		nameId = new SAMLNameIdentifier(
             		principal.getName(), null, SAMLNameIdentifier.FORMAT_EMAIL);
             	}
-            	
-                return createAuthAssertion(doc, SAMLSubject.CONF_BEARER,
+            	assertion = createAuthAssertion(doc, SAMLSubject.CONF_BEARER,
                         nameId, null, config, crypto, creationTime,
-                        expirationTime);
+                        expirationTime, data);
+                return  assertion;
             } else {
                 throw new TrustException("samlUnsupportedPrincipal",
                         new String[] { principal.getClass().getName() });
@@ -338,7 +341,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
                 String subjectNameId = data.getPrincipal().getName();
                 
                 SAMLNameIdentifier nameId = new SAMLNameIdentifier(
-                        subjectNameId, null, SAMLNameIdentifier.FORMAT_X509);
+                        subjectNameId, null, SAMLNameIdentifier.FORMAT_EMAIL);
 
                 // Create the ds:KeyValue element with the ds:X509Data
                 X509Certificate clientCert = data.getClientCert();
@@ -363,7 +366,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
                 return this.createAuthAssertion(doc,
                         SAMLSubject.CONF_HOLDER_KEY, nameId, x509DataElem,
-                        config, crypto, creationTime, expirationTime);
+                        config, crypto, creationTime, expirationTime, data);
             } catch (Exception e) {
                 throw new TrustException("samlAssertionCreationError", e);
             }
@@ -508,7 +511,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
     private SAMLAssertion createAuthAssertion(Document doc, String confMethod,
             SAMLNameIdentifier subjectNameId, Element keyInfoContent,
             SAMLTokenIssuerConfig config, Crypto crypto, Date notBefore,
-            Date notAfter) throws TrustException {
+            Date notAfter, RahasData data) throws TrustException {
         try {
             String[] confirmationMethods = new String[] { confMethod };
 
@@ -531,10 +534,16 @@ public class SAMLTokenIssuer implements TokenIssuer {
                     subject,
                     SAMLAuthenticationStatement.AuthenticationMethod_Password,
                     notBefore, null, null, null);
-            SAMLStatement[] statements = { authStmt };
+
+            List<SAMLStatement> statements = new ArrayList<SAMLStatement>();
+            if (data.getClaimDialect() != null && data.getClaimElem() != null) {
+                SAMLStatement attrStatement = createSAMLAttributeStatement((SAMLSubject)subject.clone(), data, config);
+                statements.add(attrStatement);
+            }
+            statements.add(authStmt);
 
             SAMLAssertion assertion = new SAMLAssertion(config.issuerName,
-                    notBefore, notAfter, null, null, Arrays.asList(statements));
+                    notBefore, notAfter, null, null, statements);
 
             // sign the assertion
             X509Certificate[] issuerCerts = crypto
@@ -600,6 +609,55 @@ public class SAMLTokenIssuer implements TokenIssuer {
      */
     public void setConfigurationParamName(String configParamName) {
         this.configParamName = configParamName;
+    }
+
+    private SAMLAttributeStatement createSAMLAttributeStatement(SAMLSubject subject,
+                                                                RahasData rahasData,
+                                                                SAMLTokenIssuerConfig config)
+            throws TrustException {
+        try {
+            SAMLAttribute[] attrs = null;
+            if (config.getCallbackHandler() != null) {
+                SAMLAttributeCallback cb = new SAMLAttributeCallback(rahasData);
+                SAMLCallbackHandler handler = config.getCallbackHandler();
+                handler.handle(cb);
+                attrs = cb.getAttributes();
+            } else if (config.getCallbackHandlerName() != null
+                       && config.getCallbackHandlerName().trim().length() > 0) {
+                SAMLAttributeCallback cb = new SAMLAttributeCallback(rahasData);
+                SAMLCallbackHandler handler = null;
+                MessageContext msgContext = rahasData.getInMessageContext();
+                ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
+                Class cbClass = null;
+                try {
+                    cbClass = Loader.loadClass(classLoader, config.getCallbackHandlerName());
+                } catch (ClassNotFoundException e) {
+                    throw new TrustException("cannotLoadPWCBClass",
+                                             new String[]{config.getCallbackHandlerName()}, e);
+                }
+                try {
+                    handler = (SAMLCallbackHandler) cbClass.newInstance();
+                } catch (Exception e) {
+                    throw new TrustException("cannotCreatePWCBInstance",
+                                             new String[]{config.getCallbackHandlerName()}, e);
+                }
+                handler.handle(cb);
+                attrs = cb.getAttributes();
+            } else {
+                //TODO Remove this after discussing
+                SAMLAttribute attribute = new SAMLAttribute("Name",
+                                                            "https://rahas.apache.org/saml/attrns",
+                                                            null, -1,
+                                                            Arrays.asList(new String[]{"Colombo/Rahas"}));
+                attrs = new SAMLAttribute[]{attribute};
+            }
+
+            SAMLAttributeStatement attrStmt = new SAMLAttributeStatement(
+                    subject, Arrays.asList(attrs));
+            return attrStmt;
+        } catch (SAMLException e) {
+            throw new TrustException(e.getMessage(), e);
+        }
     }
 
 }
