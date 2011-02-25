@@ -24,11 +24,9 @@ import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.opensaml.Configuration;
-import org.opensaml.XML;
-import org.opensaml.saml1.core.Assertion;
-import org.opensaml.saml1.core.AuthenticationStatement;
-import org.opensaml.saml1.core.ConfirmationMethod;
-import org.opensaml.saml1.core.SubjectStatement;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.SubjectConfirmation;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallerFactory;
 import org.w3c.dom.Document;
@@ -44,9 +42,9 @@ import java.util.List;
  *
  * @author Ruchith Fernando (ruchith.fernando@gmail.com)
  */
-public class RahasSAMLTokenUTForBearerTest extends TestClient {
+public class RahasSAML2TokenUTForBearerTest extends TestClient {
 
-    public RahasSAMLTokenUTForBearerTest(String name) {
+    public RahasSAML2TokenUTForBearerTest(String name) {
         super(name);
     }
 
@@ -55,15 +53,15 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_02);
             TrustUtil.createRequestTypeElement(RahasConstants.VERSION_05_02, rstElem, RahasConstants.REQ_TYPE_ISSUE);
             OMElement tokenTypeElem = TrustUtil.createTokenTypeElement(RahasConstants.VERSION_05_02, rstElem);
-            tokenTypeElem.setText(RahasConstants.TOK_TYPE_SAML_10);
-            
+            tokenTypeElem.setText(RahasConstants.TOK_TYPE_SAML_20);
+
             TrustUtil.createAppliesToElement(rstElem, "http://localhost:5555/axis2/services/SecureService", this.getWSANamespace());
             TrustUtil.createKeyTypeElement(RahasConstants.VERSION_05_02,
                     rstElem, RahasConstants.KEY_TYPE_BEARER);
             TrustUtil.createKeySizeElement(RahasConstants.VERSION_05_02, rstElem, 256);
-            
+
             return rstElem;
-            
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -82,7 +80,7 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
         InflowConfiguration ifc = new InflowConfiguration();
 
         ifc.setActionItems("Timestamp");
-        
+
         return ifc;
     }
 
@@ -100,22 +98,20 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
                                                                      REQUESTED_SECURITY_TOKEN));
         assertNotNull("RequestedSecurityToken missing", rst);
 
-        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
+        OMElement elem = rst.getFirstChildWithName(new QName(
+                "urn:oasis:names:tc:SAML:2.0:assertion", "Assertion"));
         assertNotNull("Missing SAML Assertion", elem);
 
         Assertion assertion = getAssertionObjectFromOMElement(elem);
-        List<AuthenticationStatement> authStmts = assertion.getAuthenticationStatements();
-        assertNotNull("At least one Authentication Statement should be present in the assertion",
-                   authStmts.get(0));
+        Subject subject = assertion.getSubject();
+        assertNotNull("SAML Subject of the assertion cannot be null", subject);
 
-        SubjectStatement authStmt = authStmts.get(0);
-        List<ConfirmationMethod> subConfirmationMethods = authStmt.getSubject().
-                getSubjectConfirmation().getConfirmationMethods();
-        assertNotNull("At least one Subject Confirmation method should be present in the SAML Subject",
-                   subConfirmationMethods.get(0));
-        assertEquals("Subject Confirmation should be BEARER : urn:oasis:names:tc:SAML:1.0:cm:bearer",
-                         RahasConstants.SAML11_SUBJECT_CONFIRMATION_BEARER,
-                         subConfirmationMethods.get(0).getConfirmationMethod());
+        List<SubjectConfirmation> subjectConfirmations = subject.getSubjectConfirmations();
+        assertNotNull("At least one Subject Confirmation should be present in the SAML Subject",
+                      subjectConfirmations.get(0));
+        assertEquals("Subject Confirmation should be BEARER : urn:oasis:names:tc:SAML:2.0:cm:bearer",
+                         RahasConstants.SAML20_SUBJECT_CONFIRMATION_BEARER,
+                         subjectConfirmations.get(0).getMethod());
     }
 
     /* (non-Javadoc)
@@ -138,13 +134,15 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
     public OMElement getRSTTemplate() throws TrustException {
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement elem = factory.createOMElement(SP11Constants.REQUEST_SECURITY_TOKEN_TEMPLATE);
-        
-        TrustUtil.createTokenTypeElement(RahasConstants.VERSION_05_02, elem).setText(RahasConstants.TOK_TYPE_SAML_10);
-        TrustUtil.createKeyTypeElement(RahasConstants.VERSION_05_02, elem, RahasConstants.KEY_TYPE_BEARER);
-        
+
+        TrustUtil.createTokenTypeElement(
+                RahasConstants.VERSION_05_02, elem).setText(RahasConstants.TOK_TYPE_SAML_20);
+        TrustUtil.createKeyTypeElement(
+                RahasConstants.VERSION_05_02, elem, RahasConstants.KEY_TYPE_BEARER);
+
         return elem;
     }
-    
+
     public int getTrstVersion() {
         return RahasConstants.VERSION_05_02;
     }
@@ -166,7 +164,7 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
                     .getUnmarshallerFactory();
             Unmarshaller unmarshaller = unmarshallerFactory
                     .getUnmarshaller(element);
-            assertion = (org.opensaml.saml1.core.Assertion) unmarshaller
+            assertion = (org.opensaml.saml2.core.Assertion) unmarshaller
                     .unmarshall(element);
         } catch (Exception e){
             e.printStackTrace();
