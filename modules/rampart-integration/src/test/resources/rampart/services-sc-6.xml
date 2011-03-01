@@ -26,10 +26,10 @@
 											<sp:TransportBinding xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
 											  <wsp:Policy>
 												<sp:TransportToken>
-												  <wsp:Policy>
-													<sp:HttpsToken RequireClientCertificate="false"/>
-												  </wsp:Policy>
-												</sp:TransportToken>
+                                                    <wsp:Policy>
+                                                        <sp:HttpsToken/>
+                                                    </wsp:Policy>
+                                                </sp:TransportToken>
 												<sp:AlgorithmSuite>
 												  <wsp:Policy>
 													<sp:Basic128/>
