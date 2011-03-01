@@ -26,11 +26,11 @@
 											<sp:TransportBinding xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
 											  <wsp:Policy>
 												<sp:TransportToken>
-												  <wsp:Policy>
-													<sp:HttpsToken RequireClientCertificate="false"/>
-												  </wsp:Policy>
-												</sp:TransportToken>
-												<sp:AlgorithmSuite>
+                                                    <wsp:Policy>
+                                                        <sp:HttpsToken/>
+                                                    </wsp:Policy>
+                                                </sp:TransportToken>
+                                                  <sp:AlgorithmSuite>
 												  <wsp:Policy>
 													<sp:Basic128/>
 												  </wsp:Policy>
@@ -87,11 +87,11 @@
 			<sp:EncryptedParts xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
 				<sp:Body/>
 			</sp:EncryptedParts>
-			<ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy"> 
+			<ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
 				<ramp:user>bob</ramp:user>
 				<ramp:encryptionUser>alice</ramp:encryptionUser>
 				<ramp:passwordCallbackClass>org.apache.rampart.PWCallback</ramp:passwordCallbackClass>
-				
+
 				<ramp:signatureCrypto>
 					<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
 						<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
@@ -106,12 +106,12 @@
 						<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">password</ramp:property>
 					</ramp:crypto>
 				</ramp:encryptionCypto>
-				
+
 			</ramp:RampartConfig>
 		</wsp:All>
 	</wsp:ExactlyOne>
 	</wsp:Policy>
-	
+
     <parameter name="sct-issuer-config">
 		<sct-issuer-config>
 			<cryptoProperties>
@@ -141,7 +141,7 @@
             <proofKeyType>BinarySecret</proofKeyType>
         </sct-issuer-config>
     </parameter>
-	
+
 	<parameter name="token-canceler-config">
 		<token-canceler-config>
 			<!--<proofToken>EncryptedKey</proofToken>-->
@@ -149,6 +149,6 @@
 			<!--<addRequestedAttachedRef />-->
 		</token-canceler-config>
     </parameter>
-	
-	
+
+
 </service>
