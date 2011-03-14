@@ -58,63 +58,32 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-	    <plugin>
-        	<groupId>org.apache.axis2</groupId>
-        	<artifactId>axis2-mar-maven-plugin</artifactId>
-        	<version>1.2</version>
-        	<extensions>true</extensions>
-        	<configuration>
-       	  		<includeDependencies>false</includeDependencies>
-			<moduleXmlFile>module.xml</moduleXmlFile>
-        	</configuration>
-      	     </plugin> 
-           </plugins>
+            <plugin>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-mar-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <includeDependencies>false</includeDependencies>
+                    <moduleXmlFile>module.xml</moduleXmlFile>
+                </configuration>
+            </plugin> 
+        </plugins>
     </build>
     
     <dependencies>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
             <version>${pom.version}</version>
         </dependency>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-trust</artifactId>
             <version>${pom.version}</version>
         </dependency>
     </dependencies>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>apache-m2</id>
-            <name>Apache M2 Repository</name>
-            <url>http://people.apache.org/repo/m2-ibiblio-rsync-repository</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>apache-snapshots</id>
-            <name>Apache Snapshots Repository</name>
-            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-    </pluginRepositories>
-	<distributionManagement>
+    <distributionManagement>
         <snapshotRepository>
             <id>apache.snapshots.https</id>
             <name>${distMgmtSnapshotsName}</name>
