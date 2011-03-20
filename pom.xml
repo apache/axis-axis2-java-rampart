@@ -411,7 +411,7 @@
         <rampart.mar.version>${pom.version}</rampart.mar.version>
         <rahas.mar.version>${pom.version}</rahas.mar.version>
 
-        <axis2.version>1.6.0-SNAPSHOT</axis2.version>
+        <axis2.version>1.6.1-SNAPSHOT</axis2.version>
         <axiom.version>1.2.11</axiom.version>
 
         <wss4j.version>1.5.11</wss4j.version>
