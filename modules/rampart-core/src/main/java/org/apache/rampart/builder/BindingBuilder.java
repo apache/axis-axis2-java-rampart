@@ -30,6 +30,7 @@ import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SupportingToken;
@@ -331,8 +332,10 @@ public abstract class BindingBuilder {
         }
         
         sig.setUserInfo(user, password);
-        sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
-        sig.setSigCanonicalization(rpd.getAlgorithmSuite().getInclusiveC14n());
+        AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
+		sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
+        sig.setSigCanonicalization(algorithmSuite.getInclusiveC14n());
+        sig.setDigestAlgo(algorithmSuite.getDigest());
         
         try {
             sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
@@ -542,7 +545,8 @@ public abstract class BindingBuilder {
         
         RampartPolicyData rpd = rmd.getPolicyData();
         
-        if(policyToken.isDerivedKeys()) {
+        AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
+		if(policyToken.isDerivedKeys()) {
             try {
                 WSSecDKSign dkSign = new WSSecDKSign();  
                 
@@ -588,8 +592,9 @@ public abstract class BindingBuilder {
                 }
 
                 //Set the algo info
-                dkSign.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
-                dkSign.setDerivedKeyLength(rpd.getAlgorithmSuite().getSignatureDerivedKeyLength()/8);
+                dkSign.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
+                dkSign.setDerivedKeyLength(algorithmSuite.getSignatureDerivedKeyLength()/8);
+//                dkSign.setDigestAlgorithm(algorithmSuite.getDigest()); //uncomment when wss4j version is updated
                 if(tok instanceof EncryptedKeyToken) {
                     //Set the value type of the reference
                     dkSign.setCustomValueType(WSConstants.SOAPMESSAGE_NS11 + "#"
@@ -702,8 +707,9 @@ public abstract class BindingBuilder {
                 
                 sig.setCustomTokenId(sigTokId);
                 sig.setSecretKey(tok.getSecret());
-                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
-                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
+                sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
+                sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
+                sig.setDigestAlgo(algorithmSuite.getDigest());
                 sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
                         .getRampartConfig(), rmd.getCustomClassLoader()),
                         rmd.getSecHeader());
