@@ -407,9 +407,9 @@
 
     <properties>
 
-        <rampart.version>${pom.version}</rampart.version>
-        <rampart.mar.version>${pom.version}</rampart.mar.version>
-        <rahas.mar.version>${pom.version}</rahas.mar.version>
+        <rampart.version>${project.version}</rampart.version>
+        <rampart.mar.version>${project.version}</rampart.mar.version>
+        <rahas.mar.version>${project.version}</rahas.mar.version>
 
         <axis2.version>1.6.1-SNAPSHOT</axis2.version>
         <axiom.version>1.2.11</axiom.version>
@@ -425,7 +425,7 @@
         <log4j.version>1.2.15</log4j.version>
 
         <!-- distribution properties -->
-        <dist.dir>rampart-${pom.version}</dist.dir>
+        <dist.dir>rampart-${project.version}</dist.dir>
         <failIfNoTests>false</failIfNoTests>
 
     </properties>
