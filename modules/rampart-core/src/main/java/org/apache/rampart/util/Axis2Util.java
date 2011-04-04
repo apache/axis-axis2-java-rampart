@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.soap.SOAP11Constants;
@@ -29,6 +30,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.SOAPModelBuilder;
 import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.axiom.soap.impl.dom.SOAPHeaderBlockImpl;
 import org.apache.axiom.soap.impl.dom.factory.DOMSOAPFactory;
@@ -41,7 +43,6 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 
 import java.io.ByteArrayInputStream;
@@ -230,8 +231,8 @@ public class Axis2Util {
                 }
                 XMLStreamReader reader = ((OMElement) doc.getDocumentElement())
                         .getXMLStreamReader();
-                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
-                        reader, null);
+                SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createStAXSOAPModelBuilder(
+                        reader);
                 SOAPEnvelope envelope = stAXSOAPModelBuilder.getSOAPEnvelope();
                 
                 //Set the processed flag of the processed headers
@@ -258,7 +259,7 @@ public class Axis2Util {
                 XMLUtils.outputDOM(doc.getDocumentElement(), os, true);
                 ByteArrayInputStream bais =  new ByteArrayInputStream(os.toByteArray());
 
-                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(XMLInputFactory.newInstance().createXMLStreamReader(bais), null);
+                SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createSOAPModelBuilder(bais, null);
                 return stAXSOAPModelBuilder.getSOAPEnvelope();
             } catch (Exception e) {
                 throw new WSSecurityException(e.getMessage());
