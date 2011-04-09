@@ -67,6 +67,10 @@
             <artifactId>rampart-trust</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-dom</artifactId>
+        </dependency>
     </dependencies>
 
     <reporting>
