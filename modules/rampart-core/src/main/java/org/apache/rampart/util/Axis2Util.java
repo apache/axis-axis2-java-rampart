@@ -185,6 +185,17 @@ public class Axis2Util {
 	public static SOAPEnvelope getSOAPEnvelopeFromDOMDocument(Document doc, boolean useDoom)
             throws WSSecurityException {
 
+	    Element documentElement = doc.getDocumentElement();
+	    if (documentElement instanceof SOAPEnvelope) {
+	        SOAPEnvelope env = (SOAPEnvelope)documentElement;
+	        // If the DOM tree already implements the Axiom API and is not DOOM, then just return
+	        // the SOAPEnvelope directly, i.e. we assume that any Axiom+DOM implementation other
+	        // than DOOM implements enough of the Axiom API to support the Axis2 runtime.
+	        if (!(env.getOMFactory() instanceof DOMSOAPFactory)) {
+	            return env;
+	        }
+	    }
+	    
         if(useDoom) {
             try {
                 //Get processed headers
