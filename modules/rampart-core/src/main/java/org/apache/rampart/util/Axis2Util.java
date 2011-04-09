@@ -90,7 +90,18 @@ public class Axis2Util {
 			throws WSSecurityException {
 		try {
             if(env instanceof Element) {
-                return ((Element)env).getOwnerDocument();
+                Element element = (Element)env;
+                Document document = element.getOwnerDocument();
+                // For outgoing messages, Axis2 only creates the SOAPEnvelope, but no document. If
+                // the Axiom implementation also supports DOM, then the envelope (seen as a DOM
+                // element) will have an owner document, but the document and the envelope have no
+                // parent-child relationship. On the other hand, the input expected by WSS4J is
+                // a document with the envelope as document element. Therefore we need to set the
+                // envelope as document element on the owner document.
+                if (element.getParentNode() != document) {
+                    document.appendChild(element);
+                }
+                return document;
             }
             
             if (useDoom) {
