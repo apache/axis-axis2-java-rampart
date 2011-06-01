@@ -96,7 +96,7 @@ Other mirrors: <select name="Preferred">
 [if-any backup]
   [for backup]<option value="[backup]">[backup] (backup)</option>[end]
 [end]
-</select><input type="submit" value="Change"></form><p>You may also consult the <a class="externalLink" href="http://www.apache.org/mirrors/">complete list of mirrors</a>
+</select><input type="submit" value="Change"/></form><p>You may also consult the <a class="externalLink" href="http://www.apache.org/mirrors/">complete list of mirrors</a>
 .</p>
 <p><strong>Note:</strong> when downloading from a mirror please
 check the <a href=
