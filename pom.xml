@@ -410,7 +410,7 @@
         <rampart.mar.version>${project.version}</rampart.mar.version>
         <rahas.mar.version>${project.version}</rahas.mar.version>
 
-        <axis2.version>1.5.5-SNAPSHOT</axis2.version>
+        <axis2.version>1.5.6-SNAPSHOT</axis2.version>
         <axiom.version>1.2.11</axiom.version>
 
         <wss4j.version>1.5.10</wss4j.version>
