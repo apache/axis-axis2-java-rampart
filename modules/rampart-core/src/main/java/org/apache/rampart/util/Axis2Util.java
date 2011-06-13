@@ -208,7 +208,7 @@ public class Axis2Util {
                     		Iterator children = element.getChildElements();
                     		while (children.hasNext()) {
                     			OMNode child = (OMNode)children.next();
-                    			child.detach();
+                    			children.remove();
                     			header.addChild(child);
                     		}
                     		
