@@ -17,13 +17,15 @@
 package org.apache.rampart.policy.model;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 
 import javax.xml.namespace.QName;
 
+import java.io.FileInputStream;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -35,7 +37,7 @@ public class RampartPolicyTest extends TestCase {
     
     public void testLoadPolicy() throws Exception {
         String xmlPath = "test-resources/policy/rampart-policy-1.xml";
-        StAXOMBuilder builder = new StAXOMBuilder(xmlPath);
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(xmlPath));
         
         OMElement elem = builder.getDocumentElement();
         
