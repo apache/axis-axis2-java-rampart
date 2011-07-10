@@ -31,26 +31,20 @@ public class TokenRequestDispatcherConfigTest extends TestCase {
     /**
      * Testing a valid config file
      */
-    public void testWithConfigFile() {
-        try {
-            TokenRequestDispatcherConfig config = TokenRequestDispatcherConfig
-                    .load("test-resources/trust/dispatcher.config.xml");
+    public void testWithConfigFile() throws Exception {
+        TokenRequestDispatcherConfig config = TokenRequestDispatcherConfig
+                .load("test-resources/trust/dispatcher.config.xml");
 
-            assertEquals("Incorrect default issuer class name",
-                    "org.apache.rahas.TempIssuer", config
-                            .getDefaultIssuerName());
+        assertEquals("Incorrect default issuer class name",
+                "org.apache.rahas.TempIssuer", config
+                        .getDefaultIssuerName());
 
-            TokenIssuer issuer = config
-                    .getIssuer("http://example.org/mySpecialToken1");
+        TokenIssuer issuer = config
+                .getIssuer("http://example.org/mySpecialToken1");
 
-            assertEquals("Incorrect issuer for token type : "
-                    + "http://example.org/mySpecialToken1", TempIssuer.class
-                    .getName(), issuer.getClass().getName());
-
-        } catch (TrustException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+        assertEquals("Incorrect issuer for token type : "
+                + "http://example.org/mySpecialToken1", TempIssuer.class
+                .getName(), issuer.getClass().getName());
     }
 
     /**

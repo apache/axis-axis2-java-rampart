@@ -31,59 +31,43 @@ import junit.framework.TestCase;
 public class SecpolicyModelTest extends TestCase {
     
     
-    public void testSymmBinding() {
-        try {
-            Policy p = this.getPolicy("test-resources/policy-symm-binding.xml");
-            List assertions = (List)p.getAlternatives().next();
-            
-            boolean symmBindingFound = false;
-            
-            for (Iterator iter = assertions.iterator(); iter.hasNext();) {
-                Assertion assertion = (Assertion) iter.next();
-                if(assertion instanceof SymmetricBinding) {
-                    symmBindingFound = true;
-                    SymmetricBinding binding = (SymmetricBinding)assertion;
-                    assertEquals("IncludeTimestamp assertion not processed", true, binding.isIncludeTimestamp());
-                    
-                    ProtectionToken protectionToken = binding.getProtectionToken();
-                    assertNotNull("ProtectionToken missing", protectionToken);
-                    
-                    Token token = protectionToken.getProtectionToken();
-                    if(token instanceof X509Token) {
-                        assertEquals("incorrect X509 token versin and type",
-                                SPConstants.WSS_X509_V3_TOKEN10,
-                                ((X509Token) token).getTokenVersionAndType());
-                    } else {
-                        fail("ProtectionToken must contain a X509Token assertion");
-                    }
-                    
+    public void testSymmBinding() throws Exception {
+        Policy p = this.getPolicy("test-resources/policy-symm-binding.xml");
+        List assertions = (List)p.getAlternatives().next();
+        
+        boolean symmBindingFound = false;
+        
+        for (Iterator iter = assertions.iterator(); iter.hasNext();) {
+            Assertion assertion = (Assertion) iter.next();
+            if(assertion instanceof SymmetricBinding) {
+                symmBindingFound = true;
+                SymmetricBinding binding = (SymmetricBinding)assertion;
+                assertEquals("IncludeTimestamp assertion not processed", true, binding.isIncludeTimestamp());
+                
+                ProtectionToken protectionToken = binding.getProtectionToken();
+                assertNotNull("ProtectionToken missing", protectionToken);
+                
+                Token token = protectionToken.getProtectionToken();
+                if(token instanceof X509Token) {
+                    assertEquals("incorrect X509 token versin and type",
+                            SPConstants.WSS_X509_V3_TOKEN10,
+                            ((X509Token) token).getTokenVersionAndType());
+                } else {
+                    fail("ProtectionToken must contain a X509Token assertion");
                 }
+                
             }
-            //The Asymm binding mean is not built in the policy processing :-(
-            assertTrue("SymmetricBinding not porcessed",  symmBindingFound);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
+        //The Asymm binding mean is not built in the policy processing :-(
+        assertTrue("SymmetricBinding not porcessed",  symmBindingFound);
     }
     
-    public void testAsymmBinding() {
-        try {
-            this.getPolicy("test-resources/policy-asymm-binding.xml");
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+    public void testAsymmBinding() throws Exception {
+        this.getPolicy("test-resources/policy-asymm-binding.xml");
     }
     
-    public void testTransportBinding() {
-        try {
-            this.getPolicy("test-resources/policy-transport-binding.xml");
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+    public void testTransportBinding() throws Exception {
+        this.getPolicy("test-resources/policy-transport-binding.xml");
     }
     
     private Policy getPolicy(String filePath) throws Exception {
