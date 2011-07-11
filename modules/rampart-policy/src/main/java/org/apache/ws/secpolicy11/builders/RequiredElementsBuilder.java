@@ -29,7 +29,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.model.RequiredElements;
 
-public class RequiredElementsBuilder implements AssertionBuilder {
+public class RequiredElementsBuilder implements AssertionBuilder<OMElement> {
 
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {

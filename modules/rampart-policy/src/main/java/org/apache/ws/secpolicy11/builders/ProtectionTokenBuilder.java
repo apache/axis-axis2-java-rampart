@@ -31,7 +31,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.ProtectionToken;
 import org.apache.ws.secpolicy.model.Token;
 
-public class ProtectionTokenBuilder implements AssertionBuilder {
+public class ProtectionTokenBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         ProtectionToken protectionToken = new ProtectionToken(SPConstants.SP_V11);

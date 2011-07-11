@@ -26,7 +26,7 @@ import org.apache.ws.secpolicy.model.SecurityContextToken;
 
 import javax.xml.namespace.QName;
 
-public class SecurityContextTokenBuilder implements AssertionBuilder {
+public class SecurityContextTokenBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {

@@ -45,3 +45,4 @@ org.apache.ws.secpolicy12.builders.SymmetricBindingBuilder
 org.apache.ws.secpolicy12.builders.IssuedTokenBuilder
 org.apache.ws.secpolicy12.builders.RequiredElementsBuilder
 org.apache.ws.secpolicy12.builders.ContentEncryptedElementsBuilder
+org.apache.ws.secpolicy12.builders.HttpsTokenBuilder

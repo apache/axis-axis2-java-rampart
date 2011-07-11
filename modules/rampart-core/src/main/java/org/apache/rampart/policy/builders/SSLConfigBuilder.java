@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class SSLConfigBuilder implements AssertionBuilder {
+public class SSLConfigBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {

@@ -32,7 +32,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.X509Token;
 
-public class X509TokenBuilder implements AssertionBuilder {
+public class X509TokenBuilder implements AssertionBuilder<OMElement> {
 	
     public final static String USER_CERT_ALIAS_LN = "userCertAlias";
 

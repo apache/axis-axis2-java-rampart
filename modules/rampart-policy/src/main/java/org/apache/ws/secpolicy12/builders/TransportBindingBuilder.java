@@ -34,7 +34,7 @@ import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.TransportBinding;
 import org.apache.ws.secpolicy.model.TransportToken;
 
-public class TransportBindingBuilder implements AssertionBuilder {
+public class TransportBindingBuilder implements AssertionBuilder<OMElement> {
  
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         TransportBinding transportBinding = new TransportBinding(SPConstants.SP_V12);

@@ -118,7 +118,9 @@ public class OptimizePartsConfig implements Assertion{
 	public boolean isOptional() {
 		throw new UnsupportedOperationException("Not relevant");
 	}
-	
+	public boolean isIgnorable() {
+	        throw new UnsupportedOperationException("Not relevant");
+	}
 	public boolean equal(PolicyComponent arg0) {
 		throw new UnsupportedOperationException("Not relevant");
 	}

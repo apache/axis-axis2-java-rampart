@@ -30,7 +30,7 @@ import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 
-public class SignedPartsBuilder implements AssertionBuilder {
+public class SignedPartsBuilder implements AssertionBuilder<OMElement> {
         
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         SignedEncryptedParts signedEncryptedParts = new SignedEncryptedParts(true, SPConstants.SP_V12);

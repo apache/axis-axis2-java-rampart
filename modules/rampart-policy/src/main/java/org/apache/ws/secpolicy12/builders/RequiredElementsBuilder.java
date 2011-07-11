@@ -30,7 +30,7 @@ import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.ContentEncryptedElements;
 import org.apache.ws.secpolicy.model.RequiredElements;
 
-public class RequiredElementsBuilder implements AssertionBuilder {
+public class RequiredElementsBuilder implements AssertionBuilder<OMElement> {
 
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {

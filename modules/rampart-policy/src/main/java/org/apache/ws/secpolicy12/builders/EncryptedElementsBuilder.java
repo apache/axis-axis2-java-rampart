@@ -30,7 +30,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.SignedEncryptedElements;
 
-public class EncryptedElementsBuilder implements AssertionBuilder {
+public class EncryptedElementsBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         SignedEncryptedElements signedEncryptedElements = new SignedEncryptedElements(false, SPConstants.SP_V12);
