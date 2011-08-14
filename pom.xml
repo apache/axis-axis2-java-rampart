@@ -354,7 +354,7 @@
                 <module>modules/documentation</module>
                 <module>modules/distribution</module>
             </modules>
-			<build>
+            <build>
                 <plugins>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -399,7 +399,7 @@
         <axiom.version>1.2.12</axiom.version>
 
         <wss4j.version>1.5.10</wss4j.version>
-		<xmlsec.version>1.4.2</xmlsec.version>
+        <xmlsec.version>1.4.2</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
 
         <bcprov.jdk14.version>140</bcprov.jdk14.version>
@@ -415,7 +415,7 @@
     </properties>
 
     <distributionManagement>
-		<snapshotRepository>
+        <snapshotRepository>
             <id>apache.snapshots.https</id>
             <name>${distMgmtSnapshotsName}</name>
             <url>${distMgmtSnapshotsUrl}</url>
