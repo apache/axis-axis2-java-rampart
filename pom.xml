@@ -229,11 +229,6 @@
             <version>2.7.1</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.santuario</groupId>
-            <artifactId>xmlsec</artifactId>
-            <version>${xmlsec.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml1</artifactId>
             <version>1.1</version>
@@ -415,7 +410,6 @@
         <axiom.version>1.2.12</axiom.version>
 
         <wss4j.version>1.5.11</wss4j.version>
-        <xmlsec.version>1.4.2</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
 
         <bcprov.jdk14.version>140</bcprov.jdk14.version>
