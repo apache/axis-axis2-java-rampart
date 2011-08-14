@@ -428,14 +428,4 @@
         <failIfNoTests>false</failIfNoTests>
 
     </properties>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>apache.snapshots.https</id>
-            <name>${distMgmtSnapshotsName}</name>
-            <url>${distMgmtSnapshotsUrl}</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement> 
-
 </project>
