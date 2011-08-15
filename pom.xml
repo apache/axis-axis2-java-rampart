@@ -383,11 +383,6 @@
     </modules>
 
     <properties>
-
-        <rampart.version>${project.version}</rampart.version>
-        <rampart.mar.version>${project.version}</rampart.mar.version>
-        <rahas.mar.version>${project.version}</rahas.mar.version>
-
         <axis2.version>1.7.0-SNAPSHOT</axis2.version>
         <axiom.version>1.2.13-SNAPSHOT</axiom.version>
 

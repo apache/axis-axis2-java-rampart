@@ -8,7 +8,7 @@
     <fileSets>
         <fileSet>
             <directory>../..</directory>
-            <outputDirectory>rampart-src-${rampart.version}</outputDirectory>
+            <outputDirectory>rampart-src-${project.version}</outputDirectory>
             <includes>
                 <include>**/modules/**/*</include>
                 <include>**/pom.xml</include>
