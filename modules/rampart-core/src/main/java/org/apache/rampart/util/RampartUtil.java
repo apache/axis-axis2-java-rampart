@@ -808,6 +808,25 @@ public class RampartUtil {
         return id;
     }
     
+    /**
+     * Change the owner document of the given node. The method first attempts to move the node using
+     * {@link Document#adoptNode(Node)}. If that fails, it will import the node into the target
+     * document using {@link Document#importNode(Node, boolean)}.
+     * 
+     * @param targetDocument
+     *            the target document
+     * @param node
+     *            the node to adopt or import
+     * @return the adopted or imported node
+     */
+    public static Node adoptNode(Document targetDocument, Node node) {
+        Node result = targetDocument.adoptNode(node);
+        if (result == null) {
+            result = targetDocument.importNode(node, true);
+        }
+        return result;
+    }
+    
     public static Element appendChildToSecHeader(RampartMessageData rmd,
             OMElement elem) {
         return appendChildToSecHeader(rmd, (Element)elem);
@@ -816,8 +835,7 @@ public class RampartUtil {
     public static Element appendChildToSecHeader(RampartMessageData rmd,
             Element elem) {
         Element secHeaderElem = rmd.getSecHeader().getSecurityHeader();
-        Node node = secHeaderElem.getOwnerDocument().importNode(
-                        elem, true);
+        Node node = adoptNode(secHeaderElem.getOwnerDocument(), elem);
         return (Element)secHeaderElem.appendChild(node);
     }
 
