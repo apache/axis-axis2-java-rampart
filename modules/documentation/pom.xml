@@ -28,7 +28,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>rampart-documentaion</artifactId>
+    <artifactId>rampart-documentation</artifactId>
     <packaging>pom</packaging>
     <name>Rampart - Documentation</name>
     <build>
