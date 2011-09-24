@@ -32,7 +32,7 @@
     <artifactId>rampart-project</artifactId>
     <packaging>pom</packaging>
     <description> WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache Axis2 </description>
-    <version>1.5.3-SNAPSHOT</version>
+    <version>1.5.2-SNAPSHOT</version>
     <name>Apache Rampart</name>
     <url>http://ws.apache.org/rampart</url>
 
