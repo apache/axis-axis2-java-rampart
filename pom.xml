@@ -358,6 +358,16 @@
                 </plugins>
             </build>
         </profile>
+        
+        <profile>
+            <!-- Profile that includes all modules. This is handy when using maven-release-plugin
+                 for anything else than doing a release. -->
+            <id>everything</id>
+            <modules>
+                <module>modules/documentation</module>
+                <module>modules/distribution</module>
+            </modules>
+        </profile>
     </profiles>
 
     <modules>
