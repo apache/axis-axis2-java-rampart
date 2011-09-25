@@ -18,7 +18,9 @@
   ~  under the License.
   -->
 
-<document>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
 		
@@ -32,28 +34,36 @@ according to specifications in the WS-Security stack. Rampart implements the
 following specifications:</p>
 		</section>
 		
-		<h2>Features of Rampart Latest Version</h2>
+		<section name="Features of Rampart Latest Version">
 		
 		    <ul>
-                <li>WS - Security 1.0</li>
-                <li>WS - Security 1.1</li>
-                <li>WS - Secure Conversation - February 2005</li>
-                <li>WS - Security Policy - 1.1 - July 2005</li>
-                <li>WS - Security Policy - 1.2 </li>
-                <li>WS - Trust - February 2005</li>
-                <li>WS - Trust - WS-SX spec - EXPERIMENTAL</li>
+                <li><p>WS - Security 1.0</p></li>
+                <li><p>WS - Security 1.1</p></li>
+                <li><p>WS - Secure Conversation - February 2005</p></li>
+                <li><p>WS - Security Policy - 1.1 - July 2005</p></li>
+                <li><p>WS - Security Policy - 1.2</p></li>
+                <li><p>WS - Trust - February 2005</p></li>
+                <li><p>WS - Trust - WS-SX spec - EXPERIMENTAL</p></li>
             </ul>
-         
-        <h2>Apache Rampart News</h2>
+        </section>
+        
+        <section name="Apache Rampart News">
+        <h3>Sep 24, 2011 : Apache Rampart 1.5.2 and 1.6.1 released</h3>
+        <p>Both releases update WSS4J to version 1.5.12 and ensure compatibility with the latest
+        Axis2 releases from the corresponding branches. Rampart 1.5.2 is supported with Axis2 1.5.6
+        and Rampart 1.6.1 is supported with Axis2 1.6.1. Please note that Rampart 1.6.1 will not
+        work with Axis2 1.6.0 and that users of Axis2 1.6.1 are required to update to Rampart 1.6.1,
+        i.e. Rampart 1.6.0 doesn't work with Axis2 1.6.1.</p>
+        
 		<h3>Jun 06, 2011 : Apache Rampart 1.6.0 released</h3>
-        Apache Rampart 1.6.0 was released with lots of bug fixes.<br></br>
+        <p>Apache Rampart 1.6.0 was released with lots of bug fixes.</p>
     
 		<h3>Jan 10, 2011 : Apache Rampart 1.5.1 released</h3>
-        Apache Rampart 1.5.1 was released with lots of bug fixes.<br></br>
+        <p>Apache Rampart 1.5.1 was released with lots of bug fixes.</p>
 
 		<h3>Feb 01, 2010 : Apache Rampart 1.5 released</h3>
-        Apache Rampart 1.5 was released with lots of bug fixes and new features.<br></br>
-        New features include
+        <p>Apache Rampart 1.5 was released with lots of bug fixes and new features.</p>
+        <p>New features include</p>
             <ul>
                 <li>SAML 2.0 support - Issuance </li>
                 <li>Key store caching</li>
@@ -61,8 +71,8 @@ following specifications:</p>
                 <li>Tests for negative scenarios</li>
             </ul>
         <h3>Jun 12, 2008 : Apache Rampart 1.4 released</h3>  
-        <p>Apache Rampart 1.4 was released with lots of bug fixes and new features.<br></br>
-        New features include</p>
+        <p>Apache Rampart 1.4 was released with lots of bug fixes and new features.</p>
+        <p>New features include</p>
             <ul>
                 <li>WS Security 1.1</li>
                 <ul>
@@ -82,7 +92,8 @@ following specifications:</p>
                     <li>Ability turn off mili second precision</li>
                 </ul>
                 <li>Ability to secure messages faults </li>
-                <li>Increased interoparability with WCF 3.5 </li>
+                <li>Increased interoperability with WCF 3.5 </li>
             </ul>   
+        </section>
 	</body>
 </document>
