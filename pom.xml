@@ -33,7 +33,7 @@
     <artifactId>rampart-project</artifactId>
     <packaging>pom</packaging>
     <description> WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache Axis2 </description>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.1</version>
     <name>Apache Rampart</name>
     <url>http://axis.apache.org/axis2/java/rampart</url>
 
@@ -110,12 +110,12 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/branches/1_6
+            scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/tags/v1.6.1
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/branches/1_6
+            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/tags/v1.6.1
         </developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/branches/1_6</url>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/tags/v1.6.1</url>
     </scm>
 
 
