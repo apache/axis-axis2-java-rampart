@@ -281,6 +281,20 @@ public class RampartMessageData {
                 if (rampartConfigCallbackHandler != null) {
                     rampartConfigCallbackHandler.update(policyData.getRampartConfig());
                 }
+
+                // Update TTL and max skew time
+                RampartConfig policyDataRampartConfig = policyData.getRampartConfig();
+                if (policyDataRampartConfig != null) {
+                    String timeToLiveString = policyDataRampartConfig.getTimestampTTL();
+                    if (timeToLiveString != null && !timeToLiveString.equals("")) {
+                        this.setTimeToLive(Integer.parseInt(timeToLiveString));
+                    }
+
+                    String maxSkewString = policyDataRampartConfig.getTimestampMaxSkew();
+                    if (maxSkewString != null && !maxSkewString.equals("")) {
+                        this.setTimestampMaxSkew(Integer.parseInt(maxSkewString));
+                    }
+                }
                 
                 //Check for RST and RSTR for an SCT
                 String wsaAction = msgContext.getWSAAction();
