@@ -194,10 +194,6 @@ public class Axis2Util {
                         // it is a header we have added in rampart eg. EncryptedHeader and should
                         // be converted to SOAPHeaderBlock for processing
                     	} else {
-                            // First detach element from soap header
-                            element.detach();
-
-                            // add new element
                     		header = soapHeader.addHeaderBlock(element.getLocalName(), element.getNamespace());
                     		Iterator attrIter = element.getAllAttributes();
                     		while (attrIter.hasNext()) {
@@ -210,17 +206,14 @@ public class Axis2Util {
                     			header.declareNamespace(ns);
                     		}
                     		Iterator children = element.getChildElements();
-
-                            // Element is a composite element, in which it has many siblings.
-                            // All siblings will be added when we add a single node.
-                            // See ParentNode.insertBefore(Node newChild, Node refChild) for
-                            // more information.
-                    		if (children.hasNext()) {
+                    		while (children.hasNext()) {
                     			OMNode child = (OMNode)children.next();
                     			children.remove();
                     			header.addChild(child);
                     		}
-
+                    		
+                    		element.detach();
+                    		
                     		soapHeader.build();
                     		
                     		header.setProcessed();
