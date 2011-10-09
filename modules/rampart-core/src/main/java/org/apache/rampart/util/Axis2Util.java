@@ -16,14 +16,15 @@
 
 package org.apache.rampart.util;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMMetaFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -32,8 +33,6 @@ import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axiom.soap.SOAPModelBuilder;
 import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
-import org.apache.axiom.soap.impl.dom.SOAPHeaderBlockImpl;
-import org.apache.axiom.soap.impl.dom.factory.DOMSOAPFactory;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.xml.security.utils.XMLUtils;
@@ -129,14 +128,15 @@ public class Axis2Util {
 
                 // Check the namespace and find SOAP version and factory
                 String nsURI = null;
+                OMMetaFactory metaFactory = OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM);
                 SOAPFactory factory;
                 if (env.getNamespace().getNamespaceURI().equals(
                         SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
                     nsURI = SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI;
-                    factory = DOOMAbstractFactory.getSOAP11Factory();
+                    factory = metaFactory.getSOAP11Factory();
                 } else {
                     nsURI = SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI;
-                    factory = DOOMAbstractFactory.getSOAP12Factory();
+                    factory = metaFactory.getSOAP12Factory();
                 }
 
                 StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
@@ -188,10 +188,11 @@ public class Axis2Util {
 	    Element documentElement = doc.getDocumentElement();
 	    if (documentElement instanceof SOAPEnvelope) {
 	        SOAPEnvelope env = (SOAPEnvelope)documentElement;
-	        // If the DOM tree already implements the Axiom API and is not DOOM, then just return
-	        // the SOAPEnvelope directly, i.e. we assume that any Axiom+DOM implementation other
-	        // than DOOM implements enough of the Axiom API to support the Axis2 runtime.
-	        if (!(env.getOMFactory() instanceof DOMSOAPFactory)) {
+	        // If the DOM tree already implements the Axiom API and the corresponding
+	        // Axiom implementation is also used as default implementation, then just return
+	        // the SOAPEnvelope directly. Note that this will never be the case for DOOM,
+	        // but may be the case for a non standard Axiom implementation.
+	        if (env.getOMFactory().getMetaFactory() == OMAbstractFactory.getMetaFactory()) {
 	            return env;
 	        }
 	    }
