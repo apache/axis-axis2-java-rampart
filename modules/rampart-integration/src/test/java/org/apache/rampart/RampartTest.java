@@ -21,6 +21,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.Constants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -77,7 +79,7 @@ public class RampartTest extends TestCase {
                         "Unlimited Strength Jurisdiction Policy !!!");
             }
             
-            for (int i = 1; i <= 30; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 31; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
                     continue;
@@ -106,7 +108,16 @@ public class RampartTest extends TestCase {
                 context.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
                         loadPolicy("/rampart/policy/" + i + ".xml"));
                 serviceClient.setOptions(options);
-
+                
+                if (i == 31) {
+                    OMNamespace omNamespace = OMAbstractFactory.getOMFactory().createOMNamespace(
+                            "http://sample.com", "myNs");
+                    SOAPHeaderBlock header = OMAbstractFactory.getSOAP12Factory()
+                            .createSOAPHeaderBlock("VitalHeader", omNamespace);
+                    header.addChild(AXIOMUtil.stringToOM("<foo>This is a sample Header</foo>"));
+                    serviceClient.addHeader(header);
+                }
+                
                 // Invoking the serive in the TestCase-28 should fail. So handling it differently..
                 if (i == 28) {
                     try {
