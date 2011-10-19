@@ -62,7 +62,7 @@ public class SignedElementsBuilder implements AssertionBuilder {
         QName name = element.getQName();
         if (SP11Constants.XPATH.equals(name)) {
             parent.addXPathExpression(element.getText());
-            Iterator namespaces = element.getAllDeclaredNamespaces();
+            Iterator namespaces = element.getNamespacesInScope();
             while (namespaces.hasNext()) {
                 OMNamespace nm = (OMNamespace) namespaces.next();
                 parent.addDeclaredNamespaces(nm.getNamespaceURI(), nm.getPrefix());

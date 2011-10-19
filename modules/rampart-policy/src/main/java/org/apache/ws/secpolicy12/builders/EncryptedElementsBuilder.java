@@ -65,7 +65,7 @@ public class EncryptedElementsBuilder implements AssertionBuilder {
     private void processElement(OMElement element, SignedEncryptedElements parent) {
         if (SP12Constants.XPATH.equals(element.getQName())) {
             parent.addXPathExpression(element.getText());   
-            Iterator namespaces = element.getAllDeclaredNamespaces();
+            Iterator namespaces = element.getNamespacesInScope();
             while (namespaces.hasNext()) {
                 OMNamespace nm = (OMNamespace) namespaces.next();
                 parent.addDeclaredNamespaces(nm.getNamespaceURI(), nm.getPrefix());
