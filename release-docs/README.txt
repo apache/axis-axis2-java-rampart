@@ -1,5 +1,5 @@
 ======================================================
-Apache Rampart-1.5.1 build  (Jan 04, 2011)
+Apache Rampart-${project.version} build  (${buildTimestamp})
 
 http://axis.apache.org/axis2/java/rampart
 ------------------------------------------------------
@@ -13,8 +13,8 @@ lib      - This directory contains all the libraries required by rampart
            release.
 	   
 
-rampart-1.5.1.mar   - WS-Security and WS-SecureConversation support for Axis2
-rahas-1.5.1.mar     - STS module - to be used to add STS operations to a service
+rampart-${project.version}.mar   - WS-Security and WS-SecureConversation support for Axis2
+rahas-${project.version}.mar     - STS module - to be used to add STS operations to a service
 
 samples  - This contains samples on using Apache Rampart and configuring
            different components to carryout different WS-Sec* operations.

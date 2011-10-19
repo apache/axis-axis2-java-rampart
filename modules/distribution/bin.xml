@@ -59,6 +59,7 @@
             <source>../../release-docs/README.txt</source>
             <outputDirectory>${dist.dir}</outputDirectory>
             <destName>README</destName>
+            <filtered>true</filtered>
         </file>
         <file>
             <source>../../release-docs/LICENSE.txt</source>
