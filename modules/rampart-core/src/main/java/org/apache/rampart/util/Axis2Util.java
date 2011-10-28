@@ -143,7 +143,7 @@ public class Axis2Util {
                         env.getXMLStreamReader(), factory, nsURI);
                 SOAPEnvelope envelope = (stAXSOAPModelBuilder)
                         .getSOAPEnvelope();
-                ((OMNode) envelope.getParent()).build();
+                envelope.getParent().build();
                 
                 //Set the processed flag of the processed headers
                 SOAPHeader header = envelope.getHeader();
