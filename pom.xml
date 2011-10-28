@@ -147,6 +147,10 @@
                     <artifactId>axis2-mar-maven-plugin</artifactId>
                     <version>1.5.4</version>
                 </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.10</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
