@@ -75,6 +75,18 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-endorsed</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>org.apache.xerces,org.apache.xalan</includeGroupIds>
+                            <outputDirectory>${project.build.directory}/endorsed</outputDirectory>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -560,6 +572,13 @@
                     </execution>
                 </executions>
             </plugin-->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Add the Xerces/Xalan versions expected by OpenSAML to the boot classpath so that the build succeeds on older 1.5 JDKs -->
+                    <argLine>-Xbootclasspath/p:${project.build.directory}/endorsed/xml-apis.jar${path.separator}${project.build.directory}/endorsed/xercesImpl.jar${path.separator}${project.build.directory}/endorsed/resolver.jar${path.separator}${project.build.directory}/endorsed/serializer.jar${path.separator}${project.build.directory}/endorsed/xalan.jar</argLine>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
