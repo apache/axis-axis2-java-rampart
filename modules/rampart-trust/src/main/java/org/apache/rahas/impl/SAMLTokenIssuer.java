@@ -189,11 +189,11 @@ public class SAMLTokenIssuer implements TokenIssuer {
             }
 
             if (config.addRequestedAttachedRef) {
-            	TrustUtil.createRequestedAttachedRef(rstrElem, assertion.getId(),wstVersion);
+                TrustUtil.createRequestedAttachedRef(rstrElem, assertion.getId(),wstVersion);
             }
 
             if (config.addRequestedUnattachedRef) {
-            	TrustUtil.createRequestedUnattachedRef(rstrElem, assertion.getId(),wstVersion);   
+                TrustUtil.createRequestedUnattachedRef(rstrElem, assertion.getId(),wstVersion);   
             }
 
             if (data.getAppliesToAddress() != null) {
@@ -256,18 +256,18 @@ public class SAMLTokenIssuer implements TokenIssuer {
             SAMLAssertion assertion;
             // In the case where the principal is a UT
             if (principal instanceof WSUsernameTokenPrincipal) {
-            	SAMLNameIdentifier nameId = null;
-            	if(config.getCallbackHandler() != null){
-            		SAMLNameIdentifierCallback cb = new SAMLNameIdentifierCallback(data);
-            		cb.setUserId(principal.getName());
-            		SAMLCallbackHandler callbackHandler = config.getCallbackHandler();
-            		callbackHandler.handle(cb);
-            		nameId = cb.getNameId();
-            	}else{
-              		nameId = new SAMLNameIdentifier(
-            		principal.getName(), null, SAMLNameIdentifier.FORMAT_EMAIL);
-            	}
-            	assertion = createAuthAssertion(doc, SAMLSubject.CONF_BEARER,
+                SAMLNameIdentifier nameId = null;
+                if(config.getCallbackHandler() != null){
+                    SAMLNameIdentifierCallback cb = new SAMLNameIdentifierCallback(data);
+                    cb.setUserId(principal.getName());
+                    SAMLCallbackHandler callbackHandler = config.getCallbackHandler();
+                    callbackHandler.handle(cb);
+                    nameId = cb.getNameId();
+                }else{
+                    nameId = new SAMLNameIdentifier(
+                    principal.getName(), null, SAMLNameIdentifier.FORMAT_EMAIL);
+                }
+                assertion = createAuthAssertion(doc, SAMLSubject.CONF_BEARER,
                         nameId, null, config, crypto, creationTime,
                         expirationTime, data);
                 return  assertion;
@@ -436,33 +436,33 @@ public class SAMLTokenIssuer implements TokenIssuer {
            
             SAMLAttribute[] attrs = null;
             if(config.getCallbackHandler() != null){
-            	SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-            	SAMLCallbackHandler handler = config.getCallbackHandler();
-            	handler.handle(cb);
-            	attrs = cb.getAttributes();
+                SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
+                SAMLCallbackHandler handler = config.getCallbackHandler();
+                handler.handle(cb);
+                attrs = cb.getAttributes();
             } else if (config.getCallbackHandlerName() != null
-					&& config.getCallbackHandlerName().trim().length() > 0) {
-				SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-				SAMLCallbackHandler handler = null;
-				MessageContext msgContext = data.getInMessageContext();
-				ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
-				Class cbClass = null;
-				try {
-					cbClass = Loader.loadClass(classLoader, config.getCallbackHandlerName());
-				} catch (ClassNotFoundException e) {
-					throw new TrustException("cannotLoadPWCBClass", new String[]{config
-							.getCallbackHandlerName()}, e);
-				}
-				try {
-					handler = (SAMLCallbackHandler) cbClass.newInstance();
-				} catch (java.lang.Exception e) {
-					throw new TrustException("cannotCreatePWCBInstance", new String[]{config
-							.getCallbackHandlerName()}, e);
-				}
-				handler.handle(cb);
-				attrs = cb.getAttributes();
+                    && config.getCallbackHandlerName().trim().length() > 0) {
+                SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
+                SAMLCallbackHandler handler = null;
+                MessageContext msgContext = data.getInMessageContext();
+                ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
+                Class cbClass = null;
+                try {
+                    cbClass = Loader.loadClass(classLoader, config.getCallbackHandlerName());
+                } catch (ClassNotFoundException e) {
+                    throw new TrustException("cannotLoadPWCBClass", new String[]{config
+                            .getCallbackHandlerName()}, e);
+                }
+                try {
+                    handler = (SAMLCallbackHandler) cbClass.newInstance();
+                } catch (java.lang.Exception e) {
+                    throw new TrustException("cannotCreatePWCBInstance", new String[]{config
+                            .getCallbackHandlerName()}, e);
+                }
+                handler.handle(cb);
+                attrs = cb.getAttributes();
             }else{
-            	//TODO Remove this after discussing
+                //TODO Remove this after discussing
                 SAMLAttribute attribute = new SAMLAttribute("Name",
                         "https://rahas.apache.org/saml/attrns", null, -1, Arrays
                                 .asList(new String[] { "Colombo/Rahas" }));

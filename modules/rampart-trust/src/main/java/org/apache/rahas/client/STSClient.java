@@ -568,8 +568,8 @@ public class STSClient {
             id = token.getAttributeValue(new QName(WSConstants.WSU_NS, "Id"));
             if ( id == null )
             {
-            	// If we are dealing with a SAML Assetion, look for AssertionID.
-            	id = token.getAttributeValue(new QName( "AssertionID"));
+                // If we are dealing with a SAML Assetion, look for AssertionID.
+                id = token.getAttributeValue(new QName( "AssertionID"));
             }
         }
         return id;

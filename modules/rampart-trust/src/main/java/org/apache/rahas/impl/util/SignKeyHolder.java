@@ -39,7 +39,7 @@ public class SignKeyHolder implements X509Credential {
 
     private X509Certificate[] issuerCerts = null;
 
-	private PrivateKey issuerPK = null;
+    private PrivateKey issuerPK = null;
 
 
     public String getSignatureAlgorithm() {

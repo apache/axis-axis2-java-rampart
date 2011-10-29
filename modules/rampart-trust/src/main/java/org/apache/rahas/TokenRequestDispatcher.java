@@ -49,9 +49,9 @@ public class TokenRequestDispatcher {
     public SOAPEnvelope handle(MessageContext inMsgCtx,
                                MessageContext outMsgCtx) throws TrustException {
         
-    	if(mlog.isDebugEnabled()){
-    		mlog.debug("*********************** TokenRequestDispatcher received \n"+inMsgCtx.getEnvelope());
-    	}
+        if(mlog.isDebugEnabled()){
+            mlog.debug("*********************** TokenRequestDispatcher received \n"+inMsgCtx.getEnvelope());
+        }
         RahasData data = new RahasData(inMsgCtx);
         
         String reqType = data.getRequestType();
@@ -72,8 +72,8 @@ public class TokenRequestDispatcher {
             outMsgCtx.getOptions().setAction(issuer.getResponseAction(data));
             
             if(mlog.isDebugEnabled()){
-        		mlog.debug("*********************** TokenRequestDispatcher sent out \n"+response);
-        	}
+                mlog.debug("*********************** TokenRequestDispatcher sent out \n"+response);
+            }
             
             return response;
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_VALIDATE).equals(reqType) ||
@@ -94,9 +94,9 @@ public class TokenRequestDispatcher {
                                 RahasConstants.RSTR_ACTION_VALIDATE));
 
                 return response;
-        	
-        	
-        	
+            
+            
+            
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_RENEW).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_RENEW).equals(reqType)) {
             log.debug("renew");
@@ -114,8 +114,8 @@ public class TokenRequestDispatcher {
                         TrustUtil.getActionValue(data.getVersion(),
                                 RahasConstants.RSTR_ACTION_RENEW));
 
-                return response;    	
-        	         
+                return response;        
+                     
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_CANCEL).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_CANCEL).equals(reqType)) {
             log.debug("cancel");

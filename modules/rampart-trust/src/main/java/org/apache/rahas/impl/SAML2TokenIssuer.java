@@ -100,20 +100,20 @@ public class SAML2TokenIssuer implements TokenIssuer {
     private static Log log = LogFactory.getLog(SAML2TokenIssuer.class);
 
     static {
-            try {
-                // Set the "javax.xml.parsers.DocumentBuilderFactory" system property
-                // to the endorsed JAXP impl.
-                System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
-                        "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-                DefaultBootstrap.bootstrap();
-            } catch (ConfigurationException e) {
-                log.error("SAML2TokenIssuerBootstrapError", e);
-                throw new RuntimeException(e);
-            } finally {
-                // Unset the DOM impl to default
-                DocumentBuilderFactoryImpl.setDOOMRequired(false);
-            }
+        try {
+            // Set the "javax.xml.parsers.DocumentBuilderFactory" system property
+            // to the endorsed JAXP impl.
+            System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
+                    "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+            DefaultBootstrap.bootstrap();
+        } catch (ConfigurationException e) {
+            log.error("SAML2TokenIssuerBootstrapError", e);
+            throw new RuntimeException(e);
+        } finally {
+            // Unset the DOM impl to default
+            DocumentBuilderFactoryImpl.setDOOMRequired(false);
         }
+    }
     
     public SOAPEnvelope issue(RahasData data) throws TrustException {
         MessageContext inMsgCtx = data.getInMessageContext();

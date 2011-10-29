@@ -246,63 +246,63 @@ public class TrustUtil {
     }
     
     /**
-	 * Create and add wst:AttachedReference element
-	 * 
-	 * @param rstrElem
-	 *            wst:RequestSecurityToken element
-	 * @param id
-	 *            Token identifier
-	 * @throws TrustException
-	 */
+     * Create and add wst:AttachedReference element
+     * 
+     * @param rstrElem
+     *            wst:RequestSecurityToken element
+     * @param id
+     *            Token identifier
+     * @throws TrustException
+     */
     public static void createRequestedAttachedRef(OMElement rstrElem, String id, int version)
-			throws TrustException {
-		OMFactory fac = null;
-		OMElement rar = null;
-		OMElement str = null;
-		OMElement ki = null;
+            throws TrustException {
+        OMFactory fac = null;
+        OMElement rar = null;
+        OMElement str = null;
+        OMElement ki = null;
 
-		String ns = TrustUtil.getWSTNamespace(version);
-		fac = rstrElem.getOMFactory();
-		rar = fac.createOMElement(new QName(ns,
-				RahasConstants.IssuanceBindingLocalNames.REQUESTED_ATTACHED_REFERENCE,
-				RahasConstants.WST_PREFIX), rstrElem);
-		str = fac.createOMElement(new QName(WSConstants.WSSE_NS,
-				SecurityTokenReference.SECURITY_TOKEN_REFERENCE, WSConstants.WSSE_PREFIX), rar);
-		ki = fac.createOMElement(new QName(WSConstants.WSSE_NS, "KeyIdentifier",
-				WSConstants.WSSE_PREFIX), str);
-		ki.addAttribute("ValueType", WSConstants.WSS_SAML_KI_VALUE_TYPE, null);
-		ki.setText(id);
-	}
+        String ns = TrustUtil.getWSTNamespace(version);
+        fac = rstrElem.getOMFactory();
+        rar = fac.createOMElement(new QName(ns,
+                RahasConstants.IssuanceBindingLocalNames.REQUESTED_ATTACHED_REFERENCE,
+                RahasConstants.WST_PREFIX), rstrElem);
+        str = fac.createOMElement(new QName(WSConstants.WSSE_NS,
+                SecurityTokenReference.SECURITY_TOKEN_REFERENCE, WSConstants.WSSE_PREFIX), rar);
+        ki = fac.createOMElement(new QName(WSConstants.WSSE_NS, "KeyIdentifier",
+                WSConstants.WSSE_PREFIX), str);
+        ki.addAttribute("ValueType", WSConstants.WSS_SAML_KI_VALUE_TYPE, null);
+        ki.setText(id);
+    }
 
-	/**
-	 * Create and add wst:UnattachedReference element
-	 * 
-	 * @param rstrElem
-	 *            wst:RequestSecurityToken element
-	 * @param id
-	 *            Token identifier
-	 * @throws TrustException
-	 */
-	public static void createRequestedUnattachedRef(OMElement rstrElem, String id, int version)
-			throws TrustException {
-		OMFactory fac = null;
-		OMElement rar = null;
-		OMElement str = null;
-		OMElement ki = null;
+    /**
+     * Create and add wst:UnattachedReference element
+     * 
+     * @param rstrElem
+     *            wst:RequestSecurityToken element
+     * @param id
+     *            Token identifier
+     * @throws TrustException
+     */
+    public static void createRequestedUnattachedRef(OMElement rstrElem, String id, int version)
+            throws TrustException {
+        OMFactory fac = null;
+        OMElement rar = null;
+        OMElement str = null;
+        OMElement ki = null;
 
-		String ns = TrustUtil.getWSTNamespace(version);
-		fac = rstrElem.getOMFactory();
-		rar = fac.createOMElement(new QName(ns,
-				RahasConstants.IssuanceBindingLocalNames.REQUESTED_UNATTACHED_REFERENCE,
-				RahasConstants.WST_PREFIX), rstrElem);
-		str = fac.createOMElement(new QName(WSConstants.WSSE_NS,
-				SecurityTokenReference.SECURITY_TOKEN_REFERENCE, WSConstants.WSSE_PREFIX), rar);
-		ki = fac.createOMElement(new QName(WSConstants.WSSE_NS, "KeyIdentifier",
-				WSConstants.WSSE_PREFIX), str);
+        String ns = TrustUtil.getWSTNamespace(version);
+        fac = rstrElem.getOMFactory();
+        rar = fac.createOMElement(new QName(ns,
+                RahasConstants.IssuanceBindingLocalNames.REQUESTED_UNATTACHED_REFERENCE,
+                RahasConstants.WST_PREFIX), rstrElem);
+        str = fac.createOMElement(new QName(WSConstants.WSSE_NS,
+                SecurityTokenReference.SECURITY_TOKEN_REFERENCE, WSConstants.WSSE_PREFIX), rar);
+        ki = fac.createOMElement(new QName(WSConstants.WSSE_NS, "KeyIdentifier",
+                WSConstants.WSSE_PREFIX), str);
 
-		ki.addAttribute("ValueType", WSConstants.WSS_SAML_KI_VALUE_TYPE, null);
-		ki.setText(id);
-	}
+        ki.addAttribute("ValueType", WSConstants.WSS_SAML_KI_VALUE_TYPE, null);
+        ki.setText(id);
+    }
 
     public static OMElement createKeySizeElement(int version,
                                                  OMElement parent,
@@ -544,14 +544,14 @@ public class TrustUtil {
     }
     
     public static OMElement createClaims(int version, 
-    											OMElement parent, String dialect) throws TrustException{
+                OMElement parent, String dialect) throws TrustException{
         OMElement omElem = createOMElement(parent,
                 getWSTNamespace(version),
                 RahasConstants.IssuanceBindingLocalNames.CLAIMS,
-                RahasConstants.WST_PREFIX);    	
+                RahasConstants.WST_PREFIX);
         
         OMNamespace ns = omElem.getOMFactory().createOMNamespace(getWSTNamespace(version), 
-        		RahasConstants.WSP_PREFIX);
+                RahasConstants.WSP_PREFIX);
         omElem.addAttribute(RahasConstants.ATTR_CLAIMS_DIALECT , dialect, ns);
        
         

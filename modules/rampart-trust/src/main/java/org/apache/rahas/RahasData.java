@@ -305,15 +305,15 @@ public class RahasData {
      *
      */
     private void processClaims() throws TrustException{
-        	claimElem = this.rstElement
-        			.getFirstChildWithName(new QName(this.wstNs,
-        					RahasConstants.IssuanceBindingLocalNames.CLAIMS));
-        	
-        	if(claimElem != null){
-        		claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
-        					RahasConstants.ATTR_CLAIMS_DIALECT));
-        	}
-    	
+        claimElem = this.rstElement
+                .getFirstChildWithName(new QName(this.wstNs,
+                        RahasConstants.IssuanceBindingLocalNames.CLAIMS));
+        
+        if(claimElem != null){
+            claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
+                    RahasConstants.ATTR_CLAIMS_DIALECT));
+        }
+        
     }
     
     private void processValidateTarget()throws TrustException{
@@ -335,7 +335,7 @@ public class RahasData {
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
                 } else if(str.containsKeyIdentifier()){
-                	tokenId = str.getKeyIdentifierValue();
+                    tokenId = str.getKeyIdentifierValue();
                 }
             } catch (WSSecurityException e) {
                 throw new TrustException("errorExtractingTokenId",e);
@@ -361,7 +361,7 @@ public class RahasData {
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
                 } else if(str.containsKeyIdentifier()){
-                	tokenId = str.getKeyIdentifierValue();
+                    tokenId = str.getKeyIdentifierValue();
                 }
                 if(tokenId == null){
                     if(str.containsKeyIdentifier()){
@@ -535,13 +535,13 @@ public class RahasData {
         this.ephmeralKey = ephmeralKey;
     }
 
-	public String getClaimDialect() {
-		return claimDialect;
-	}
+    public String getClaimDialect() {
+        return claimDialect;
+    }
 
-	public OMElement getClaimElem() {
-		return claimElem;
-	}
+    public OMElement getClaimElem() {
+        return claimElem;
+    }
 
     public OMElement getAppliesToEpr() {
         return appliesToEpr;

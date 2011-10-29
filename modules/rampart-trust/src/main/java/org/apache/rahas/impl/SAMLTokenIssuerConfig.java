@@ -45,9 +45,9 @@ import java.util.Properties;
  */
 public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
 
-	
-	Log log = LogFactory.getLog(SAMLTokenIssuerConfig.class);
-	
+    
+    Log log = LogFactory.getLog(SAMLTokenIssuerConfig.class);
+    
     /**
      * The QName of the configuration element of the SAMLTokenIssuer
      */
@@ -60,15 +60,15 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     private final static QName ISSUER_KEY_ALIAS = new QName("issuerKeyAlias");
 
     /**
-	 * Element name to include the password of the private key to sign the response or the issued
-	 * token
-	 */
-	private final static QName ISSUER_KEY_PASSWD = new QName("issuerKeyPassword");
+     * Element name to include the password of the private key to sign the response or the issued
+     * token
+     */
+    private final static QName ISSUER_KEY_PASSWD = new QName("issuerKeyPassword");
 
-	/**
-	 * Element name of the attribute call-back handler
-	 */
-	private final static QName ATTR_CALLBACK_HANDLER_NAME = new QName("attrCallbackHandlerName");
+    /**
+     * Element name of the attribute call-back handler
+     */
+    private final static QName ATTR_CALLBACK_HANDLER_NAME = new QName("attrCallbackHandlerName");
 
     /**
      * Element to specify the lifetime of the SAMLToken
@@ -252,24 +252,24 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         }
         
         
-       	OMElement attrElemet = elem.getFirstChildWithName(SAML_CALLBACK_CLASS);
-		if (attrElemet != null) {
-				try {
-					String value = attrElemet.getText();
-					Class handlerClass = Class.forName(value);
-					this.callbackHandler = (SAMLCallbackHandler)handlerClass.newInstance();
-				} catch (ClassNotFoundException e) {
-					log.error("Error loading class" , e);
-					throw new TrustException("Error loading class" , e);
-				} catch (InstantiationException e) {
-					log.error("Error instantiating class" , e);
-					throw new TrustException("Error instantiating class" , e);
-				} catch (IllegalAccessException e) {
-					log.error("Illegal Access" , e);
-					throw new TrustException("Illegal Access" , e);
-				}
-		}
-				
+        OMElement attrElemet = elem.getFirstChildWithName(SAML_CALLBACK_CLASS);
+        if (attrElemet != null) {
+            try {
+                String value = attrElemet.getText();
+                Class handlerClass = Class.forName(value);
+                this.callbackHandler = (SAMLCallbackHandler)handlerClass.newInstance();
+            } catch (ClassNotFoundException e) {
+                log.error("Error loading class" , e);
+                throw new TrustException("Error loading class" , e);
+            } catch (InstantiationException e) {
+                log.error("Error instantiating class" , e);
+                throw new TrustException("Error instantiating class" , e);
+            } catch (IllegalAccessException e) {
+                log.error("Illegal Access" , e);
+                throw new TrustException("Illegal Access" , e);
+            }
+        }
+                
 
     }
 
@@ -408,30 +408,30 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     }
 
     @Deprecated
-	public SAMLCallbackHandler getCallbackHander() {
-		return callbackHandler;
-	}
+    public SAMLCallbackHandler getCallbackHander() {
+        return callbackHandler;
+    }
 
     @Deprecated
-	public void setCallbackHander(SAMLCallbackHandler callbackHandler) {
-		this.callbackHandler = callbackHandler;
-	}
-	
-	public SAMLCallbackHandler getCallbackHandler() {
-		return callbackHandler;
-	}
+    public void setCallbackHander(SAMLCallbackHandler callbackHandler) {
+        this.callbackHandler = callbackHandler;
+    }
+    
+    public SAMLCallbackHandler getCallbackHandler() {
+        return callbackHandler;
+    }
 
-	public void setCallbackHandler(SAMLCallbackHandler callbackHandler) {
-		this.callbackHandler = callbackHandler;
-	}
-	
-	public String getCallbackHandlerName() {
-		return callbackHandlerName;
-	}
+    public void setCallbackHandler(SAMLCallbackHandler callbackHandler) {
+        this.callbackHandler = callbackHandler;
+    }
+    
+    public String getCallbackHandlerName() {
+        return callbackHandlerName;
+    }
 
-	public void setCallbackHandlerName(String callbackHandlerName) {
-		this.callbackHandlerName = callbackHandlerName;
-	}
+    public void setCallbackHandlerName(String callbackHandlerName) {
+        this.callbackHandlerName = callbackHandlerName;
+    }
 
     /**
      * Uses the <code>wst:AppliesTo</code> to figure out the certificate to

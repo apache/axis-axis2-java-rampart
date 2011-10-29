@@ -231,7 +231,7 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         } else if(child.getQName().equals(Reference.TOKEN)) {
             String uri = child.getAttributeValue(new QName("URI"));
             if (uri.charAt(0) == '#') {
-	        uri = uri.substring(1);
+                uri = uri.substring(1);
             }
             return uri;
         } else {

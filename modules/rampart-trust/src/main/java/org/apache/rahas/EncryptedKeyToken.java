@@ -33,7 +33,7 @@ import org.apache.axiom.om.OMElement;
  *
  */
 public class EncryptedKeyToken extends Token {
-	
+    
     /**
      * SHA1 value of the encrypted key
      */
@@ -42,29 +42,29 @@ public class EncryptedKeyToken extends Token {
     public EncryptedKeyToken(){
         super();
     }
-	
-	public EncryptedKeyToken (String id,Date created, Date expires) {
-		super(id,created,expires);
-	}
-	
-	public EncryptedKeyToken (String id, OMElement tokenElem, 
-			                    Date created, Date expires)throws TrustException{
-		super(id,tokenElem,created,expires);
-	}
-	
-	/**
-	 * @param sha SHA1 of the encrypted key
-	 */
-	public void setSHA1(String sha) {
-		this.sha = sha;
-	}
-	
-	/** 
-	 * @return SHA1 value of the encrypted key 
-	 */
-	public String getSHA1() {
-		return sha;
-	}
+    
+    public EncryptedKeyToken (String id,Date created, Date expires) {
+        super(id,created,expires);
+    }
+    
+    public EncryptedKeyToken (String id, OMElement tokenElem, 
+                                Date created, Date expires)throws TrustException{
+        super(id,tokenElem,created,expires);
+    }
+    
+    /**
+     * @param sha SHA1 of the encrypted key
+     */
+    public void setSHA1(String sha) {
+        this.sha = sha;
+    }
+    
+    /** 
+     * @return SHA1 value of the encrypted key 
+     */
+    public String getSHA1() {
+        return sha;
+    }
 
     public void writeExternal(ObjectOutput out)
         throws IOException {
