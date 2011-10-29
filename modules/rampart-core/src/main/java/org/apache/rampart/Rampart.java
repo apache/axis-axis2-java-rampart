@@ -26,11 +26,18 @@ import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
+import org.opensaml.DefaultBootstrap;
+import org.opensaml.xml.ConfigurationException;
 
 public class Rampart implements Module /* , ModulePolicyExtension */  {
 
     public void init(ConfigurationContext configContext, AxisModule module)
             throws AxisFault {
+        try {
+            DefaultBootstrap.bootstrap();
+        } catch (ConfigurationException ex) {
+            throw new AxisFault("Failed to bootstrap OpenSAML", ex);
+        }
     }
 
     public void engageNotify(AxisDescription axisDescription) throws AxisFault {
