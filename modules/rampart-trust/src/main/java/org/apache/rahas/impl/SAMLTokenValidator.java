@@ -6,7 +6,6 @@ import java.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
@@ -50,62 +49,55 @@ public class SAMLTokenValidator implements TokenValidator {
         // retrieve the list of tokens from the message context
         TokenStorage tkStorage = TrustUtil.getTokenStore(inMsgCtx);
 
-        try {
-            // Set the DOM impl to DOOM
-            DocumentBuilderFactoryImpl.setDOOMRequired(true);
+        // Create envelope
+        SOAPEnvelope env = TrustUtil.createSOAPEnvelope(inMsgCtx
+                .getEnvelope().getNamespace().getNamespaceURI());
 
-            // Create envelope
-            SOAPEnvelope env = TrustUtil.createSOAPEnvelope(inMsgCtx
-                    .getEnvelope().getNamespace().getNamespaceURI());
-
-            // Create RSTR element, with respective version
-            OMElement rstrElem;
-            int wstVersion = data.getVersion();
-            if (RahasConstants.VERSION_05_02 == wstVersion) {
-                rstrElem = TrustUtil.createRequestSecurityTokenResponseElement(
-                        wstVersion, env.getBody());
-            } else {
-                OMElement rstrcElem = TrustUtil
-                        .createRequestSecurityTokenResponseCollectionElement(
-                                wstVersion, env.getBody());
-                rstrElem = TrustUtil.createRequestSecurityTokenResponseElement(
-                        wstVersion, rstrcElem);
-            }
-
-            // Create TokenType element, set to RSTR/Status
-            TrustUtil.createTokenTypeElement(wstVersion, rstrElem).setText(
-                    TrustUtil.getWSTNamespace(wstVersion)
-                            + RahasConstants.TOK_TYPE_STATUS);
-
-            // Create Status element
-            OMElement statusElement = createMessageElement(wstVersion,
-                    rstrElem, RahasConstants.LocalNames.STATUS);
-
-            // Obtain the token
-            Token tk = tkStorage.getToken(data.getTokenId());
-
-            // create the crypto object
-            PublicKey issuerPBKey = getIssuerPublicKey(inMsgCtx);
-
-            boolean valid = isValid(tk, issuerPBKey);
-            String validityCode;
-
-            if (valid) {
-                validityCode = RahasConstants.STATUS_CODE_VALID;
-            } else {
-                validityCode = RahasConstants.STATUS_CODE_INVALID;
-            }
-
-            // Create Code element (inside Status) and set it to the
-            // correspondent value
-            createMessageElement(wstVersion, statusElement,
-                    RahasConstants.LocalNames.CODE).setText(
-                    TrustUtil.getWSTNamespace(wstVersion) + validityCode);
-
-            return env;
-        } finally {
-            DocumentBuilderFactoryImpl.setDOOMRequired(false);
+        // Create RSTR element, with respective version
+        OMElement rstrElem;
+        int wstVersion = data.getVersion();
+        if (RahasConstants.VERSION_05_02 == wstVersion) {
+            rstrElem = TrustUtil.createRequestSecurityTokenResponseElement(
+                    wstVersion, env.getBody());
+        } else {
+            OMElement rstrcElem = TrustUtil
+                    .createRequestSecurityTokenResponseCollectionElement(
+                            wstVersion, env.getBody());
+            rstrElem = TrustUtil.createRequestSecurityTokenResponseElement(
+                    wstVersion, rstrcElem);
         }
+
+        // Create TokenType element, set to RSTR/Status
+        TrustUtil.createTokenTypeElement(wstVersion, rstrElem).setText(
+                TrustUtil.getWSTNamespace(wstVersion)
+                        + RahasConstants.TOK_TYPE_STATUS);
+
+        // Create Status element
+        OMElement statusElement = createMessageElement(wstVersion,
+                rstrElem, RahasConstants.LocalNames.STATUS);
+
+        // Obtain the token
+        Token tk = tkStorage.getToken(data.getTokenId());
+
+        // create the crypto object
+        PublicKey issuerPBKey = getIssuerPublicKey(inMsgCtx);
+
+        boolean valid = isValid(tk, issuerPBKey);
+        String validityCode;
+
+        if (valid) {
+            validityCode = RahasConstants.STATUS_CODE_VALID;
+        } else {
+            validityCode = RahasConstants.STATUS_CODE_INVALID;
+        }
+
+        // Create Code element (inside Status) and set it to the
+        // correspondent value
+        createMessageElement(wstVersion, statusElement,
+                RahasConstants.LocalNames.CODE).setText(
+                TrustUtil.getWSTNamespace(wstVersion) + validityCode);
+
+        return env;
     }
 
     /**
