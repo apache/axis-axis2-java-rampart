@@ -1,4 +1,4 @@
-<module name="rahas">
+<module name="rahas" class="org.apache.rahas.Rahas">
     <Description>This module is used to STS enable a service where it adds
         the RequestSecurityToken operation to a service that the module is engaged to</Description>
 
