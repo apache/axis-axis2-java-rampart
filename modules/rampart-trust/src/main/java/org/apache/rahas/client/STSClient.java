@@ -16,13 +16,12 @@
 
 package org.apache.rahas.client;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.om.util.Base64;
-import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
@@ -55,6 +54,7 @@ import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.token.Reference;
 import org.apache.ws.security.processor.EncryptedKeyProcessor;
+import org.apache.ws.security.util.UUIDGenerator;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Element;
@@ -476,8 +476,9 @@ public class STSClient {
             } else if (child.getQName().equals(new QName(ns, WSConstants.ENC_KEY_LN))) {
                 try {
                     Element domChild = (Element) new StAXOMBuilder(
-                            DOOMAbstractFactory.getOMFactory(), child
-                            .getXMLStreamReader()).getDocumentElement();
+                            OMAbstractFactory.getMetaFactory(
+                            		OMAbstractFactory.FEATURE_DOM).getOMFactory(), 
+                            child.getXMLStreamReader()).getDocumentElement();
 
                     EncryptedKeyProcessor processor = new EncryptedKeyProcessor();
 

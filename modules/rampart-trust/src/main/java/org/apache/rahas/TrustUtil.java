@@ -16,16 +16,25 @@
 
 package org.apache.rahas;
 
+import java.security.SecureRandom;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMMetaFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.addressing.AddressingConstants;
-import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.MessageContext;
 import org.apache.rahas.impl.AbstractIssuerConfig;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.message.token.Reference;
@@ -37,15 +46,6 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.SubjectConfirmation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
-
-import java.security.SecureRandom;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.Iterator;
 
 public class TrustUtil {
 
@@ -426,11 +426,12 @@ public class TrustUtil {
      * @return SOAPEnvelope
      */
     public static SOAPEnvelope createSOAPEnvelope(String nsUri) {
+    	OMMetaFactory domFac = OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM);
         if (nsUri != null
             && SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI.equals(nsUri)) {
-            return DOOMAbstractFactory.getSOAP11Factory().getDefaultEnvelope();
+			return domFac.getSOAP11Factory().getDefaultEnvelope();
         } else {
-            return DOOMAbstractFactory.getSOAP12Factory().getDefaultEnvelope();
+            return domFac.getSOAP12Factory().getDefaultEnvelope();
         }
     }
 

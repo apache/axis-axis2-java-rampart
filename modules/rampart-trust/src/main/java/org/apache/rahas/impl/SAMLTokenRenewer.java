@@ -1,6 +1,5 @@
 package org.apache.rahas.impl;
 
-import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.Arrays;
