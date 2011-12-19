@@ -101,7 +101,7 @@ public class Wss11 extends Wss10 {
         }
         
         // <wsp:Policy>
-        writer.writeStartElement(prefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
         // <sp:MustSupportRefKeyIndentifier />
         if (isMustSupportRefKeyIdentifier()) {
