@@ -318,11 +318,21 @@ public class SAMLTokenIssuer implements TokenIssuer {
                 // Extract the Encryptedkey DOM element
                 encryptedKeyElem = encrKeyBuilder.getEncryptedKeyElement();
             } catch (WSSecurityException e) {
-                throw new TrustException(
-                        "errorInBuildingTheEncryptedKeyForPrincipal",
-                        new String[] { serviceCert.getSubjectDN().getName() },
-                        e);
+
+                if (serviceCert != null) {
+                    throw new TrustException(
+                            "errorInBuildingTheEncryptedKeyForPrincipal",
+                            new String[]{serviceCert.getSubjectDN().getName()},
+                            e);
+                } else {
+                    throw new TrustException(
+                            "trustedCertNotFoundForEPR",
+                            new String[]{data.getAppliesToAddress()},
+                            e);
+                }
+
             }
+
             return this.createAttributeAssertion(doc, data ,encryptedKeyElem, config,
                     crypto, creationTime, expirationTime);
         } else {
