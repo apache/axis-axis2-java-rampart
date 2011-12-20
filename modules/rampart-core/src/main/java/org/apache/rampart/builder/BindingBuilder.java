@@ -175,10 +175,6 @@ public abstract class BindingBuilder {
                 password = cb[0].getPassword();
             }
 
-            if (log.isDebugEnabled()) {
-                log.debug("Password : " + password);
-            }
-
             if(password != null && !"".equals(password)) {
                 //If the password is available then build the token
                 
