@@ -27,6 +27,7 @@ import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.SupportingPolicyData;
+import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.SPConstants;
@@ -274,14 +275,19 @@ public abstract class BindingBuilder {
         }
 
         // Get the user - First check whether userCertAlias present
-        if (user == null) {
-            user = rpd.getRampartConfig().getUserCertAlias();
+        RampartConfig rampartConfig = rpd.getRampartConfig();
+        if(rampartConfig == null) {
+        	throw new RampartException("rampartConfigMissing");
+        }
+        
+		if (user == null) {
+            user = rampartConfig.getUserCertAlias();
         }
         
         // If userCertAlias is not present, use user property as Alias
         
         if (user == null) {
-            user = rpd.getRampartConfig().getUser();
+            user = rampartConfig.getUser();
         }
             
         String password = null;
@@ -334,8 +340,7 @@ public abstract class BindingBuilder {
         sig.setDigestAlgo(algorithmSuite.getDigest());
         
         try {
-            sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
-                    .getRampartConfig(), rmd.getCustomClassLoader()), 
+            sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rampartConfig, rmd.getCustomClassLoader()), 
                     rmd.getSecHeader());
         } catch (WSSecurityException e) {
             throw new RampartException("errorInSignatureWithX509Token", e);
