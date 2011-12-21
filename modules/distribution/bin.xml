@@ -27,7 +27,7 @@
                 <include>org.opensaml:xmltooling:jar</include>
                 <include>joda-time:joda-time:jar</include>
                 <include>org.slf4j:slf4j-api:jar</include>
-                <include>org.slf4j:slf4j-jdk14:jar</include>
+                <include>org.slf4j:slf4j-jcl:jar</include>
                 <include>velocity:velocity:jar</include>
                 <include>commons-collections:commons-collections:jar</include>
                 <include>org.opensaml:openws:jar</include>
