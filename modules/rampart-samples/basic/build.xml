@@ -30,6 +30,15 @@
 	
     <property environment="env"/>
     	
+    <property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
+    
+    <path id="runtime.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+        <pathelement location="${env.AXIS2_HOME}"/>
+    </path>
+    
 	<target name="check.dependency" unless="env.AXIS2_HOME">
         <echo message="AXIS2_HOME must be set"/>
     </target>
@@ -155,7 +164,6 @@
 	   	<sequential>
 	   		
 	   		<property name="modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
-	   		<property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
 	   		
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}"/>
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}/services"/>
@@ -196,11 +204,7 @@
             <java classname="org.apache.axis2.transport.http.SimpleHTTPServer" fork="true">
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
-                    <classpath>
-                            <fileset dir="${lib.dir}">
-                                    <include name="**/*.jar"/>
-                            </fileset>
-                    </classpath>
+                	<classpath refid="runtime.classpath"/>
             </java>
 
 	   </sequential>
@@ -211,7 +215,6 @@
 	   	<sequential>
 	   		
 	   		<property name="modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
-	   		<property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
 	   		
 	   		<!-- Create the client repo -->
 	   		<mkdir dir="${client.repos.dir}/sample@{sample.number}"/>
@@ -250,9 +253,7 @@
                     <arg value="${sample.services.url}/sample@{sample.number}"/>
                     <arg value="${client.repos.dir}/sample@{sample.number}"/>
                     <classpath>
-                        <fileset dir="${lib.dir}">
-                        	<include name="**/*.jar"/>
-                        </fileset>
+                        <path refid="runtime.classpath"/>
                   		<dirset dir="${temp.client.dir}" />
                     </classpath>
             </java>
