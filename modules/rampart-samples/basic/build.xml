@@ -23,9 +23,6 @@
 	<property name="keys.dir" value="../keys"/>
 	<property name="temp.client.dir" value="build/temp_client"/>
 	
-	<property name="addressing.mar" value="addressing-1.5.4.mar"/>
-	<property name="rampart.mar" value="rampart-1.5.1.mar"/>	
-	
 	<property name="client.port" value="8080"/>
 	<property name="server.port" value="8080"/>
 	
@@ -165,8 +162,12 @@
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}/modules"/>
 	   		
 	   		<!-- copy modules -->
-	   		<copy file="${modules.dir}/${addressing.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${addressing.mar}" overwrite="true"/>
-	   		<copy file="${modules.dir}/${rampart.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rampart.mar}" overwrite="true"/>
+	   		<copy todir="${service.repos.dir}/sample@{sample.number}/modules">
+	   		    <fileset dir="${modules.dir}">
+	   		        <include name="addressing-*.mar"/>
+	   		        <include name="rampart-*.mar"/>
+	   		    </fileset>
+	   		</copy>
 	   		
 	   		<!-- create service -->
 	   		<mkdir dir="${temp.dir}"/>
@@ -221,8 +222,12 @@
 	   		<copy file="sample@{sample.number}/client.axis2.xml" tofile="${client.repos.dir}/sample@{sample.number}/conf/axis2.xml" overwrite="true"/>
 	   		
 	   		<!-- copy modules -->
-	   		<copy file="${modules.dir}/${addressing.mar}" tofile="${client.repos.dir}/sample@{sample.number}/modules/${addressing.mar}" overwrite="true"/>
-	   		<copy file="${modules.dir}/${rampart.mar}" tofile="${client.repos.dir}/sample@{sample.number}/modules/${rampart.mar}" overwrite="true"/>
+	   		<copy todir="${client.repos.dir}/sample@{sample.number}/modules">
+	   		    <fileset dir="${modules.dir}">
+	   		        <include name="addressing-*.mar"/>
+	   		        <include name="rampart-*.mar"/>
+	   		    </fileset>
+	   		</copy>
 	   		
 	   		<mkdir dir="${temp.client.dir}"/>
 	   		
