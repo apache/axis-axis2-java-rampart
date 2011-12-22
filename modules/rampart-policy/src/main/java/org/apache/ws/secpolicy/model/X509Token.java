@@ -147,18 +147,12 @@ public class X509Token extends Token {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
+        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(namespaceURI);
-
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-            
         // <sp:X509Token> 
-        writer.writeStartElement(prefix, localName, namespaceURI);
+        writeStartElement(writer, prefix, localName, namespaceURI);
         
         String inclusion;
         
@@ -169,53 +163,40 @@ public class X509Token extends Token {
         }
         
         if (inclusion != null) {
-            writer.writeAttribute(prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN , inclusion);
-        }
-        
-        
-        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
-        if (pPrefix == null) {
-            pPrefix = SPConstants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
+            writeAttribute(writer, prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN , inclusion);
         }
         
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+        writeStartElement(writer, SPConstants.POLICY);
         
         if (isRequireKeyIdentifierReference()) {
             // <sp:RequireKeyIdentifierReference />
-            writer.writeStartElement(prefix, SPConstants.REQUIRE_KEY_IDENTIFIRE_REFERENCE, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.REQUIRE_KEY_IDENTIFIRE_REFERENCE, namespaceURI);
         }
         
         if (isRequireIssuerSerialReference()) {
             // <sp:RequireIssuerSerialReference />
-            writer.writeStartElement(prefix, SPConstants.REQUIRE_ISSUER_SERIAL_REFERENCE, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.REQUIRE_ISSUER_SERIAL_REFERENCE, namespaceURI);
         }
         
         if (isRequireEmbeddedTokenReference()) {
             // <sp:RequireEmbeddedTokenReference />
-            writer.writeStartElement(prefix, SPConstants.REQUIRE_EMBEDDED_TOKEN_REFERENCE, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.REQUIRE_EMBEDDED_TOKEN_REFERENCE, namespaceURI);
         }
         
         if (isRequireThumbprintReference()) {
             // <sp:RequireThumbprintReference />
-            writer.writeStartElement(prefix, SPConstants.REQUIRE_THUMBPRINT_REFERENCE, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.REQUIRE_THUMBPRINT_REFERENCE, namespaceURI);
         }
         
         if (tokenVersionAndType != null) {
             // <sp:WssX509V1Token10 /> | ..
-            writer.writeStartElement(prefix, tokenVersionAndType, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, tokenVersionAndType, namespaceURI);
         }
         
         if(isDerivedKeys()) {
             // <sp:RequireDerivedKeys/>
-            writer.writeStartElement(prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
         }
         
         // </wsp:Policy>

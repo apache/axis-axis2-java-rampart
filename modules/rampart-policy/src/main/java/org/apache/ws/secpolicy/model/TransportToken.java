@@ -62,29 +62,11 @@ public class TransportToken extends AbstractSecurityAssertion implements TokenWr
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        
-        String localName = getName().getLocalPart();
-        String namespaceURI = getName().getNamespaceURI();
-        
-        String prefix = writer.getPrefix(namespaceURI);
-        
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-        
         // <sp:TransportToken>
-        
-        writer.writeStartElement(prefix, localName, namespaceURI);
-        
-        String wspPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
-        if (wspPrefix == null) {
-            wspPrefix = SPConstants.POLICY.getPrefix();
-            writer.setPrefix(wspPrefix, SPConstants.POLICY.getNamespaceURI());
-        }
+        writeStartElement(writer, getName());
         
         // <wsp:Policy>
-        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+        writeStartElement(writer, SPConstants.POLICY);
         
         // serialization of the token ..
         if (transportToken != null) {

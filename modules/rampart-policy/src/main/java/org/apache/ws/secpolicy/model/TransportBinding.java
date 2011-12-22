@@ -142,28 +142,15 @@ public class TransportBinding extends Binding {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
+        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(namespaceURI);
-
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-
         // <sp:TransportBinding>
-        writer.writeStartElement(prefix, localName, namespaceURI);
-        writer.writeNamespace(prefix, namespaceURI);
-        
-        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
-        if (pPrefix == null) {
-            pPrefix = SPConstants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
-        }
+        writeStartElement(writer, prefix, localName, namespaceURI);
         
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+        writeStartElement(writer, SPConstants.POLICY);
         
 
         if (transportToken == null) {
@@ -192,10 +179,8 @@ public class TransportBinding extends Binding {
         }
 
         if (isIncludeTimestamp()) {
-            // <sp:IncludeTimestamp>
-            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
-            writer.writeEndElement();
-            // </sp:IncludeTimestamp>
+            // <sp:IncludeTimestamp />
+            writeEmptyElement(writer, prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
         }
         
         // </wsp:Policy>
