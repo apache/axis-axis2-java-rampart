@@ -123,29 +123,15 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
+        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(namespaceURI);
-        
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-
         // <sp:AsymmetricBinding>
-        writer.writeStartElement(prefix, localname, namespaceURI);
-        writer.writeNamespace(prefix, namespaceURI);
-
-        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
-        if (pPrefix == null) {
-            pPrefix = SPConstants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
-        }
+        writeStartElement(writer, prefix, localname, namespaceURI);
 
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(),
-                SPConstants.POLICY.getNamespaceURI());
+        writeStartElement(writer, SPConstants.POLICY);
 
         if (initiatorToken == null) {
             throw new RuntimeException("InitiatorToken is not set");
@@ -180,40 +166,30 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
         }
 
         if (isIncludeTimestamp()) {
-            // <sp:IncludeTimestamp>
-            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP,
-                    namespaceURI);
-            writer.writeEndElement();
-            // </sp:IncludeTimestamp>
+            // <sp:IncludeTimestamp />
+            writeEmptyElement(writer, prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
         }
 
         if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
             // <sp:EncryptBeforeSign />
-            writer.writeStartElement(prefix, SPConstants.ENCRYPT_BEFORE_SIGNING,
-                    namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
         }
 
         if (isSignatureProtection()) {
             // <sp:EncryptSignature />
             // FIXME move the String constants to a QName
-            writer.writeStartElement(prefix, SPConstants.ENCRYPT_SIGNATURE,
-                    namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.ENCRYPT_SIGNATURE, namespaceURI);
         }
 
         if (isTokenProtection()) {
             // <sp:ProtectTokens />
-            writer.writeStartElement(prefix, SPConstants.PROTECT_TOKENS,
-                    namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.PROTECT_TOKENS, namespaceURI);
         }
 
         if (isEntireHeadersAndBodySignatures()) {
             // <sp:OnlySignEntireHeaderAndBody />
-            writer.writeStartElement(prefix,
-                    SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY,
+                    namespaceURI);
         }
 
         // </wsp:Policy>

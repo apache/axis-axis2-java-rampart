@@ -60,27 +60,18 @@ public class RequiredParts extends AbstractSecurityAssertion {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
+        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(namespaceURI);
-
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-            
         // <sp:RequiredParts> 
-        writer.writeStartElement(prefix, localName, namespaceURI);
-        
-        // xmlns:sp=".."
-        writer.writeNamespace(prefix, namespaceURI);
+        writeStartElement(writer, prefix, localName, namespaceURI);
         
         Header header;        
         for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
             header = (Header) iterator.next();
             // <sp:Header Name=".." Namespace=".." />
-            writer.writeStartElement(prefix, SPConstants.HEADER, namespaceURI);
+            writeStartElement(writer, prefix, SPConstants.HEADER, namespaceURI);
             // Name attribute is optional
             if (header.getName() != null) {
                 writer.writeAttribute("Name", header.getName());

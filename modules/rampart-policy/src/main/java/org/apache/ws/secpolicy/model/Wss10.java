@@ -98,53 +98,34 @@ public class Wss10 extends AbstractSecurityAssertion {
     }
     
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
+        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(namespaceURI);
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-
         // <sp:Wss10>
-        writer.writeStartElement(prefix, localname, namespaceURI);
-        
-        // xmlns:sp=".."
-        writer.writeNamespace(prefix, namespaceURI);
-        
-        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
-        if (pPrefix == null) {
-            writer.setPrefix(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getNamespaceURI());
-        }
+        writeStartElement(writer, prefix, localname, namespaceURI);
         
         // <wsp:Policy>
-        writer.writeStartElement(prefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+        writeStartElement(writer, SPConstants.POLICY);
         
         if (isMustSupportRefKeyIdentifier()) {
             // <sp:MustSupportRefKeyIdentifier />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_KEY_IDENTIFIER, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_KEY_IDENTIFIER, namespaceURI);
         }
         
         if (isMustSupportRefIssuerSerial()) {
             // <sp:MustSupportRefIssuerSerial />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_ISSUER_SERIAL, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_ISSUER_SERIAL, namespaceURI);
         }
         
         if (isMustSupportRefExternalURI()) {
             // <sp:MustSupportRefExternalURI />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_EXTERNAL_URI, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_EXTERNAL_URI, namespaceURI);
         }
         
         if (isMustSupportRefEmbeddedToken()) {
             // <sp:MustSupportRefEmbeddedToken />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_EMBEDDED_TOKEN, namespaceURI);
-            writer.writeEndElement();
-
-            
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_EMBEDDED_TOKEN, namespaceURI);
         }
         
         // </wsp:Policy>
