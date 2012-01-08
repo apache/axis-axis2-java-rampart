@@ -311,6 +311,16 @@ public class RampartEngine {
                 }
             } else if (WSConstants.SIGN == actInt.intValue()) {
                 X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+
+                if (rpd.isAsymmetricBinding() && cert == null && rpd.getInitiatorToken() != null
+                        && !rpd.getInitiatorToken().isDerivedKeys()) {
+
+                    // If symmetric binding is used, the certificate should be null.
+                    // If certificate is not null then probably initiator and
+                    // recipient are using 2 different bindings.
+                    throw new RampartException("invalidSignatureAlgo");
+                }
+
                 msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
             }
 
