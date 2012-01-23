@@ -36,6 +36,7 @@ import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.xml.security.utils.XMLUtils;
+import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -100,6 +101,23 @@ public class Axis2Util {
                 if (element.getParentNode() != document) {
                     document.appendChild(element);
                 }
+                // If the Axiom implementation supports DOM, then it is possible/likely that the
+                // DOM API was used to create the object model (or parts of it). In this case, the
+                // object model is not necessarily well formed with respect to namespaces because
+                // DOM doesn't generate namespace declarations automatically. This is an issue
+                // because WSS4J/Santuario expects that all namespace declarations are present.
+                // If this is not the case, then signature values or encryptions will be incorrect.
+                // To avoid this, we normalize the document. Note that if we disable the other
+                // normalizations supported by DOM, this is generally not a heavy operation.
+                // In particular, the Axiom implementation is not required to expand the object
+                // model (including OMSourcedElements) because the Axiom builder is required to
+                // perform namespace repairing, so that no modifications to unexpanded parts of
+                // the message are required.
+                DOMConfiguration domConfig = document.getDomConfig();
+                domConfig.setParameter("split-cdata-sections", Boolean.FALSE);
+                domConfig.setParameter("well-formed", Boolean.FALSE);
+                domConfig.setParameter("namespaces", Boolean.TRUE);
+                document.normalizeDocument();
                 return document;
             }
             
