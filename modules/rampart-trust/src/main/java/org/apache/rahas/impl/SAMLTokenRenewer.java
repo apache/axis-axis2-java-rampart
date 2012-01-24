@@ -1,8 +1,6 @@
 package org.apache.rahas.impl;
 
-import java.security.cert.X509Certificate;
 import java.text.DateFormat;
-import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.axiom.om.OMElement;
@@ -17,16 +15,17 @@ import org.apache.rahas.TokenRenewer;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
-import org.apache.ws.security.WSSecurityException;
+import org.apache.rahas.impl.util.SAMLUtils;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
-import org.apache.xml.security.signature.XMLSignature;
-import org.opensaml.SAMLAssertion;
-import org.opensaml.SAMLException;
+import org.joda.time.DateTime;
+import org.opensaml.saml1.core.Assertion;
+import org.opensaml.saml1.core.Conditions;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+@SuppressWarnings({"UnusedDeclaration"})
 public class SAMLTokenRenewer implements TokenRenewer {
     
     private String configParamName;
@@ -36,14 +35,14 @@ public class SAMLTokenRenewer implements TokenRenewer {
     private String configFile;
 
     public SOAPEnvelope renew(RahasData data) throws TrustException {
-        
+
         // retrieve the message context
         MessageContext inMsgCtx = data.getInMessageContext();
-        
+
         SAMLTokenIssuerConfig config = null;
         if (this.configElement != null) {
             config = new SAMLTokenIssuerConfig(configElement
-                            .getFirstChildWithName(SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
+                    .getFirstChildWithName(SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
         }
 
         // Look for the file
@@ -60,17 +59,17 @@ public class SAMLTokenRenewer implements TokenRenewer {
                                 SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
             } else {
                 throw new TrustException("expectedParameterMissing",
-                        new String[] { this.configParamName });
+                        new String[]{this.configParamName});
             }
         }
 
         if (config == null) {
             throw new TrustException("configurationIsNull");
         }
-        
+
         // retrieve the list of tokens from the message context
         TokenStorage tkStorage = TrustUtil.getTokenStore(inMsgCtx);
-        
+
         // Create envelope
         SOAPEnvelope env = TrustUtil.createSOAPEnvelope(inMsgCtx
                 .getEnvelope().getNamespace().getNamespaceURI());
@@ -88,14 +87,14 @@ public class SAMLTokenRenewer implements TokenRenewer {
             rstrElem = TrustUtil.createRequestSecurityTokenResponseElement(
                     wstVersion, rstrcElem);
         }
-        
+
         Crypto crypto;
-        if (config.cryptoElement != null) { 
+        if (config.cryptoElement != null) {
             // crypto props defined as elements
             crypto = CryptoFactory.getInstance(TrustUtil
                     .toProperties(config.cryptoElement), inMsgCtx
                     .getAxisService().getClassLoader());
-        } else { 
+        } else {
             // crypto props defined in a properties file
             crypto = CryptoFactory.getInstance(config.cryptoPropertiesFile,
                     inMsgCtx.getAxisService().getClassLoader());
@@ -104,12 +103,12 @@ public class SAMLTokenRenewer implements TokenRenewer {
         // Create TokenType element
         TrustUtil.createTokenTypeElement(wstVersion, rstrElem).setText(
                 RahasConstants.TOK_TYPE_SAML_10);
-        
+
         // Creation and expiration times
         Date creationTime = new Date();
         Date expirationTime = new Date();
         expirationTime.setTime(creationTime.getTime() + config.ttl);
-        
+
         // Use GMT time in milliseconds
         DateFormat zulu = new XmlSchemaDateFormat();
 
@@ -121,45 +120,30 @@ public class SAMLTokenRenewer implements TokenRenewer {
         Token tk = tkStorage.getToken(data.getTokenId());
 
         OMElement assertionOMElement = tk.getToken();
-        SAMLAssertion samlAssertion = null;
+        Assertion samlAssertion;
 
-        try {
-            samlAssertion = new SAMLAssertion((Element) assertionOMElement);
-            samlAssertion.unsign();
-            samlAssertion.setNotBefore(creationTime);
-            samlAssertion.setNotOnOrAfter(expirationTime);
-            
-            // sign the assertion
-            X509Certificate[] issuerCerts = crypto
-                    .getCertificates(config.issuerKeyAlias);
+        samlAssertion = SAMLUtils.buildAssertion((Element) assertionOMElement);
 
-            String sigAlgo = XMLSignature.ALGO_ID_SIGNATURE_RSA;
-            String pubKeyAlgo = issuerCerts[0].getPublicKey().getAlgorithm();
-            if (pubKeyAlgo.equalsIgnoreCase("DSA")) {
-                sigAlgo = XMLSignature.ALGO_ID_SIGNATURE_DSA;
-            }
-            java.security.Key issuerPK = crypto.getPrivateKey(
-                    config.issuerKeyAlias, config.issuerKeyPassword);
-            
-            samlAssertion.sign(sigAlgo, issuerPK, Arrays.asList(issuerCerts));
-            
-            // Create the RequestedSecurityToken element and add the SAML token
-            // to it
-            OMElement reqSecTokenElem = TrustUtil
-                    .createRequestedSecurityTokenElement(wstVersion, rstrElem);
-            
-            Node tempNode = samlAssertion.toDOM();
-            reqSecTokenElem.addChild((OMNode) ((Element) rstrElem)
-                    .getOwnerDocument().importNode(tempNode, true));
+        if (samlAssertion.getConditions() == null) {
+            samlAssertion.setConditions((Conditions) SAMLUtils.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME));
 
-
-        } catch (SAMLException e) {
-            throw new TrustException("Cannot create SAML Assertion",e);             
-        } catch (WSSecurityException e) {
-            throw new TrustException("Cannot create SAML Assertion",e);
-        } catch (Exception e) {
-            throw new TrustException("Cannot create SAML Assertion",e);
         }
+
+        samlAssertion.getConditions().setNotBefore(new DateTime(creationTime));
+        samlAssertion.getConditions().setNotOnOrAfter(new DateTime(expirationTime));
+
+        // sign the assertion
+        SAMLUtils.signAssertion(samlAssertion, crypto, config.getIssuerKeyAlias(), config.getIssuerKeyPassword());
+
+        // Create the RequestedSecurityToken element and add the SAML token
+        // to it
+        OMElement reqSecTokenElem = TrustUtil
+                .createRequestedSecurityTokenElement(wstVersion, rstrElem);
+
+        Node tempNode = samlAssertion.getDOM();
+        reqSecTokenElem.addChild((OMNode) ((Element) rstrElem)
+                .getOwnerDocument().importNode(tempNode, true));
+
         return env;
     }
 

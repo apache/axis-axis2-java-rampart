@@ -26,10 +26,8 @@ import org.apache.neethi.Policy;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP12Constants;
-import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.util.WSSecurityUtil;
-import org.opensaml.XML;
 
 public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
 
@@ -105,7 +103,7 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
                                                                      REQUESTED_SECURITY_TOKEN));
         assertNotNull("RequestedSecurityToken missing", rst);
         
-        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
+        OMElement elem = rst.getFirstChildWithName(new QName(RahasConstants.SAML_NS, "Assertion"));
         assertNotNull("Missing SAML Assertoin", elem);
         
         //Uncomment for inteorp - START

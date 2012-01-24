@@ -20,7 +20,6 @@ import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 
 import javax.xml.namespace.QName;
@@ -40,10 +39,6 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.message.token.Reference;
 import org.apache.ws.security.message.token.SecurityTokenReference;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
-import org.opensaml.SAMLAssertion;
-import org.opensaml.SAMLSubjectStatement;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.SubjectConfirmation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -618,38 +613,4 @@ public class TrustUtil {
                         .getAttributeValue().trim());
         return properties;
     }
-
-    /**
-     * Get subject confirmation method of the given SAML 1.1 Assertion
-     * @param assertion SAML 1.1 Assertion
-     * @return  subject confirmation method
-     */
-    public static String getSAML11SubjectConfirmationMethod(SAMLAssertion assertion){
-        String subjectConfirmationMethod =  RahasConstants.SAML11_SUBJECT_CONFIRMATION_HOK;
-        // iterate the statements and get the subject confirmation method.
-        Iterator statements = assertion.getStatements();
-        if(statements.hasNext()){
-            SAMLSubjectStatement stmt = (SAMLSubjectStatement)statements.next();
-            Iterator subjectConfirmations = stmt.getSubject().getConfirmationMethods();
-            if(subjectConfirmations.hasNext()){
-                subjectConfirmationMethod = (String)subjectConfirmations.next();
-            }
-        }
-        return subjectConfirmationMethod;
-    }
-
-    /**
-     * Get the subject confirmation method of a SAML 2.0 assertion
-     * @param assertion SAML 2.0 assertion
-     * @return  Subject Confirmation method
-     */
-    public static String getSAML2SubjectConfirmationMethod(Assertion assertion){
-        String subjectConfirmationMethod = RahasConstants.SAML20_SUBJECT_CONFIRMATION_HOK;
-        List<SubjectConfirmation> subjectConfirmations = assertion.getSubject().getSubjectConfirmations();
-        if(subjectConfirmations.size() > 0){
-            subjectConfirmationMethod = subjectConfirmations.get(0).getMethod();
-        }
-        return  subjectConfirmationMethod;
-    }
-    
 }

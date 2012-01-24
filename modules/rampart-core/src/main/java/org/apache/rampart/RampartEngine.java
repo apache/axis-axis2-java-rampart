@@ -16,7 +16,6 @@
 
 package org.apache.rampart;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -30,13 +29,11 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.rahas.RahasConstants;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
-import org.apache.rahas.TrustUtil;
-import org.apache.rahas.impl.util.SAML2KeyInfo;
-import org.apache.rahas.impl.util.SAML2Utils;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.saml.SAMLAssertionHandler;
+import org.apache.rampart.saml.SAMLAssertionHandlerFactory;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
@@ -46,18 +43,10 @@ import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.WSUsernameTokenPrincipal;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.saml.SAMLKeyInfo;
-import org.apache.ws.security.saml.SAMLUtil;
-import org.opensaml.SAMLAssertion;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Conditions;
-import org.opensaml.saml2.core.Subject;
-import org.opensaml.saml2.core.SubjectConfirmationData;
 
 import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -70,7 +59,6 @@ public class RampartEngine {
 	public Vector process(MessageContext msgCtx) throws WSSPolicyException,
 	RampartException, WSSecurityException, AxisFault {
 
-		boolean doDebug = log.isDebugEnabled();
 		boolean dotDebug = tlog.isDebugEnabled();
 		
 		log.debug("Enter process(MessageContext msgCtx)");
@@ -103,7 +91,7 @@ public class RampartEngine {
 		}
 
 
-		Vector results = null;
+		Vector results;
 
 		WSSecurityEngine engine = new WSSecurityEngine();
 
@@ -188,89 +176,30 @@ public class RampartEngine {
                     (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
             if (WSConstants.ST_UNSIGNED == actInt.intValue()) {
 
-                // If this is a SAML2.0 assertion
-                if (wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION) instanceof Assertion) {
-                    final Assertion assertion = (Assertion) wser.get(
-                            WSSecurityEngineResult.TAG_SAML_ASSERTION);
+                Object samlAssertion = wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
 
-                    // if the subject confirmation method is Bearer, do not try to get the KeyInfo
-                    if(TrustUtil.getSAML2SubjectConfirmationMethod(assertion).equals(
-                            RahasConstants.SAML20_SUBJECT_CONFIRMATION_BEARER)){
-                        break;
-                    }
+                SAMLAssertionHandler samlAssertionHandler
+                        = SAMLAssertionHandlerFactory.createAssertionHandler(samlAssertion);
 
-                    String id = assertion.getID();
-                    Subject subject = assertion.getSubject();
-
-                    Date dateOfCreation = null;
-                    Date dateOfExpiration = null;
-
-                    //Read the validity period from the 'Conditions' element, else read it from SC Data
-                    if (assertion.getConditions() != null) {
-                        Conditions conditions = assertion.getConditions();
-                        if (conditions.getNotBefore() != null) {
-                            dateOfCreation = conditions.getNotBefore().toDate();
-                        }
-                        if (conditions.getNotOnOrAfter() != null) {
-                            dateOfExpiration = conditions.getNotOnOrAfter().toDate();
-                        }
-                    } else {
-                        SubjectConfirmationData scData = subject.getSubjectConfirmations()
-                                .get(0).getSubjectConfirmationData();
-                        if (scData.getNotBefore() != null) {
-                            dateOfCreation = scData.getNotBefore().toDate();
-                        }
-                        if (scData.getNotOnOrAfter() != null) {
-                            dateOfExpiration = scData.getNotOnOrAfter().toDate();
-                        }
-                    }
-
-                    // TODO : SAML2KeyInfo element needs to be moved to WSS4J.
-                    SAML2KeyInfo saml2KeyInfo = SAML2Utils.
-                            getSAML2KeyInfo(assertion, signatureCrypto, tokenCallbackHandler);
-
-                    //Store the token
-                    try {
-                        TokenStorage store = rmd.getTokenStorage();
-                        if (store.getToken(id) == null) {
-                            Token token = new Token(id, (OMElement) SAML2Utils.getElementFromAssertion(assertion), dateOfCreation, dateOfExpiration);
-                            token.setSecret(saml2KeyInfo.getSecret());
-                            store.add(token);
-                        }
-                    } catch (Exception e) {
-                        throw new RampartException(
-                                "errorInAddingTokenIntoStore", e);
-                    }
-
+                if (samlAssertionHandler.isBearerAssertion()) {
+                    break;
                 }
-                //if this is a SAML1.1 assertion
-                else {
-                    final SAMLAssertion assertion = ((SAMLAssertion) wser.get(
-                            WSSecurityEngineResult.TAG_SAML_ASSERTION));
+                //Store the token
+                try {
+                    TokenStorage store = rmd.getTokenStorage();
+                    if (store.getToken(samlAssertionHandler.getAssertionId()) == null) {
+                        Token token = new Token(samlAssertionHandler.getAssertionId(),
+                                samlAssertionHandler.getAssertionElement(),
+                                samlAssertionHandler.getDateNotBefore(),
+                                samlAssertionHandler.getDateNotOnOrAfter());
 
-                    // if the subject confirmation method is Bearer, do not try to get the KeyInfo
-                    if(RahasConstants.SAML11_SUBJECT_CONFIRMATION_BEARER.equals(
-                            TrustUtil.getSAML11SubjectConfirmationMethod(assertion))){
-                        break;
+                        token.setSecret(samlAssertionHandler.
+                                getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler));
+                        store.add(token);
                     }
-
-                    String id = assertion.getId();
-                    Date created = assertion.getNotBefore();
-                    Date expires = assertion.getNotOnOrAfter();
-                    SAMLKeyInfo samlKi = SAMLUtil.getSAMLKeyInfo(assertion,
-                            signatureCrypto, tokenCallbackHandler);
-                    try {
-                        TokenStorage store = rmd.getTokenStorage();
-                        if (store.getToken(id) == null) {
-                            Token token = new Token(id, (OMElement) assertion.toDOM(), created, expires);
-                            token.setSecret(samlKi.getSecret());
-                            store.add(token);
-                        }
-                    } catch (Exception e) {
-                        throw new RampartException(
-                                "errorInAddingTokenIntoStore", e);
-                    }
-
+                } catch (Exception e) {
+                    throw new RampartException(
+                            "errorInAddingTokenIntoStore", e);
                 }
             } else if (WSConstants.UT == actInt.intValue()) {
 

@@ -26,20 +26,21 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.dom.DOMMetaFactory;
-import org.opensaml.XML.ParserPool;
+import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.parse.StaticBasicParserPool;
 
 /**
  * Custom OpenSAML 1.x {@link ParserPool} implementation that uses a DOM aware Axiom implementation
  * instead of requesting a {@link DocumentBuilderFactory} using JAXP.
  */
-public class AxiomParserPool extends ParserPool {
+public class AxiomParserPool extends StaticBasicParserPool {
     public AxiomParserPool() {
         DOMMetaFactory metaFactory = (DOMMetaFactory)OMAbstractFactory.getMetaFactory(FEATURE_DOM);
         DocumentBuilderFactory dbf = metaFactory.newDocumentBuilderFactory();
         // Unfortunately, ParserPool doesn't allow to set the DocumentBuilderFactory, so that we
         // have to use reflection here.
         try {
-            Field dbfField = ParserPool.class.getDeclaredField("dbf");
+            Field dbfField = StaticBasicParserPool.class.getDeclaredField("builderFactory");
             dbfField.setAccessible(true);
             dbfField.set(this, dbf);
         } catch (IllegalAccessException ex) {

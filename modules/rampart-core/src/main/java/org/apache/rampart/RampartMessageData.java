@@ -36,6 +36,8 @@ import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.policy.RampartPolicyBuilder;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.model.RampartConfig;
+import org.apache.rampart.saml.SAMLAssertionHandler;
+import org.apache.rampart.saml.SAMLAssertionHandlerFactory;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.SP11Constants;
@@ -53,7 +55,6 @@ import org.apache.ws.security.message.WSSecHeader;
 import org.apache.ws.security.message.token.SecurityContextToken;
 import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.WSSecurityUtil;
-import org.opensaml.SAMLAssertion;
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;
@@ -588,10 +589,12 @@ public class RampartMessageData {
                     final Integer actInt = 
                         (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
                     if(WSConstants.ST_UNSIGNED == actInt.intValue()) {
-                        final SAMLAssertion assertion = 
-                            ((SAMLAssertion) wser
-                                .get(WSSecurityEngineResult.TAG_SAML_ASSERTION));
-                        return assertion.getId();
+                        final Object assertion =
+                             wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
+                        SAMLAssertionHandler samlAssertionHandler
+                                = SAMLAssertionHandlerFactory.createAssertionHandler(assertion);
+
+                        return samlAssertionHandler.getAssertionId();
                     }
 
                 }

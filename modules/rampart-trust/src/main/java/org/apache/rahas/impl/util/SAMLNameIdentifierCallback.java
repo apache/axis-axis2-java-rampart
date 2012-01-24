@@ -1,7 +1,7 @@
 package org.apache.rahas.impl.util;
 
 import org.apache.rahas.RahasData;
-import org.opensaml.SAMLNameIdentifier;
+import org.opensaml.saml1.core.NameIdentifier;
 
 /**
  * This is used retrieve data for the SAMLNameIdentifier.
@@ -12,7 +12,7 @@ import org.opensaml.SAMLNameIdentifier;
  */
 public class SAMLNameIdentifierCallback implements SAMLCallback{
     
-    private SAMLNameIdentifier nameId = null;
+    private NameIdentifier nameId = null;
     private String userId = null;
     private RahasData data = null;
     
@@ -24,11 +24,11 @@ public class SAMLNameIdentifierCallback implements SAMLCallback{
         return SAMLCallback.NAME_IDENTIFIER_CALLBACK;
     }
 
-    public SAMLNameIdentifier getNameId() {
+    public NameIdentifier getNameId() {
         return nameId;
     }
 
-    public void setNameId(SAMLNameIdentifier nameId) {
+    public void setNameId(NameIdentifier nameId) {
         this.nameId = nameId;
     }
 

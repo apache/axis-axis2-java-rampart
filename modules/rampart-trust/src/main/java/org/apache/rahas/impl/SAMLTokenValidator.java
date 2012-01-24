@@ -18,15 +18,18 @@ import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TokenValidator;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.util.SAMLUtils;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoFactory;
-import org.opensaml.SAMLAssertion;
-import org.opensaml.SAMLException;
+import org.opensaml.saml1.core.Assertion;
+import org.opensaml.xml.signature.SignatureValidator;
+import org.opensaml.xml.validation.ValidationException;
 import org.w3c.dom.Element;
 
 /**
  * Implementation of a SAML Token Validator for the Security Token Service.
  */
+@SuppressWarnings({"UnusedDeclaration"})
 public class SAMLTokenValidator implements TokenValidator {
 
     Log log = LogFactory.getLog(SAMLTokenValidator.class);
@@ -107,23 +110,25 @@ public class SAMLTokenValidator implements TokenValidator {
      * 
      * @param token
      *                the token to validate.
+     * @param issuerPBKey Public key which should be used during validation.
      * @return true if the token has been signed by the issuer.
      */
     private boolean isValid(Token token, PublicKey issuerPBKey) {
         // extract SAMLAssertion object from token
         OMElement assertionOMElement = token.getToken();
-        SAMLAssertion samlAssertion = null;
+        Assertion samlAssertion;
 
         try {
-            samlAssertion = new SAMLAssertion((Element) assertionOMElement);
+            samlAssertion = SAMLUtils.buildAssertion((Element) assertionOMElement);
 
             log.info("Verifying token validity...");
 
             // check if the token has been signed by the issuer.
-            samlAssertion.verify(issuerPBKey);
+            SignatureValidator validator = new SignatureValidator(samlAssertion.getSignature().getSigningCredential());
+            validator.validate(samlAssertion.getSignature());
 
-        } catch (SAMLException e) {
-            log.error("Could not verify signature", e);
+        } catch (ValidationException e) {
+            log.error("Signature verification failed on SAML token.", e);
             return false;
         }
 
@@ -189,14 +194,7 @@ public class SAMLTokenValidator implements TokenValidator {
         return issuerPBKey;
     }
 
-    /**
-     * Returns the <wst:Status> element.
-     * 
-     * @param version
-     *                WS-Trust version.
-     * @param parent
-     *                the parent OMElement.
-     */
+
     private static OMElement createMessageElement(int version,
             OMElement parent, String elementName) throws TrustException {
         return createOMElement(parent, TrustUtil.getWSTNamespace(version),
@@ -216,7 +214,7 @@ public class SAMLTokenValidator implements TokenValidator {
      * value of the &lt;configuration-file&gt; element of the
      * token-dispatcher-configuration
      * 
-     * @param configFile
+     * @param configFile  configuration file to be used.
      */
     public void setConfigurationFile(String configFile) {
         this.configFile = configFile;
@@ -228,7 +226,7 @@ public class SAMLTokenValidator implements TokenValidator {
      * object available in the via the messageContext when the
      * <code>TokenValidator</code> is called.
      * 
-     * @param configParamName
+     * @param configParamName Parameter name.
      * @see org.apache.axis2.description.Parameter
      */
     public void setConfigurationParamName(String configParamName) {

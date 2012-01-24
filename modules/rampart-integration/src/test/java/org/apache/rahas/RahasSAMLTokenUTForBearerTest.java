@@ -24,7 +24,6 @@ import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.opensaml.Configuration;
-import org.opensaml.XML;
 import org.opensaml.saml1.core.Assertion;
 import org.opensaml.saml1.core.AuthenticationStatement;
 import org.opensaml.saml1.core.ConfirmationMethod;
@@ -100,7 +99,7 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
                                                                      REQUESTED_SECURITY_TOKEN));
         assertNotNull("RequestedSecurityToken missing", rst);
 
-        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
+        OMElement elem = rst.getFirstChildWithName(new QName(RahasConstants.SAML_NS, "Assertion"));
         assertNotNull("Missing SAML Assertion", elem);
 
         Assertion assertion = getAssertionObjectFromOMElement(elem);

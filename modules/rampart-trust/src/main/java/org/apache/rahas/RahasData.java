@@ -28,7 +28,7 @@ import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
 import org.apache.ws.security.message.token.SecurityTokenReference;
-import org.opensaml.SAMLAssertion;
+import org.opensaml.saml1.core.Assertion;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
@@ -84,7 +84,7 @@ public class RahasData {
     
     private String  claimDialect;
     
-    private SAMLAssertion assertion;
+    private Assertion assertion;
     /**
      * Create a new RahasData instance and populate it with the information from
      * the request.
@@ -182,7 +182,7 @@ public class RahasData {
                         this.clientCert = certificates[0];
                         this.principal = this.clientCert.getSubjectDN();
                     } else if (act == WSConstants.ST_UNSIGNED) {
-                        this.assertion = (SAMLAssertion) wser
+                        this.assertion = (Assertion) wser
                                 .get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
                         
                     }
