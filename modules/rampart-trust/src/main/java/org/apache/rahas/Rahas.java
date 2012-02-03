@@ -25,9 +25,6 @@ import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
-import org.apache.rahas.impl.util.AxiomParserPool;
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
 import org.opensaml.xml.ConfigurationException;
 
 public class Rahas implements Module {
