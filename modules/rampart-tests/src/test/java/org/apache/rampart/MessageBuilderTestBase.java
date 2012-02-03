@@ -125,7 +125,8 @@ public class MessageBuilderTestBase extends TestCase {
         while (secHeaderChildren.hasNext()) {
             OMElement element = (OMElement) secHeaderChildren.next();
             if (qnameList.hasNext()) {
-                if (!element.getQName().equals(qnameList.next())) {
+                QName elementQName = (QName)qnameList.next();
+                if (!element.getQName().equals(elementQName)) {
                     fail("Incorrect Element" + element);
                 }
             } else {

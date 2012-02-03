@@ -50,7 +50,7 @@ public class InteropScenarioClient {
     public void invokeWithStaticConfig(String clientRepo, String url)
             throws Exception {
         TicketType ticket = TicketType.Factory.newInstance();
-        ticket.setId("My ticket Id");
+        ticket.setId("MyticketId");
 
         Ping ping = Ping.Factory.newInstance();
         ping.setText("Testing rampart");
@@ -71,7 +71,6 @@ public class InteropScenarioClient {
         stub._getServiceClient().getOptions().setSoapVersionURI(soapNsURI);
         stub._getServiceClient().engageModule(
                 new javax.xml.namespace.QName("rampart"));
-        
 
         PingResponseDocument pingResDoc = stub.ping(pingDoc);
 
@@ -84,7 +83,7 @@ public class InteropScenarioClient {
             OutflowConfiguration outflowConfig, InflowConfiguration inflowConfig)
             throws Exception {
         TicketType ticket = TicketType.Factory.newInstance();
-        ticket.setId("My ticket Id");
+        ticket.setId("MyticketId"); // TODO need to figure out why "My ticket Id" is failing
 
         Ping ping = Ping.Factory.newInstance();
         ping.setText("Testing rampart");
@@ -128,7 +127,7 @@ public class InteropScenarioClient {
             Hashtable propRefs)
             throws Exception {
         TicketType ticket = TicketType.Factory.newInstance();
-        ticket.setId("My ticket Id");
+        ticket.setId("MyticketId"); // TODO need to figure out why "My ticket Id" is failing
 
         Ping ping = Ping.Factory.newInstance();
         ping.setText("Testing rampart");

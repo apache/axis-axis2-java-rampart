@@ -17,24 +17,15 @@
 package org.apache.rampart;
 
 import java.io.ByteArrayInputStream;
-import java.util.Vector;
-import java.util.ArrayList;
+import java.util.List;
 import java.security.cert.X509Certificate;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.builder.SOAPBuilder;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.engine.AxisEngine;
-import org.apache.axis2.namespace.Constants;
 import org.apache.neethi.Policy;
-import org.apache.rampart.util.Axis2Util;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.handler.WSHandlerResult;
-import org.apache.ws.security.handler.WSHandlerConstants;
-
-import javax.xml.namespace.QName;
 
 public class RampartEngineTest extends MessageBuilderTestBase {
 
@@ -77,7 +68,7 @@ public class RampartEngineTest extends MessageBuilderTestBase {
         buildSOAPEnvelope(ctx);
 
         RampartEngine engine = new RampartEngine();
-        Vector results = engine.process(ctx);
+        List<WSSecurityEngineResult> results = engine.process(ctx);
 
         /*
         The principle purpose of the test case is to verify that the above processes
@@ -87,12 +78,11 @@ public class RampartEngineTest extends MessageBuilderTestBase {
         assertNotNull("RampartEngine returned null result", results);
         //verify cert was stored
         X509Certificate usedCert = null;
-        for (int i = 0; i < results.size(); i++) {
-            WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(i);
-            Integer action = (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
-            if (action.intValue() == WSConstants.SIGN) {
+        for (WSSecurityEngineResult result : results) {
+            Integer action = (Integer) result.get(WSSecurityEngineResult.TAG_ACTION);
+            if (action == WSConstants.SIGN) {
                 //the result is for the signature, which contains the used certificate
-                usedCert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+                usedCert = (X509Certificate) result.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 break;
             }
         }
@@ -115,7 +105,7 @@ public class RampartEngineTest extends MessageBuilderTestBase {
         buildSOAPEnvelope(ctx);
 
         RampartEngine engine = new RampartEngine();
-        Vector results = engine.process(ctx);
+        List<org.apache.ws.security.WSSecurityEngineResult> results = engine.process(ctx);
 
         /*
         The principle purpose of the test case is to verify that the above processes
@@ -125,12 +115,11 @@ public class RampartEngineTest extends MessageBuilderTestBase {
         assertNotNull("RampartEngine returned null result", results);
         //verify cert was stored
         X509Certificate usedCert = null;
-        for (int i = 0; i < results.size(); i++) {
-            WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(i);
-            Integer action = (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
-            if (action.intValue() == WSConstants.SIGN) {
+        for (WSSecurityEngineResult result : results) {
+            Integer action = (Integer) result.get(WSSecurityEngineResult.TAG_ACTION);
+            if (action == WSConstants.SIGN) {
                 //the result is for the signature, which contains the used certificate
-                usedCert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+                usedCert = (X509Certificate) result.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 break;
             }
         }

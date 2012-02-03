@@ -240,12 +240,8 @@ public class RampartUtil {
        }
        
        return null;
-       
-       
    }
-    
-   
-    
+
     /**
      * Perform a callback to get a password.
      * <p/>
@@ -331,7 +327,8 @@ public class RampartUtil {
 
             if (crypto == null) {
                 // cache miss
-                crypto = CryptoFactory.getInstance(prop, loader);
+                crypto = createCrypto(prop, loader);
+
                 if (cryptoKey != null) {
                     // Crypto caching is enabled - cache the Crypto object
                     cacheCrypto(cryptoKey.trim() + "#" + provider.trim(), crypto);
@@ -342,6 +339,16 @@ public class RampartUtil {
             crypto = getSignatureCrypto(config, loader);
         }
         return crypto;
+    }
+
+    private static Crypto createCrypto(Properties properties, ClassLoader classLoader) throws RampartException {
+
+        try {
+            return CryptoFactory.getInstance(properties, classLoader);
+        } catch (WSSecurityException e) {
+            log.error("Error loading crypto properties.", e);
+            throw new RampartException("cannotCrateCryptoInstance", e);
+        }
     }
     
     /**
@@ -387,7 +394,7 @@ public class RampartUtil {
 
             if (crypto == null) {
                 // cache miss
-                crypto = CryptoFactory.getInstance(prop, loader);
+                crypto = createCrypto(prop, loader);
                 if (cryptoKey != null) {
                     // cache enabled - let's cache
                     cacheCrypto(cryptoKey.trim() + "#" + provider.trim(), crypto);
@@ -877,10 +884,10 @@ public class RampartUtil {
         
     }
     
-    public static Vector getEncryptedParts(RampartMessageData rmd) {
+    public static List<WSEncryptionPart> getEncryptedParts(RampartMessageData rmd) {
 		RampartPolicyData rpd = rmd.getPolicyData();
 		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-		Vector encryptedPartsElements = getPartsAndElements(false, envelope,
+		List<WSEncryptionPart> encryptedPartsElements = getPartsAndElements(false, envelope,
 				rpd.isEncryptBody() && !rpd.isEncryptBodyOptional(), rpd
 						.getEncryptedParts(), rpd.getEncryptedElements(), rpd
 						.getDeclaredNamespaces());
@@ -888,7 +895,7 @@ public class RampartUtil {
 				rpd.getContentEncryptedElements(), rpd.getDeclaredNamespaces());
 	}
 
-	public static Vector getSignedParts(RampartMessageData rmd) {
+	public static List<WSEncryptionPart> getSignedParts(RampartMessageData rmd) {
 		RampartPolicyData rpd = rmd.getPolicyData();
 		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
 
@@ -909,7 +916,7 @@ public class RampartUtil {
 				.getSignedElements(), rpd.getDeclaredNamespaces());
 	}
 
-	public static Vector getSupportingEncryptedParts(RampartMessageData rmd,
+	public static List<WSEncryptionPart> getSupportingEncryptedParts(RampartMessageData rmd,
 			SupportingPolicyData rpd) {
 		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
 		return getPartsAndElements(false, envelope, rpd.isEncryptBody()
@@ -917,7 +924,7 @@ public class RampartUtil {
 				.getEncryptedElements(), rpd.getDeclaredNamespaces());
 	}
 
-	public static Vector getSupportingSignedParts(RampartMessageData rmd,
+	public static List<WSEncryptionPart> getSupportingSignedParts(RampartMessageData rmd,
 			SupportingPolicyData rpd) {
 		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
 		return getPartsAndElements(true, envelope, rpd.isSignBody()
@@ -927,53 +934,49 @@ public class RampartUtil {
     
     public static Set findAllPrefixNamespaces(OMElement currentElement, HashMap decNamespacess)
     {
-    	Set results = new HashSet();
+    	Set<OMNamespace> results = new HashSet<OMNamespace>();
     	
     	//Find declared namespaces
     	findPrefixNamespaces(currentElement,results);
     	
     	//Get all default namespaces
     	List defaultNamespaces = getDefaultPrefixNamespaces(currentElement.getOMFactory());
-    	for (Iterator iterator = defaultNamespaces.iterator(); iterator
-                .hasNext();) {
-            OMNamespace ns = (OMNamespace) iterator.next();
+        for (Object defaultNamespace : defaultNamespaces) {
+            OMNamespace ns = (OMNamespace) defaultNamespace;
             results.add(ns);
         }
-    	
-    	for ( Iterator iterator = decNamespacess.keySet().iterator(); iterator.hasNext();) {
-    	    String prefix  = (String) iterator.next();
-    	    String ns = (String) decNamespacess.get(prefix); 
-    	    OMFactory omFactory = currentElement.getOMFactory();
-    	    OMNamespace namespace = omFactory.createOMNamespace(ns, prefix);
-    	    results.add(namespace);
-    	    
-    	}
+
+        for (Object o : decNamespacess.keySet()) {
+            String prefix = (String) o;
+            String ns = (String) decNamespacess.get(prefix);
+            OMFactory omFactory = currentElement.getOMFactory();
+            OMNamespace namespace = omFactory.createOMNamespace(ns, prefix);
+            results.add(namespace);
+
+        }
     	
     	return results;
     }
-    
-    private static void findPrefixNamespaces(OMElement e, Set results)
-    {
-    	
-	    	Iterator iter = e.getAllDeclaredNamespaces();
-	    	
-	    	if (iter!=null)
-	    	{
-	    		while (iter.hasNext())
-	    				results.add(iter.next());
-	    	}
-	    	
-	    	Iterator children = e.getChildElements();
-	    	
-	    	while (children.hasNext())
-	    	{
-	    		findPrefixNamespaces((OMElement)children.next(), results);
-	    	}
+
+    private static void findPrefixNamespaces(OMElement e, Set<OMNamespace> results) {
+
+        Iterator iterator = e.getAllDeclaredNamespaces();
+
+        if (iterator != null) {
+            while (iterator.hasNext())
+                results.add((OMNamespace)iterator.next());
+        }
+
+        Iterator children = e.getChildElements();
+
+        while (children.hasNext()) {
+            findPrefixNamespaces((OMElement) children.next(), results);
+        }
     }
     
     private static List getDefaultPrefixNamespaces(OMFactory factory)
     {
-    	List namespaces = new ArrayList();
+    	List<OMNamespace> namespaces = new ArrayList<OMNamespace>();
 
     	// put default namespaces here (sp, soapenv, wsu, etc...)
     	namespaces.add(factory.createOMNamespace(WSConstants.ENC_NS, WSConstants.ENC_PREFIX));
@@ -985,72 +988,119 @@ public class RampartUtil {
     	
     }
     
-    public static Vector getContentEncryptedElements (Vector encryptedPartsElements, SOAPEnvelope envelope,Vector elements, HashMap decNamespaces ) {
+    public static List<WSEncryptionPart> getContentEncryptedElements (List<WSEncryptionPart> encryptedPartsElements,
+                                                 SOAPEnvelope envelope,List<String> elements, HashMap decNamespaces ) {
         
         Set namespaces = findAllPrefixNamespaces(envelope, decNamespaces);
-        
-        Iterator elementsIter = elements.iterator();
-        while (elementsIter.hasNext())
-        {
-                String expression = (String)elementsIter.next();
-                try {
-                                XPath xp = new AXIOMXPath(expression);
-                                Iterator nsIter = namespaces.iterator();
-                                
-                                while (nsIter.hasNext())
-                                {
-                                        OMNamespace tmpNs = (OMNamespace)nsIter.next();
-                                        xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
-                                }
-                                
-                                List selectedNodes = xp.selectNodes(envelope);
-                                
-                                Iterator nodesIter = selectedNodes.iterator();
-                                
-                            while (nodesIter.hasNext())
-                            {
-                                OMElement e = (OMElement)nodesIter.next();
-                                
-                                String localName = e.getLocalName();
-                                String namespace = e.getNamespace() != null ? e.getNamespace().getNamespaceURI() : null;
-                                                            
-                                WSEncryptionPart encryptedElem = new WSEncryptionPart(localName, namespace,
-                            "Content", WSConstants.PART_TYPE_ELEMENT);
-                                
-                                encryptedElem.setXpath(expression);
-                                OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
-                                
-                                if ( wsuId != null ) {
-                                    encryptedElem.setEncId(wsuId.getAttributeValue());
-                                }
-                                
-                                encryptedPartsElements.add(encryptedElem);
-                                
-                            }
-                                
-                        } catch (JaxenException e) {
-                                // This has to be changed to propagate an instance of a RampartException up
-                                throw new RuntimeException(e);
-                        }
+
+        for (String expression : elements) {
+            try {
+                XPath xp = new AXIOMXPath(expression);
+
+                for (Object objectNamespace : namespaces) {
+                    OMNamespace tmpNs = (OMNamespace) objectNamespace;
+                    xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
+                }
+
+                List selectedNodes = xp.selectNodes(envelope);
+
+                for (Object selectedNode : selectedNodes) {
+                    OMElement e = (OMElement) selectedNode;
+
+                    String localName = e.getLocalName();
+                    String namespace = e.getNamespace() != null ? e.getNamespace().getNamespaceURI() : null;
+
+                    OMAttribute wsuIdAttribute = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
+
+                    String wsuId = null;
+                    if (wsuIdAttribute != null) {
+                        wsuId = wsuIdAttribute.getAttributeValue();
+                    }
+
+                    encryptedPartsElements.add(createEncryptionPart(localName,
+                            wsuId, namespace, "Content", expression));
+
+                }
+
+            } catch (JaxenException e) {
+                // This has to be changed to propagate an instance of a RampartException up
+                throw new RuntimeException(e);
+            }
         }
         
      
         return encryptedPartsElements;
         
     }
-    
-    public static Vector getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody, Vector parts, Vector elements, HashMap decNamespaces) {
 
-        Vector found = new Vector();
-        Vector result = new Vector();
+
+    /**
+     * Creates an Encryption or Signature paert with given name and id. Name must not be null.
+     * @param name The name of the part
+     * @param id The id of the part.
+     * @return WSEncryptionPart.
+     */
+    public static WSEncryptionPart createEncryptionPart (String name, String id) {
+
+        return createEncryptionPart(name, id, null, null, null);
+    }
+
+    /**
+     * Creates an encryption part. Could be a part or could be an element pointed through xpath expression.
+     * @param name Name of the element.
+     * @param id The id of the element
+     * @param namespace Namespace of the element.
+     * @param modifier Modifier "Content" or "Element"
+     * @return A WSEncryptionPart
+     */
+    public static WSEncryptionPart createEncryptionPart(String name, String id,
+                                                         String namespace, String modifier) {
+
+        return createEncryptionPart(name, id, namespace, modifier, null);
+    }
+
+     /**
+     * Creates an encryption part. Could be a part or could be an element pointed through xpath expression.
+     * @param name Name of the element.
+     * @param id The id of the element
+     * @param namespace Namespace of the element.
+     * @param modifier Modifier "Content" or "Element"
+     * @param xPath The xPath expression
+      * @return A WSEncryptionPart
+     */
+    public static WSEncryptionPart createEncryptionPart(String name, String id,
+                                                         String namespace, String modifier,String xPath) {
+
+        // The part name must not be null !!
+        assert name != null;
+
+        WSEncryptionPart wsEncryptionPart = new WSEncryptionPart(name, namespace, modifier);
+        wsEncryptionPart.setId(id);
+        wsEncryptionPart.setXpath(xPath);
+
+        return wsEncryptionPart;
+    }
+    
+    public static List<WSEncryptionPart> getPartsAndElements(boolean sign, SOAPEnvelope envelope, boolean includeBody,
+                                                             List<WSEncryptionPart> parts, List<String> elements,
+                                                             HashMap decNamespaces) {
+
+        List<OMElement> found = new ArrayList<OMElement>();
+        List<WSEncryptionPart> result = new ArrayList<WSEncryptionPart>();
 
         // check body
         if(includeBody) {
+
+            String wsuId = addWsuIdToElement(envelope.getBody());
+
             if( sign ) {
-                result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody()),null,WSConstants.PART_TYPE_BODY));
+                result.add(createEncryptionPart(envelope.getBody().getLocalName(), wsuId,
+                        null, null));
             } else {
-                result.add(new WSEncryptionPart(addWsuIdToElement(envelope.getBody()), "Content", WSConstants.PART_TYPE_BODY));
+                result.add(createEncryptionPart(envelope.getBody().getLocalName(), wsuId, null, "Content"));
             }
+
+            // TODO can we remove this ?
             found.add( envelope.getBody() );
         }
         
@@ -1058,109 +1108,99 @@ public class RampartUtil {
 
         SOAPHeader header = envelope.getHeader();
 
-        for(int i=0; i<parts.size(); i++) {
-            WSEncryptionPart wsep = (WSEncryptionPart) parts.get( i );
-            if( wsep.getName() == null ) {
+        for (WSEncryptionPart part : parts) {
+            if (part.getName() == null) {
                 // NO name - search by namespace
-                ArrayList headerList = header.getHeaderBlocksWithNSURI( wsep.getNamespace() );
-              
-                for(int j=0; j<headerList.size(); j++) {
-                    SOAPHeaderBlock shb = (SOAPHeaderBlock) headerList.get( j ); 
-                    
+                ArrayList headerList = header.getHeaderBlocksWithNSURI(part.getNamespace());
+
+                for (Object aHeaderList : headerList) {
+                    SOAPHeaderBlock shb = (SOAPHeaderBlock) aHeaderList;
+
                     // find reference in envelope
-                    OMElement e = header.getFirstChildWithName( shb.getQName() );
-                  
-                    if( ! found.contains(  e ) ) {
+                    OMElement e = header.getFirstChildWithName(shb.getQName());
+
+                    if (!found.contains(e)) {
                         // found new
-                        found.add( e );
-                        
-                        if( sign ) {
-                            result.add(new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Content", WSConstants.PART_TYPE_HEADER));
+                        found.add(e);
+
+                        if (sign) {
+                            result.add(createEncryptionPart(e.getLocalName(), null,
+                                    part.getNamespace(), "Content"));
                         } else {
-                            
-                            WSEncryptionPart encryptedHeader = new WSEncryptionPart(e.getLocalName(), wsep.getNamespace(), "Element", WSConstants.PART_TYPE_HEADER);
-                            OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
-                            
-                            if ( wsuId != null ) {
-                                encryptedHeader.setEncId(wsuId.getAttributeValue());
+
+                            OMAttribute wsuIdAttribute = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
+
+                            String wsuId = null;
+                            if (wsuIdAttribute != null) {
+                                wsuId = wsuIdAttribute.getAttributeValue();
                             }
-                            
-                            result.add(encryptedHeader);
+
+                            result.add(createEncryptionPart(e.getLocalName(),wsuId,
+                                    part.getNamespace(), "Element"));
                         }
-                    } 
+                    }
                 }
             } else {
                 // try to find
-                OMElement e = header.getFirstChildWithName( new QName(wsep.getNamespace(), wsep.getName()) );
-                if( e != null ) {
-                    if( ! found.contains( e ) ) {
+                OMElement e = header.getFirstChildWithName(new QName(part.getNamespace(), part.getName()));
+                if (e != null) {
+                    if (!found.contains(e)) {
                         // found new (reuse wsep)
-                        found.add( e );          
-                        wsep.setType(WSConstants.PART_TYPE_HEADER);
+                        found.add(e);
                         OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
-                        
-                        if ( wsuId != null ) {
-                            wsep.setEncId(wsuId.getAttributeValue());
+
+                        if (wsuId != null) {
+                            part.setEncId(wsuId.getAttributeValue());
                         }
-                        
-                        result.add( wsep );
+
+                        result.add(part);
                     }
-                } 
-            } 
+                }
+            }
         }
         
         // ?? Search for 'Elements' here
         
         // decide what exactly is going to be used - only the default namespaces, or the list of all declared namespaces in the message !
         Set namespaces = findAllPrefixNamespaces(envelope, decNamespaces);
-        
-        Iterator elementsIter = elements.iterator();
-        while (elementsIter.hasNext())
-        {
-        	String expression = (String)elementsIter.next();
-        	try {
-				XPath xp = new AXIOMXPath(expression);
-				Iterator nsIter = namespaces.iterator();
-				
-				while (nsIter.hasNext())
-				{
-					OMNamespace tmpNs = (OMNamespace)nsIter.next();
-					xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
-				}
-				
-				List selectedNodes = xp.selectNodes(envelope);
-				
-				Iterator nodesIter = selectedNodes.iterator();
-			    while (nodesIter.hasNext())
-			    {
-			    	OMElement e = (OMElement)nodesIter.next();
-			    	String localName = e.getLocalName();
+
+        for (String expression : elements) {
+            try {
+                XPath xp = new AXIOMXPath(expression);
+
+                for (Object objectNamespace : namespaces) {
+                    OMNamespace tmpNs = (OMNamespace) objectNamespace;
+                    xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
+                }
+
+                List selectedNodes = xp.selectNodes(envelope);
+
+                for (Object selectedNode : selectedNodes) {
+                    OMElement e = (OMElement) selectedNode;
+                    String localName = e.getLocalName();
                     String namespace = e.getNamespace() != null ? e.getNamespace().getNamespaceURI() : null;
-			    	
-			    	if (sign) {
-                        WSEncryptionPart encryptedElem = new WSEncryptionPart(localName,namespace, "Content", WSConstants.PART_TYPE_ELEMENT);
-                        encryptedElem.setXpath(expression);
-                        result.add(encryptedElem);
+
+                    if (sign) {
+
+                        result.add(createEncryptionPart(localName, null, namespace, "Content", expression));
 
                     } else {
 
-                        WSEncryptionPart encryptedElem = new WSEncryptionPart(localName,namespace, "Element", WSConstants.PART_TYPE_ELEMENT);
-                        encryptedElem.setXpath(expression);
+                        OMAttribute wsuIdAttribute = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
 
-			    		OMAttribute wsuId = e.getAttribute(new QName(WSConstants.WSU_NS, "Id"));
-			    	        
-			    		if ( wsuId != null ) {
-			    		    encryptedElem.setEncId(wsuId.getAttributeValue());
-			    		}
-			    		
-			    		result.add(encryptedElem);
-			    	}
-			    }
-				
-			} catch (JaxenException e) {
-				// This has to be changed to propagate an instance of a RampartException up
-				throw new RuntimeException(e);
-			}
+                        String wsuId = null;
+                        if (wsuIdAttribute != null) {
+                            wsuId = wsuIdAttribute.getAttributeValue();
+                        }
+
+                        result.add(createEncryptionPart(localName, wsuId, namespace, "Element", expression));
+                    }
+                }
+
+            } catch (JaxenException e) {
+                // This has to be changed to propagate an instance of a RampartException up
+                throw new RuntimeException(e);
+            }
         }
 
         return result;
@@ -1173,35 +1213,32 @@ public class RampartUtil {
      * @param expression  XPATH expression of required elements
      * @return
      */
-    public static boolean checkRequiredElements(SOAPEnvelope envelope, HashMap decNamespaces, String expression ) {
+    public static boolean checkRequiredElements(SOAPEnvelope envelope, HashMap decNamespaces, String expression) {
 
         // The XPath expression must be evaluated against the SOAP header
         // http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/ws-securitypolicy-1.2-spec-os.html#_Toc161826519
         SOAPHeader header = envelope.getHeader();
-        
         Set namespaces = findAllPrefixNamespaces(header, decNamespaces);
 
         try {
-                        XPath xp = new AXIOMXPath(expression);
-                        Iterator nsIter = namespaces.iterator();
-                        
-                        while (nsIter.hasNext())
-                        {
-                                OMNamespace tmpNs = (OMNamespace)nsIter.next();
-                                xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
-                        }
-                        
-                        List selectedNodes = xp.selectNodes(header);
-                        
-                        if (selectedNodes.size() == 0 ) {
-                            return false;
-                        }
-                
+            XPath xp = new AXIOMXPath(expression);
+
+            for (Object namespace : namespaces) {
+                OMNamespace tmpNs = (OMNamespace) namespace;
+                xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
+            }
+
+            List selectedNodes = xp.selectNodes(header);
+
+            if (selectedNodes.size() == 0) {
+                return false;
+            }
+
         } catch (JaxenException e) {
-                // This has to be changed to propagate an instance of a RampartException up
-                throw new RuntimeException(e);
+            // This has to be changed to propagate an instance of a RampartException up
+            throw new RuntimeException(e);
         }
-        
+
         return true;
     }
     
@@ -1289,13 +1326,14 @@ public class RampartUtil {
             throw new RampartException("missingEncryptionUser");
         }
         if(encrUser.equals(WSHandlerConstants.USE_REQ_SIG_CERT)) {
-            Object resultsObj = rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
+            List<WSHandlerResult> resultsObj
+                    = (List<WSHandlerResult>)rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
             if(resultsObj != null) {
-                encrKeyBuilder.setUseThisCert(getReqSigCert((Vector)resultsObj));
+                encrKeyBuilder.setUseThisCert(getReqSigCert(resultsObj));
                  
                 //TODO This is a hack, this should not come under USE_REQ_SIG_CERT
                 if(encrKeyBuilder.isCertSet()) {
-                	encrKeyBuilder.setUserInfo(getUsername((Vector)resultsObj));
+                	encrKeyBuilder.setUserInfo(getUsername(resultsObj));
                 }
                 	
                 
@@ -1363,27 +1401,23 @@ public class RampartUtil {
 		}
     }
     
-    private static X509Certificate getReqSigCert(Vector results) {
+    private static X509Certificate getReqSigCert(List<WSHandlerResult> results) {
         /*
         * Scan the results for a matching actor. Use results only if the
         * receiving Actor and the sending Actor match.
         */
-        for (int i = 0; i < results.size(); i++) {
-            WSHandlerResult rResult =
-                    (WSHandlerResult) results.get(i);
+        for (WSHandlerResult result : results) {
 
-            Vector wsSecEngineResults = rResult.getResults();
+            List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
             /*
             * Scan the results for the first Signature action. Use the
             * certificate of this Signature to set the certificate for the
             * encryption action :-).
             */
-            for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                WSSecurityEngineResult wser =
-                        (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-                if (actInt.intValue() == WSConstants.SIGN) {
-                    return (X509Certificate)wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+            for (WSSecurityEngineResult wsSecEngineResult : wsSecEngineResults) {
+                Integer actInt = (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
+                if (actInt == WSConstants.SIGN) {
+                    return (X509Certificate) wsSecEngineResult.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 }
             }
         }
@@ -1392,85 +1426,74 @@ public class RampartUtil {
     }
     
     /**
-     * Scan through <code>WSHandlerResult<code> vector for a Username token and return
+     * Scan through <code>WSHandlerResult<code> list for a Username token and return
      * the username if a Username Token found 
      * @param results
      * @return
      */
     
-    public static String getUsername(Vector results) {
+    public static String getUsername(List<WSHandlerResult> results) {
         /*
          * Scan the results for a matching actor. Use results only if the
          * receiving Actor and the sending Actor match.
          */
-         for (int i = 0; i < results.size(); i++) {
-             WSHandlerResult rResult =
-                     (WSHandlerResult) results.get(i);
+        for (WSHandlerResult result : results) {
 
-             Vector wsSecEngineResults = rResult.getResults();
-             /*
-             * Scan the results for a username token. Use the username
-             * of this token to set the alias for the encryption user
-             */
-             for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                 WSSecurityEngineResult wser =
-                         (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                 Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-                 if (actInt.intValue() == WSConstants.UT) {
-                	 WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
-                     return principal.getName();
-                 }
-             }
-         }
+            List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
+            /*
+            * Scan the results for a username token. Use the username
+            * of this token to set the alias for the encryption user
+            */
+            for (WSSecurityEngineResult wsSecEngineResult : wsSecEngineResults) {
+                Integer actInt = (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
+                if (actInt == WSConstants.UT) {
+                    WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) wsSecEngineResult.
+                            get(WSSecurityEngineResult.TAG_PRINCIPAL);
+                    return principal.getName();
+                }
+            }
+        }
          
          return null;
-    }  
-    
-    public static String getRequestEncryptedKeyId(Vector results) {
-        
-        for (int i = 0; i < results.size(); i++) {
-            WSHandlerResult rResult =
-                    (WSHandlerResult) results.get(i);
+    }
 
-            Vector wsSecEngineResults = rResult.getResults();
+    public static String getRequestEncryptedKeyId(List<WSHandlerResult> results) {
+
+        for (WSHandlerResult result : results) {
+
+            List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
             /*
             * Scan the results for the first Signature action. Use the
             * certificate of this Signature to set the certificate for the
             * encryption action :-).
             */
-            for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                WSSecurityEngineResult wser =
-                        (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-                String encrKeyId = (String)wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_ID);
-                if (actInt.intValue() == WSConstants.ENCR && 
+            for (WSSecurityEngineResult wsSecEngineResult : wsSecEngineResults) {
+                Integer actInt = (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
+                String encrKeyId = (String) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ID);
+                if (actInt == WSConstants.ENCR &&
                         encrKeyId != null) {
                     return encrKeyId;
                 }
             }
         }
-        
+
         return null;
     }
     
-    public static byte[] getRequestEncryptedKeyValue(Vector results) {
-        
-        for (int i = 0; i < results.size(); i++) {
-            WSHandlerResult rResult =
-                    (WSHandlerResult) results.get(i);
+    public static byte[] getRequestEncryptedKeyValue(List<WSHandlerResult> results) {
 
-            Vector wsSecEngineResults = rResult.getResults();
+        for (WSHandlerResult result : results) {
+
+            List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
             /*
             * Scan the results for the first Signature action. Use the
             * certificate of this Signature to set the certificate for the
             * encryption action :-).
             */
-            for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                WSSecurityEngineResult wser =
-                        (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-                byte[] decryptedKey = (byte[])wser.get(WSSecurityEngineResult.TAG_DECRYPTED_KEY);
-                if (actInt.intValue() == WSConstants.ENCR && 
+            for (WSSecurityEngineResult wsSecEngineResult : wsSecEngineResults) {
+                Integer actInt = (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
+                byte[] decryptedKey = (byte[]) wsSecEngineResult.get(WSSecurityEngineResult.TAG_SECRET);
+                if (actInt == WSConstants.ENCR &&
                         decryptedKey != null) {
                     return decryptedKey;
                 }
@@ -1492,47 +1515,47 @@ public class RampartUtil {
      */
     public static Element insertSiblingAfterOrPrepend(RampartMessageData rmd, Element child, Element elem) {
         Element retElem = null;
-    	if(child != null){ // child is not null so insert sibling after
-    		retElem = RampartUtil.insertSiblingAfter(rmd, child, elem);
-    	}else{ //Prepend 
-                retElem = prependSecHeader(rmd, elem);
-    	}
-    	
-    	return retElem;
-    }
-    
-    public static Element insertSiblingBeforeOrPrepend(RampartMessageData rmd, Element child, Element elem) {
-        Element retElem = null;
-        if(child != null && child.getPreviousSibling() != null){ 
-                retElem = RampartUtil.insertSiblingBefore(rmd, child, elem);
-        }else{ //Prepend 
-                retElem = prependSecHeader(rmd, elem);
+        if (child != null) { // child is not null so insert sibling after
+            retElem = RampartUtil.insertSiblingAfter(rmd, child, elem);
+        } else { //Prepend
+            retElem = prependSecHeader(rmd, elem);
         }
-        
+
         return retElem;
     }
-    
-    private static Element prependSecHeader(RampartMessageData rmd, Element elem){
+
+    public static Element insertSiblingBeforeOrPrepend(RampartMessageData rmd, Element child, Element elem) {
         Element retElem = null;
-        
+        if (child != null && child.getPreviousSibling() != null) {
+            retElem = RampartUtil.insertSiblingBefore(rmd, child, elem);
+        } else { //Prepend
+            retElem = prependSecHeader(rmd, elem);
+        }
+
+        return retElem;
+    }
+
+    private static Element prependSecHeader(RampartMessageData rmd, Element elem) {
+        Element retElem = null;
+
         Element secHeaderElem = rmd.getSecHeader().getSecurityHeader();
         Node node = secHeaderElem.getOwnerDocument().importNode(
                 elem, true);
-        Element firstElem = (Element)secHeaderElem.getFirstChild();
+        Element firstElem = (Element) secHeaderElem.getFirstChild();
 
-        if(firstElem == null){
-                retElem = (Element)secHeaderElem.appendChild(node);
-        }else{
-                if(firstElem.getOwnerDocument().equals(elem.getOwnerDocument())) {
-                        ((OMElement)firstElem).insertSiblingBefore((OMElement)elem);
+        if (firstElem == null) {
+            retElem = (Element) secHeaderElem.appendChild(node);
+        } else {
+            if (firstElem.getOwnerDocument().equals(elem.getOwnerDocument())) {
+                ((OMElement) firstElem).insertSiblingBefore((OMElement) elem);
                 retElem = elem;
-                } else {
-                        Element newSib = (Element)firstElem.getOwnerDocument().importNode(elem, true);
-                        ((OMElement)firstElem).insertSiblingBefore((OMElement)newSib);
-                        retElem = newSib;
-                }
+            } else {
+                Element newSib = (Element) firstElem.getOwnerDocument().importNode(elem, true);
+                ((OMElement) firstElem).insertSiblingBefore((OMElement) newSib);
+                retElem = newSib;
+            }
         }
-        
+
         return retElem;
     }
     
@@ -1566,10 +1589,9 @@ public class RampartUtil {
         
         if (!initiator && inflow || initiator && !inflow ) {
         
-            Vector supportingToks = rpd.getSupportingTokensList();
-            for (int i = 0; i < supportingToks.size(); i++) {
-                supportingTokens = (SupportingToken) supportingToks.get(i);
-                if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
+            for (SupportingToken supportingTok : supportingToks) {
+                if (supportingTok != null && supportingTok.getTokens().size() != 0) {
                     return true;
                 }
             }
@@ -1613,50 +1635,52 @@ public class RampartUtil {
         return false;
         
     }
-    
-    public static void handleEncryptedSignedHeaders(Vector encryptedParts, Vector signedParts, Document doc) {
-         
+
+    public static void handleEncryptedSignedHeaders(List<WSEncryptionPart> encryptedParts,
+                                                    List<WSEncryptionPart> signedParts, Document doc) {
+
         //TODO Is there a more efficient  way to do this ? better search algorithm 
-        for (int i = 0 ; i < signedParts.size() ; i++) {
-            WSEncryptionPart signedPart = (WSEncryptionPart)signedParts.get(i);
-            
+        for (WSEncryptionPart signedPart : signedParts) {
             //This signed part is not a header
             if (signedPart.getNamespace() == null || signedPart.getName() == null) {
                 continue;
             }
-             
-            for (int j = 0 ; j < encryptedParts.size() ; j ++) {
-                WSEncryptionPart encryptedPart = (WSEncryptionPart) encryptedParts.get(j);
-                
-                if (encryptedPart.getNamespace() == null || encryptedPart.getName() == null ) {
+
+            for (WSEncryptionPart encryptedPart : encryptedParts) {
+
+                if (encryptedPart.getNamespace() == null || encryptedPart.getName() == null) {
                     continue;
                 }
-                
+
                 if (signedPart.getName().equals(encryptedPart.getName()) &&
                         signedPart.getNamespace().equals(encryptedPart.getNamespace())) {
-                    
-                    String encDataID =  encryptedPart.getEncId();                    
-                    Element encDataElem = WSSecurityUtil.findElementById(doc.getDocumentElement(), encDataID, null);
-                    
+
+                    String encDataID = encryptedPart.getEncId();
+
+                    // TODO Do we need to go through the whole tree to find element by id ? Verify
+                    Element encDataElem = WSSecurityUtil.findElementById(doc.getDocumentElement(), encDataID, false);
+
                     if (encDataElem != null) {
-                        Element encHeader = (Element)encDataElem.getParentNode();
+                        Element encHeader = (Element) encDataElem.getParentNode();
                         String encHeaderId = encHeader.getAttributeNS(WSConstants.WSU_NS, "Id");
-                        
+
                         //For some reason the id might not be available
                         // so the part/element with empty/null id won't be recognized afterwards. 
                         if (encHeaderId != null && !"".equals(encHeaderId.trim())) {
                             signedParts.remove(signedPart);
-                            WSEncryptionPart encHeaderToSign = new WSEncryptionPart(encHeaderId);
-                            signedParts.add(encHeaderToSign);
+
+                            signedParts.add(createEncryptionPart(signedPart.getName(), encHeaderId,
+                                    signedPart.getNamespace(),
+                                    signedPart.getEncModifier(), signedPart.getXpath()));
                         }
-                        
+
                     }
                 }
             }
-            
-            
+
+
         }
-        
+
     }
     
     public static String getSigElementId(RampartMessageData rmd) {
@@ -1700,7 +1724,7 @@ public class RampartUtil {
     
     public static WSSConfig getWSSConfigInstance() {
         
-        WSSConfig defaultWssConfig = WSSConfig.getDefaultWSConfig();
+        WSSConfig defaultWssConfig = WSSConfig.getNewInstance();
         WSSConfig wssConfig = WSSConfig.getNewInstance();
         
         wssConfig.setEnableSignatureConfirmation(defaultWssConfig.isEnableSignatureConfirmation());
@@ -1772,5 +1796,105 @@ public class RampartUtil {
 
     }
 
+    /**
+     * Returns SAML10 Assertion namespace. As follows,
+     * http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID
+     * @return SAML10 assertion namespace.
+     */
+    public static String getSAML10AssertionNamespace() {
+
+        StringBuilder stringBuilder = new StringBuilder(WSConstants.SAMLTOKEN_NS);
+        stringBuilder.append("#").append(WSConstants.SAML_ASSERTION_ID);
+
+        return stringBuilder.toString();
+
+    }
+
+    /**
+     * Sets encryption crypto file or crypto reference key to signature crypto file or signature
+     * crypto reference.
+     * @param msgContext The message context to get signature crypto properties and encryption properties
+     * will be set to same message context.
+     */
+    public static void setEncryptionCrypto(MessageContext msgContext) {
+        setEncryptionCryptoFileProperty(msgContext);
+        setEncryptionCryptoReferenceProperty(msgContext);
+    }
+
+    /**
+     * Sets decryption crypto file or crypto reference key to signature crypto file or signature
+     * crypto reference.
+     * @param msgContext The message context to get signature crypto properties and decryption properties
+     * will be set to same message context.
+     */
+    public static void setDecryptionCrypto(MessageContext msgContext) {
+        setDecryptionCryptoFileProperty(msgContext);
+        setDecryptionCryptoReferenceProperty(msgContext);
+    }
+
+    /**
+     * Sets encryption crypto property reference id.- WSHandlerConstants.ENC_PROP_REF_ID
+     * @param msgContext The message context.
+     */
+    private static void setEncryptionCryptoReferenceProperty (MessageContext msgContext) {
+        setCryptoProperty(msgContext, WSHandlerConstants.SIG_PROP_REF_ID, WSHandlerConstants.ENC_PROP_REF_ID);
+    }
+
+    /**
+     * Sets encryption crypto property file.- WSHandlerConstants.DEC_PROP_REF_ID
+     * @param msgContext The message context.
+     */
+    private static void setDecryptionCryptoReferenceProperty (MessageContext msgContext) {
+        setCryptoProperty(msgContext, WSHandlerConstants.SIG_PROP_REF_ID, WSHandlerConstants.DEC_PROP_REF_ID);
+    }
+
+    /**
+     * Sets encryption crypto property file.- WSHandlerConstants.ENC_PROP_FILE
+     * @param msgContext The message context.
+     */
+    private static void setEncryptionCryptoFileProperty (MessageContext msgContext) {
+        setCryptoProperty(msgContext, WSHandlerConstants.SIG_PROP_FILE, WSHandlerConstants.ENC_PROP_FILE);
+    }
+
+    /**
+     * Sets encryption crypto property file.- WSHandlerConstants.DEC_PROP_FILE
+     * @param msgContext The message context.
+     */
+    private static void setDecryptionCryptoFileProperty (MessageContext msgContext) {
+        setCryptoProperty(msgContext, WSHandlerConstants.SIG_PROP_FILE, WSHandlerConstants.DEC_PROP_FILE);
+    }
+
+    private static void setCryptoProperty(MessageContext msgContext, String signaturePropertyName,
+                                          String cryptoPropertyName){
+
+        /**
+         * Encryption Crypto is loaded using WSHandlerConstants.ENC_PROP_FILE. If this is not
+         * set in the message context set WSHandlerConstants.SIG_PROP_FILE as WSHandlerConstants.ENC_PROP_FILE.
+         */
+        if (msgContext.getProperty(cryptoPropertyName) == null) {
+
+
+            String signaturePropertyFile = (String)msgContext.getProperty(signaturePropertyName);
+
+            if (signaturePropertyFile == null) {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Signature crypto property file is not set. Property file key - "
+                            + WSHandlerConstants.SIG_PROP_FILE);
+                }
+            } else {
+                msgContext.setProperty(cryptoPropertyName, signaturePropertyFile);
+            }
+        }
+    }
+
+    /**
+     * Returns true if needed to encrypt first.
+     * @param rpd Rampart policy data
+     * @return true if policy says we need to encrypt first else false.
+     */
+    public static boolean encryptFirst(RampartPolicyData rpd) {
+        return SPConstants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder());
+    }
 
 }

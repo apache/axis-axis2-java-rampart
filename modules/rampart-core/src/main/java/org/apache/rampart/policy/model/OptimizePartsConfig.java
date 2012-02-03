@@ -16,10 +16,7 @@
 
 package org.apache.rampart.policy.model;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -41,11 +38,11 @@ public class OptimizePartsConfig implements Assertion{
 	public final static String PREFIX_ATTR = "prefix";
 	
 	private Map namespaces = null;
-	private Vector expressions = null;
+	private List<String> expressions = null;
 	
 	public OptimizePartsConfig(){
 		namespaces = new HashMap();
-		expressions = new Vector();
+		expressions = new ArrayList<String>();
 	}
 	
 	public void addExpression(String expression){
@@ -56,7 +53,7 @@ public class OptimizePartsConfig implements Assertion{
 		namespaces.put(prefix, ns);
 	}
 	
-	public Vector getExpressions() {
+	public List<String> getExpressions() {
 		return expressions;
 	}
 

@@ -32,7 +32,7 @@ public class Scenario5Test extends InteropTestBase {
 	protected OutflowConfiguration getOutflowConfiguration() {
 		OutflowConfiguration ofc = new OutflowConfiguration(2);
 		
-		ofc.setActionItems("Signature NoSerialization");
+		ofc.setActionItems("Signature");
 		ofc.setUser("alice");
 		ofc.setSignaturePropFile("interop.properties");
 		ofc.setPasswordCallbackClass("org.apache.axis2.security.PWCallback");
@@ -68,7 +68,7 @@ public class Scenario5Test extends InteropTestBase {
     protected OutflowConfiguration getOutflowConfigurationWithRefs() {
         OutflowConfiguration ofc = new OutflowConfiguration(2);
         
-        ofc.setActionItems("Signature NoSerialization");
+        ofc.setActionItems("Signature");
         ofc.setUser("alice");
         ofc.setSignaturePropRefId("key1");
         ofc.setPasswordCallbackClass("org.apache.axis2.security.PWCallback");

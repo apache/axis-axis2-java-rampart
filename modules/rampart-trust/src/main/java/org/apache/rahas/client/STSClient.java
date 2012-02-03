@@ -42,6 +42,7 @@ import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.Trust10;
@@ -53,7 +54,6 @@ import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.token.Reference;
-import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.UUIDGenerator;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
@@ -70,7 +70,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 public class STSClient {
 
@@ -137,6 +136,10 @@ public class STSClient {
             
             client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
             client.getOptions().setSoapVersionURI(this.soapVersion);
+
+            //TODO Remove later
+            client.getOptions().setTimeOutInMilliSeconds(300000);
+
             if(this.addressingNs != null) {
                 client.getOptions().setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.addressingNs);
             }
@@ -474,25 +477,22 @@ public class STSClient {
                 String b64Secret = child.getText();
                 secret = Base64.decode(b64Secret);
             } else if (child.getQName().equals(new QName(ns, WSConstants.ENC_KEY_LN))) {
+
+                Element domChild = (Element) new StAXOMBuilder(
+                        OMAbstractFactory.getMetaFactory(
+                                OMAbstractFactory.FEATURE_DOM).getOMFactory(),
+                        child.getXMLStreamReader()).getDocumentElement();
+
                 try {
-                    Element domChild = (Element) new StAXOMBuilder(
-                            OMAbstractFactory.getMetaFactory(
-                            		OMAbstractFactory.FEATURE_DOM).getOMFactory(), 
-                            child.getXMLStreamReader()).getDocumentElement();
-
-                    EncryptedKeyProcessor processor = new EncryptedKeyProcessor();
-
-                    processor.handleToken(domChild, null, this.crypto,
-                                          this.cbHandler, null, new Vector(),
-                                          null);
-
-                    secret = processor.getDecryptedBytes();
+                    secret = CommonUtil.getDecryptedBytes(this.cbHandler, this.crypto, domChild);
                 } catch (WSSecurityException e) {
+                    log.error("Error decrypting encrypted key element", e);
                     throw new TrustException("errorInProcessingEncryptedKey", e);
                 }
+
             } else if (child.getQName().equals(new QName(ns,
-                                                         RahasConstants.IssuanceBindingLocalNames.
-                                                                 COMPUTED_KEY))) {
+                    RahasConstants.IssuanceBindingLocalNames.
+                            COMPUTED_KEY))) {
                 //Handle the computed key
 
                 //Get service entropy
