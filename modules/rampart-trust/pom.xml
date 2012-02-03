@@ -44,11 +44,11 @@
                 </excludes>
             </resource>
         </resources> 
-	<testResources>
-      		<testResource>
-        		<directory>${project.basedir}/src/test/resources</directory>
-      		</testResource>
-    	</testResources>
+        <testResources>
+            <testResource>
+                <directory>${project.basedir}/src/test/resources</directory>
+            </testResource>
+        </testResources>
 
         <plugins>
             <plugin>
@@ -59,13 +59,13 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-	     <plugin>
+            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-		<!--configuration>
-			<includes>
-                     		<include>**/*Test.java</include>
-                	</includes>
-		</configuration-->
+                <!--configuration>
+                        <includes>
+                                     <include>**/*Test.java</include>
+                        </includes>
+                </configuration-->
             </plugin>
         </plugins>
     </build>
