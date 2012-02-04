@@ -16,9 +16,10 @@
 
 package org.apache.rahas.impl;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.axiom.om.dom.DOMMetaFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
@@ -43,7 +44,6 @@ import org.apache.xml.security.signature.XMLSignature;
 import org.apache.xml.security.utils.EncryptionConstants;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
@@ -53,7 +53,6 @@ import org.opensaml.saml2.core.impl.AssertionBuilder;
 import org.opensaml.saml2.core.impl.ConditionsBuilder;
 import org.opensaml.saml2.core.impl.IssuerBuilder;
 import org.opensaml.saml2.core.impl.NameIDBuilder;
-import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
@@ -98,22 +97,6 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
     private static Log log = LogFactory.getLog(SAML2TokenIssuer.class);
 
-    static {
-        try {
-            // Set the "javax.xml.parsers.DocumentBuilderFactory" system property
-            // to the endorsed JAXP impl.
-            System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
-                    "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-            DefaultBootstrap.bootstrap();
-        } catch (ConfigurationException e) {
-            log.error("SAML2TokenIssuerBootstrapError", e);
-            throw new RuntimeException(e);
-        } finally {
-            // Unset the DOM impl to default
-            DocumentBuilderFactoryImpl.setDOOMRequired(false);
-        }
-    }
-    
     public SOAPEnvelope issue(RahasData data) throws TrustException {
         MessageContext inMsgCtx = data.getInMessageContext();
 
@@ -300,10 +283,8 @@ public class SAML2TokenIssuer implements TokenIssuer {
             writer.write(element, output);
             String elementString = byteArrayOutputStrm.toString();
 
-            DocumentBuilderFactoryImpl.setDOOMRequired(true);
-
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setNamespaceAware(true);
+            DocumentBuilderFactory documentBuilderFactory = ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(
+                    OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory();
             DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(new ByteArrayInputStream(elementString.trim().getBytes()));
             Element assertionElement = document.getDocumentElement();
@@ -334,11 +315,6 @@ public class SAML2TokenIssuer implements TokenIssuer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
-            // Unset the DOM impl to default
-            DocumentBuilderFactoryImpl.setDOOMRequired(false);
-        }
-
 
         return null;
     }

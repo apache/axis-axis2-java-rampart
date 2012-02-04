@@ -17,7 +17,8 @@
 
 package org.apache.rahas.impl.util;
 
-import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.dom.DOMMetaFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
@@ -64,19 +65,9 @@ public class SAML2Utils {
     public static Element getElementFromAssertion(XMLObject xmlObj) throws TrustException {
         try {
             
-            String jaxpProperty = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-            //System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-
             MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(xmlObj);
             Element element = marshaller.marshall(xmlObj);
-
-            // Reset the sys. property to its previous value.
-            if (jaxpProperty == null) {
-                System.getProperties().remove("javax.xml.parsers.DocumentBuilderFactory");
-            } else {
-                System.setProperty("javax.xml.parsers.DocumentBuilderFactory", jaxpProperty);
-            }
 
             ByteArrayOutputStream byteArrayOutputStrm = new ByteArrayOutputStream();
 
@@ -91,14 +82,11 @@ public class SAML2Utils {
             writer.write(element, output);
             String elementString = byteArrayOutputStrm.toString();
 
-            DocumentBuilderFactoryImpl.setDOOMRequired(true);
-
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setNamespaceAware(true);
+            DocumentBuilderFactory documentBuilderFactory = ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(
+                    OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory();
             DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(new ByteArrayInputStream(elementString.trim().getBytes()));
             Element assertionElement = document.getDocumentElement();
-            DocumentBuilderFactoryImpl.setDOOMRequired(false);
 
             log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
             return assertionElement;
