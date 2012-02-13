@@ -22,7 +22,6 @@ import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.dom.DOMMetaFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.*;
@@ -33,7 +32,6 @@ import org.apache.rahas.impl.util.SignKeyHolder;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Base64;
 import org.apache.ws.security.util.Loader;
@@ -101,50 +99,34 @@ public class SAML2TokenIssuer implements TokenIssuer {
         MessageContext inMsgCtx = data.getInMessageContext();
 
         try {
-            SAMLTokenIssuerConfig config = null;
-            if (this.configElement != null) {
-                config = new SAMLTokenIssuerConfig(configElement
-                        .getFirstChildWithName(SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
-            }
+            SAMLTokenIssuerConfig tokenIssuerConfiguration = CommonUtil.getTokenIssuerConfiguration(this.configElement,
+                    this.configFile, inMsgCtx.getParameter(this.configParamName));
 
-            // Look for the file
-            if (config == null && this.configFile != null) {
-                config = new SAMLTokenIssuerConfig(this.configFile);
-                //config = new SAMLTokenIssuerConfig("/home/thilina/Desktop/saml-issuer-config.xml");
-            }
+            if (tokenIssuerConfiguration == null) {
 
-            // Look for the param
-            if (config == null && this.configParamName != null) {
-                Parameter param = inMsgCtx.getParameter(this.configParamName);
-                if (param != null && param.getParameterElement() != null) {
-                    config = new SAMLTokenIssuerConfig(param
-                            .getParameterElement().getFirstChildWithName(
-                            SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
-                } else {
-                    throw new TrustException("expectedParameterMissing",
-                            new String[]{this.configParamName});
+                if (log.isDebugEnabled()) {
+                    String parameterName;
+                    if (this.configElement != null) {
+                        parameterName = "OMElement - " + this.configElement.toString();
+                    } else if (this.configFile != null) {
+                        parameterName = "File - " + this.configFile;
+                    } else if (this.configParamName != null) {
+                        parameterName = "With message context parameter name - " + this.configParamName;
+                    } else {
+                        parameterName = "No method to build configurations";
+                    }
+
+                    log.debug("Unable to build token configurations, " + parameterName);
                 }
-            }
 
-            if (config == null) {
                 throw new TrustException("configurationIsNull");
             }
 
             SOAPEnvelope env = TrustUtil.createSOAPEnvelope(inMsgCtx
                     .getEnvelope().getNamespace().getNamespaceURI());
 
-            Crypto crypto;
-            if (config.cryptoElement != null) { // crypto props
-                // defined as
-                // elements
-                crypto = CryptoFactory.getInstance(TrustUtil
-                        .toProperties(config.cryptoElement), inMsgCtx
+            Crypto crypto = tokenIssuerConfiguration.getIssuerCrypto(inMsgCtx
                         .getAxisService().getClassLoader());
-            } else { // crypto props defined in a properties file
-                crypto = CryptoFactory.getInstance(config.cryptoPropertiesFile,
-                        inMsgCtx.getAxisService().getClassLoader());
-            }
-
 
             // Get the document
             Document doc = ((Element) env).getOwnerDocument();
@@ -153,7 +135,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
             int keySize = data.getKeysize();
             String keyType = data.getKeyType();
 
-            keySize = (keySize == -1) ? config.keySize : keySize;
+            keySize = (keySize == -1) ? tokenIssuerConfiguration.getKeySize() : keySize;
 
             //Build the assertion
             AssertionBuilder assertionBuilder = new AssertionBuilder();
@@ -166,7 +148,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
             //Set the issuer
             IssuerBuilder issuerBuilder = new IssuerBuilder();
             Issuer issuer = issuerBuilder.buildObject();
-            issuer.setValue(config.issuerName);
+            issuer.setValue(tokenIssuerConfiguration.getIssuerName());
             assertion.setIssuer(issuer);
 
             // Set the issued time.
@@ -174,7 +156,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
             // Validity period
             DateTime creationDate = new DateTime();
-            DateTime expirationDate = new DateTime(creationDate.getMillis() + config.ttl);
+            DateTime expirationDate = new DateTime(creationDate.getMillis() + tokenIssuerConfiguration.getTtl());
 
             // These variables are used to build the trust assertion
             Date creationTime = creationDate.toDate();
@@ -189,7 +171,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
             Subject subject;
 
             if (!data.getKeyType().endsWith(RahasConstants.KEY_TYPE_BEARER)) {
-                subject = createSubjectWithHolderOfKeySC(config, doc, crypto, creationDate, expirationDate, data);
+                subject = createSubjectWithHolderOfKeySC(tokenIssuerConfiguration, doc, crypto, creationDate, expirationDate, data);
             }
             else{
                 subject = createSubjectWithBearerSC(data);
@@ -200,18 +182,18 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
             // If a SymmetricKey is used build an attr stmt, if a public key is build an authn stmt. 
             if (isSymmetricKeyBasedHoK) {
-                AttributeStatement attrStmt = createAttributeStatement(data, config);
+                AttributeStatement attrStmt = createAttributeStatement(data, tokenIssuerConfiguration);
                 assertion.getAttributeStatements().add(attrStmt);
             } else {
                 AuthnStatement authStmt = createAuthnStatement(data);
                 assertion.getAuthnStatements().add(authStmt);
                 if (data.getClaimDialect() != null && data.getClaimElem() != null) {
-                    assertion.getAttributeStatements().add(createAttributeStatement(data, config));
+                    assertion.getAttributeStatements().add(createAttributeStatement(data, tokenIssuerConfiguration));
                 }
             }
 
             // Create a SignKeyHolder to hold the crypto objects that are used to sign the assertion
-            SignKeyHolder signKeyHolder = createSignKeyHolder(config, crypto);
+            SignKeyHolder signKeyHolder = createSignKeyHolder(tokenIssuerConfiguration, crypto);
 
             // Sign the assertion
             assertion = setSignature(assertion, signKeyHolder);
@@ -237,12 +219,12 @@ public class SAML2TokenIssuer implements TokenIssuer {
                 TrustUtil.createKeySizeElement(wstVersion, rstrElem, keySize);
             }
 
-            if (config.addRequestedAttachedRef) {
+            if (tokenIssuerConfiguration.isAddRequestedAttachedRef()) {
                 TrustUtil.createRequestedAttachedRef(wstVersion, rstrElem, "#"
                         + assertion.getID(), RahasConstants.TOK_TYPE_SAML_20);
             }
 
-            if (config.addRequestedUnattachedRef) {
+            if (tokenIssuerConfiguration.isAddRequestedUnattachedRef()) {
                 TrustUtil.createRequestedUnattachedRef(wstVersion, rstrElem,
                         assertion.getID(), RahasConstants.TOK_TYPE_SAML_20);
             }
@@ -303,11 +285,12 @@ public class SAML2TokenIssuer implements TokenIssuer {
             TrustUtil.getTokenStore(inMsgCtx).add(assertionToken);
 
             if (keyType.endsWith(RahasConstants.KEY_TYPE_SYMM_KEY)
-                && config.keyComputation != SAMLTokenIssuerConfig.KeyComputation.KEY_COMP_USE_REQ_ENT) {
+                && tokenIssuerConfiguration.getKeyComputation()
+                    != SAMLTokenIssuerConfig.KeyComputation.KEY_COMP_USE_REQ_ENT) {
 
                 // Add the RequestedProofToken
                 TokenIssuerUtil.handleRequestedProofToken(data, wstVersion,
-                                                          config, rstrElem, assertionToken, doc);
+                                                          tokenIssuerConfiguration, rstrElem, assertionToken, doc);
             }
 
             return env;
@@ -368,13 +351,12 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
                 // set keysize
                 int keysize = data.getKeysize();
-                keysize = (keysize != -1) ? keysize : config.keySize;
+                keysize = (keysize != -1) ? keysize : config.getKeySize();
 
                 // TODO setting keysize is removed with wss4j 1.6 migration - do we actually need this ?
 
                 encrKeyBuilder.setEphemeralKey(TokenIssuerUtil.getSharedSecret(
-                        data, config.keyComputation, keysize));
-
+                        data, config.getKeyComputation(), keysize));
 
                 // Set key encryption algo
                 encrKeyBuilder
@@ -620,7 +602,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         SignKeyHolder signKeyHolder = new SignKeyHolder();
 
         try {
-            X509Certificate[] issuerCerts = CommonUtil.getCertificatesByAlias(crypto,config.issuerKeyAlias);
+            X509Certificate[] issuerCerts = CommonUtil.getCertificatesByAlias(crypto,config.getIssuerKeyAlias());
 
             String sigAlgo = XMLSignature.ALGO_ID_SIGNATURE_RSA;
             String pubKeyAlgo = issuerCerts[0].getPublicKey().getAlgorithm();
@@ -628,7 +610,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
                 sigAlgo = XMLSignature.ALGO_ID_SIGNATURE_DSA;
             }
             java.security.Key issuerPK = crypto.getPrivateKey(
-                    config.issuerKeyAlias, config.issuerKeyPassword);
+                    config.getIssuerKeyAlias(), config.getIssuerKeyPassword());
 
             signKeyHolder.setIssuerCerts(issuerCerts);
             signKeyHolder.setIssuerPK((PrivateKey) issuerPK);

@@ -15,7 +15,6 @@ import org.apache.rahas.TokenRenewer;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
-import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLUtils;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
@@ -88,16 +87,8 @@ public class SAMLTokenRenewer implements TokenRenewer {
                     wstVersion, rstrcElem);
         }
 
-        Crypto crypto;
         ClassLoader classLoader = inMsgCtx.getAxisService().getClassLoader();
-        if (config.cryptoElement != null) {
-            // crypto props defined as elements
-            crypto = CommonUtil.getCrypto(TrustUtil
-                    .toProperties(config.cryptoElement), classLoader);
-        } else {
-            // crypto props defined in a properties file
-            crypto = CommonUtil.getCrypto(config.cryptoPropertiesFile, classLoader);
-        }
+        Crypto crypto = config.getIssuerCrypto(classLoader);
 
         // Create TokenType element
         TrustUtil.createTokenTypeElement(wstVersion, rstrElem).setText(
@@ -106,7 +97,7 @@ public class SAMLTokenRenewer implements TokenRenewer {
         // Creation and expiration times
         Date creationTime = new Date();
         Date expirationTime = new Date();
-        expirationTime.setTime(creationTime.getTime() + config.ttl);
+        expirationTime.setTime(creationTime.getTime() + config.getTtl());
 
         // Use GMT time in milliseconds
         DateFormat zulu = new XmlSchemaDateFormat();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
+ * Copyright The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.handler.RequestData;
-import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.Base64;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.keys.KeyInfo;
@@ -55,7 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.Iterator;
 import java.util.List;
 
 public class SAML2Utils {
@@ -174,7 +171,7 @@ public class SAML2Utils {
                 }
 
                 // extract the subject confirmation element from the subject
-                SubjectConfirmation subjectConf = (SubjectConfirmation) samlSubject.getSubjectConfirmations().get(0);
+                SubjectConfirmation subjectConf = samlSubject.getSubjectConfirmations().get(0);
                 if (subjectConf == null) {
                     throw new WSSecurityException(WSSecurityException.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no Subject Confirmation)"});
@@ -191,9 +188,7 @@ public class SAML2Utils {
                 // Get the SAML specific XML representation of the keyInfo object
                 XMLObject KIElem = null;
                 List<XMLObject> scDataElements = scData.getOrderedChildren();
-                Iterator<XMLObject> iterator = scDataElements.iterator();
-                while (iterator.hasNext()) {
-                    XMLObject xmlObj = iterator.next();
+                for (XMLObject xmlObj : scDataElements) {
                     if (xmlObj instanceof org.opensaml.xml.signature.KeyInfo) {
                         KIElem = xmlObj;
                         break;
@@ -205,21 +200,9 @@ public class SAML2Utils {
                 // Generate a DOM element from the XMLObject.
                 if (KIElem != null) {
 
-                    // Set the "javax.xml.parsers.DocumentBuilderFactory" system property to make sure the endorsed JAXP
-                    // implementation is picked over the default jaxp impl shipped with the JDK.
-                    String jaxpProperty = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-                    //System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-
                     MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
                     Marshaller marshaller = marshallerFactory.getMarshaller(KIElem);
                     keyInfoElement = marshaller.marshall(KIElem);
-
-                    // Reset the sys. property to its previous value.
-                    if (jaxpProperty == null) {
-                        System.getProperties().remove("javax.xml.parsers.DocumentBuilderFactory");
-                    } else {
-                        System.setProperty("javax.xml.parsers.DocumentBuilderFactory", jaxpProperty);
-                    }
 
                 } else {
                     throw new WSSecurityException(WSSecurityException.FAILURE,
@@ -227,9 +210,9 @@ public class SAML2Utils {
                 }
 
                 AttributeStatement attrStmt = assertion.getAttributeStatements().size() != 0 ?
-                        (AttributeStatement) assertion.getAttributeStatements().get(0) : null;
+                        assertion.getAttributeStatements().get(0) : null;
                 AuthnStatement authnStmt = assertion.getAuthnStatements().size() != 0 ?
-                        (AuthnStatement) assertion.getAuthnStatements().get(0) : null;
+                        assertion.getAuthnStatements().get(0) : null;
 
                 // if an attr stmt is present, then it has a symmetric key.
                 if (attrStmt != null) {
@@ -258,7 +241,7 @@ public class SAML2Utils {
                 // If an authn stmt is present then it has a public key.
                 if (authnStmt != null) {
 
-                    X509Certificate[] certs = null;
+                    X509Certificate[] certs;
                     try {
                         KeyInfo ki = new KeyInfo(keyInfoElement, null);
 

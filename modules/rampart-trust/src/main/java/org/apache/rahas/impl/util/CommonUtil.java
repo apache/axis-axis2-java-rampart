@@ -17,11 +17,15 @@
 package org.apache.rahas.impl.util;
 
 import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.dom.DOMMetaFactory;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.SAMLTokenIssuerConfig;
 import org.apache.ws.security.WSDocInfo;
 import org.apache.ws.security.WSSConfig;
 import org.apache.ws.security.WSSecurityEngineResult;
@@ -184,5 +188,111 @@ public class CommonUtil {
             throw new TrustException("errorLoadingCryptoProperties", new Object[]{propertiesFile}, e);
 
         }
+    }
+
+    /**
+     * Creates the token issuer configuration. The configuration is created in following order,
+     * 1. Try create token configuration using configuration OMElement
+     * 2. Try create token configuration using a configuration file name
+     * 3. Try create token configuration using a parameter name in message context.
+     * The issuer configuration would look like as follows,
+     *
+     *  <saml-issuer-config>
+     *       <issuerName>Test_STS</issuerName>
+     *       <issuerKeyAlias>ip</issuerKeyAlias>
+     *       <issuerKeyPassword>password</issuerKeyPassword>
+     *       <cryptoProperties>
+     *          <crypto provider="org.apache.ws.security.components.crypto.Merlin">
+     *               <property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</property>
+     *               <property name="org.apache.ws.security.crypto.merlin.file">META-INF/rahas-sts.jks</property>
+     *               <property name="org.apache.ws.security.crypto.merlin.keystore.password">password</property>
+     *           </crypto>
+     *       </cryptoProperties>
+     *       <timeToLive>300000</timeToLive>
+     *       <keySize>256</keySize>
+     *       <addRequestedAttachedRef />
+     *       <addRequestedUnattachedRef />
+     *       <keyComputation>2</keyComputation>
+     *       <proofKeyType>BinarySecret</proofKeyType>
+     *       <trusted-services>
+     *           <service alias="bob">http://localhost:8080/axis2/services/STS</service>
+     *       </trusted-services>
+     *   </saml-issuer-config>
+     *
+     * @param configElement Configuration as an OMElement.
+     * @param configFile Configuration as a file.
+     * @param messageContextParameter Configuration as a message context parameter.
+     * @return  Token issuer configuration as a SAMLTokenIssuerConfig object.
+     * @throws TrustException If an error occurred while creating SAMLTokenIssuerConfig object.
+     */
+    public static SAMLTokenIssuerConfig getTokenIssuerConfiguration(OMElement configElement, String configFile,
+                                                               Parameter messageContextParameter) throws TrustException {
+
+        // First try using configuration element
+        SAMLTokenIssuerConfig tokenIssuerConfiguration = createTokenIssuerConfiguration(configElement);
+
+        if (tokenIssuerConfiguration == null) {
+
+            // Now try file
+            tokenIssuerConfiguration = createTokenIssuerConfiguration(configFile);
+
+            if (tokenIssuerConfiguration == null) {
+
+                // Finally try using the parameter
+                if (messageContextParameter != null) {
+                    tokenIssuerConfiguration = createTokenIssuerConfiguration(messageContextParameter);
+                }
+
+                return tokenIssuerConfiguration;
+            } else {
+                return tokenIssuerConfiguration;
+            }
+
+        } else {
+            return tokenIssuerConfiguration;
+        }
+    }
+
+    protected static SAMLTokenIssuerConfig createTokenIssuerConfiguration(OMElement configElement)
+            throws TrustException {
+
+        if (configElement != null) {
+
+            log.debug("Creating token issuer configuration using OMElement");
+
+            return new SAMLTokenIssuerConfig(configElement
+                    .getFirstChildWithName(SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
+        }
+
+        return null;
+    }
+
+    protected static SAMLTokenIssuerConfig createTokenIssuerConfiguration(String configFile) throws TrustException {
+
+        if (configFile != null) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Creating token issuer configuration using file " + configFile);
+            }
+
+            return new SAMLTokenIssuerConfig(configFile);
+        }
+
+        return null;
+    }
+
+    protected static SAMLTokenIssuerConfig createTokenIssuerConfiguration(Parameter messageContextParameter)
+            throws TrustException {
+
+        if (messageContextParameter != null && messageContextParameter.getParameterElement() != null) {
+
+            log.debug("Creating token issuer configuration using the config parameter");
+
+            return new SAMLTokenIssuerConfig(messageContextParameter
+                    .getParameterElement().getFirstChildWithName(
+                            SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
+        }
+
+        return null;
     }
 }
