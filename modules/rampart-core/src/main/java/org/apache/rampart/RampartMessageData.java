@@ -170,6 +170,9 @@ public class RampartMessageData {
         this.msgContext = msgCtx;
         
         try {
+
+            // Set the WSSConfig
+            this.config = WSSConfig.getNewInstance();
             
             // First obtain the axis service as we have to do a null check, there can be situations 
             // where Axis Service is null
@@ -339,27 +342,23 @@ public class RampartMessageData {
                     msgContext.setProperty(SCT_ID, outMsgCtx.getProperty(SCT_ID));
                 }
             }
-            
-           // Check whether RampartConfig is present 
-           if (this.policyData != null && this.policyData.getRampartConfig() != null) {
-               
-               boolean timestampPrecisionInMilliseconds = Boolean.valueOf(this.policyData
-                       .getRampartConfig().getTimestampPrecisionInMilliseconds()).booleanValue();
-               
-               // This is not the default behavior, we clone the default WSSConfig to prevent this 
-               // affecting globally 
-               if (timestampPrecisionInMilliseconds == WSSConfig.getNewInstance()
-                                                           .isPrecisionInMilliSeconds()) {
-                   this.config = WSSConfig.getNewInstance();
-               } else {
-                   this.config = RampartUtil.getWSSConfigInstance();
-                   this.config.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);               
-               }
-           } else {
-               this.config = WSSConfig.getNewInstance();
-           }
-            
-           // To handle scenarios where password type is not set by default.
+
+            // Check whether RampartConfig is present
+            if (this.policyData != null && this.policyData.getRampartConfig() != null) {
+
+                boolean timestampPrecisionInMilliseconds = this.policyData
+                        .getRampartConfig().isDefaultTimestampPrecisionInMs();
+                boolean timestampStrict = this.policyData.getRampartConfig().isTimeStampStrict();
+
+
+                // We do not need earlier logic as now WSS4J returns a new instance of WSSConfig, rather
+                // than a singleton instance. Therefore modifying logic as follows,
+                this.config.setTimeStampStrict(timestampStrict);
+                this.config.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);
+
+            }
+
+            // To handle scenarios where password type is not set by default.
             this.config.setHandleCustomPasswordTypes(true);
 
             if (axisService != null) { 

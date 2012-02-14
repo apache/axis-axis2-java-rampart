@@ -154,6 +154,12 @@ public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
         	rampartConfig.setOptimizeParts(config);
         }
 
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.TIMESTAMP_STRICT_LN));
+        if (childElement != null) {
+            rampartConfig.setTimeStampStrict(childElement.getText().trim());
+        }
+
         return rampartConfig;
     }
 

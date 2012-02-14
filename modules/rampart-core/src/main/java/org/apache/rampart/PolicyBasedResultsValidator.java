@@ -196,8 +196,9 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
          * Perform further checks on the timestamp that was transmitted in the
          * header. 
          * In the following implementation the timestamp is valid if :
-         * Timestamp->Created < 'now' < Timestamp->Expires (Last test already handled by WSS4J)
-         * 
+         * Timestamp->Created < 'now' < Timestamp->Expires.
+         * (Last test handled by WSS4J also if timeStampStrict enabled)
+         *
          * Note: the method verifyTimestamp(Timestamp) allows custom
          * implementations with other validation algorithms for subclasses.
          */
@@ -648,27 +649,45 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                         ((rpd.getInitiatorToken() != null && rmd.isInitiator())
                                 || rpd.getRecipientToken() != null && !rmd.isInitiator()));
     }
-    
+
 
     /*
-     * Verify that ts->Created is before 'now'
-     * - testing that timestamp has not expired ('now' is before ts->Expires) is handled earlier by WSS4J
-     * TODO must write unit tests
-     */
+    * Verify whether timestamp of the message is valid.
+    * If timeStampStrict is enabled in rampartConfig; testing of timestamp has not expired
+    * ('now' is before ts->Expires) is also handled earlier by WSS4J without timeskew.
+    * TODO must write unit tests
+    */
     protected boolean verifyTimestamp(Timestamp timestamp, RampartMessageData rmd) throws RampartException {
 
+        long maxSkew = RampartUtil.getTimestampMaxSkew(rmd);
+
+        //Verify that ts->Created is before 'now'
         Date createdTime = timestamp.getCreated();
         if (createdTime != null) {
             long now = Calendar.getInstance().getTimeInMillis();
 
-            // adjust 'now' with allowed timeskew 
-            long maxSkew = RampartUtil.getTimestampMaxSkew( rmd );
-            if( maxSkew > 0 ) {
+            //calculate the tolerance limit for timeskew of the 'Created' in timestamp
+            if (maxSkew > 0) {
                 now += (maxSkew * 1000);
             }
-            
+
             // fail if ts->Created is after 'now'
-            if( createdTime.getTime() > now ) {
+            if (createdTime.getTime() > now) {
+                return false;
+            }
+        }
+
+        //Verify that ts->Expires is after now.
+        Date expires = timestamp.getExpires();
+
+        if (expires != null) {
+            long now = Calendar.getInstance().getTimeInMillis();
+            //calculate the tolerance limit for timeskew of the 'Expires' in timestamp
+            if (maxSkew > 0) {
+                now -= (maxSkew * 1000);
+            }
+            //fail if ts->Expires is before 'now'
+            if (expires.getTime() < now) {
                 return false;
             }
         }
