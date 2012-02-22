@@ -130,7 +130,7 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
             builder = new StAXOMBuilder(fis);
         } catch (Exception e) {
             throw new TrustException("errorLoadingConfigFile",
-                    new String[] { configFilePath });
+                    new String[] { configFilePath }, e);
         }
         this.load(builder.getDocumentElement());
     }
