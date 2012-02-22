@@ -20,7 +20,8 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -124,10 +125,10 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
      */
     public SAMLTokenIssuerConfig(String configFilePath) throws TrustException {
         FileInputStream fis;
-        StAXOMBuilder builder;
+        OMXMLParserWrapper builder;
         try {
             fis = new FileInputStream(configFilePath);
-            builder = new StAXOMBuilder(fis);
+            builder = OMXMLBuilderFactory.createOMBuilder(fis);
         } catch (Exception e) {
             throw new TrustException("errorLoadingConfigFile",
                     new String[] { configFilePath }, e);
