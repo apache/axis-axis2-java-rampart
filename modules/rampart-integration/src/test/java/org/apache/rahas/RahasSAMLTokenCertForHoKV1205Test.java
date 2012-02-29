@@ -24,9 +24,7 @@ import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP12Constants;
-import org.apache.ws.secpolicy.SPConstants;
 import org.apache.xml.security.encryption.XMLCipher;
-import org.opensaml.XML;
 
 import javax.xml.namespace.QName;
 
@@ -114,7 +112,7 @@ public class RahasSAMLTokenCertForHoKV1205Test extends TestClient {
                                                      RahasConstants.IssuanceBindingLocalNames.
                                                              REQUESTED_SECURITY_TOKEN));
         assertNotNull("RequestedSecurityToken missing", rst);
-        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
+        OMElement elem = rst.getFirstChildWithName(new QName(RahasConstants.SAML_NS, "Assertion"));
         assertNotNull("Missing SAML Assertoin", elem);
 
     }
