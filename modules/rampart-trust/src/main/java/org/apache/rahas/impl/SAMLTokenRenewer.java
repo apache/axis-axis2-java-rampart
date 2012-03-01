@@ -15,9 +15,9 @@ import org.apache.rahas.TokenRenewer;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLUtils;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.joda.time.DateTime;
 import org.opensaml.saml1.core.Assertion;
@@ -89,15 +89,14 @@ public class SAMLTokenRenewer implements TokenRenewer {
         }
 
         Crypto crypto;
+        ClassLoader classLoader = inMsgCtx.getAxisService().getClassLoader();
         if (config.cryptoElement != null) {
             // crypto props defined as elements
-            crypto = CryptoFactory.getInstance(TrustUtil
-                    .toProperties(config.cryptoElement), inMsgCtx
-                    .getAxisService().getClassLoader());
+            crypto = CommonUtil.getCrypto(TrustUtil
+                    .toProperties(config.cryptoElement), classLoader);
         } else {
             // crypto props defined in a properties file
-            crypto = CryptoFactory.getInstance(config.cryptoPropertiesFile,
-                    inMsgCtx.getAxisService().getClassLoader());
+            crypto = CommonUtil.getCrypto(config.cryptoPropertiesFile, classLoader);
         }
 
         // Create TokenType element

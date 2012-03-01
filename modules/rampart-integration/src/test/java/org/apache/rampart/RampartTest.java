@@ -36,10 +36,23 @@ import org.apache.axis2.integration.UtilServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
 
 public class RampartTest extends TestCase {
 
     public final static int PORT = UtilServer.TESTING_PORT;
+
+    private static ResourceBundle resources;
+
+    static {
+        try {
+            resources = ResourceBundle.getBundle("org.apache.rampart.errors");
+        } catch (MissingResourceException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
 
     public RampartTest(String name) {
         super(name);
@@ -83,7 +96,7 @@ public class RampartTest extends TestCase {
                         "Unlimited Strength Jurisdiction Policy !!!");
             }
             
-            for (int i = 1; i <= 33; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 34; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
                     continue;
@@ -122,19 +135,34 @@ public class RampartTest extends TestCase {
                     serviceClient.addHeader(header);
                 }
                 
-                // Invoking the serive in the TestCase-28 should fail. So handling it differently..
-                if (i == 28) {
+                // Invoking the service in the TestCase-28 should fail. So handling it differently..
+                if (i == 28 || i == 34) {
                     try {
+
                         //Blocking invocation
                         serviceClient.sendReceive(getOMElement());
-                        fail("Service Should throw an error..");
+
+                        String message = "";
+
+                        if (i == 34) {
+                            message = "Test case 34 should fail. We are running the service in symmetric binding mode " +
+                                      "and client in asymmetric binding mode. Therefore test case 34 should fail.";
+                        }
+
+                        fail("Service Should throw an error - " + message);
 
                     } catch (AxisFault axisFault) {
-                        assertEquals("Expected encrypted part missing", axisFault.getMessage());
+
+                        if (i == 28) {
+                            assertEquals(resources.getString("encryptionMissing"), axisFault.getMessage());
+                        } else if (i == 34) {
+                            assertEquals(resources.getString("invalidSignatureAlgo"), axisFault.getMessage());
+                        }
+
                     }
                 }
-
                 else{
+
                     //Blocking invocation
                     serviceClient.sendReceive(getEchoElement());
                 }

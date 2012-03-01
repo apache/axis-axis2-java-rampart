@@ -37,18 +37,12 @@ import org.apache.rampart.saml.SAMLAssertionHandlerFactory;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityEngine;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.WSUsernameTokenPrincipal;
+import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
 
 import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
 public class RampartEngine {
 
@@ -56,7 +50,7 @@ public class RampartEngine {
 	private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);
     private static ServiceNonceCache serviceNonceCache = new ServiceNonceCache();
 
-	public Vector process(MessageContext msgCtx) throws WSSPolicyException,
+	public List<WSSecurityEngineResult> process(MessageContext msgCtx) throws WSSPolicyException,
 	RampartException, WSSecurityException, AxisFault {
 
 		boolean dotDebug = tlog.isDebugEnabled();
@@ -91,7 +85,7 @@ public class RampartEngine {
 		}
 
 
-		Vector results;
+		List<WSSecurityEngineResult> results;
 
 		WSSecurityEngine engine = new WSSecurityEngine();
 
@@ -102,7 +96,7 @@ public class RampartEngine {
 		    throw new RampartException("missingSOAPHeader");
 		}
 		
-                ArrayList headerBlocks = header.getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
+        ArrayList headerBlocks = header.getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
 		SOAPHeaderBlock secHeader = null;
 		//Issue is axiom - a returned collection must not be null
 		if(headerBlocks != null) {
@@ -150,6 +144,7 @@ public class RampartEngine {
             }
 
 		} else {
+
 			log.debug("Processing security header in normal path");
 			results = engine.processSecurityHeader(rmd.getDocument(),
 					actorValue, 
@@ -201,7 +196,7 @@ public class RampartEngine {
                     throw new RampartException(
                             "errorInAddingTokenIntoStore", e);
                 }
-            } else if (WSConstants.UT == actInt.intValue()) {
+            } else if (WSConstants.UT == actInt) {
 
 		        WSUsernameTokenPrincipal userNameTokenPrincipal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
 
@@ -238,8 +233,18 @@ public class RampartEngine {
 
                     serviceNonceCache.addNonceForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce(), nonceLifeTimeInSeconds);
                 }
-            } else if (WSConstants.SIGN == actInt.intValue()) {
+            } else if (WSConstants.SIGN == actInt) {
                 X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+
+                if (rpd.isAsymmetricBinding() && cert == null && rpd.getInitiatorToken() != null
+                        && !rpd.getInitiatorToken().isDerivedKeys()) {
+
+                    // If symmetric binding is used, the certificate should be null.
+                    // If certificate is not null then probably initiator and
+                    // recipient are using 2 different bindings.
+                    throw new RampartException("invalidSignatureAlgo");
+                }
+
                 msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
             }
 
@@ -256,8 +261,16 @@ public class RampartEngine {
 		Axis2Util.useDOOM(false);
 				
 		PolicyValidatorCallbackHandler validator = RampartUtil.getPolicyValidatorCB(msgCtx, rpd);
-		
-		validator.validate(data, results);
+
+        if (validator instanceof ExtendedPolicyValidatorCallbackHandler) {
+            ExtendedPolicyValidatorCallbackHandler extendedPolicyValidatorCallbackHandler
+                    = (ExtendedPolicyValidatorCallbackHandler)validator;
+            extendedPolicyValidatorCallbackHandler.validate(data,results);
+        } else {
+            Vector resultsVector = new Vector(results);
+            validator.validate(data, resultsVector);
+        }
+
 
 		if(dotDebug){
 			t3 = System.currentTimeMillis();

@@ -58,14 +58,10 @@ import org.w3c.dom.Element;
 
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.xml.crypto.dsig.Reference;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import java.util.Map.Entry;
 
 public abstract class BindingBuilder {
@@ -75,7 +71,7 @@ public abstract class BindingBuilder {
     
     protected String mainSigId = null;
     
-    protected ArrayList encryptedTokensIdList = new ArrayList();
+    protected ArrayList<String> encryptedTokensIdList = new ArrayList<String>();
     
     protected Element timestampElement;
     
@@ -225,7 +221,8 @@ public abstract class BindingBuilder {
         try {
             RampartUtil.setKeyIdentifierType(rmd, encrKey, token);
             RampartUtil.setEncryptionUser(rmd, encrKey);
-            encrKey.setKeySize(rpd.getAlgorithmSuite().getMaximumSymmetricKeyLength());
+
+            //TODO we do not need to pass keysize as it is taken from algorithm it self - verify
             encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
             
             encrKey.prepare(doc, RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
@@ -354,6 +351,7 @@ public abstract class BindingBuilder {
             throws RampartException {
         
         //Create the list to hold the tokens
+        // TODO putting different types of objects. Need to figure out a way to add single types of objects
         HashMap endSuppTokMap = new HashMap();
         
         if(suppTokens != null && suppTokens.getTokens() != null &&
@@ -361,70 +359,70 @@ public abstract class BindingBuilder {
             log.debug("Processing supporting tokens");
 
             ArrayList tokens = suppTokens.getTokens();
-            for (Iterator iter = tokens.iterator(); iter.hasNext();) {
-                Token token = (Token) iter.next();
+            for (Object objectToken : tokens) {
+                Token token = (Token) objectToken;
                 org.apache.rahas.Token endSuppTok = null;
-                if(token instanceof IssuedToken && rmd.isInitiator()){
-                    String id = RampartUtil.getIssuedToken(rmd, (IssuedToken)token);
+                if (token instanceof IssuedToken && rmd.isInitiator()) {
+                    String id = RampartUtil.getIssuedToken(rmd, (IssuedToken) token);
                     try {
                         endSuppTok = rmd.getTokenStorage().getToken(id);
                     } catch (TrustException e) {
-                        throw new RampartException("errorInRetrievingTokenId", 
+                        throw new RampartException("errorInRetrievingTokenId",
                                 new String[]{id}, e);
                     }
-                    
-                    if(endSuppTok == null) {
-                        throw new RampartException("errorInRetrievingTokenId", 
+
+                    if (endSuppTok == null) {
+                        throw new RampartException("errorInRetrievingTokenId",
                                 new String[]{id});
                     }
-                    
+
                     //Add the token to the header
                     Element siblingElem = RampartUtil
                             .insertSiblingAfter(rmd, this.getInsertionLocation(),
                                     (Element) endSuppTok.getToken());
                     this.setInsertionLocation(siblingElem);
-                    
+
                     if (suppTokens.isEncryptedToken()) {
                         this.encryptedTokensIdList.add(endSuppTok.getId());
                     }
-                    
+
                     //Add the extracted token
                     endSuppTokMap.put(token, endSuppTok);
-                    
-                } else if(token instanceof X509Token) {
 
-                        //We have to use a cert
-                        //Prepare X509 signature
-                        WSSecSignature sig = this.getSignatureBuilder(rmd, token);
-                        Element bstElem = sig.getBinarySecurityTokenElement();
-                        if(bstElem != null) {   
-                            bstElem = RampartUtil.insertSiblingAfter(rmd, 
-                                    this.getInsertionLocation(), bstElem);
-                            this.setInsertionLocation(bstElem);
-                            
-                            SupportingPolicyData supportingPolcy = new SupportingPolicyData();
-                            supportingPolcy.build(suppTokens);
-                            supportingPolcy.setSignatureToken(token);
-                            supportingPolcy.setEncryptionToken(token);
-                            rmd.getPolicyData().addSupportingPolicyData(supportingPolcy);
-                            
-                            if (suppTokens.isEncryptedToken()) {
-                                this.encryptedTokensIdList.add(sig.getBSTTokenId());
-                            }
+                } else if (token instanceof X509Token) {
+
+                    //We have to use a cert
+                    //Prepare X509 signature
+                    WSSecSignature sig = this.getSignatureBuilder(rmd, token);
+                    Element bstElem = sig.getBinarySecurityTokenElement();
+                    if (bstElem != null) {
+                        bstElem = RampartUtil.insertSiblingAfter(rmd,
+                                this.getInsertionLocation(), bstElem);
+                        this.setInsertionLocation(bstElem);
+
+                        SupportingPolicyData supportingPolcy = new SupportingPolicyData();
+                        supportingPolcy.build(suppTokens);
+                        supportingPolcy.setSignatureToken(token);
+                        supportingPolcy.setEncryptionToken(token);
+                        rmd.getPolicyData().addSupportingPolicyData(supportingPolcy);
+
+                        if (suppTokens.isEncryptedToken()) {
+                            this.encryptedTokensIdList.add(sig.getBSTTokenId());
                         }
-                        endSuppTokMap.put(token, sig);
-                        
-                } else if(token instanceof UsernameToken) {
-                    WSSecUsernameToken utBuilder = addUsernameToken(rmd, (UsernameToken)token);
-                    
+                    }
+                    endSuppTokMap.put(token, sig);
+
+                } else if (token instanceof UsernameToken) {
+                    WSSecUsernameToken utBuilder = addUsernameToken(rmd, (UsernameToken) token);
+
                     utBuilder.prepare(rmd.getDocument());
-                    
+
                     //Add the UT
                     Element elem = utBuilder.getUsernameTokenElement();
                     elem = RampartUtil.insertSiblingAfter(rmd, this.getInsertionLocation(), elem);
-                    
+
                     encryptedTokensIdList.add(utBuilder.getId());
-                    
+
                     //Move the insert location to the next element
                     this.setInsertionLocation(elem);
                     Date now = new Date();
@@ -447,27 +445,28 @@ public abstract class BindingBuilder {
      * @param sigParts
      * @throws RampartException
      */
-    protected Vector addSignatureParts(HashMap tokenMap, Vector sigParts) throws RampartException {
+    protected List<WSEncryptionPart> addSignatureParts(HashMap tokenMap, List<WSEncryptionPart> sigParts)
+            throws RampartException {
     	
         Set entrySet = tokenMap.entrySet();
-        
-        for (Iterator iter = entrySet.iterator(); iter.hasNext();) {
-            Object tempTok =  ((Entry)iter.next()).getValue();
+
+        for (Object anEntrySet : entrySet) {
+            Object tempTok = ((Entry) anEntrySet).getValue();
             WSEncryptionPart part = null;
-            
-            if(tempTok instanceof org.apache.rahas.Token) {
-            	
+
+            if (tempTok instanceof org.apache.rahas.Token) {
+
                 part = new WSEncryptionPart(
                         ((org.apache.rahas.Token) tempTok).getId());
-                
-            } else if(tempTok instanceof WSSecSignature) {
+
+            } else if (tempTok instanceof WSSecSignature) {
                 WSSecSignature tempSig = (WSSecSignature) tempTok;
-                if(tempSig.getBSTTokenId() != null) {
+                if (tempSig.getBSTTokenId() != null) {
                     part = new WSEncryptionPart(tempSig.getBSTTokenId());
                 }
             } else {
-            	
-              throw new RampartException("UnsupportedTokenInSupportingToken");  
+
+                throw new RampartException("UnsupportedTokenInSupportingToken");
             }
             sigParts.add(part);
         }
@@ -485,45 +484,55 @@ public abstract class BindingBuilder {
     }
     
     
-    protected Vector doEndorsedSignatures(RampartMessageData rmd, HashMap tokenMap) throws RampartException {
+    protected List<byte[]> doEndorsedSignatures(RampartMessageData rmd, HashMap tokenMap) throws RampartException {
         
         Set tokenSet = tokenMap.keySet();
         
-        Vector sigValues = new Vector();
-        
-        for (Iterator iter = tokenSet.iterator(); iter.hasNext();) {
-            
-            Token token = (Token)iter.next();
-            
+        List<byte[]> sigValues = new ArrayList<byte[]>();
+
+        for (Object aTokenSet : tokenSet) {
+
+            Token token = (Token) aTokenSet;
+
             Object tempTok = tokenMap.get(token);
-            
-            Vector sigParts = new Vector();
+
+            // Migrating to a list
+            List<WSEncryptionPart> sigParts = new ArrayList<WSEncryptionPart>();
             sigParts.add(new WSEncryptionPart(this.mainSigId));
-            
+
             if (tempTok instanceof org.apache.rahas.Token) {
-                org.apache.rahas.Token tok = (org.apache.rahas.Token)tempTok;
-                if(rmd.getPolicyData().isTokenProtection()) {
+                org.apache.rahas.Token tok = (org.apache.rahas.Token) tempTok;
+                if (rmd.getPolicyData().isTokenProtection()) {
                     sigParts.add(new WSEncryptionPart(tok.getId()));
                 }
-                
-                this.doSymmSignature(rmd, token, (org.apache.rahas.Token)tempTok, sigParts);
-                
+
+                this.doSymmSignature(rmd, token, (org.apache.rahas.Token) tempTok, sigParts);
+
             } else if (tempTok instanceof WSSecSignature) {
-                WSSecSignature sig = (WSSecSignature)tempTok;
-                if(rmd.getPolicyData().isTokenProtection() &&
+                WSSecSignature sig = (WSSecSignature) tempTok;
+                if (rmd.getPolicyData().isTokenProtection() &&
                         sig.getBSTTokenId() != null) {
                     sigParts.add(new WSEncryptionPart(sig.getBSTTokenId()));
                 }
-                
+
                 try {
-                    sig.addReferencesToSign(sigParts, rmd.getSecHeader());
-                    sig.computeSignature();
-                    
-                    this.setInsertionLocation(RampartUtil.insertSiblingAfter(
-                            rmd, 
-                            this.getInsertionLocation(), 
-                            sig.getSignatureElement()));
-                    
+
+
+                    List<Reference> referenceList
+                            = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+
+                    /**
+                     * Before migration it was - this.setInsertionLocation(RampartUtil.insertSiblingAfter(rmd, this
+                     *       .getInsertionLocation(), supportingSignatureElement));
+                     *
+                     * In this case we need to append <Signature>..</Signature> element to
+                     * current insertion location
+                     */
+
+                    sig.computeSignature(referenceList, false, this.getInsertionLocation());
+
+                    this.setInsertionLocation(sig.getSignatureElement());
+
                 } catch (WSSecurityException e) {
                     throw new RampartException("errorInSignatureWithX509Token", e);
                 }
@@ -536,7 +545,8 @@ public abstract class BindingBuilder {
     }
     
     
-    protected byte[] doSymmSignature(RampartMessageData rmd, Token policyToken, org.apache.rahas.Token tok, Vector sigParts) throws RampartException {
+    protected byte[] doSymmSignature(RampartMessageData rmd, Token policyToken, org.apache.rahas.Token tok,
+                                     List<WSEncryptionPart> sigParts) throws RampartException {
         
         Document doc = rmd.getDocument();
         
@@ -563,7 +573,7 @@ public abstract class BindingBuilder {
                 
                 // Setting the AttachedReference or the UnattachedReference according to the flag
                 OMElement ref;
-                if (attached == true) {
+                if (attached) {
                     ref = tok.getAttachedReference();
                 } else {
                     ref = tok.getUnattachedReference();
@@ -582,6 +592,7 @@ public abstract class BindingBuilder {
                 	    tokenRef.setKeyIdentifierEncKeySHA1(((EncryptedKeyToken)tok).getSHA1());;
                 	}
                 	dkSign.setExternalKey(tok.getSecret(), tokenRef.getElement());
+                    tokenRef.addTokenType(WSConstants.WSS_ENC_KEY_VALUE_TYPE);  // TODO check this
                 
                 } else {
                     dkSign.setExternalKey(tok.getSecret(), tok.getId());
@@ -611,36 +622,45 @@ public abstract class BindingBuilder {
                 
                 dkSign.setParts(sigParts);
                 
-                dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
-                
-                //Do signature
-                dkSign.computeSignature();
+                List<Reference> referenceList
+                        = dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
 
                 //Add elements to header
-                
+                //Do signature
                 if (rpd.getProtectionOrder().equals(SPConstants.ENCRYPT_BEFORE_SIGNING) &&
-                        this.getInsertionLocation() == null ) {
-                    this.setInsertionLocation(RampartUtil
-                            
-                            .insertSiblingBefore(rmd, 
-                                    this.mainRefListElement,
-                                    dkSign.getdktElement()));
+                        this.mainRefListElement != null ) {
 
-                        this.setInsertionLocation(RampartUtil.insertSiblingAfter(
-                                rmd, 
-                                this.getInsertionLocation(), 
-                                dkSign.getSignatureElement()));                
+                     /**
+                     * <xenc:ReferenceList>
+                     *     <xenc:DataReference URI="#EncDataId-2"/>
+                     * </xenc:ReferenceList>
+                     * If there is a reference list as above we need to first prepend reference list
+                     * with the new derived key. Then we need to prepend Signature to newly added derived key.
+                     */
+
+                    // Add DeriveKey before ReferenceList
+                    RampartUtil.insertSiblingBefore(rmd, this.mainRefListElement, dkSign.getdktElement());
+
+                    // Insert signature before DerivedKey
+                    dkSign.computeSignature(referenceList, true, dkSign.getdktElement());
+                    this.setInsertionLocation(this.mainRefListElement);
                 } else {
-                    this.setInsertionLocation(RampartUtil
-                
-                        .insertSiblingAfter(rmd, 
-                                this.getInsertionLocation(),
-                                dkSign.getdktElement()));
 
-                    this.setInsertionLocation(RampartUtil.insertSiblingAfter(
-                            rmd, 
-                            this.getInsertionLocation(), 
-                            dkSign.getSignatureElement()));
+                    /**
+                     * Add <wsc:DerivedKeyToken>..</wsc:DerivedKeyToken> to security
+                     * header.
+                     */
+                    dkSign.appendDKElementToHeader(rmd.getSecHeader());
+
+                    this.setInsertionLocation(dkSign.getdktElement());
+
+                    /**
+                     * In this case we need to insert <Signature>..</Signature> element
+                     * before this.mainRefListElement element. In other words we need to
+                     * prepend <Signature>...</Signature> element to this.mainRefListElement.
+                     */
+                    dkSign.computeSignature(referenceList, false, this.getInsertionLocation());
+                    this.setInsertionLocation(dkSign.getSignatureElement());
                 }
 
                 return dkSign.getSignatureValue();
@@ -671,8 +691,8 @@ public abstract class BindingBuilder {
                     }
 
                 } else if (policyToken instanceof IssuedToken) {
-                    sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS
-                            + WSConstants.SAML_ASSERTION_ID);
+
+                    sig.setCustomTokenValueType(RampartUtil.getSAML10AssertionNamespace());
                     sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
                 }
                 
@@ -702,30 +722,41 @@ public abstract class BindingBuilder {
                 
                 sig.setCustomTokenId(sigTokId);
                 sig.setSecretKey(tok.getSecret());
-                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
+                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());// TODO one is redundant ?..
                 sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
                 sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
                         .getRampartConfig(), rmd.getCustomClassLoader()),
                         rmd.getSecHeader());
 
                 sig.setParts(sigParts);
-                sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                List<Reference> referenceList
+                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
 
                 //Do signature
-                sig.computeSignature();
+                if (rpd.getProtectionOrder().equals(SPConstants.ENCRYPT_BEFORE_SIGNING)
+                        && this.mainRefListElement != null) {
 
-                if (rpd.getProtectionOrder().equals(SPConstants.ENCRYPT_BEFORE_SIGNING) &&
-                        this.getInsertionLocation() == null) {
-                    this.setInsertionLocation(RampartUtil.insertSiblingBefore(
-                            rmd,
-                            this.mainRefListElement,
-                            sig.getSignatureElement()));                    
+                    /**
+                     * In this case we need to insert <Signature>..</Signature> element
+                     * before this.mainRefListElement element. In other words we need to
+                     * prepend <Signature>...</Signature> element to this.mainRefListElement.
+                     * this.mainRefListElement is equivalent to
+                     * <xenc:ReferenceList>
+                     *     <xenc:DataReference URI="#EncDataId-2"/>
+                     * </xenc:ReferenceList>
+                     */
+                    sig.computeSignature(referenceList, true, this.mainRefListElement);
+                    this.setInsertionLocation(this.mainRefListElement);
                 } else {
-                    this.setInsertionLocation(RampartUtil.insertSiblingAfter(
-                            rmd,
-                            this.getInsertionLocation(),
-                            sig.getSignatureElement()));     
+
+                    /**
+                     * In this case we need to append <Signature>..</Signature> element to
+                     * current insertion location.
+                     */
+                    sig.computeSignature(referenceList, false, this.getInsertionLocation());
+                    this.setInsertionLocation(sig.getSignatureElement());
                 }
+
 
                 return sig.getSignatureValue();
                 
@@ -746,7 +777,7 @@ public abstract class BindingBuilder {
      */
     protected org.apache.rahas.Token getToken(RampartMessageData rmd, 
                     String tokenId) throws RampartException {
-        org.apache.rahas.Token tok = null;
+        org.apache.rahas.Token tok;
         try {
             tok = rmd.getTokenStorage().getToken(tokenId);
         } catch (TrustException e) {
@@ -762,7 +793,7 @@ public abstract class BindingBuilder {
     }
     
 
-    protected void addSignatureConfirmation(RampartMessageData rmd, Vector sigParts) {
+    protected void addSignatureConfirmation(RampartMessageData rmd, List<WSEncryptionPart> sigParts) {
         
         if(!rmd.getPolicyData().isSignatureConfirmation()) {
             
@@ -771,16 +802,17 @@ public abstract class BindingBuilder {
         }
         
         Document doc = rmd.getDocument();
-        
-        Vector results = (Vector)rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
+
+        List<WSHandlerResult> results
+                = (List<WSHandlerResult>)rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
         /*
          * loop over all results gathered by all handlers in the chain. For each
          * handler result get the various actions. After that loop we have all
-         * signature results in the signatureActions vector
+         * signature results in the signatureActions list.
          */
-        Vector signatureActions = new Vector();
-        for (int i = 0; i < results.size(); i++) {
-            WSHandlerResult wshResult = (WSHandlerResult) results.get(i);
+        List<WSSecurityEngineResult> signatureActions = new ArrayList<WSSecurityEngineResult>();
+        for (Object result : results) {
+            WSHandlerResult wshResult = (WSHandlerResult) result;
 
             WSSecurityUtil.fetchAllActionResults(wshResult.getResults(),
                     WSConstants.SIGN, signatureActions);
@@ -797,14 +829,12 @@ public abstract class BindingBuilder {
                 log.debug("Signature Confirmation: number of Signature results: "
                         + signatureActions.size());
             }
-            for (int i = 0; i < signatureActions.size(); i++) {
-                WSSecurityEngineResult wsr = (WSSecurityEngineResult) signatureActions
-                        .get(i);
-                byte[] sigVal = (byte[]) wsr.get(WSSecurityEngineResult.TAG_SIGNATURE_VALUE);
+            for (WSSecurityEngineResult signatureAction : signatureActions) {
+                byte[] sigVal = (byte[]) signatureAction.get(WSSecurityEngineResult.TAG_SIGNATURE_VALUE);
                 wsc.setSignatureValue(sigVal);
                 wsc.prepare(doc);
                 RampartUtil.appendChildToSecHeader(rmd, wsc.getSignatureConfirmationElement());
-                if(sigParts != null) {
+                if (sigParts != null) {
                     sigParts.add(new WSEncryptionPart(wsc.getId()));
                 }
             }

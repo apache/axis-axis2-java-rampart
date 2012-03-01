@@ -226,10 +226,6 @@
                     <artifactId>xalan</artifactId>
                     <groupId>xalan</groupId>
                 </exclusion>
-                <!--exclusion>
-                    <artifactId>org.opensaml</artifactId>
-                    <groupId>opensaml1</groupId>
-                </exclusion-->
             </exclusions>
         </dependency>
         <dependency>
@@ -241,22 +237,6 @@
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
             <version>${opensaml.version}</version>
-            <exclusions>
-                <!-- Don't allow OpenSAML to impose a particular logging implementation -->
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>log4j-over-slf4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-	<dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml1</artifactId>
-            <version>1.1</version>
             <exclusions>
                 <!-- Don't allow OpenSAML to impose a particular logging implementation -->
                 <exclusion>
@@ -415,7 +395,7 @@
         <axis2.version>1.6.2-SNAPSHOT</axis2.version>
         <axiom.version>1.2.13-SNAPSHOT</axiom.version>
 
-        <wss4j.version>1.5.12</wss4j.version>
+        <wss4j.version>1.6.4</wss4j.version>
         <opensaml.version>2.5.1-1</opensaml.version>
 
         <bcprov.jdk15.version>140</bcprov.jdk15.version>

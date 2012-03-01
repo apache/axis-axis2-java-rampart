@@ -74,40 +74,38 @@ public class TestCBHandler implements CallbackHandler {
             throws IOException, UnsupportedCallbackException {
 
 
+        for (Callback callback : callbacks) {
 
-        for (int i = 0; i < callbacks.length; i++) {
+            if (callback instanceof WSPasswordCallback) {
 
-            if (callbacks[i] instanceof WSPasswordCallback) {
-
-                WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
-
+                WSPasswordCallback pc = (WSPasswordCallback) callback;
 
 
                 /*
 
-                 * This usage type is used only in case we received a
+                * This usage type is used only in case we received a
 
-                 * username token with a password of type PasswordText or
+                * username token with a password of type PasswordText or
 
-                 * an unknown password type.
+                * an unknown password type.
 
-                 * 
+                *
 
-                 * This case the WSPasswordCallback object contains the
+                * This case the WSPasswordCallback object contains the
 
-                 * identifier (aka username), the password we received, and
+                * identifier (aka username), the password we received, and
 
-                 * the password type string to identify the type.
+                * the password type string to identify the type.
 
-                 * 
+                *
 
-                 * Here we perform only a very simple check.
+                * Here we perform only a very simple check.
 
-                 */
+                */
 
                 if (pc.getUsage() == WSPasswordCallback.USERNAME_TOKEN_UNKNOWN) {
 
-                    if(pc.getIdentifer().equals("Ron") && pc.getPassword().equals("noR")) {
+                    if (pc.getIdentifier().equals("Ron") && pc.getPassword().equals("noR")) {
 
                         return;
 
@@ -117,11 +115,11 @@ public class TestCBHandler implements CallbackHandler {
 
                         return;
 
-                    }                   
+                    }
 
-                    throw new UnsupportedCallbackException(callbacks[i],
+                    throw new UnsupportedCallbackException(callback,
 
-                    "check failed");
+                            "check failed");
 
                 }
 
@@ -141,15 +139,15 @@ public class TestCBHandler implements CallbackHandler {
 
                     pc.setKey(key);
 
-                } else if(pc.getIdentifer().equals("alice")) {
+                } else if (pc.getIdentifier().equals("alice")) {
 
                     pc.setPassword("password");
 
-                } else if(pc.getIdentifer().equals("bob")) {
+                } else if (pc.getIdentifier().equals("bob")) {
 
                     pc.setPassword("password");
 
-                } else if(pc.getIdentifer().equals("Ron")) {
+                } else if (pc.getIdentifier().equals("Ron")) {
 
                     pc.setPassword("noR");
 
@@ -161,7 +159,7 @@ public class TestCBHandler implements CallbackHandler {
 
             } else {
 
-                throw new UnsupportedCallbackException(callbacks[i],
+                throw new UnsupportedCallbackException(callback,
 
                         "Unrecognized Callback");
 

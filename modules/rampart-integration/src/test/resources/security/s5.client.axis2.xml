@@ -9,7 +9,7 @@
     <parameter name="OutflowSecurity">
 
         <action>
-            <items>Signature NoSerialization</items>
+            <items>Signature</items>
             <user>alice</user>
             <passwordCallbackClass>org.apache.axis2.security.PWCallback</passwordCallbackClass>
             <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>

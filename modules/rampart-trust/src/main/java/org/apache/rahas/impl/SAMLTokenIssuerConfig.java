@@ -25,6 +25,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
+import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLCallbackHandler;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
@@ -441,21 +442,21 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
      * @param serviceAddress
      *            The address of the service
      * @return
-     * @throws org.apache.ws.security.WSSecurityException
+     * @throws org.apache.rahas.TrustException If unable to find certificate by given alias.
      */
-    public X509Certificate getServiceCert(Crypto crypto, String serviceAddress) throws WSSecurityException {
+    public X509Certificate getServiceCert(Crypto crypto, String serviceAddress) throws TrustException {
 
         if (serviceAddress != null && !"".equals(serviceAddress)) {
             String alias = (String) this.trustedServices.get(serviceAddress);
             if (alias != null) {
-                return crypto.getCertificates(alias)[0];
+                return CommonUtil.getCertificateByAlias(crypto,alias);
             } else {
                 alias = (String) this.trustedServices.get("*");
-                return crypto.getCertificates(alias)[0];
+                return CommonUtil.getCertificateByAlias(crypto,alias);
             }
         } else {
             String alias = (String) this.trustedServices.get("*");
-            return crypto.getCertificates(alias)[0];
+            return CommonUtil.getCertificateByAlias(crypto,alias);
         }
 
     }

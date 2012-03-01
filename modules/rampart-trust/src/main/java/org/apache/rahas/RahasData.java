@@ -35,7 +35,7 @@ import javax.xml.namespace.QName;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Common data items on WS-Trust request messages
@@ -153,38 +153,35 @@ public class RahasData {
          * we will not be encrypting the response
          */
 
-        Vector results;
-        if ((results = (Vector) this.inMessageContext
+        List<WSHandlerResult> results;
+        if ((results = (List<WSHandlerResult>) this.inMessageContext
                 .getProperty(WSHandlerConstants.RECV_RESULTS)) == null) {
             throw new TrustException(TrustException.REQUEST_FAILED);
         } else {
 
-            for (int i = 0; i < results.size(); i++) {
-                WSHandlerResult rResult = (WSHandlerResult) results.get(i);
-                Vector wsSecEngineResults = rResult.getResults();
+            for (WSHandlerResult result : results) {
+                List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
 
-                for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                    WSSecurityEngineResult wser = (WSSecurityEngineResult) wsSecEngineResults
-                            .get(j);
+                for (WSSecurityEngineResult wser : wsSecEngineResults) {
                     Object principalObject = wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
-                    int act = ((Integer)wser.get(WSSecurityEngineResult.TAG_ACTION)).
-                            intValue();
+                    int act = (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
+
                     if (act == WSConstants.SIGN && principalObject != null) {
                         this.clientCert = (X509Certificate) wser
                                 .get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
-                        this.principal = (Principal)principalObject;
+                        this.principal = (Principal) principalObject;
                     } else if (act == WSConstants.UT && principalObject != null) {
-                        this.principal = (Principal)principalObject;
+                        this.principal = (Principal) principalObject;
                     } else if (act == WSConstants.BST) {
-                        final X509Certificate[] certificates = 
-                            (X509Certificate[]) wser
-                                .get(WSSecurityEngineResult.TAG_X509_CERTIFICATES);
+                        final X509Certificate[] certificates =
+                                (X509Certificate[]) wser
+                                        .get(WSSecurityEngineResult.TAG_X509_CERTIFICATES);
                         this.clientCert = certificates[0];
                         this.principal = this.clientCert.getSubjectDN();
                     } else if (act == WSConstants.ST_UNSIGNED) {
                         this.assertion = (Assertion) wser
                                 .get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
-                        
+
                     }
                 }
             }

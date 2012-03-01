@@ -34,6 +34,7 @@ import org.apache.rampart.RampartEngine;
 import org.apache.rampart.RampartException;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
@@ -41,7 +42,6 @@ import org.apache.ws.security.handler.WSHandlerResult;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.xml.namespace.QName;
 
@@ -87,7 +87,7 @@ public class RampartReceiver implements Handler {
         }
         
         RampartEngine engine = new RampartEngine();
-        Vector wsResult = null;
+        List<WSSecurityEngineResult> wsResult = null;
         try {
             wsResult = engine.process(msgContext);
             
@@ -103,10 +103,10 @@ public class RampartReceiver implements Handler {
           return InvocationResponse.CONTINUE;        
         }
         
-        Vector results = null;
-        if ((results = (Vector) msgContext
+        List<WSHandlerResult> results = null;
+        if ((results = (List<WSHandlerResult>) msgContext
                 .getProperty(WSHandlerConstants.RECV_RESULTS)) == null) {
-            results = new Vector();
+            results = new ArrayList<WSHandlerResult>();
             msgContext.setProperty(WSHandlerConstants.RECV_RESULTS, results);
         }
         WSHandlerResult rResult = new WSHandlerResult("", wsResult);

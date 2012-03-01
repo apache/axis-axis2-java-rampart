@@ -16,6 +16,7 @@
 
 package org.apache.rahas.client;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMNode;
@@ -43,6 +44,7 @@ import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.Trust10;
@@ -54,7 +56,6 @@ import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.token.Reference;
-import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Element;
@@ -70,7 +71,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 public class STSClient {
 
@@ -137,6 +137,10 @@ public class STSClient {
             
             client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
             client.getOptions().setSoapVersionURI(this.soapVersion);
+
+            //TODO Remove later
+            client.getOptions().setTimeOutInMilliSeconds(300000);
+
             if(this.addressingNs != null) {
                 client.getOptions().setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.addressingNs);
             }
@@ -474,36 +478,34 @@ public class STSClient {
                 String b64Secret = child.getText();
                 secret = Base64.decode(b64Secret);
             } else if (child.getQName().equals(new QName(ns, WSConstants.ENC_KEY_LN))) {
+
+                Element domChild = (Element) new StAXOMBuilder(
+                        OMAbstractFactory.getMetaFactory(
+                                OMAbstractFactory.FEATURE_DOM).getOMFactory(),
+                        child.getXMLStreamReader()).getDocumentElement();
+
                 try {
-                    Element domChild = (Element) new StAXOMBuilder(
-                            DOOMAbstractFactory.getOMFactory(), child
-                            .getXMLStreamReader()).getDocumentElement();
-
-                    EncryptedKeyProcessor processor = new EncryptedKeyProcessor();
-
-                    processor.handleToken(domChild, null, this.crypto,
-                                          this.cbHandler, null, new Vector(),
-                                          null);
-
-                    secret = processor.getDecryptedBytes();
+                    secret = CommonUtil.getDecryptedBytes(this.cbHandler, this.crypto, domChild);
                 } catch (WSSecurityException e) {
+                    log.error("Error decrypting encrypted key element", e);
                     throw new TrustException("errorInProcessingEncryptedKey", e);
                 }
+
             } else if (child.getQName().equals(new QName(ns,
-                                                         RahasConstants.IssuanceBindingLocalNames.
-                                                                 COMPUTED_KEY))) {
+                    RahasConstants.IssuanceBindingLocalNames.
+                            COMPUTED_KEY))) {
                 //Handle the computed key
 
                 //Get service entropy
                 OMElement serviceEntrElem = rstr
                         .getFirstChildWithName(new QName(ns,
-                                                         RahasConstants.IssuanceBindingLocalNames.
-                                                                 ENTROPY));
+                                RahasConstants.IssuanceBindingLocalNames.
+                                        ENTROPY));
 
                 OMElement binSecElem = serviceEntrElem.getFirstElement();
 
                 if (binSecElem != null && binSecElem.getText() != null
-                    && !"".equals(binSecElem.getText().trim())) {
+                        && !"".equals(binSecElem.getText().trim())) {
 
                     byte[] serviceEntr = Base64.decode(binSecElem.getText());
 
@@ -511,10 +513,10 @@ public class STSClient {
                     P_SHA1 p_sha1 = new P_SHA1();
 
                     int length = (this.keySize > 0) ? keySize
-                                 : this.algorithmSuite
+                            : this.algorithmSuite
                             .getMaximumSymmetricKeyLength();
                     try {
-                        secret = p_sha1.createKey(this.requestorEntropy, serviceEntr, 0, length/8);
+                        secret = p_sha1.createKey(this.requestorEntropy, serviceEntr, 0, length / 8);
                     } catch (ConversationException e) {
                         throw new TrustException("keyDerivationError", e);
                     }

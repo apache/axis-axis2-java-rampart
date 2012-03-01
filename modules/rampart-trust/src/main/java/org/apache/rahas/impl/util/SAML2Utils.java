@@ -22,11 +22,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSPasswordCallback;
-import org.apache.ws.security.WSSecurityEngine;
-import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.handler.RequestData;
 import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.Base64;
 import org.apache.xml.security.exceptions.XMLSecurityException;
@@ -119,7 +117,7 @@ public class SAML2Utils {
      *
      */
     public static SAML2KeyInfo getSAML2KeyInfo(Element elem, Crypto crypto,
-                                              CallbackHandler cb) throws WSSecurityException {
+                                              CallbackHandler cb) throws WSSecurityException, TrustException {
         Assertion assertion;
 
         //build the assertion by unmarhalling the DOM element.
@@ -258,10 +256,9 @@ public class SAML2Utils {
                         QName el = new QName(child.getNamespaceURI(), child.getLocalName());
                         if (el.equals(WSSecurityEngine.ENCRYPTED_KEY)) {
 
-                            EncryptedKeyProcessor proc = new EncryptedKeyProcessor();
-                            proc.handleEncryptedKey((Element) child, cb, crypto, null);
+                            byte[] secret = CommonUtil.getDecryptedBytes(cb, crypto, child);
 
-                            return new SAML2KeyInfo(assertion, proc.getDecryptedBytes());
+                            return new SAML2KeyInfo(assertion, secret);
                         } else if (el.equals(new QName(WSConstants.WST_NS, "BinarySecret"))) {
                             Text txt = (Text) child.getFirstChild();
                             return new SAML2KeyInfo(assertion, Base64.decode(txt.getData()));

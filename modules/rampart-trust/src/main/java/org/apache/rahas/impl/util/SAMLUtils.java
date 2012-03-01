@@ -114,23 +114,11 @@ public class SAMLUtils {
                                      String issuerKeyAlias, String issuerKeyPassword)
             throws TrustException {
 
-        X509Certificate[] issuerCerts;
-        try {
-            issuerCerts = crypto
-                    .getCertificates(issuerKeyAlias);
-        } catch (WSSecurityException e) {
-            log.debug("Unable to get issuer certificate for issuer alias " + issuerKeyAlias, e);
-            throw new TrustException("issuerCertificateNotFound", new Object[]{issuerKeyAlias}, e);
-        }
-
-        if (issuerCerts == null || issuerCerts.length == 0) {
-            log.debug("Unable to get issuer certificate for issuer alias " + issuerKeyAlias);
-            throw new TrustException("issuerCertificateNotFound", new Object[]{issuerKeyAlias});
-        }
+        X509Certificate issuerCerts = CommonUtil.getCertificateByAlias(crypto, issuerKeyAlias);
 
         String signatureAlgorithm = XMLSignature.ALGO_ID_SIGNATURE_RSA;
 
-        PublicKey issuerPublicKey = issuerCerts[0].getPublicKey();
+        PublicKey issuerPublicKey = issuerCerts.getPublicKey();
 
         String publicKeyAlgorithm = issuerPublicKey.getAlgorithm();
         if (publicKeyAlgorithm.equalsIgnoreCase("DSA")) {
@@ -153,7 +141,7 @@ public class SAMLUtils {
         signature.setSigningCredential(signingCredential);
         signature.setSignatureAlgorithm(signatureAlgorithm);
 
-        X509Data x509Data = createX509Data(issuerCerts[0]);
+        X509Data x509Data = createX509Data(issuerCerts);
         KeyInfo keyInfo = createKeyInfo(x509Data);
 
         signature.setKeyInfo(keyInfo);
@@ -610,6 +598,7 @@ public class SAMLUtils {
 
 
 
+    // TODO remove keySize parameter
     static WSSecEncryptedKey getSymmetricKeyBasedKeyInfoContent(Document doc,
                                                                        byte[] ephemeralKey,
                                                                        X509Certificate serviceCert,
@@ -626,8 +615,7 @@ public class SAMLUtils {
         // SEt the encryption cert
         encryptedKeyBuilder.setUseThisCert(serviceCert);
 
-        // set keysize
-        encryptedKeyBuilder.setKeySize(keySize);
+        // TODO setting keysize is removed with wss4j 1.6 migration - do we actually need this ?
 
         encryptedKeyBuilder.setEphemeralKey(ephemeralKey);
 
