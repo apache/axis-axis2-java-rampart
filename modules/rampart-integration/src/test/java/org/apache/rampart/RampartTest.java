@@ -21,7 +21,6 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
@@ -271,8 +270,7 @@ public class RampartTest extends TestCase {
     }
 
     private Policy loadPolicy(String xmlPath) throws Exception {
-        StAXOMBuilder builder = new StAXOMBuilder(RampartTest.class.getResourceAsStream(xmlPath));
-        return PolicyEngine.getPolicy(builder.getDocumentElement());
+        return PolicyEngine.getPolicy(RampartTest.class.getResourceAsStream(xmlPath));
     }
 
 
