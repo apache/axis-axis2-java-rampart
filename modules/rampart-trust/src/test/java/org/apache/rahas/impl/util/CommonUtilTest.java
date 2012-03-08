@@ -19,25 +19,38 @@
 package org.apache.rahas.impl.util;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.rahas.RahasData;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.impl.SAMLTokenIssuerConfig;
+import org.apache.rahas.impl.TokenIssuerUtil;
+import org.apache.rahas.test.util.AbstractTestCase;
+import org.apache.rahas.test.util.TestCallbackHandler;
+import org.apache.rahas.test.util.TestSAMLCallbackHandler;
+import org.apache.rahas.test.util.TestUtil;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.message.WSSecEncrypt;
+import org.apache.ws.security.message.WSSecHeader;
+import org.opensaml.Configuration;
+import org.opensaml.xml.signature.KeyInfo;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A test class for common util.
  */
-public class CommonUtilTest extends TestCase {
+public class CommonUtilTest extends AbstractTestCase {
 
     private boolean isConfigFromFile = false;
 
@@ -147,6 +160,130 @@ public class CommonUtilTest extends TestCase {
         SAMLTokenIssuerConfig tokenIssuerConfig = CommonUtil.createTokenIssuerConfiguration(parameter);
         Assert.assertNotNull(tokenIssuerConfig);
         checkConfigurations(tokenIssuerConfig);
+    }
+
+    public void testGetDecryptedBytes() throws Exception {
+
+        RahasData rahasData = new RahasData();
+        byte[] ephemeralKey = TokenIssuerUtil.getSharedSecret(
+                rahasData, 1, 192);
+
+        Document doc = TestUtil.getTestDocument();
+
+        WSSecEncrypt builder = new WSSecEncrypt();
+        builder.setUserInfo("apache");
+        builder.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
+        builder.setSymmetricEncAlgorithm(WSConstants.TRIPLE_DES);
+        builder.setEphemeralKey(ephemeralKey);
+        WSSecHeader secHeader = new WSSecHeader();
+        secHeader.insertSecurityHeader(doc);
+
+        builder.prepare(doc, TestUtil.getCrypto());
+
+        List<WSEncryptionPart> parts = new ArrayList<WSEncryptionPart>();
+        WSEncryptionPart encP =
+            new WSEncryptionPart(
+                "add", "http://ws.apache.org/counter/counter_port_type", "Element"
+            );
+        parts.add(encP);
+
+        Element refs = builder.encryptForRef(null, parts);
+        builder.addInternalRefElement(refs);
+
+        builder.prependToHeader(secHeader);
+
+        builder.prependBSTElementToHeader(secHeader);
+
+        Element element = builder.getEncryptedKeyElement();
+
+        byte[] decryptedKey = CommonUtil.getDecryptedBytes(new TestCallbackHandler(), TestUtil.getCrypto(), element);
+
+        Assert.assertTrue(Arrays.equals(ephemeralKey, decryptedKey));
+
+    }
+
+    public void testGetSymmetricKeyBasedKeyInfo() throws Exception {
+
+        RahasData rahasData = new RahasData();
+
+        Document doc = TestUtil.getTestDocument();
+
+        KeyInfo keyInfo = CommonUtil.getSymmetricKeyBasedKeyInfo(doc, rahasData,
+                TestUtil.getDefaultCertificate(), 256, TestUtil.getCrypto(), 2);
+
+        Assert.assertNotNull(keyInfo);
+
+        marshallerFactory.getMarshaller(keyInfo).marshall(keyInfo, doc.getDocumentElement());
+
+        printElement(keyInfo.getDOM());
+
+        OMElement element = (OMElement)keyInfo.getDOM();
+
+        printElement(element);
+
+        Assert.assertNotNull(rahasData.getEphmeralKey());
+
+        Assert.assertNotNull(element.getChildrenWithLocalName("EncryptedKey"));
+        Assert.assertNotNull(element.getChildrenWithLocalName("CipherData"));
+        Assert.assertNotNull(element.getChildrenWithLocalName("CipherValue"));
+    }
+
+    public void testGetCertificateBasedKeyInfo() throws Exception {
+
+        Document doc = TestUtil.getTestDocument();
+
+        KeyInfo keyInfo = CommonUtil.getCertificateBasedKeyInfo(TestUtil.getDefaultCertificate());
+
+        Assert.assertNotNull(keyInfo);
+
+        marshallerFactory.getMarshaller(keyInfo).marshall(keyInfo, doc.getDocumentElement());
+
+        printElement(keyInfo.getDOM());
+
+        OMElement element = (OMElement)keyInfo.getDOM();
+
+        printElement(element);
+
+        Assert.assertNotNull(element.getChildrenWithLocalName("X509Data"));
+        Assert.assertNotNull(element.getChildrenWithLocalName("X509Certificate"));
+
+    }
+
+    public void testGetSAMLCallbackHandlerWithObject() throws Exception {
+
+        RahasData rahasData = new RahasData();
+
+        this.isConfigFromFile = true;
+        SAMLTokenIssuerConfig tokenIssuerConfig = CommonUtil.createTokenIssuerConfiguration(configurationFileName);
+        Assert.assertNotNull(tokenIssuerConfig);
+        checkConfigurations(tokenIssuerConfig);
+
+        tokenIssuerConfig.setCallbackHandler(new TestSAMLCallbackHandler());
+
+        SAMLCallbackHandler cb = CommonUtil.getSAMLCallbackHandler(tokenIssuerConfig, rahasData);
+
+        Assert.assertTrue(cb instanceof TestSAMLCallbackHandler);
+    }
+
+    public void testGetSAMLCallbackHandlerWithCallbackName() throws Exception {
+
+        RahasData rahasData = new RahasData();
+
+        MessageContext messageContext = new MessageContext();
+        messageContext.setAxisService(new AxisService("My Service"));
+
+        rahasData.setInMessageContext(messageContext);
+
+        this.isConfigFromFile = true;
+        SAMLTokenIssuerConfig tokenIssuerConfig = CommonUtil.createTokenIssuerConfiguration(configurationFileName);
+        Assert.assertNotNull(tokenIssuerConfig);
+        checkConfigurations(tokenIssuerConfig);
+
+        tokenIssuerConfig.setCallbackHandlerName("org.apache.rahas.test.util.TestSAMLCallbackHandler");
+
+        SAMLCallbackHandler cb = CommonUtil.getSAMLCallbackHandler(tokenIssuerConfig, rahasData);
+
+        Assert.assertTrue(cb instanceof TestSAMLCallbackHandler);
     }
 
 }

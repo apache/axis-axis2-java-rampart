@@ -462,14 +462,24 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         if (serviceAddress != null && !"".equals(serviceAddress)) {
             String alias = (String) this.trustedServices.get(serviceAddress);
             if (alias != null) {
-                return CommonUtil.getCertificateByAlias(crypto,alias);
+                return CommonUtil.getCertificateByAlias(crypto, alias);
             } else {
                 alias = (String) this.trustedServices.get("*");
-                return CommonUtil.getCertificateByAlias(crypto,alias);
+
+                if (alias == null) {
+                    throw new TrustException("aliasMissingForService", new String[]{serviceAddress});
+                }
+
+                return CommonUtil.getCertificateByAlias(crypto, alias);
             }
         } else {
             String alias = (String) this.trustedServices.get("*");
-            return CommonUtil.getCertificateByAlias(crypto,alias);
+
+            if (alias == null) {
+                throw new TrustException("aliasMissingForService", new String[]{serviceAddress});
+            }
+
+            return CommonUtil.getCertificateByAlias(crypto, alias);
         }
 
     }

@@ -124,9 +124,7 @@ public class STSClient {
                                       String appliesTo) throws TrustException {
         try {
             QName rstQn = new QName("requestSecurityToken");
-            String requestType =
-                    TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_ISSUE;
-            
+
             ServiceClient client = getServiceClient(rstQn, issuerAddress);
             
             for (int i = 0; i < parameters.size(); i++) {
@@ -136,9 +134,6 @@ public class STSClient {
             
             client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
             client.getOptions().setSoapVersionURI(this.soapVersion);
-
-            //TODO Remove later
-            client.getOptions().setTimeOutInMilliSeconds(300000);
 
             if(this.addressingNs != null) {
                 client.getOptions().setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.addressingNs);
@@ -151,7 +146,7 @@ public class STSClient {
             
             try {
                 OMElement response = client.sendReceive(rstQn,
-                                                        createIssueRequest(requestType, appliesTo));
+                                                        createIssueRequest(appliesTo));
     
                 return processIssueResponse(version, response, issuerAddress);
             } finally {
@@ -389,10 +384,14 @@ public class STSClient {
     }
 
     /**
-     * @param result
-     * @return Token
+     * Processes the response from Token issuer.
+     * @param version The supported version.
+     * @param result Resulting token response from token issuer.
+     * @param issuerAddress The respective token applying entity (as a url)
+     * @return The issued token.
+     * @throws TrustException If an error occurred while extracting token from response.
      */
-    private Token processIssueResponse(int version, OMElement result, 
+    protected Token processIssueResponse(int version, OMElement result,
             String issuerAddress) throws TrustException {
         OMElement rstr = result;
 
@@ -650,15 +649,15 @@ public class STSClient {
     }
 
     /**
-     * Create the RST request.
-     *
-     * @param requestType
-     * @param appliesTo
-     * @return OMElement
-     * @throws TrustException
+     * This creates a request security token (RST) message.
+     * @param appliesTo The address which token is applicable to.
+     * @return The axiom object representation of RST.
+     * @throws TrustException If an error occurred while creating the RST.
      */
-    private OMElement createIssueRequest(String requestType,
-                                         String appliesTo) throws TrustException {
+    protected OMElement createIssueRequest(String appliesTo) throws TrustException {
+
+        String requestType =
+                    TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_ISSUE;
 
         if (log.isDebugEnabled()) {
             log.debug("Creating request with request type: " + requestType +

@@ -36,6 +36,9 @@ public class Rahas implements Module {
 
         try {
             RampartSAMLBootstrap.bootstrap();
+
+            // Initialize XML security
+            org.apache.xml.security.Init.init();
         } catch (ConfigurationException ex) {
             throw new AxisFault("Failed to bootstrap OpenSAML", ex);
         }

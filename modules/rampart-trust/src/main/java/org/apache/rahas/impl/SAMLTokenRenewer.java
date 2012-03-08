@@ -15,6 +15,7 @@ import org.apache.rahas.TokenRenewer;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLUtils;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
@@ -115,7 +116,7 @@ public class SAMLTokenRenewer implements TokenRenewer {
         samlAssertion = SAMLUtils.buildAssertion((Element) assertionOMElement);
 
         if (samlAssertion.getConditions() == null) {
-            samlAssertion.setConditions((Conditions) SAMLUtils.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME));
+            samlAssertion.setConditions((Conditions) CommonUtil.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME));
 
         }
 

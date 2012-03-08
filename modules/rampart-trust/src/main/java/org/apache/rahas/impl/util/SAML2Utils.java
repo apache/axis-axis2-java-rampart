@@ -26,12 +26,16 @@ import org.apache.rahas.TrustException;
 import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.util.Base64;
+import org.apache.ws.security.util.UUIDGenerator;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.keys.KeyInfo;
 import org.apache.xml.security.keys.content.X509Data;
 import org.apache.xml.security.keys.content.x509.XMLX509Certificate;
+import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
+import org.opensaml.common.SAMLVersion;
+import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.*;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
@@ -93,16 +97,18 @@ public class SAML2Utils {
         }
     }
 
-     /**
+    /**
      * Extract certificates or the key available in the SAMLAssertion
      *
-     * @param elem
+     * @param elem  The element to process.
+     * @param crypto The crypto properties.
+     * @param cb Callback class to get the Key
      * @return the SAML2 Key Info
-     * @throws org.apache.ws.security.WSSecurityException
+     * @throws org.apache.ws.security.WSSecurityException If an error occurred while extracting KeyInfo.
      *
      */
     public static SAML2KeyInfo getSAML2KeyInfo(Element elem, Crypto crypto,
-                                              CallbackHandler cb) throws WSSecurityException, TrustException {
+                                              CallbackHandler cb) throws WSSecurityException {
         Assertion assertion;
 
         //build the assertion by unmarhalling the DOM element.
@@ -293,6 +299,58 @@ public class SAML2Utils {
         }
         return subjectConfirmationMethod;
     }
+
+
+    public static Assertion createAssertion() throws TrustException {
+        try {
+            Assertion assertion = (Assertion)CommonUtil.buildXMLObject(Assertion.DEFAULT_ELEMENT_NAME);
+            assertion.setVersion(SAMLVersion.VERSION_20);
+
+            // Set an UUID as the ID of an assertion
+            assertion.setID(UUIDGenerator.getUUID());
+            return assertion;
+        } catch (TrustException e) {
+            throw new TrustException("Unable to create an Assertion object", e);
+        }
+    }
+
+    public static Issuer createIssuer(String issuerName) throws TrustException {
+        try {
+            Issuer issuer = (Issuer)CommonUtil.buildXMLObject(Issuer.DEFAULT_ELEMENT_NAME);
+            issuer.setValue(issuerName);
+            return issuer;
+        } catch (TrustException e) {
+            throw new TrustException("Unable to create an Issuer object", e);
+        }
+    }
+
+    public static Conditions createConditions(DateTime creationTime, DateTime expirationTime) throws TrustException {
+        try {
+            Conditions conditions = (Conditions)CommonUtil.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME);
+            conditions.setNotBefore(creationTime);
+            conditions.setNotOnOrAfter(expirationTime);
+            return conditions;
+        } catch (TrustException e) {
+            throw new TrustException("Unable to create an Conditions object");
+        }
+    }
+
+/**
+     * Create named identifier.
+     * @param principalName Name of the subject.
+     * @param format Format of the subject, whether it is an email, uid etc ...
+     * @return The NamedIdentifier object.
+     * @throws org.apache.rahas.TrustException If unable to find the builder.
+     */
+    public static NameID createNamedIdentifier(String principalName, String format) throws TrustException{
+
+        NameID nameId = (NameID)CommonUtil.buildXMLObject(NameID.DEFAULT_ELEMENT_NAME);
+        nameId.setValue(principalName);
+        nameId.setFormat(format);
+
+        return nameId;
+    }
+
 
 }
 

@@ -283,7 +283,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
                 // Create the encrypted key
                 KeyInfo encryptedKeyInfoElement
-                        = SAMLUtils.getSymmetricKeyBasedKeyInfo(doc, data, serviceCert, keySize,
+                        = CommonUtil.getSymmetricKeyBasedKeyInfo(doc, data, serviceCert, keySize,
                         crypto, config.getKeyComputation());
 
                 return this.createAttributeAssertion(data, encryptedKeyInfoElement, nameIdentifier, config,
@@ -331,7 +331,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
                     clientCert = CommonUtil.getCertificateByAlias(crypto,data.getPrincipal().getName());;
                 }
 
-                KeyInfo keyInfo = SAMLUtils.getCertificateBasedKeyInfo(clientCert);
+                KeyInfo keyInfo = CommonUtil.getCertificateBasedKeyInfo(clientCert);
 
                 return this.createAuthAssertion(RahasConstants.SAML11_SUBJECT_CONFIRMATION_HOK, nameId, keyInfo,
                         config, crypto, creationTime, expirationTime, data);
@@ -393,41 +393,22 @@ public class SAMLTokenIssuer implements TokenIssuer {
             Subject subject
                     = SAMLUtils.createSubject(subjectNameId, RahasConstants.SAML11_SUBJECT_CONFIRMATION_HOK, keyInfo);
 
-            Attribute[] attrs;
-            if (config.getCallbackHandler() != null) {
-                SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-                SAMLCallbackHandler handler = config.getCallbackHandler();
+            Attribute[] attributes;
+
+            SAMLCallbackHandler handler = CommonUtil.getSAMLCallbackHandler(config, data);
+
+            SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
+            if (handler != null) {
                 handler.handle(cb);
-                attrs = cb.getAttributes();
-            } else if (config.getCallbackHandlerName() != null
-                    && config.getCallbackHandlerName().trim().length() > 0) {
-                SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-                SAMLCallbackHandler handler = null;
-                MessageContext msgContext = data.getInMessageContext();
-                ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
-                Class cbClass;
-                try {
-                    cbClass = Loader.loadClass(classLoader, config.getCallbackHandlerName());
-                } catch (ClassNotFoundException e) {
-                    throw new TrustException("cannotLoadPWCBClass", new String[]{config
-                            .getCallbackHandlerName()}, e);
-                }
-                try {
-                    handler = (SAMLCallbackHandler) cbClass.newInstance();
-                } catch (java.lang.Exception e) {
-                    throw new TrustException("cannotCreatePWCBInstance", new String[]{config
-                            .getCallbackHandlerName()}, e);
-                }
-                handler.handle(cb);
-                attrs = cb.getAttributes();
+                attributes = cb.getAttributes();
             } else {
                 //TODO Remove this after discussing
                 Attribute attribute = SAMLUtils.createAttribute("Name", "https://rahas.apache.org/saml/attrns",
                         "Colombo/Rahas");
-                attrs = new Attribute[]{attribute};
+                attributes = new Attribute[]{attribute};
             }
 
-            AttributeStatement attributeStatement = SAMLUtils.createAttributeStatement(subject, Arrays.asList(attrs));
+            AttributeStatement attributeStatement = SAMLUtils.createAttributeStatement(subject, Arrays.asList(attributes));
 
 
             List<Statement> attributeStatements = new ArrayList<Statement>();

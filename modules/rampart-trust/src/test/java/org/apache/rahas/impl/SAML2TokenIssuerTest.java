@@ -18,11 +18,20 @@ package org.apache.rahas.impl;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
+import org.apache.rahas.RahasConstants;
 import org.apache.rahas.RahasData;
+import org.apache.rahas.Token;
+import org.apache.rahas.client.STSClient;
+import org.apache.rahas.test.util.AbstractTestCase;
+import org.apache.rahas.test.util.TestSTSClient;
 import org.apache.rahas.test.util.TestUtil;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.joda.time.DateTime;
+import org.opensaml.common.xml.SAMLConstants;
 import org.w3c.dom.Document;
 
 import java.io.File;
@@ -30,44 +39,50 @@ import java.io.File;
 /**
  * Test class for SAML2 token issuer.
  */
-public class SAML2TokenIssuerTest extends TestCase {
+public class SAML2TokenIssuerTest extends AbstractTestCase {
 
-    public void testIssueToken() {
+    private String configurationElement = "<configuration><saml-issuer-config>" +
+            "<issuerName>Test_STS</issuerName>" +
+            "<issuerKeyAlias>apache</issuerKeyAlias>" +
+            "<issuerKeyPassword>password</issuerKeyPassword>" +
+            "<cryptoProperties><crypto provider=\"org.apache.ws.security.components.crypto.Merlin\">" +
+            "<property name=\"org.apache.ws.security.crypto.merlin.keystore.type\">JKS</property>" +
+            "<property name=\"org.apache.ws.security.crypto.merlin.file\">src/test/resources/keystore.jks</property>" +
+            "<property name=\"org.apache.ws.security.crypto.merlin.keystore.password\">password</property></crypto>" +
+            "</cryptoProperties>" +
+            "<timeToLive>300000</timeToLive>" +
+            "<keySize>256</keySize>" +
+            "<addRequestedAttachedRef /><addRequestedUnattachedRef />" +
+            "<keyComputation>2</keyComputation>" +
+            "<proofKeyType>BinarySecret</proofKeyType>" +
+            "<trusted-services>" +
+            "<service alias=\"apache\">http://10.100.3.196:9768/services/echo/</service>" +
+            "</trusted-services></saml-issuer-config></configuration>";
+
+    public void testCreateSubjectWithHolderOfKeySubjectConfirmation() throws Exception {
+
+        RahasData rahasData = TestUtil.createTestRahasData("http://10.100.3.196:9768/services/echo/");
+
+        SAML2TokenIssuer tokenIssuer = new SAML2TokenIssuer();
+        tokenIssuer.setConfigurationElement(AXIOMUtil.stringToOM(this.configurationElement));
+        SOAPEnvelope envelope = tokenIssuer.issue(rahasData);
+        //System.out.println(envelope.toString());
+
+        TestSTSClient stsClient = TestUtil.createTestSTSClient(SAMLConstants.SAML20_NS);
+
+        Token token = stsClient.processResponse(RahasConstants.VERSION_05_02,
+                envelope.getBody().getFirstElement(), "http://10.100.3.196:9768/services/echo/");
+
+        Assert.assertNotNull(token.getToken());
+    }
+
+    public void testCreateSubjectWithBearerSubjectConfirmation() {
         // TODO
-        Assert.assertTrue(true);
     }
 
-    public void testCreateSubjectWithHolderOfKeySC() throws Exception {
-
-        // TODO Its hard to do unit testing on TokenIssuer
-        // Cos we need to construct complete message contexts with all
-        // relevant data. This is more like an integration test rather than a
-        // unit test. Therefore we need to refactor code to smaller testable units (methods)
-        // and then only write tests.
-
-        /*SAML2TokenIssuer saml2TokenIssuer = new SAML2TokenIssuer();
-
-        MessageContext messageContext = new MessageContext();
-
-        File file = new File("./sts-aar-resources/saml-issuer-config.xml");
-        Assert.assertTrue(file.exists());
-
-        SAMLTokenIssuerConfig samlTokenIssuerConfig = new SAMLTokenIssuerConfig(file.getAbsolutePath());
-        Crypto crypto = TestUtil.getCrypto();
-        DateTime creationDate = new DateTime();
-        DateTime expirationDate = new DateTime(2050, 1, 1, 0, 0, 0, 0);
-        RahasData rahasData = new RahasData(messageContext);*/
-
-        /*Document document;
-        Crypto crypto;
-        DateTime creationDate;
-        DateTime expirationDate;
-        RahasData rahasData;*/
-
-
-
-
-
-        //saml2TokenIssuer.createSubjectWithHolderOfKeySC()
+    public void testCreateSubjectWithHOKSubjectConfirmationPublicCert() {
+        // TODO
     }
+
+
 }
