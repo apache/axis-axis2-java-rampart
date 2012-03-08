@@ -84,7 +84,6 @@ public class RahasConstants {
     public static final String KEY_TYPE_SYMM_KEY = "/SymmetricKey";
     public static final String KEY_TYPE_PUBLIC_KEY = "/PublicKey";
     public static final String KEY_TYPE_BEARER = "/Bearer";
-    public static final String KEY_TYPE_HOK = "/Bearer";
 
     //Attr values
     public static final String BIN_SEC_TYPE_NONCE = "/Nonce";

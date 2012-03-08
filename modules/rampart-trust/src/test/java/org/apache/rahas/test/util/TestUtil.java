@@ -242,8 +242,8 @@ public class TestUtil {
     /**
      * This is directly taken from rampart-core.
      * TODO we need to move these common code to a new module. Otherwise code will be duplicated.
-     * We cannot following method from rampart-core as it creates a cyclic dependency. Therefore we have
-     * to live will following.
+     * We cannot use following method from rampart-core as it creates a cyclic dependency. Therefore we have
+     * to live with following.
      * @param doc The document to convert.
      * @param useDoom Whether to use doom or not.
      * @return A SOAPEnvelope.
@@ -347,8 +347,8 @@ public class TestUtil {
 
     /**
      * TODO we need to move these common code to a new module. Otherwise code will be duplicated.
-     * We cannot following method from rampart-core as it creates a cyclic dependency. Therefore we have
-     * to live will following.
+     * We cannot use following method from rampart-core as it creates a cyclic dependency. Therefore we have
+     * to live with following.
 	 * Creates a DOM Document using the SOAP Envelope.
 	 * @param env An org.apache.axiom.soap.SOAPEnvelope instance
 	 * @return Returns the DOM Document of the given SOAP Envelope.
