@@ -40,11 +40,11 @@ import org.opensaml.saml2.core.*;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.io.*;
-import org.w3c.dom.*;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSOutput;
-import org.w3c.dom.ls.LSSerializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 import javax.security.auth.callback.Callback;
@@ -54,7 +54,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -68,26 +67,8 @@ public class SAML2Utils {
             
             MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(xmlObj);
-            Element element = marshaller.marshall(xmlObj);
-
-            ByteArrayOutputStream byteArrayOutputStrm = new ByteArrayOutputStream();
-
-            DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
-
-            DOMImplementationLS impl =
-                    (DOMImplementationLS) registry.getDOMImplementation("LS");
-
-            LSSerializer writer = impl.createLSSerializer();
-            LSOutput output = impl.createLSOutput();
-            output.setByteStream(byteArrayOutputStrm);
-            writer.write(element, output);
-            String elementString = byteArrayOutputStrm.toString();
-
-            DocumentBuilderFactory documentBuilderFactory = ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(
-                    OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory();
-            DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = docBuilder.parse(new ByteArrayInputStream(elementString.trim().getBytes()));
-            Element assertionElement = document.getDocumentElement();
+            Element assertionElement = marshaller.marshall(xmlObj,
+                    ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory().newDocumentBuilder().newDocument());
 
             log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
             return assertionElement;
@@ -208,7 +189,13 @@ public class SAML2Utils {
 
                     MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
                     Marshaller marshaller = marshallerFactory.getMarshaller(KIElem);
-                    keyInfoElement = marshaller.marshall(KIElem);
+                    try {
+                        keyInfoElement = marshaller.marshall(KIElem,
+                                ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory().newDocumentBuilder().newDocument());
+                    } catch (ParserConfigurationException ex) {
+                        // We never get here
+                        throw new Error(ex);
+                    }
 
                 } else {
                     throw new WSSecurityException(WSSecurityException.FAILURE,
