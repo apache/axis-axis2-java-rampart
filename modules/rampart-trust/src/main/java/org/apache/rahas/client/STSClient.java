@@ -683,18 +683,16 @@ public class STSClient {
 
             Iterator templateChildren = rstTemplate.getChildElements();
             while (templateChildren.hasNext()) {
-                OMNode child = (OMNode) templateChildren.next();
-                rst.addChild(child);
+                OMElement child = (OMElement) templateChildren.next();
+                rst.addChild(child.cloneOMElement());
                 //Look for the key size element
-                if (child instanceof OMElement
-                    && ((OMElement) child).getQName().equals(
+                if (child.getQName().equals(
                         new QName(TrustUtil.getWSTNamespace(this.version),
                                   RahasConstants.IssuanceBindingLocalNames.KEY_SIZE))) {
                     log.debug("Extracting key size from the RSTTemplate: ");
-                    OMElement childElem = (OMElement) child;
                     this.keySize =
-                            (childElem.getText() != null && !"".equals(childElem.getText())) ?
-                            Integer.parseInt(childElem.getText()) :
+                            (child.getText() != null && !"".equals(child.getText())) ?
+                            Integer.parseInt(child.getText()) :
                             -1;
                     if (log.isDebugEnabled()) {
                         log.debug("Key size from RSTTemplate: " + this.keySize);
