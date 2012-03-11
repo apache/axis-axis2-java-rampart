@@ -256,7 +256,7 @@ public class Axis2Util {
                     			header.addChild(child);
                     		}
                     		
-                    		element.detach();
+                    		headerBlocs.remove();
                     		
                     		soapHeader.build();
                     		
