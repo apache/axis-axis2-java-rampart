@@ -682,7 +682,7 @@ public class STSClient {
             Iterator templateChildren = rstTemplate.getChildElements();
             while (templateChildren.hasNext()) {
                 OMElement child = (OMElement) templateChildren.next();
-                rst.addChild(child);
+                rst.addChild(child.cloneOMElement());
                 //Look for the key size element
                 if (child.getQName().equals(
                         new QName(TrustUtil.getWSTNamespace(this.version),
