@@ -524,9 +524,9 @@ public class SAML2TokenIssuer implements TokenIssuer {
         } catch (CertificateEncodingException e) {
             throw new TrustException("Error in setting the signature", e);
         } catch (SignatureException e) {
-            throw new TrustException("errorMarshellingOrSigning", e);
+            throw new TrustException("errorSigningAssertion", e);
         } catch (MarshallingException e) {
-            throw new TrustException("errorMarshellingOrSigning", e);
+            throw new TrustException("errorMarshallingAssertion", e);
         }
 
         log.debug("SAML2.0 assertion is marshalled and signed..");
