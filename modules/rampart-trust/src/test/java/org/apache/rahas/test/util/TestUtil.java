@@ -17,12 +17,7 @@ package org.apache.rahas.test.util;
 
 import junit.framework.Assert;
 import org.apache.axiom.om.*;
-import org.apache.axiom.om.impl.builder.StAXBuilder;
-import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
-import org.apache.axiom.om.util.StAXUtils;
 import org.apache.axiom.soap.*;
-import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
-import org.apache.axiom.soap.impl.dom.soap11.SOAP11Factory;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
@@ -142,9 +137,7 @@ public class TestUtil {
     }
 
     public static SOAPEnvelope createSOAPEnvelope(InputStream in) throws Exception {
-        XMLStreamReader xmlreader =
-                StAXUtils.createXMLStreamReader(in);
-        StAXBuilder builder = new StAXSOAPModelBuilder(xmlreader, null);
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createSOAPModelBuilder(in, null);
         return (SOAPEnvelope) builder.getDocumentElement();
     }
 
@@ -194,7 +187,7 @@ public class TestUtil {
         dummyMessageContext.setProperty(AddressingConstants.WS_ADDRESSING_VERSION,
                 AddressingConstants.Submission.WSA_NAMESPACE);
 
-        SOAP11Factory factory = new SOAP11Factory();
+        SOAPFactory factory = OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM).getSOAP11Factory();
         SOAPEnvelope envelope = factory.createSOAPEnvelope();
 
         SOAPBody soapBody = factory.createSOAPBody(envelope);
@@ -412,20 +405,9 @@ public class TestUtil {
                     }
                 }
 
-                // Check the namespace and find SOAP version and factory
-                String nsURI = null;
-                SOAPFactory factory;
-                if (env.getNamespace().getNamespaceURI().equals(
-                        SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-                    nsURI = SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI;
-                    factory = DOOMAbstractFactory.getSOAP11Factory();
-                } else {
-                    nsURI = SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI;
-                    factory = DOOMAbstractFactory.getSOAP12Factory();
-                }
-
-                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
-                        env.getXMLStreamReader(), factory, nsURI);
+                SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createStAXSOAPModelBuilder(
+                        OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM),
+                        env.getXMLStreamReader());
                 SOAPEnvelope envelope = (stAXSOAPModelBuilder)
                         .getSOAPEnvelope();
                 envelope.getParent().build();
