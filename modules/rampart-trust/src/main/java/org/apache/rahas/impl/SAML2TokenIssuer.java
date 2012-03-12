@@ -517,7 +517,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
             //Marshall and Sign
             MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(assertion);
-            marshaller.marshall(assertion, document.getDocumentElement());
+            marshaller.marshall(assertion, document);
 
             Signer.signObjects(signatureList);
 
