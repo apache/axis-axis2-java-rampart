@@ -54,68 +54,62 @@ public abstract class TestClient extends TestCase {
 
     /**
      */
-    public void testRequest() {
-        try {
+    public void testRequest() throws Exception {
+        // Get the repository location from the args
+        String repo = Constants.TESTING_PATH + "rahas_client_repo";
 
-            // Get the repository location from the args
-            String repo = Constants.TESTING_PATH + "rahas_client_repo";
+        ConfigurationContext configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(repo,
+                                                                                                                  null);
+        ServiceClient serviceClient = new ServiceClient(configContext, null);
+        Options options = new Options();
 
-            ConfigurationContext configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(repo,
-                                                                                                                      null);
-            ServiceClient serviceClient = new ServiceClient(configContext, null);
-            Options options = new Options();
+        System.setProperty("javax.net.ssl.keyStorePassword", "password");
+        System.setProperty("javax.net.ssl.keyStoreType", "JKS");
+        System.setProperty("javax.net.ssl.trustStore", "/home/ruchith/Desktop/interop/certs/interop2.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "password");
+        System.setProperty("javax.net.ssl.trustStoreType","JKS");
 
-            System.setProperty("javax.net.ssl.keyStorePassword", "password");
-            System.setProperty("javax.net.ssl.keyStoreType", "JKS");
-            System.setProperty("javax.net.ssl.trustStore", "/home/ruchith/Desktop/interop/certs/interop2.jks");
-            System.setProperty("javax.net.ssl.trustStorePassword", "password");
-            System.setProperty("javax.net.ssl.trustStoreType","JKS");
+        options.setTo(new EndpointReference("http://127.0.0.1:" + port + "/axis2/services/SecureService"));
+//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/UTSAMLHoK"));
+//        options.setTo(new EndpointReference("https://www-lk.wso2.com:8443/axis2/services/UTSAMLHoK"));
+//        options.setTo(new EndpointReference("https://192.18.49.133:2343/jaxws-s1-sts/sts"));
+//        options.setTo(new EndpointReference("https://207.200.37.116/SxSts/Scenario_1_IssuedTokenOverTransport_UsernameOverTransport"));
+//        options.setTo(new EndpointReference("http://localhost:9090/SxSts/Scenario_4_IssuedToken_MutualCertificate10"));
 
-            options.setTo(new EndpointReference("http://127.0.0.1:" + port + "/axis2/services/SecureService"));
-//            options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/UTSAMLHoK"));
-//            options.setTo(new EndpointReference("https://www-lk.wso2.com:8443/axis2/services/UTSAMLHoK"));
-//            options.setTo(new EndpointReference("https://192.18.49.133:2343/jaxws-s1-sts/sts"));
-//            options.setTo(new EndpointReference("https://207.200.37.116/SxSts/Scenario_1_IssuedTokenOverTransport_UsernameOverTransport"));
-//            options.setTo(new EndpointReference("http://localhost:9090/SxSts/Scenario_4_IssuedToken_MutualCertificate10"));
+//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/MutualCertsSAMLHoK"));
+//        options.setTo(new EndpointReference("http://www-lk.wso2.com:8888/axis2/services/MutualCertsSAMLHoK"));
+//        options.setTo(new EndpointReference("https://131.107.72.15/trust/Addressing2004/UserName"));
+//        options.setTo(new EndpointReference("https://131.107.72.15/trust/UserName"));
+//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/trust/X509WSS10"));
+//        options.setTo(new EndpointReference("https://131.107.72.15/trust/UserName"));
+//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/jaxws-s4-sts/sts"));
+//        options.setTo(new EndpointReference("http://127.0.0.1:9090/jaxws-s4/simple"));
+//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/UTSAMLBearer"));
 
-//            options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/MutualCertsSAMLHoK"));
-//            options.setTo(new EndpointReference("http://www-lk.wso2.com:8888/axis2/services/MutualCertsSAMLHoK"));
-//            options.setTo(new EndpointReference("https://131.107.72.15/trust/Addressing2004/UserName"));
-//            options.setTo(new EndpointReference("https://131.107.72.15/trust/UserName"));
-//            options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/trust/X509WSS10"));
-//            options.setTo(new EndpointReference("https://131.107.72.15/trust/UserName"));
-//            options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/jaxws-s4-sts/sts"));
-//            options.setTo(new EndpointReference("http://127.0.0.1:9090/jaxws-s4/simple"));
-//            options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/UTSAMLBearer"));
+        options.setTransportInProtocol(Constants.TRANSPORT_HTTP);
+        options.setAction(this.getRequestAction());
+//        options.setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.getWSANamespace());
 
-            options.setTransportInProtocol(Constants.TRANSPORT_HTTP);
-            options.setAction(this.getRequestAction());
-//            options.setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.getWSANamespace());
-
-            options.setTimeOutInMilliSeconds(200 * 1000);
-            OutflowConfiguration clientOutflowConfiguration = getClientOutflowConfiguration();
-            if (clientOutflowConfiguration != null) {
-                configContext.setProperty(WSSHandlerConstants.OUTFLOW_SECURITY, clientOutflowConfiguration.getProperty());
-            }
-            InflowConfiguration clientInflowConfiguration = getClientInflowConfiguration();
-            if (clientInflowConfiguration != null) {
-                configContext.setProperty(WSSHandlerConstants.INFLOW_SECURITY, clientInflowConfiguration.getProperty());
-            }
-
-            serviceClient.engageModule(new QName("addressing"));
-            serviceClient.engageModule(new QName("rampart"));
-
-            serviceClient.setOptions(options);
-
-            //Blocking invocation
-
-            OMElement result = serviceClient.sendReceive(getRequest());
-
-            this.validateRsponse(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
+        options.setTimeOutInMilliSeconds(200 * 1000);
+        OutflowConfiguration clientOutflowConfiguration = getClientOutflowConfiguration();
+        if (clientOutflowConfiguration != null) {
+            configContext.setProperty(WSSHandlerConstants.OUTFLOW_SECURITY, clientOutflowConfiguration.getProperty());
         }
+        InflowConfiguration clientInflowConfiguration = getClientInflowConfiguration();
+        if (clientInflowConfiguration != null) {
+            configContext.setProperty(WSSHandlerConstants.INFLOW_SECURITY, clientInflowConfiguration.getProperty());
+        }
+
+        serviceClient.engageModule(new QName("addressing"));
+        serviceClient.engageModule(new QName("rampart"));
+
+        serviceClient.setOptions(options);
+
+        //Blocking invocation
+
+        OMElement result = serviceClient.sendReceive(getRequest());
+
+        this.validateRsponse(result);
     }
 
     protected String getWSANamespace() {
