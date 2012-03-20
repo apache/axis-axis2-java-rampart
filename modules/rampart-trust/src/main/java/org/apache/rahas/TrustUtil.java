@@ -421,12 +421,15 @@ public class TrustUtil {
      * @return SOAPEnvelope
      */
     public static SOAPEnvelope createSOAPEnvelope(String nsUri) {
+        SOAPEnvelope env;
         if (nsUri != null
             && SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI.equals(nsUri)) {
-            return DOOMAbstractFactory.getSOAP11Factory().getDefaultEnvelope();
+            env = DOOMAbstractFactory.getSOAP11Factory().getDefaultEnvelope();
         } else {
-            return DOOMAbstractFactory.getSOAP12Factory().getDefaultEnvelope();
+            env = DOOMAbstractFactory.getSOAP12Factory().getDefaultEnvelope();
         }
+        ((Element)env).getOwnerDocument().appendChild((Element)env);
+        return env;
     }
 
 
