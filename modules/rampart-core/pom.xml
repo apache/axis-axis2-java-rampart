@@ -72,17 +72,6 @@
             <artifactId>axiom-dom</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!--dependency>
-            <groupId>com.google.code.ddom</groupId>
-            <artifactId>ddom-bundle-axiom-impl</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>1.4</version>
-        </dependency-->
     </dependencies>
 
     <reporting>
