@@ -30,8 +30,6 @@ import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
 
-import javax.xml.namespace.QName;
-
 public class Client {
 
     public static void main(String[] args) throws Exception {
