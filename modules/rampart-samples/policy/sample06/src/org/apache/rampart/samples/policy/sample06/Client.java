@@ -22,7 +22,6 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -31,15 +30,11 @@ import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rahas.RahasConstants;
-import org.apache.rahas.Token;
-import org.apache.rahas.TokenStorage;
-import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
-import org.apache.rahas.client.STSClient;
 import org.apache.rampart.RampartMessageData;
 import org.apache.ws.secpolicy.SP11Constants;
-import org.apache.ws.secpolicy.SPConstants;
-import org.opensaml.XML;
+import org.opensaml.common.xml.SAMLConstants;
+
 
 import javax.xml.namespace.QName;
 
@@ -80,7 +75,7 @@ public class Client {
         OMElement rst = resp.getFirstChildWithName(new QName(RahasConstants.WST_NS_05_02,
                                                              RahasConstants.IssuanceBindingLocalNames.
                                                                      REQUESTED_SECURITY_TOKEN));
-        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
+        OMElement elem = rst.getFirstChildWithName(new QName(SAMLConstants.SAML20_NS, "Assertion"));
         return elem;
     }
 
