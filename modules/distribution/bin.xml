@@ -34,6 +34,7 @@
                 <include>org.apache.xerces:xercesImpl:jar</include>
                 <include>org.apache.xerces:resolver:jar</include>
                 <include>org.apache.xerces:serializer:jar</include>
+                <include>org.owasp.esapi:esapi:jar</include>
             </includes>
         </dependencySet>
     </dependencySets>
