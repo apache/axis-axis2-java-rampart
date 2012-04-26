@@ -48,6 +48,9 @@ following specifications:</p>
         </section>
         
         <section name="Apache Rampart News">
+        <h3>April 26, 2012 : Apache Rampart 1.6.2 released</h3>
+        <p>Apache Rampart 1.6.2 is a maintenance release that update WSS4J to version 1.6.4 and OpenSAML to version 2.5.1. Apache Rampart 1.6.2 ensure compatibility with the latest Axis2 1.6.2 release.</p>
+
         <h3>Sep 24, 2011 : Apache Rampart 1.5.2 and 1.6.1 released</h3>
         <p>Both releases update WSS4J to version 1.5.12 and ensure compatibility with the latest
         Axis2 releases from the corresponding branches. Rampart 1.5.2 is supported with Axis2 1.5.6
