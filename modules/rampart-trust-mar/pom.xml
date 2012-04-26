@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.apache.rampart</groupId>
         <artifactId>rampart-project</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
@@ -36,10 +36,10 @@
     <name>Rampart - Trust-Mar</name>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/tags/v1.6.2</connection>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/branches/1_6</connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/tags/v1.6.2</developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/tags/v1.6.2</url>
+            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/branches/1_6</developerConnection>
+        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/branches/1_6</url>
     </scm>
 
     <build>
