@@ -129,7 +129,7 @@ public class RampartTest extends TestCase {
                 if (i == 31) {
                     OMNamespace omNamespace = OMAbstractFactory.getOMFactory().createOMNamespace(
                             "http://sample.com", "myNs");
-                    SOAPHeaderBlock header = OMAbstractFactory.getSOAP12Factory()
+                    SOAPHeaderBlock header = OMAbstractFactory.getSOAP11Factory()
                             .createSOAPHeaderBlock("VitalHeader", omNamespace);
                     header.addChild(AXIOMUtil.stringToOM("<foo>This is a sample Header</foo>"));
                     serviceClient.addHeader(header);
