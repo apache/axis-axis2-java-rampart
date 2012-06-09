@@ -20,7 +20,6 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 
 import junit.framework.TestCase;
 
@@ -145,7 +144,7 @@ public class SimpleTokenStoreTest extends TestCase {
 
     private Token getTestToken(String tokenId, Date expiry)
         throws TrustException {
-        OMFactory factory = DOOMAbstractFactory.getOMFactory();
+        OMFactory factory = OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM).getOMFactory();
         OMElement tokenEle = factory.createOMElement("testToken", "", "");
         Token token = new Token(tokenId, tokenEle, new Date(), expiry);
         token.setAttachedReference(tokenEle);
