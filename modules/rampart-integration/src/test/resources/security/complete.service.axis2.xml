@@ -3,6 +3,16 @@
     <parameter name="hotupdate" locked="false">true</parameter>
     <parameter name="enableMTOM" locked="false">true</parameter>
 
+    <!-- ================================================= -->
+    <!-- Deployers -->
+    <!-- ================================================= -->
+
+    <!--Service deployer , this will alow users to deploy AAR or exploded AAR as axis2 services-->
+    <deployer extension=".aar" directory="services" class="org.apache.axis2.deployment.ServiceDeployer">
+        <serviceBuilderExtension name ="jwsbuilderExt" class="org.apache.axis2.jaxws.framework.JAXWSServiceBuilderExtension"/>
+        <serviceBuilderExtension name ="wsdlbuilderExt" class="org.apache.axis2.deployment.WSDLServiceBuilderExtension"/>
+    </deployer>
+    
     <messageReceiver mep="INOUT" class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
 
     <!-- Engage the addressing module -->
