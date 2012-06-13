@@ -34,7 +34,7 @@
 &lt;module ref="rampart" /&gt;
 
 &lt;operation name="IssueToken"
-        mep="http://www.w3.org/2006/01/wsdl/in-out"&gt;
+        mep="http://www.w3.org/ns/wsdl/in-out"&gt;
     &lt;messageReceiver
             class="org.apache.rahas.STSMessageReceiver"/&gt;
 
