@@ -100,8 +100,8 @@ public abstract class TestClient extends TestCase {
             configContext.setProperty(WSSHandlerConstants.INFLOW_SECURITY, clientInflowConfiguration.getProperty());
         }
 
-        serviceClient.engageModule(new QName("addressing"));
-        serviceClient.engageModule(new QName("rampart"));
+        serviceClient.engageModule("addressing");
+        serviceClient.engageModule("rampart");
 
         serviceClient.setOptions(options);
 

@@ -69,8 +69,7 @@ public class InteropScenarioClient {
         stub._getServiceClient().getOptions().setProperty(
                 Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
         stub._getServiceClient().getOptions().setSoapVersionURI(soapNsURI);
-        stub._getServiceClient().engageModule(
-                new javax.xml.namespace.QName("rampart"));
+        stub._getServiceClient().engageModule("rampart");
 
         PingResponseDocument pingResDoc = stub.ping(pingDoc);
 
@@ -101,8 +100,7 @@ public class InteropScenarioClient {
         stub._getServiceClient().getOptions().setProperty(
                 Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
         // Engage the security module
-        stub._getServiceClient().engageModule(
-                new javax.xml.namespace.QName("rampart"));
+        stub._getServiceClient().engageModule("rampart");
 
         if (outflowConfig != null) {
             stub._getServiceClient().getServiceContext().setProperty(
@@ -145,8 +143,7 @@ public class InteropScenarioClient {
         stub._getServiceClient().getOptions().setProperty(
                 Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
         // Engage the security module
-        stub._getServiceClient().engageModule(
-                new javax.xml.namespace.QName("rampart"));
+        stub._getServiceClient().engageModule("rampart");
 
         if (outflowConfig != null) {
             stub._getServiceClient().getServiceContext().setProperty(
