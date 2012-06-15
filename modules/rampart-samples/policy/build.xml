@@ -23,6 +23,7 @@
 	<property name="temp.dir" value="build/temp"/>
 	<property name="keys.dir" value="../keys"/>
 	<property name="temp.client.dir" value="build/temp_client"/>
+    <property name="endorsed.dir" value="build/endorsed"/>
 	
 	<property name="addressing.mar" value="addressing-1.5.1.mar"/>
 	<property name="rampart.mar" value="rampart-1.5.mar"/>
@@ -119,6 +120,12 @@
         <create.and.run.client sample.number="08"/>
     </target>
 
+    <target name="setup">
+	<mkdir dir="${endorsed.dir}"/>
+        <get src="http://repo2.maven.org/maven2/xerces/xercesImpl/2.9.1/xercesImpl-2.9.1.jar"
+             dest="${endorsed.dir}/xercesImpl-2.9.1.jar" verbose="true"/>
+    </target>
+
 
 	<target name="clean">
 		<delete dir="build" />
@@ -174,6 +181,7 @@
                                     <include name="**/*.jar"/>
                             </fileset>
                     </classpath>
+                    <jvmarg value="-Djava.endorsed.dirs=${endorsed.dir}"/>
             </java>
 
 	   </sequential>
@@ -230,6 +238,7 @@
                                     <include name="**/*.jar"/>
                             </fileset>
                     </classpath>
+                    <jvmarg value="-Djava.endorsed.dirs=${endorsed.dir}"/>
             </java>
 
        </sequential>
