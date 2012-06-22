@@ -58,6 +58,7 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class RampartMessageData {
@@ -237,7 +238,7 @@ public class RampartMessageData {
                 } catch (NullPointerException e) {
                     //TODO remove this once AXIS2-4114 is fixed
                     if (axisService != null) {
-                        List<PolicyComponent> policyList = new ArrayList<PolicyComponent>();
+                        Collection<PolicyComponent> policyList = new ArrayList<PolicyComponent>();
                         policyList.addAll(axisService.getPolicySubject().getAttachedPolicyComponents());
                         AxisConfiguration axisConfiguration = axisService.getAxisConfiguration();
                         policyList.addAll(axisConfiguration.getPolicySubject().getAttachedPolicyComponents());
