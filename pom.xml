@@ -133,7 +133,7 @@
             </snapshots>
             <id>open-saml</id>
             <name>OpenSAML</name>
-            <url>http://shibboleth.internet2.edu/downloads/maven2/</url>
+            <url>https://build.shibboleth.net/nexus/content/groups/public/</url>
         </repository>
 
     </repositories>
