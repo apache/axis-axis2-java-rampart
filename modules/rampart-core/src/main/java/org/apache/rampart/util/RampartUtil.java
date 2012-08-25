@@ -1897,4 +1897,31 @@ public class RampartUtil {
         return SPConstants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder());
     }
 
+    /**
+     * Check if the given SOAP fault reports a security fault.
+     * 
+     * @param fault
+     *            the SOAP fault; must not be <code>null</code>
+     * @return <code>true</code> if the fault is a security fault; <code>false</code> otherwise
+     */
+    public static boolean isSecurityFault(SOAPFault fault) {
+        String soapVersionURI = fault.getNamespaceURI();
+        SOAPFaultCode code = fault.getCode();
+        if (code == null) {
+            // If no fault code is given, then it can't be security fault
+            return false;
+        } else if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+            return isSecurityFaultCode(code);
+        } else {
+            // For SOAP 1.2 security faults, the fault code is env:Sender, and the security fault code is
+            // specified in the subcode
+            SOAPFaultSubCode subCode = code.getSubCode();
+            return subCode == null ? false : isSecurityFaultCode(subCode);
+        }
+    }
+    
+    private static boolean isSecurityFaultCode(SOAPFaultClassifier code) {
+        QName value = code.getValueAsQName();
+        return value == null ? false : value.getNamespaceURI().equals(WSConstants.WSSE_NS);
+    }
 }
