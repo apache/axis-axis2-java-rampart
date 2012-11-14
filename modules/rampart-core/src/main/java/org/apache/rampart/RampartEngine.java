@@ -16,13 +16,8 @@
 
 package org.apache.rampart;
 
-import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFault;
-import org.apache.axiom.soap.SOAPFaultCode;
-import org.apache.axiom.soap.SOAPFaultSubCode;
-import org.apache.axiom.soap.SOAPFaultValue;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
@@ -290,41 +285,7 @@ public class RampartEngine {
 
 	
 	private boolean isSecurityFault(RampartMessageData rmd) {
-
-		SOAPEnvelope soapEnvelope = rmd.getMsgContext().getEnvelope();
-		SOAPFault soapFault = soapEnvelope.getBody().getFault();
-
-		// This is not a soap fault
-		if (soapFault == null) {
-			return false;
-		}
-
-		String soapVersionURI = rmd.getMsgContext().getEnvelope().getNamespace().getNamespaceURI();
-		SOAPFaultCode faultCode = soapFault.getCode();
-		if(faultCode == null){
-			//If no fault code is given, then it can't be security fault
-			return false;
-		}
-		
-		if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-			// This is a fault processing the security header
-			if (faultCode.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-				return true;
-			}
-		} else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-			// TODO AXIOM API returns only one fault sub code, there can be many
-			SOAPFaultSubCode faultSubCode = faultCode.getSubCode();
-			if (faultSubCode != null) {
-				SOAPFaultValue faultSubCodeValue = faultSubCode.getValue();
-
-				// This is a fault processing the security header
-				if (faultSubCodeValue != null && faultSubCodeValue.getTextAsQName().
-						getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+		SOAPFault soapFault = rmd.getMsgContext().getEnvelope().getBody().getFault();
+		return soapFault == null ? false : RampartUtil.isSecurityFault(soapFault);
 	}
 }

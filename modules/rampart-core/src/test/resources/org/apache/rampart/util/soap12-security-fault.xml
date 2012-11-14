@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+    <soapenv:Body>
+        <soapenv:Fault>
+            <soapenv:Code>
+                <soapenv:Value>soapenv:Sender</soapenv:Value>
+                <soapenv:Subcode>
+                    <soapenv:Value xmlns:axis2ns1="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">axis2ns1:FailedAuthentication</soapenv:Value>
+                </soapenv:Subcode>
+            </soapenv:Code>
+            <soapenv:Reason>
+                <soapenv:Text>CWWSS6521E: The Login failed because of an exception: javax.security.auth.login.LoginException: CWWSS7062E: Failed to check username [user1] and password in the UserRegsitry: WSSUserRegistryProcessor.checkRegistry()=false</soapenv:Text>
+            </soapenv:Reason>
+            <soapenv:Detail></soapenv:Detail>
+        </soapenv:Fault>
+    </soapenv:Body>
+</soapenv:Envelope>
