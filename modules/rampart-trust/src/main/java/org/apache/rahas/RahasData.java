@@ -19,7 +19,7 @@ package org.apache.rahas;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
-import org.apache.axiom.om.util.Base64;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.ws.security.WSConstants;
@@ -383,7 +383,7 @@ public class RahasData {
             OMElement binSecElem = entropyElem.getFirstElement();
             if (binSecElem != null && binSecElem.getText() != null
                 && !"".equals(binSecElem.getText())) {
-                this.requestEntropy = Base64.decode(binSecElem.getText());
+                this.requestEntropy = Base64Utils.decode(binSecElem.getText());
             } else {
                 throw new TrustException("malformedEntropyElement",
                                          new String[]{entropyElem.toString()});
