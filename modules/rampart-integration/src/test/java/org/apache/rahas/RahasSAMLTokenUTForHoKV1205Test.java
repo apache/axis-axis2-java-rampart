@@ -21,7 +21,7 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.util.Base64;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.neethi.Policy;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
@@ -57,7 +57,7 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
             byte[] nonce = WSSecurityUtil.generateNonce(16);
             clientEntr = nonce;
             OMElement entrElem = TrustUtil.createEntropyElement(RahasConstants.VERSION_05_12, rstElem);
-            TrustUtil.createBinarySecretElement(RahasConstants.VERSION_05_12, entrElem, RahasConstants.BIN_SEC_TYPE_NONCE).setText(Base64.encode(nonce));
+            TrustUtil.createBinarySecretElement(RahasConstants.VERSION_05_12, entrElem, RahasConstants.BIN_SEC_TYPE_NONCE).setText(Base64Utils.encode(nonce));
             TrustUtil.createComputedKeyAlgorithm(RahasConstants.VERSION_05_12,rstElem, RahasConstants.COMPUTED_KEY_PSHA1);
             
             return rstElem;

@@ -21,8 +21,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.util.Base64;
 import org.apache.axiom.soap.SOAP12Constants;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -474,7 +474,7 @@ public class STSClient {
                                                           BINARY_SECRET))) {
                 //First check for the binary secret
                 String b64Secret = child.getText();
-                secret = Base64.decode(b64Secret);
+                secret = Base64Utils.decode(b64Secret);
             } else if (child.getQName().equals(new QName(ns, WSConstants.ENC_KEY_LN))) {
 
                 Element domChild = (Element) new StAXOMBuilder(
@@ -505,7 +505,7 @@ public class STSClient {
                 if (binSecElem != null && binSecElem.getText() != null
                     && !"".equals(binSecElem.getText().trim())) {
 
-                    byte[] serviceEntr = Base64.decode(binSecElem.getText());
+                    byte[] serviceEntr = Base64Utils.decode(binSecElem.getText());
 
                     //Right now we only use PSHA1 as the computed key algo                    
                     P_SHA1 p_sha1 = new P_SHA1();
@@ -718,10 +718,10 @@ public class STSClient {
                     this.requestorEntropy =
                             WSSecurityUtil.generateNonce(this.algorithmSuite.
                                     getMaximumSymmetricKeyLength()/8);
-                    binSec.setText(Base64.encode(this.requestorEntropy));
+                    binSec.setText(Base64Utils.encode(this.requestorEntropy));
 
                     if (log.isDebugEnabled()) {
-                        log.debug("Clien entropy : " + Base64.encode(this.requestorEntropy));
+                        log.debug("Clien entropy : " + Base64Utils.encode(this.requestorEntropy));
                     }
 
                     // Add the ComputedKey element
@@ -744,10 +744,10 @@ public class STSClient {
                     this.requestorEntropy =
                             WSSecurityUtil.generateNonce(this.algorithmSuite.
                                     getMaximumSymmetricKeyLength()/8);
-                    binSec.setText(Base64.encode(this.requestorEntropy));
+                    binSec.setText(Base64Utils.encode(this.requestorEntropy));
 
                     if (log.isDebugEnabled()) {
-                        log.debug("Clien entropy : " + Base64.encode(this.requestorEntropy));
+                        log.debug("Clien entropy : " + Base64Utils.encode(this.requestorEntropy));
                     }
 
                     // Add the ComputedKey element
