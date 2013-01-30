@@ -83,6 +83,9 @@ public class RampartEngine {
 		List<WSSecurityEngineResult> results;
 
 		WSSecurityEngine engine = new WSSecurityEngine();
+		
+		//Set rampart's configuration of WSS4J
+		engine.setWssConfig(rmd.getConfig());
 
 		ValidatorData data = new ValidatorData(rmd);
 

@@ -32,6 +32,7 @@ import org.apache.neethi.PolicyEngine;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.SimpleTokenStore;
 import org.apache.rahas.TokenStorage;
+import org.apache.rampart.handler.RampartUsernameTokenValidator;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.policy.RampartPolicyBuilder;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -46,6 +47,7 @@ import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.SOAPConstants;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSConfig;
+import org.apache.ws.security.WSSecurityEngine;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.conversation.ConversationConstants;
@@ -174,6 +176,9 @@ public class RampartMessageData {
 
             // Set the WSSConfig
             this.config = WSSConfig.getNewInstance();
+            
+            //Update the UsernameToken validator
+            this.config.setValidator(WSSecurityEngine.USERNAME_TOKEN, RampartUsernameTokenValidator.class);
             
             // First obtain the axis service as we have to do a null check, there can be situations 
             // where Axis Service is null
