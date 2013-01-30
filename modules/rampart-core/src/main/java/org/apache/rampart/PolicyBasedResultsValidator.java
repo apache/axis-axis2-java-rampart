@@ -323,11 +323,17 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 
                 org.apache.ws.security.message.token.UsernameToken wssUt = 
                 		(org.apache.ws.security.message.token.UsernameToken) utResult.get(WSSecurityEngineResult.TAG_USERNAME_TOKEN);
-                if(ut.isHashPassword() && !wssUt.getPasswordType().equals(WSConstants.PASSWORD_DIGEST)) {
+                
+                if(ut.isNoPassword() && wssUt.getPassword() != null) {
+                	throw new RampartException("invalidUsernameTokenType");
+                }
+                
+            	if(ut.isHashPassword() && !wssUt.isHashed()) {
                 	throw new RampartException("invalidUsernameTokenType");
                 } else if (!wssUt.getPasswordType().equals(WSConstants.PASSWORD_TEXT)) {
                 	throw new RampartException("invalidUsernameTokenType");
                 }
+                
                 
 
             } else if (token instanceof IssuedToken) {
