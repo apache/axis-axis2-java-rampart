@@ -39,7 +39,6 @@ import org.jaxen.JaxenException;
 
 import javax.xml.namespace.QName;
 import java.math.BigInteger;
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -317,9 +316,19 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 UsernameToken ut = (UsernameToken) token;
                 //Check presence of a UsernameToken
                 WSSecurityEngineResult utResult = WSSecurityUtil.fetchActionResult(results, WSConstants.UT);
+                
                 if (utResult == null && !ut.isOptional()) {
                     throw new RampartException("usernameTokenMissing");
                 }
+                
+                org.apache.ws.security.message.token.UsernameToken wssUt = 
+                		(org.apache.ws.security.message.token.UsernameToken) utResult.get(WSSecurityEngineResult.TAG_USERNAME_TOKEN);
+                if(ut.isHashPassword() && !wssUt.getPasswordType().equals(WSConstants.PASSWORD_DIGEST)) {
+                	throw new RampartException("invalidUsernameTokenType");
+                } else if (!wssUt.getPasswordType().equals(WSConstants.PASSWORD_TEXT)) {
+                	throw new RampartException("invalidUsernameTokenType");
+                }
+                
 
             } else if (token instanceof IssuedToken) {
                 //TODO is is enough to check for ST_UNSIGNED results ??
