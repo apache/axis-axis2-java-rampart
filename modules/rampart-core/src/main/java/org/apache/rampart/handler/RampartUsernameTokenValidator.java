@@ -58,13 +58,13 @@ public class RampartUsernameTokenValidator extends UsernameTokenValidator {
 				mlog.debug(e);
 			}
 			throw new WSSecurityException(
-					WSSecurityException.FAILED_AUTHENTICATION, null, null, e);
+					WSSecurityException.FAILED_AUTHENTICATION);
 		} catch (UnsupportedCallbackException e) {
 			if (mlog.isDebugEnabled()) {
 				mlog.debug(e);
 			}
 			throw new WSSecurityException(
-					WSSecurityException.FAILED_AUTHENTICATION, null, null, e);
+					WSSecurityException.FAILED_AUTHENTICATION);
 		}
 
 	}
