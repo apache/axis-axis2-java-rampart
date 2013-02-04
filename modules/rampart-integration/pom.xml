@@ -407,7 +407,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <!-- Add the Xerces/Xalan versions expected by OpenSAML to the boot classpath so that the build succeeds on older 1.5 JDKs -->
-                    <argLine>-Xbootclasspath/p:${project.build.directory}/endorsed/xml-apis.jar${path.separator}${project.build.directory}/endorsed/xercesImpl.jar${path.separator}${project.build.directory}/endorsed/resolver.jar${path.separator}${project.build.directory}/endorsed/serializer.jar${path.separator}${project.build.directory}/endorsed/xalan.jar</argLine>
+                    <argLine>${argLine} -Xbootclasspath/p:${project.build.directory}/endorsed/xml-apis.jar${path.separator}${project.build.directory}/endorsed/xercesImpl.jar${path.separator}${project.build.directory}/endorsed/resolver.jar${path.separator}${project.build.directory}/endorsed/serializer.jar${path.separator}${project.build.directory}/endorsed/xalan.jar</argLine>
                     <excludes>
                         <exclude>org/apache/rahas/*.java</exclude>
                     </excludes>
