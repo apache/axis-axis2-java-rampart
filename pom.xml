@@ -286,85 +286,26 @@
         </plugins>
     </build>
 
-
-    <dependencies>
-
-        <!-- Axis2 and Axiom Dependencies -->
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-kernel</artifactId>
-            <version>${axis2.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>mex</artifactId>
-            <version>${axis2.version}</version>
-            <classifier>impl</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-mtompolicy</artifactId>
-            <version>${axis2.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>addressing</artifactId>
-            <type>mar</type>
-            <version>${axis2.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- Other Rampart Dependencies -->
-        <dependency>
-            <groupId>org.apache.ws.security</groupId>
-            <artifactId>wss4j</artifactId>
-            <version>${wss4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>xalan</groupId>
-            <artifactId>xalan</artifactId>
-            <version>2.7.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml</artifactId>
-            <version>${opensaml.version}</version>
-            <exclusions>
-                <!-- Don't allow OpenSAML to impose a particular logging implementation -->
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>log4j-over-slf4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>bouncycastle</groupId>
-            <artifactId>bcprov-jdk15</artifactId>
-            <version>${bcprov.jdk15.version}</version>
-        </dependency>
-
-        <!-- Junit Dependency -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
-
     <dependencyManagement>
         <dependencies>
+            <!-- Axis2 dependencies -->
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-kernel</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-mtompolicy</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>mex</artifactId>
+                <version>${axis2.version}</version>
+                <classifier>impl</classifier>
+            </dependency>
+            
             <!-- Since Rampart depends on DOOM, but axiom-dom is not a transitive
                  dependency, we need to manage the Axiom version. -->
             <dependency>
@@ -383,6 +324,39 @@
                 <version>${axiom.version}</version>
             </dependency>
 
+            <!-- Other Rampart Dependencies -->
+            <dependency>
+                <groupId>org.apache.ws.security</groupId>
+                <artifactId>wss4j</artifactId>
+                <version>${wss4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>bouncycastle</groupId>
+                <artifactId>bcprov-jdk15</artifactId>
+                <version>${bcprov.jdk15.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xalan</groupId>
+                <artifactId>xalan</artifactId>
+                <version>2.7.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml</artifactId>
+                <version>${opensaml.version}</version>
+                <exclusions>
+                    <!-- Don't allow OpenSAML to impose a particular logging implementation -->
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>log4j-over-slf4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
@@ -423,6 +397,11 @@
                         <artifactId>junit</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>3.8.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -495,8 +474,6 @@
         <opensaml.version>2.5.1-1</opensaml.version>
 
         <bcprov.jdk15.version>140</bcprov.jdk15.version>
-
-        <junit.version>3.8.2</junit.version>
 
         <!-- distribution properties -->
         <dist.dir>rampart-${project.version}</dist.dir>
