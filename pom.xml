@@ -136,6 +136,27 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.10</version>
+                    <configuration>
+                        <argLine>${jacoco.surefireArgLine}</argLine>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.7</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.gmaven</groupId>
+                    <artifactId>gmaven-plugin</artifactId>
+                    <version>1.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.7</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -162,6 +183,89 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>initialize</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>
+                                <!-- Skip Jacoco if necessary -->
+                                if (project.packaging == 'pom' || project.properties['skipTests'] == 'true') {
+                                    project.properties['skipJacoco'] = 'true'
+                                }
+                            </source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent-for-surefire</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>jacoco.surefireArgLine</propertyName>
+                            <!-- Anonymize the session ID (by default it contains the name of the host executing the build) -->
+                            <sessionId>mvn:${project.groupId}:${project.artifactId}:${project.version}:surefire</sessionId>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>${skipJacoco}</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-jacoco-exec</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <skipAttach>${skipJacoco}</skipAttach>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/jacoco.exec</file>
+                                    <classifier>jacoco</classifier>
+                                    <type>exec</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- We need (some of) the source JARs for the code coverage analysis. -->
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- Use the same ID as in org.apache:apache; otherwise, the goal
+                             will be executed twice when the apache-release profile is
+                             activated -->
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
             </plugin>
             
             <plugin>
@@ -380,6 +484,7 @@
         <module>modules/rampart-integration</module>
         <!-- Compile sample codes -->
         <module>modules/rampart-samples</module>
+        <module>code-coverage</module>
     </modules>
 
     <properties>
@@ -397,5 +502,6 @@
         <dist.dir>rampart-${project.version}</dist.dir>
         <failIfNoTests>false</failIfNoTests>
 
+        <jacoco.version>0.6.1.201212231917</jacoco.version>
     </properties>
 </project>
