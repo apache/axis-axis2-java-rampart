@@ -330,8 +330,8 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 
             	if(ut.isHashPassword() && !wssUt.isHashed()) {
                 	throw new RampartException("invalidUsernameTokenType");
-                } else if (wssUt.getPassword() == null ||
-			!wssUt.getPasswordType().equals(WSConstants.PASSWORD_TEXT)) {
+                } else if (!ut.isHashPassword() && (wssUt.getPassword() == null ||
+                        !wssUt.getPasswordType().equals(WSConstants.PASSWORD_TEXT))) {
                 	throw new RampartException("invalidUsernameTokenType");
                 }
                 
