@@ -133,6 +133,7 @@
                         </goals>
                         <configuration>
                             <modules>addressing,rampart</modules>
+                            <axis2xml>src/test/resources/conf/axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/default_security_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -153,6 +154,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s1.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario1_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -163,6 +165,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s1.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario1_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -173,6 +176,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s2.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario2_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -183,6 +187,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s2.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario2_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -193,6 +198,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s2a.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario2a_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -203,6 +209,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s2a.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario2a_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -213,6 +220,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s3.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario3_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -223,6 +231,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s3.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario3_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -233,6 +242,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s4.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario4_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -243,6 +253,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s4.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario4_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -253,6 +264,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s5.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario5_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -263,6 +275,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s5.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario5_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -273,6 +286,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s6.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario6_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -283,6 +297,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s6.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario6_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -293,6 +308,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s7.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario7_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -303,6 +319,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/s7.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenario7_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -313,6 +330,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/sST1.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenarioST1_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -323,6 +341,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/sST1.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/scenarioST1_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -333,6 +352,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/secMtom.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/mtom_sec_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -343,6 +363,7 @@
                         </goals>
                         <configuration>
                             <modules>rampart</modules>
+                            <axis2xml>src/test/resources/security/secMtom.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/mtom_sec_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -353,6 +374,7 @@
                         </goals>
                         <configuration>
                             <modules>addressing,rampart</modules>
+                            <axis2xml>src/test/resources/security/complete.client.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/complete_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -363,10 +385,14 @@
                         </goals>
                         <configuration>
                             <modules>addressing,rampart</modules>
+                            <axis2xml>src/test/resources/security/complete.service.axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/complete_service_repo</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <configurationDirectory>conf</configurationDirectory>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -605,9 +631,6 @@
                                 <!--
                                  Rahas Test 3 & 4: RahasSAMLTokenUTForHoKTest and RahasSAMLTokenUTForHoKV1205Test : END
                                 -->
-                                <mkdir dir="target/test-resources/default_security_client_repo" />
-                                <mkdir dir="target/test-resources/default_security_client_repo/conf" />
-                                <copy file="src/test/resources/conf/axis2.xml" tofile="target/test-resources/default_security_client_repo/conf/axis2.xml" />
                                 <!--
                         RahasSAMLTokenAttributeTest
                         -->
@@ -620,16 +643,7 @@
 
                                 <!--RahasAttributeTest END-->
                                 <!-- Scenario 1 -->
-                                <mkdir dir="target/test-resources/scenario1_client_repo" />
-                                <mkdir dir="target/test-resources/scenario1_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenario1_client_repo/services" />
-                                <mkdir dir="target/test-resources/scenario1_service_repo" />
-                                <mkdir dir="target/test-resources/scenario1_service_repo/conf" />
                                 <mkdir dir="target/test-resources/scenario1_service_repo/services" />
-                                <!-- setup scenario 1 client repository-->
-                                <copy file="src/test/resources/security/s1.client.axis2.xml" tofile="target/test-resources/scenario1_client_repo/conf/axis2.xml" />
-                                <!-- setup scenario 1 service repository-->
-                                <copy file="src/test/resources/security/s1.service.axis2.xml" tofile="target/test-resources/scenario1_service_repo/conf/axis2.xml" />
 
                                 <mkdir dir="target/temp-interop/META-INF" />
 
@@ -637,113 +651,51 @@
                                 <copy file="src/test/resources/security/s1.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenario1_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
                                 <!-- Scenario 2 - Setup the client and service repos -->
-                                <mkdir dir="target/test-resources/scenario2_client_repo" />
-                                <mkdir dir="target/test-resources/scenario2_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenario2_service_repo" />
-                                <mkdir dir="target/test-resources/scenario2_service_repo/ conf" />
                                 <mkdir dir="target/test-resources/scenario2_service_repo/services" />
-                                <copy file="src/test/resources/security/s2.client.axis2.xml" tofile="target/test-resources/scenario2_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/s2.service.axis2.xml" tofile="target/test-resources/scenario2_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/s2.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenario2_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
 
                                 <!-- Scenario 2a - set up repos -->
-                                <mkdir dir="target/test-resources/scenario2a_client_repo" />
-                                <mkdir dir="target/test-resources/scenario2a_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenario2a_service_repo" />
-                                <mkdir dir="target/test-resources/scenario2a_service_repo/conf" />
                                 <mkdir dir="target/test-resources/scenario2a_service_repo/services" />
-                                <copy file="src/test/resources/security/s2a.client.axis2.xml" tofile="target/test-resources/scenario2a_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/s2a.service.axis2.xml" tofile="target/test-resources/scenario2a_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/s2a.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenario2a_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
                                 <!-- Scenario 3 -->
-                                <mkdir dir="target/test-resources/scenario3_client_repo" />
-                                <mkdir dir="target/test-resources/scenario3_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenario3_service_repo" />
-                                <mkdir dir="target/test-resources/scenario3_service_repo/conf" />
                                 <mkdir dir="target/test-resources/scenario3_service_repo/services" />
-                                <copy file="src/test/resources/security/s3.client.axis2.xml" tofile="target/test-resources/scenario3_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/s3.service.axis2.xml" tofile="target/test-resources/scenario3_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/s3.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenario3_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
 
                                 <!-- Scenario 4 -->
-                                <mkdir dir="target/test-resources/scenario4_client_repo" />
-                                <mkdir dir="target/test-resources/scenario4_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenario4_service_repo" />
-                                <mkdir dir="target/test-resources/scenario4_service_repo/conf" />
                                 <mkdir dir="target/test-resources/scenario4_service_repo/services" />
-                                <copy file="src/test/resources/security/s4.client.axis2.xml" tofile="target/test-resources/scenario4_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/s4.service.axis2.xml" tofile="target/test-resources/scenario4_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/s4.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenario4_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
 
                                 <!-- Scenario 5 -->
-                                <mkdir dir="target/test-resources/scenario5_client_repo" />
-                                <mkdir dir="target/test-resources/scenario5_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenario5_service_repo" />
-                                <mkdir dir="target/test-resources/scenario5_service_repo/conf" />
                                 <mkdir dir="target/test-resources/scenario5_service_repo/services" />
-                                <copy file="src/test/resources/security/s5.client.axis2.xml" tofile="target/test-resources/scenario5_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/s5.service.axis2.xml" tofile="target/test-resources/scenario5_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/s5.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenario5_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
 
                                 <!-- Scenario 6 -->
-                                <mkdir dir="target/test-resources/scenario6_client_repo" />
-                                <mkdir dir="target/test-resources/scenario6_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenario6_service_repo" />
-                                <mkdir dir="target/test-resources/scenario6_service_repo/conf" />
                                 <mkdir dir="target/test-resources/scenario6_service_repo/services" />
-                                <copy file="src/test/resources/security/s6.client.axis2.xml" tofile="target/test-resources/scenario6_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/s6.service.axis2.xml" tofile="target/test-resources/scenario6_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/s6.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenario6_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
 
                                 <!-- Scenario 7 -->
-                                <mkdir dir="target/test-resources/scenario7_client_repo" />
-                                <mkdir dir="target/test-resources/scenario7_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenario7_service_repo" />
-                                <mkdir dir="target/test-resources/scenario7_service_repo/conf" />
                                 <mkdir dir="target/test-resources/scenario7_service_repo/services" />
-                                <copy file="src/test/resources/security/s7.client.axis2.xml" tofile="target/test-resources/scenario7_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/s7.service.axis2.xml" tofile="target/test-resources/scenario7_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/s7.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenario7_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
 
                                 <!-- Scenario ST1 -->
-                                <mkdir dir="target/test-resources/scenarioST1_client_repo" />
-                                <mkdir dir="target/test-resources/scenarioST1_client_repo/conf" />
-                                <mkdir dir="target/test-resources/scenarioST1_service_repo" />
-                                <mkdir dir="target/test-resources/scenarioST1_service_repo/conf" />
                                 <mkdir dir="target/test-resources/scenarioST1_service_repo/services" />
-                                <copy file="src/test/resources/security/sST1.client.axis2.xml" tofile="target/test-resources/scenarioST1_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/sST1.service.axis2.xml" tofile="target/test-resources/scenarioST1_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/sST1.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/scenarioST1_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
 
                                 <!-- MTOM Optimized Security Test -->
-                                <mkdir dir="target/test-resources/mtom_sec_client_repo" />
-                                <mkdir dir="target/test-resources/mtom_sec_client_repo/conf" />
-                                <mkdir dir="target/test-resources/mtom_sec_service_repo" />
-                                <mkdir dir="target/test-resources/mtom_sec_service_repo/conf" />
                                 <mkdir dir="target/test-resources/mtom_sec_service_repo/services" />
-                                <copy file="src/test/resources/security/secMtom.client.axis2.xml" tofile="target/test-resources/mtom_sec_client_repo/conf/axis2.xml" />
-                                <copy file="src/test/resources/security/secMtom.service.axis2.xml" tofile="target/test-resources/mtom_sec_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/secMtom.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <jar jarfile="target/test-resources/mtom_sec_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
 
                                 <!-- Test with addressing and MTOM  -->
-                                <mkdir dir="target/test-resources/complete_client_repo" />
-                                <mkdir dir="target/test-resources/complete_client_repo/conf" />
-                                <mkdir dir="target/test-resources/complete_service_repo" />
-                                <mkdir dir="target/test-resources/complete_service_repo/conf" />
                                 <mkdir dir="target/test-resources/complete_service_repo/services" />
-                                <!-- Test with addressing and MTOM client repository-->
-                                <copy file="src/test/resources/security/complete.client.axis2.xml" tofile="target/test-resources/complete_client_repo/conf/axis2.xml" />
-                                <!-- Test with addressing and MTOMservice repository-->
-                                <copy file="src/test/resources/security/complete.service.axis2.xml" tofile="target/test-resources/complete_service_repo/conf/axis2.xml" />
                                 <copy file="src/test/resources/security/complete.service.xml" tofile="target/temp-interop/META-INF/services.xml" overwrite="true" />
                                 <!-- Create the .aar file -->
                                 <jar jarfile="target/test-resources/complete_service_repo/services/PingPort.aar" basedir="target/temp-interop" />
