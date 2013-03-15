@@ -62,8 +62,8 @@ public class SupportingTokensBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
 
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), supportingToken);
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative(iterator.next(), supportingToken);
             /*
              * for the moment we will say there should be only one alternative 
              */
@@ -80,11 +80,11 @@ public class SupportingTokensBuilder implements AssertionBuilder<OMElement> {
                 SP11Constants.SIGNED_ENDORSING_SUPPORTING_TOKENS};
     }
 
-    private void processAlternative(List assertions, SupportingToken supportingToken) {
+    private void processAlternative(List<Assertion> assertions, SupportingToken supportingToken) {
         
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
 
-            Assertion primitive = (Assertion) iterator.next();
+            Assertion primitive = iterator.next();
             QName qname = primitive.getName();
 
             if (SP11Constants.ALGORITHM_SUITE.equals(qname)) {

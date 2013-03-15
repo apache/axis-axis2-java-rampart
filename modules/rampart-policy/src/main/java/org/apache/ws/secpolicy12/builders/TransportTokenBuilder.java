@@ -37,8 +37,8 @@ public class TransportTokenBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
 
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), transportToken);
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative(iterator.next(), transportToken);
             break; // since there should be only one alternative
         }
 
@@ -49,8 +49,8 @@ public class TransportTokenBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP12Constants.TRANSPORT_TOKEN};
     }
 
-    private void processAlternative(List assertions, TransportToken parent) {
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
+    private void processAlternative(List<Assertion> assertions, TransportToken parent) {
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
             Assertion primtive = (Assertion) iterator.next();
             QName qname = primtive.getName();
                 if(SP12Constants.HTTPS_TOKEN.equals(qname)){

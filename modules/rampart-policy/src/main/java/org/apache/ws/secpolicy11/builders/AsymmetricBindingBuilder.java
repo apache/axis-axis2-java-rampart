@@ -43,8 +43,8 @@ public class AsymmetricBindingBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), asymmetricBinding);
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative(iterator.next(), asymmetricBinding);
             
             /*
              * since there should be only one alternative
@@ -55,13 +55,13 @@ public class AsymmetricBindingBuilder implements AssertionBuilder<OMElement> {
         return asymmetricBinding;
     }
     
-    private void processAlternative(List assertions, AsymmetricBinding asymmetricBinding) {
+    private void processAlternative(List<Assertion> assertions, AsymmetricBinding asymmetricBinding) {
                
         Assertion assertion;
         QName name;
         
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            assertion = (Assertion) iterator.next();
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+            assertion = iterator.next();
             name = assertion.getName();
             
             if (SP11Constants.INITIATOR_TOKEN.equals(name)) {

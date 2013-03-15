@@ -77,9 +77,9 @@ public class X509TokenBuilder implements AssertionBuilder<OMElement> {
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
             policy = (Policy) policy.normalize(false);
 
-            for (Iterator iterator = policy.getAlternatives(); iterator
+            for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator
                     .hasNext();) {
-                processAlternative((List) iterator.next(), x509Token);
+                processAlternative(iterator.next(), x509Token);
                 
                 /*
                  * since there should be only one alternative
@@ -105,12 +105,12 @@ public class X509TokenBuilder implements AssertionBuilder<OMElement> {
         return x509Token;
     }
 
-    private void processAlternative(List assertions, X509Token parent) {
+    private void processAlternative(List<Assertion> assertions, X509Token parent) {
                 Assertion assertion;
         QName name;
 
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            assertion = (Assertion) iterator.next();
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+            assertion = iterator.next();
             name = assertion.getName();
 
             if (SP11Constants.REQUIRE_KEY_IDENTIFIRE_REFERENCE.equals(name)) {

@@ -116,7 +116,7 @@ public class MessageBuilderTestBase extends TestCase {
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
 
-    protected void verifySecHeader(Iterator qnameList, SOAPEnvelope env) {
+    protected void verifySecHeader(Iterator<QName> qnameList, SOAPEnvelope env) {
         Iterator secHeaderChildren =
                 env.getHeader().
                         getFirstChildWithName(new QName(WSConstants.WSSE_NS,
