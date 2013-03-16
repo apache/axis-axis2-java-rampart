@@ -23,10 +23,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.neethi.Policy;
-import org.apache.rampart.handler.config.InflowConfiguration;
-import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP12Constants;
-import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.util.WSSecurityUtil;
 
 public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
@@ -65,24 +62,6 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public OutflowConfiguration getClientOutflowConfiguration() {
-        OutflowConfiguration ofc = new OutflowConfiguration();
-
-        ofc.setActionItems("UsernameToken Timestamp");
-        ofc.setUser("joe");
-        ofc.setPasswordType(WSConstants.PW_TEXT);
-        ofc.setPasswordCallbackClass(PWCallback.class.getName());
-        return ofc;
-    }
-
-    public InflowConfiguration getClientInflowConfiguration() {
-        InflowConfiguration ifc = new InflowConfiguration();
-
-        ifc.setActionItems("Timestamp");
-        
-        return ifc;
     }
 
     public String getServiceRepo() {
@@ -158,6 +137,11 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
     public int getTrstVersion() {
         return RahasConstants.VERSION_05_12;
     }
+
+	@Override
+	public String getClientPolicyPath() {
+		return "/rahas/3.xml";
+	}
     
 //    private void requestService(OMElement assertion, byte[] reqEnt, byte[] respEnt) throws Exception {
 //        

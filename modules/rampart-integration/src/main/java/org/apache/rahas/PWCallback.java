@@ -33,35 +33,6 @@ import java.io.IOException;
 public class PWCallback implements CallbackHandler {
 
 
-
-    /** Field key */
-
-    private static final byte[] key = {
-
-        (byte) 0x31, (byte) 0xfd, (byte) 0xcb, (byte) 0xda, (byte) 0xfb,
-
-        (byte) 0xcd, (byte) 0x6b, (byte) 0xa8, (byte) 0xe6, (byte) 0x19,
-
-        (byte) 0xa7, (byte) 0xbf, (byte) 0x51, (byte) 0xf7, (byte) 0xc7,
-
-        (byte) 0x3e, (byte) 0x80, (byte) 0xae, (byte) 0x98, (byte) 0x51,
-
-        (byte) 0xc8, (byte) 0x51, (byte) 0x34, (byte) 0x04,
-
-    };
-
-
-
-    /*
-
-     * (non-Javadoc)
-
-     * @see javax.security.auth.callback.CallbackHandler#handle(javax.security.auth.callback.Callback[])
-
-     */
-
-
-
     /**
 
      * Method handle
@@ -150,11 +121,7 @@ public class PWCallback implements CallbackHandler {
 
                  */
 
-                if (pc.getUsage() == WSPasswordCallback.KEY_NAME) {
-
-                    pc.setKey(key);
-
-                } else if(pc.getIdentifier().equals("alice")) {
+                if(pc.getIdentifier().equals("alice")) {
 
                     pc.setPassword("password");
 

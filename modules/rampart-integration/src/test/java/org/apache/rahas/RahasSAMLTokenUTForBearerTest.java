@@ -20,8 +20,6 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
-import org.apache.rampart.handler.config.InflowConfiguration;
-import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.opensaml.Configuration;
 import org.opensaml.saml1.core.Assertion;
@@ -66,23 +64,6 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public OutflowConfiguration getClientOutflowConfiguration() {
-        OutflowConfiguration ofc = new OutflowConfiguration();
-
-        ofc.setActionItems("UsernameToken Timestamp");
-        ofc.setUser("joe");
-        ofc.setPasswordCallbackClass(PWCallback.class.getName());
-        return ofc;
-    }
-
-    public InflowConfiguration getClientInflowConfiguration() {
-        InflowConfiguration ifc = new InflowConfiguration();
-
-        ifc.setActionItems("Timestamp");
-        
-        return ifc;
     }
 
     public String getServiceRepo() {
@@ -172,4 +153,9 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
         }
         return  assertion;
     }
+
+	@Override
+	public String getClientPolicyPath() {
+		return "/rahas/3.xml";
+	}
 }

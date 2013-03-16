@@ -35,7 +35,6 @@ import org.apache.ws.security.WSEncryptionPart;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 public class RampartPolicyData {
 
@@ -126,8 +125,7 @@ public class RampartPolicyData {
     
     private List<String> contentEncryptedElements = new ArrayList<String>();
 
-    //TODO make this strongly type attribute
-    private HashMap declaredNamespaces = new HashMap();
+    private HashMap<String, String> declaredNamespaces = new HashMap<String, String>();
 
     /*
      * Holds the supporting tokens elements
@@ -528,11 +526,11 @@ public class RampartPolicyData {
         return signedParts;
     }
     
-    public HashMap getDeclaredNamespaces() {
+    public HashMap<String, String> getDeclaredNamespaces() {
         return declaredNamespaces;
     }
     
-    public void addDeclaredNamespaces(HashMap namespaces) {
+    public void addDeclaredNamespaces(HashMap<String, String> namespaces) {
         declaredNamespaces.putAll(namespaces);
     }
 
@@ -900,7 +898,7 @@ public class RampartPolicyData {
             
         case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
             if(this.signedEndorsingSupportingTokensIdMap == null) {
-                this.signedEndorsingSupportingTokensIdMap = new HashMap();
+                this.signedEndorsingSupportingTokensIdMap = new HashMap<Token,String>();
             }
             return null;
 

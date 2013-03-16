@@ -140,12 +140,12 @@ public class NonceCache extends AbstractUniqueMessageAttributeCache {
         rightNow.add(Calendar.SECOND, -(maxLifeTime));
         long timeBeforeMaxLifeTime = rightNow.getTimeInMillis();
         
-        Iterator iterator = mapIdNonce.entrySet().iterator();
+        Iterator<Map.Entry<Nonce, Calendar>> iterator = mapIdNonce.entrySet().iterator();
 
         while (iterator.hasNext()) {
 
-            Map.Entry pair = (Map.Entry)iterator.next();
-            Calendar itemDate = (Calendar)pair.getValue();
+            Map.Entry<Nonce, Calendar> pair = iterator.next();
+            Calendar itemDate = pair.getValue();
 
             long itemAddedTime = itemDate.getTimeInMillis();
 

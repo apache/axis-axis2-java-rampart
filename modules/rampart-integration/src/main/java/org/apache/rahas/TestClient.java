@@ -16,6 +16,8 @@
 
 package org.apache.rahas;
 
+import java.io.InputStream;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.Constants;
@@ -25,14 +27,11 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.integration.UtilServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.apache.rampart.handler.WSSHandlerConstants;
-import org.apache.rampart.handler.config.InflowConfiguration;
-import org.apache.rampart.handler.config.OutflowConfiguration;
-
-import javax.xml.namespace.QName;
+import org.apache.rampart.RampartMessageData;
 
 import junit.framework.TestCase;
 
@@ -91,15 +90,10 @@ public abstract class TestClient extends TestCase {
 //        options.setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.getWSANamespace());
 
         options.setTimeOutInMilliSeconds(200 * 1000);
-        OutflowConfiguration clientOutflowConfiguration = getClientOutflowConfiguration();
-        if (clientOutflowConfiguration != null) {
-            configContext.setProperty(WSSHandlerConstants.OUTFLOW_SECURITY, clientOutflowConfiguration.getProperty());
-        }
-        InflowConfiguration clientInflowConfiguration = getClientInflowConfiguration();
-        if (clientInflowConfiguration != null) {
-            configContext.setProperty(WSSHandlerConstants.INFLOW_SECURITY, clientInflowConfiguration.getProperty());
-        }
 
+        ServiceContext context = serviceClient.getServiceContext();
+        context.setProperty(RampartMessageData.KEY_RAMPART_POLICY, loadPolicy());
+        
         serviceClient.engageModule("addressing");
         serviceClient.engageModule("rampart");
 
@@ -118,9 +112,7 @@ public abstract class TestClient extends TestCase {
 
     public abstract OMElement getRequest();
 
-    public abstract OutflowConfiguration getClientOutflowConfiguration();
-
-    public abstract InflowConfiguration getClientInflowConfiguration();
+    public abstract String getClientPolicyPath();
 
     public abstract String getServiceRepo();
 
@@ -176,5 +168,12 @@ public abstract class TestClient extends TestCase {
         OMElement elem = builder.getDocumentElement();
         return PolicyEngine.getPolicy(elem);
     }
+    
+    private Policy loadPolicy() throws Exception {
+    	String path = getClientPolicyPath();
+    	InputStream poilicyStream = TestClient.class.getResourceAsStream(path);
+		return PolicyEngine.getPolicy(poilicyStream);
+    }
+
 
 }
