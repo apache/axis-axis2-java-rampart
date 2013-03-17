@@ -30,7 +30,6 @@ import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
-import org.apache.rampart.util.HandlerParameterDecoder;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.SupportingToken;
