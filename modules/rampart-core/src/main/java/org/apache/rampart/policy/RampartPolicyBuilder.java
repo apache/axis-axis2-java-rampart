@@ -36,7 +36,6 @@ import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.SymmetricAsymmetricBindingBase;
 import org.apache.ws.secpolicy.model.SymmetricBinding;
-import org.apache.ws.secpolicy.model.TokenWrapper;
 import org.apache.ws.secpolicy.model.TransportBinding;
 import org.apache.ws.secpolicy.model.TransportToken;
 import org.apache.ws.secpolicy.model.Trust10;
@@ -363,14 +362,14 @@ public class RampartPolicyBuilder {
      */
     private static void asymmetricBinding(AsymmetricBinding binding,
             RampartPolicyData rpd) throws WSSPolicyException {
-        TokenWrapper tokWrapper = binding.getRecipientToken();
-        TokenWrapper tokWrapper1 = binding.getInitiatorToken();
-        if (tokWrapper == null || tokWrapper1 == null) {
+    	RecipientToken rt = binding.getRecipientToken();
+    	InitiatorToken it = binding.getInitiatorToken();
+        if (rt == null || it == null) {
             throw new WSSPolicyException("Asymmetric binding should have both Initiator and " +
             		                                                "Recipient tokens defined");
         }
-        rpd.setRecipientToken(((RecipientToken) tokWrapper).getReceipientToken());
-        rpd.setInitiatorToken(((InitiatorToken) tokWrapper1).getInitiatorToken());
+        rpd.setRecipientToken(rt.getReceipientToken());
+        rpd.setInitiatorToken(it.getInitiatorToken());
     }
 
     private static void processSupportingTokens(SupportingToken token,

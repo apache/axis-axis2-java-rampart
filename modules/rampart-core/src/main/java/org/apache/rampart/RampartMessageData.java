@@ -26,6 +26,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.PolicyUtil;
 import org.apache.axis2.wsdl.WSDLConstants;
+import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
 import org.apache.neethi.PolicyEngine;
@@ -261,7 +262,7 @@ public class RampartMessageData {
             }
             
             if(this.servicePolicy != null){
-                List it = (List)this.servicePolicy.getAlternatives().next();
+                List<Assertion> it = this.servicePolicy.getAlternatives().next();
 
                 //Process policy and build policy data
                 this.policyData = RampartPolicyBuilder.build(it);
@@ -430,7 +431,7 @@ public class RampartMessageData {
             this.servicePolicy.addAssertion(rc);
         }
 
-        List it = (List) this.servicePolicy.getAlternatives().next();
+        List<Assertion> it = this.servicePolicy.getAlternatives().next();
 
         //Process policy and build policy data
         try {
@@ -446,14 +447,6 @@ public class RampartMessageData {
      */
     public Document getDocument() {
         return document;
-    }
-
-    /**
-     * @param document The document to set.
-     * @deprecated document is derived from MessageContext passed in constructor
-     */
-    public void setDocument(Document document) {
-        this.document = document;
     }
 
     /**
@@ -507,40 +500,10 @@ public class RampartMessageData {
     }
 
     /**
-     * @param msgContext The msgContext to set.
-     * @deprecated MessageContext is set in constructor
-     */
-    public void setMsgContext(MessageContext msgContext) {
-        this.msgContext = msgContext;
-    }
-
-    /**
      * @return Returns the policyData.
      */
     public RampartPolicyData getPolicyData() {
         return policyData;
-    }
-
-    /**
-     * @param policyData The policyData to set.
-     * @deprecated Policy data determined within constructor
-     */
-    public void setPolicyData(RampartPolicyData policyData) throws RampartException {
-        this.policyData = policyData;
-        
-        try {
-            //if client side then check whether sig conf enabled 
-            //and get hold of the stored signature values
-            if(this.isInitiator && !this.sender && policyData.isSignatureConfirmation()) {
-                OperationContext opCtx = msgContext.getOperationContext();
-                MessageContext outMsgCtx = opCtx
-                        .getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-                msgContext.setProperty(WSHandlerConstants.SEND_SIGV, outMsgCtx
-                        .getProperty(WSHandlerConstants.SEND_SIGV));
-            }
-        } catch (AxisFault e) {
-            throw new RampartException("errorGettingSignatureValuesForSigconf", e);
-        }
     }
 
     /**
@@ -725,14 +688,6 @@ public class RampartMessageData {
     }
 
     /**
-     * @param wstVersion The wstVersion to set.
-     * @deprecated This is defined by the class.
-     */
-    public void setWstVersion(int wstVersion) {
-        this.wstVersion = wstVersion;
-    }
-
-    /**
      * @return Returns the secConvVersion.
      */
     public int getSecConvVersion() {
@@ -746,13 +701,6 @@ public class RampartMessageData {
         return servicePolicy;
     }
 
-    /**
-     * @param servicePolicy The servicePolicy to set.
-     * @deprecated servicePolicy determined in constructor
-     */
-    public void setServicePolicy(Policy servicePolicy) {
-        this.servicePolicy = servicePolicy;
-    }
     
     /**
      * @return Returns the timestampId.

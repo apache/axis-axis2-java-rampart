@@ -121,13 +121,13 @@ public class PostDispatchVerificationHandler implements Handler {
             return InvocationResponse.CONTINUE;
         }
         
-        Iterator alternatives = policy.getAlternatives();
+        Iterator<List<Assertion>> alternatives = policy.getAlternatives();
         
         boolean securityPolicyPresent = false;
         if(alternatives.hasNext()) {
-            List assertions = (List)alternatives.next();
-            for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-                Assertion assertion = (Assertion) iterator.next();
+            List<Assertion> assertions = alternatives.next();
+            for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+                Assertion assertion = iterator.next();
                 //Check for any *Binding assertion
                 if (assertion instanceof Binding) {
                     securityPolicyPresent = true;
