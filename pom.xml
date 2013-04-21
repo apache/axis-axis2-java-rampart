@@ -183,6 +183,7 @@
                                     <banPluginRepositories>true</banPluginRepositories>
                                     <!-- We still need to allow the Apache snapshot repository -->
                                     <allowSnapshotRepositories>true</allowSnapshotRepositories>
+                                    <allowSnapshotPluginRepositories>true</allowSnapshotPluginRepositories>
                                 </requireNoRepositories>
                             </rules>
                         </configuration>
@@ -486,4 +487,17 @@
 
         <jacoco.version>0.6.1.201212231917</jacoco.version>
     </properties>
+
+    <pluginRepositories>
+         <pluginRepository>
+             <id>apache.snapshots</id>
+             <url>http://repository.apache.org/snapshots/</url>
+             <snapshots>
+                 <enabled>true</enabled>
+             </snapshots>
+             <releases>
+                 <enabled>false</enabled>
+             </releases>
+         </pluginRepository>
+    </pluginRepositories>
 </project>
