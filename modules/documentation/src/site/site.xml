@@ -45,7 +45,7 @@
 		
 		<menu name="Apache Rampart">
 			<item name="Home" href="index.html" />
-			<item name="Downloads">
+			<item name="Downloads" href="javascript:void(0)">
 			        <item name="Releases" href="download.html"/>
 			        <item name="Source Code" href="svn.html"/>
 			</item>
