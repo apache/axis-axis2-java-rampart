@@ -36,38 +36,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>build-javadoc</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <tasks>
-                                <javadoc packagenames="org.apache.rampart.*,org.apache.rahas.*" destdir="target/apidocs" author="true" breakiterator="true" version="true" use="true" windowtitle="Apache Rampart API">
-
-                                    <sourcepath>
-                                        <dirset dir="../..">
-                                            <include name="**/rampart-core/src/main/java" />
-                                            <include name="**/rampart-policy/src/main/java" />
-                                            <include name="**/rampart-trust/src/main/java" />
-                                        </dirset>
-                                    </sourcepath>
-
-                                    <classpath refid="maven.dependency.classpath" />
-                                    <classpath refid="maven.compile.classpath" />
-                                    <classpath refid="maven.runtime.classpath" />
-
-                                </javadoc>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
                 <executions>
@@ -105,6 +73,12 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>
