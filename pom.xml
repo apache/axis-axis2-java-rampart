@@ -118,6 +118,13 @@
         <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/trunk</url>
     </scm>
 
+    <distributionManagement>
+        <site>
+            <id>site</id>
+            <url>scm:svn:https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart</url>
+        </site>
+    </distributionManagement>
+    
     <build>
         <pluginManagement>
             <plugins>
@@ -162,6 +169,14 @@
                     <groupId>org.apache.axis2</groupId>
                     <artifactId>axis2-repo-maven-plugin</artifactId>
                     <version>${axis2.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.2</version>
+                    <configuration>
+                        <!-- Required by maven-scm-publish-plugin -->
+                        <skipDeploy>true</skipDeploy>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -286,11 +301,15 @@
 
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.2</version>
                 <inherited>false</inherited>
                 <configuration>
                     <siteDirectory>modules/documentation/src/site</siteDirectory>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-publish-plugin</artifactId>
+                <version>1.0-beta-2</version>
             </plugin>
         </plugins>
     </build>
