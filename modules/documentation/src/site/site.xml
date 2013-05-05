@@ -26,7 +26,7 @@
 	</bannerLeft>
 	    
     <bannerRight>
-        <src>images/apache-rampart-banner.jpg</src>
+        <src>http://www.apache.org/images/asf_logo_wide.png</src>
         <href>http://www.apache.org</href>
     </bannerRight>
 
@@ -45,7 +45,7 @@
 		
 		<menu name="Apache Rampart">
 			<item name="Home" href="index.html" />
-			<item name="Downloads">
+			<item name="Downloads" href="javascript:void(0)">
 			        <item name="Releases" href="download.html"/>
 			        <item name="Source Code" href="svn.html"/>
 			</item>
@@ -71,9 +71,10 @@
 		    <item name="Source Code"
 		       href="http://svn.apache.org/viewvc/axis/axis2/java/rampart/" />
 		    <item name="Dependencies" href="dependencies.html"/>
-		    <item name="License"
-		        href="http://www.apache.org/licenses/LICENSE-2.0.html" />
+			<item name="License" href="http://www.apache.org/licenses/"/>
+			<item name="Sponsorship" href="http://www.apache.org/foundation/sponsorship.html"/>
+			<item name="Thanks" href="http://www.apache.org/foundation/thanks.html"/>
+			<item name="Security" href="http://www.apache.org/security/"/>
 		</menu>
-
 	</body>
 </project>

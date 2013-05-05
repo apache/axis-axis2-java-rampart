@@ -51,65 +51,32 @@ urchinTracker();
 Distribution</strong></td>
 <td>This is the complete version of Apache Rampart and will contain samples
 as well.</td>
-<td><a href="[preferred]/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip" title=
-		"[preferred]/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip" onClick=
+<td><a href="http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip" title=
+		"http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip" onClick=
 "javascript:urchinTracker ('/downloads/rampart-dist-1.6.1-bin.zip');">zip</a>
-<a href="http://www.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip.md5"
-	title="http://www.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip.md5">MD5</a>
-<a href="http://www.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip.asc"
-	title="http://www.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip.asc">PGP</a></td>
+<a href="http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip.md5"
+	title="http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip.md5">MD5</a>
+<a href="http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip.asc"
+	title="http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-bin.zip.asc">PGP</a></td>
 </tr>
 <tr>
 <td><a name="src" id="src"></a> <strong>Source
 Distribution</strong></td>
 <td>This will contain the sources of Apache Rampart distribution.</td>
-<td><a href="[preferred]/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip" title=
-		"[preferred]/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip" onClick=
+<td><a href="http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip" title=
+		"http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip" onClick=
 "javascript:urchinTracker ('/downloads/rampart-dist-1.6.1-src.zip');">zip</a>
 <a href=
-	"http://www.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip.md5"
+	"http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip.md5"
 title=
-"http://www.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip.md5">MD5</a>
+"http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip.md5">MD5</a>
 <a href=
-	"http://www.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip.asc"
+	"http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip.asc"
 title=
-"http://www.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip.asc">PGP</a></td>
+"http://archive.apache.org/dist/axis/axis2/java/rampart/1.6.1/rampart-dist-1.6.1-src.zip.asc">PGP</a></td>
 </tr>
 </tbody>
 </table>
-</div>
-<div align="left"><br />
-<p>[if-any logo] <a href="[link]"><img align="right" src="[logo]"
-border="0" /></a>[end] The currently selected mirror is
-<b>[preferred]</b>. If you encounter a problem with this mirror,
-please select another mirror. If all mirrors are failing, there are
-<i>backup</i> mirrors (at the end of the mirrors list) that should
-be available.</p>
-<form action="[location]" method="get" id="SelectMirror" name="SelectMirror">
-Other mirrors: <select name="Preferred">
-[if-any http]
-  [for http]<option value="[http]">[http]</option>[end]
-[end]  
-[if-any ftp]
-  [for ftp]<option value="[ftp]">[ftp]</option>[end]
-[end]
-[if-any backup]
-  [for backup]<option value="[backup]">[backup] (backup)</option>[end]
-[end]
-</select><input type="submit" value="Change"/></form><p>You may also consult the <a class="externalLink" href="http://www.apache.org/mirrors/">complete list of mirrors</a>
-.</p>
-<p><strong>Note:</strong> when downloading from a mirror please
-check the <a href=
-"http://www.apache.org/dev/release-signing#md5">md5sum</a> and
-verify the <a href=
-"http://www.apache.org/dev/release-signing#openpgp">OpenPGP</a>
-compatible signature from the main Apache site. These can be
-downloaded by following the links above. This <a href=
-"http://www.apache.org/dist/axis/axis2/java/rampart/KEYS">KEYS</a> file contains
-the public keys that can be used for verifying signatures. It is
-recommended that (when possible)a <a href=
-"http://www.apache.org/dev/release-signing#web-of-trust">Web of
-trust</a> is used to confirm the identity of these keys.</p>
 </div>
 </body>
 </html>

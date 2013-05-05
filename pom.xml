@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>8</version>
+        <version>13</version>
     </parent>
 
     <groupId>org.apache.rampart</groupId>
@@ -118,6 +118,13 @@
         <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/branches/1_6</url>
     </scm>
 
+    <distributionManagement>
+        <site>
+            <id>site</id>
+            <url>scm:svn:https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart</url>
+        </site>
+    </distributionManagement>
+    
     <build>
         <pluginManagement>
             <plugins>
@@ -136,6 +143,14 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.10</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.2</version>
+                    <configuration>
+                        <!-- Required by maven-scm-publish-plugin -->
+                        <skipDeploy>true</skipDeploy>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -176,12 +191,36 @@
 
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>2.0-beta-5</version>
                 <inherited>false</inherited>
+                <configuration>
+                    <siteDirectory>modules/documentation/src/site</siteDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-publish-plugin</artifactId>
+                <version>1.0-beta-2</version>
             </plugin>
         </plugins>
     </build>
 
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.6</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>project-team</report>
+                            <report>dependencies</report>
+                            <report>mailing-list</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <dependencies>
 
@@ -341,11 +380,24 @@
                 </property>
             </activation>
             <modules>
-                <module>modules/documentation</module>
                 <module>modules/distribution</module>
             </modules>
             <build>
                 <plugins>
+                    <plugin>
+                        <!-- Generate the site for inclusion in the binary distribution -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>dist-site</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>site</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <executions>
@@ -373,13 +425,14 @@
                  for anything else than doing a release. -->
             <id>everything</id>
             <modules>
-                <module>modules/documentation</module>
                 <module>modules/distribution</module>
+                <module>code-coverage</module>
             </modules>
         </profile>
     </profiles>
 
     <modules>
+        <module>apidocs</module>
         <module>modules/rampart-policy</module>
         <module>modules/rampart-trust</module>
         <module>modules/rampart-core</module>

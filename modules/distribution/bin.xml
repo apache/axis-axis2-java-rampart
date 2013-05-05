@@ -41,11 +41,11 @@
     </dependencySets>
     <fileSets>
         <fileSet>
-            <directory>target/apidocs</directory>
+            <directory>../../apidocs/target/site</directory>
             <outputDirectory>${dist.dir}/docs/apidocs</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../documentation/target/site</directory>
+            <directory>../../target/site</directory>
             <outputDirectory>${dist.dir}/docs</outputDirectory>
         </fileSet>
         <fileSet>

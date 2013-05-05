@@ -29,13 +29,9 @@
 	<body>
         <h1>Apache Rampart - Axis2 Security Module</h1>
 		<section name="Welcome to Apache Rampart">
-			<p>Rampart is the security module of Axis2. It secures SOAP messages
+			<p>Apache Rampart&#x2122; is the security module of Axis2. It secures SOAP messages
 according to specifications in the WS-Security stack. Rampart implements the
 following specifications:</p>
-		</section>
-		
-		<section name="Features of Rampart Latest Version">
-		
 		    <ul>
                 <li><p>WS - Security 1.0</p></li>
                 <li><p>WS - Security 1.1</p></li>
@@ -45,6 +41,8 @@ following specifications:</p>
                 <li><p>WS - Trust - February 2005</p></li>
                 <li><p>WS - Trust - WS-SX spec - EXPERIMENTAL</p></li>
             </ul>
+            <hr/>
+            <p>Apache Rampart, Rampart, Apache, the Apache feather logo, and the Apache Rampart project logo are trademarks of The Apache Software Foundation.</p>
         </section>
         
         <section name="Apache Rampart News">
