@@ -1472,7 +1472,12 @@ public class RampartUtil {
                 String encrKeyId = (String) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ID);
                 if (actInt == WSConstants.ENCR &&
                         encrKeyId != null) {
-                    return encrKeyId;
+                    if (encrKeyId.length() > 0) {
+                        return encrKeyId;
+                    }
+                    else if (log.isDebugEnabled()) {
+                        log.debug("Found encryption security processing result with empty id, skipping it: " + wsSecEngineResult);
+                    }
                 }
             }
         }
