@@ -106,7 +106,7 @@
     </target>
 
     <target name="copy-bc-jar-15" unless="${jdk14.present}">
-		<copy todir="${dir.dist.bin}/lib" file="${dir.mvn2.repo}/bouncycastle/bcprov-jdk15/${version.bcprov15}/bcprov-jdk15-${version.bcprov15}.jar"/>
+		<copy todir="${dir.dist.bin}/lib" file="${dir.mvn2.repo}/org/bouncycastle/bcprov-jdk15on/${version.bcprov15}/bcprov-jdk15on-${version.bcprov15}.jar"/>
     </target>
     
     <target name="src-dist" depends="init">

@@ -112,8 +112,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>bouncycastle</groupId>
-            <artifactId>bcprov-jdk15</artifactId>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
             <version>${bcprov.jdk15.version}</version>
         </dependency>
         <dependency>

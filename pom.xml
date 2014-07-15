@@ -377,8 +377,8 @@
                 <version>${wss4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>bouncycastle</groupId>
-                <artifactId>bcprov-jdk15</artifactId>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
                 <version>${bcprov.jdk15.version}</version>
             </dependency>
             <dependency>
@@ -532,7 +532,7 @@
         <wss4j.version>1.6.16</wss4j.version>
         <opensaml.version>2.5.1-1</opensaml.version>
 
-        <bcprov.jdk15.version>140</bcprov.jdk15.version>
+        <bcprov.jdk15.version>1.49</bcprov.jdk15.version>
 
         <!-- distribution properties -->
         <dist.dir>rampart-${project.version}</dist.dir>
