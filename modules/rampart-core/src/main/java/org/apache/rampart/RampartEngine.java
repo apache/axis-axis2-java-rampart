@@ -32,6 +32,7 @@ import org.apache.rampart.saml.SAMLAssertionHandlerFactory;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
+import org.apache.ws.secpolicy.model.UsernameToken;
 import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
 
@@ -117,6 +118,19 @@ public class RampartEngine {
 			t0 = System.currentTimeMillis();
 		}
 
+		//wss4j does not allow username tokens with no password per default, see https://issues.apache.org/jira/browse/WSS-420
+		//configure it to allow them explicitly if at least one username token assertion with no password requirement is found
+		if (!rmd.isInitiator()) {
+		    Collection<UsernameToken> usernameTokens = RampartUtil.getUsernameTokens(rpd);
+		    for (UsernameToken usernameTok : usernameTokens) {
+		        if (usernameTok.isNoPassword()) {
+		            log.debug("Found UsernameToken with no password assertion in policy, configuring ws security processing to allow username tokens without password." );
+		            engine.getWssConfig().setAllowUsernameTokenNoPassword(true);
+		            break;
+		        }
+		    }
+		}
+		
 		String actorValue = secHeader.getAttributeValue(new QName(rmd
 				.getSoapConstants().getEnvelopeURI(), "actor"));
 

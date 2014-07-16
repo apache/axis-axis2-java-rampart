@@ -1929,4 +1929,60 @@ public class RampartUtil {
         QName value = code.getValueAsQName();
         return value == null ? false : value.getNamespaceURI().equals(WSConstants.WSSE_NS);
     }
+    
+    /**
+     * @param rpd Rampart policy data instance. Must not be null.
+     * @return A collection of all {@link UsernameToken} supporting token assertions in the specified Rampart policy instance. The method will check the following lists:
+     * <ul>
+     *     <li>{@link RampartPolicyData#getSupportingTokensList()}</li>
+     *     <li>{@link RampartPolicyData#getSignedSupportingTokens()}</li>
+     *     <li>{@link RampartPolicyData#getSignedEndorsingSupportingTokens()}</li>
+     *     <li>{@link RampartPolicyData#getEndorsingSupportingTokens()}</li>
+     *     <li>{@link RampartPolicyData#getEncryptedSupportingTokens()}</li>
+     *     <li>{@link RampartPolicyData#getSignedEncryptedSupportingTokens()}</li>
+     *     <li>{@link RampartPolicyData#getEndorsingEncryptedSupportingTokens()}</li>
+     *     <li>{@link RampartPolicyData#getSignedEndorsingEncryptedSupportingTokens()}</li>
+     * </ul>
+     */
+    public static Collection<UsernameToken> getUsernameTokens(RampartPolicyData rpd) {
+        Collection<UsernameToken> usernameTokens = new ArrayList<UsernameToken>();
+        
+        List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
+        for (SupportingToken suppTok : supportingToks) {
+            usernameTokens.addAll(getUsernameTokens(suppTok));
+        }
+        
+        usernameTokens.addAll(getUsernameTokens(rpd.getSignedSupportingTokens()));
+        usernameTokens.addAll(getUsernameTokens(rpd.getSignedEndorsingSupportingTokens()));
+        usernameTokens.addAll(getUsernameTokens(rpd.getEndorsingSupportingTokens()));
+        usernameTokens.addAll(getUsernameTokens(rpd.getEncryptedSupportingTokens()));
+        usernameTokens.addAll(getUsernameTokens(rpd.getSignedEncryptedSupportingTokens()));
+        usernameTokens.addAll(getUsernameTokens(rpd.getEndorsingEncryptedSupportingTokens()));
+        usernameTokens.addAll(getUsernameTokens(rpd.getSignedEndorsingEncryptedSupportingTokens()));
+
+        return usernameTokens;
+    }
+    
+    /**
+     * @param suppTok The {@link SupportingToken} assertion to check for username tokens.
+     * @return A collection of all tokens in the specified <code>suppTok</code> SupportingToken assertion which are instances of {@link UsernameToken}.
+     * If the specified  <code>suppTok</code> SupportingToken assertion is <code>null</code>, an empty collection will be returned.
+     */
+    public static Collection<UsernameToken> getUsernameTokens(SupportingToken suppTok) {
+        
+        if (suppTok == null) {
+            return new ArrayList<UsernameToken>();
+        }
+        
+        Collection<UsernameToken> usernameTokens = new ArrayList<UsernameToken>();
+        ArrayList tokens = suppTok.getTokens();
+        for (Iterator iter = tokens.iterator(); iter.hasNext();) {
+            org.apache.ws.secpolicy.model.Token token = (org.apache.ws.secpolicy.model.Token) iter.next();
+            if (token instanceof UsernameToken) {
+                usernameTokens.add((UsernameToken)token);
+            }
+        }
+        
+        return usernameTokens;
+    }
 }

@@ -96,7 +96,7 @@ public class RampartTest extends TestCase {
             }
 
             //for (int i = 34; i <= 34; i++) { //<-The number of tests we have
-            for (int i = 1; i <= 34; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 35; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
                     continue;
