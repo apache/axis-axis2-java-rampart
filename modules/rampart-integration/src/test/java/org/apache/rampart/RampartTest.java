@@ -16,6 +16,11 @@
 
 package org.apache.rampart;
 
+import static org.apache.axis2.integration.JettyServer.getHttpPort;
+import static org.apache.axis2.integration.JettyServer.getHttpsPort;
+import static org.apache.axis2.integration.JettyServer.CLIENT_KEYSTORE;
+import static org.apache.axis2.integration.JettyServer.KEYSTORE_PASSWORD;
+
 import junit.framework.TestCase;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -31,7 +36,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.integration.UtilServer;
+import org.apache.axis2.integration.JettyServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 
@@ -41,10 +46,11 @@ import java.util.ResourceBundle;
 
 public class RampartTest extends TestCase {
 
-    public final static int PORT = UtilServer.TESTING_PORT;
-
     private static ResourceBundle resources;
-
+    private String trustStore;
+    private String trustStorePassword;
+    private String trustStoreType;
+    
     static {
         try {
             resources = ResourceBundle.getBundle("org.apache.rampart.errors");
@@ -58,12 +64,45 @@ public class RampartTest extends TestCase {
     }
 
     protected void setUp() throws Exception {
-        UtilServer.start(Constants.TESTING_PATH + "rampart_service_repo" ,null);
+        trustStore = System.getProperty("javax.net.ssl.trustStore");
+        System.setProperty("javax.net.ssl.trustStore", CLIENT_KEYSTORE);
+        
+        trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+        System.setProperty("javax.net.ssl.trustStorePassword", KEYSTORE_PASSWORD);
+        
+        trustStoreType = System.getProperty("javax.net.ssl.trustStoreType");
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+             
+        JettyServer.start(Constants.TESTING_PATH + "rampart_service_repo");
     }
     
 
     protected void tearDown() throws Exception {
-        UtilServer.stop();
+        try {
+            JettyServer.stop();
+        }
+        finally {
+            if (trustStore != null) {
+                System.setProperty("javax.net.ssl.trustStore", trustStore);
+            }
+            else {
+                System.clearProperty("javax.net.ssl.trustStore");
+            }
+            
+            if (trustStorePassword != null) {
+                System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);    
+            }
+            else {
+                System.clearProperty("javax.net.ssl.trustStorePassword");
+            }
+            
+            if (trustStoreType != null) {
+                System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
+            }
+            else {
+                System.clearProperty("javax.net.ssl.trustStoreType");
+            }
+        }
     }
 
     private ServiceClient getServiceClientInstance() throws AxisFault {
@@ -109,18 +148,22 @@ public class RampartTest extends TestCase {
                 Options options = new Options();
                 
                 if( i == 13 ) {
-                    continue; // Can't test Transport binding with Simple HTTP Server
+                    options.setTo(new EndpointReference("https://127.0.0.1:" +
+                                    getHttpsPort() +  
+                                    "/axis2/services/SecureService" + i));
                     //Username token created with user/pass from options
-                    //options.setUserName("alice");
-                    //options.setPassword("password");
+                    options.setUserName("alice");
+                    options.setPassword("password");
+                }
+                else {
+                    options.setTo(new EndpointReference("http://127.0.0.1:" +
+                                    getHttpPort() +  
+                                    "/axis2/services/SecureService" + i));
                 }
                 
                 System.out.println("Testing WS-Sec: custom scenario " + i);
                 options.setAction("urn:echo");
-                options.setTo(new EndpointReference("http://127.0.0.1:" +
-                                        PORT +  
-                                        "/axis2/services/SecureService" + i));
-                
+
                 ServiceContext context = serviceClient.getServiceContext();
                 context.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
                         loadPolicy("/rampart/policy/" + i + ".xml"));
@@ -181,14 +224,20 @@ public class RampartTest extends TestCase {
                 Options options = new Options();
 
                 if (i == 13) {
-                    continue;
+                    options.setTo(new EndpointReference("https://127.0.0.1:" +
+                                    getHttpsPort() +
+                                    "/axis2/services/SecureService" + i));
+                    //Username token created with user/pass from options
+                    options.setUserName("alice");
+                    options.setPassword("password");
                 }
-
+                else {
+                    options.setTo(new EndpointReference("http://127.0.0.1:" +
+                                    getHttpPort() +
+                                    "/axis2/services/SecureService" + i));
+                }
                 System.out.println("Testing WS-Sec: negative scenario " + i);
                 options.setAction("urn:returnError");
-                options.setTo(new EndpointReference("http://127.0.0.1:" +
-                        PORT +
-                        "/axis2/services/SecureService" + i));
 
                 ServiceContext context = serviceClient.getServiceContext();
                 context.setProperty(RampartMessageData.KEY_RAMPART_POLICY,
@@ -207,15 +256,17 @@ public class RampartTest extends TestCase {
 
             
             for (int i = 1; i <= 6; i++) { //<-The number of tests we have
+                Options options = new Options();
                 
                 if (i == 3 || i == 6) {
-                    continue; // Can't test Transport binding scenarios with Simple HTTP Server
+                    options.setTo(new EndpointReference("https://127.0.0.1:" + getHttpsPort() + "/axis2/services/SecureServiceSC" + i));
+                }
+                else {
+                    options.setTo(new EndpointReference("http://127.0.0.1:" + getHttpPort() + "/axis2/services/SecureServiceSC" + i));
                 }
 
-                Options options = new Options();
                 System.out.println("Testing WS-SecConv: custom scenario " + i);
                 options.setAction("urn:echo");
-                options.setTo(new EndpointReference("http://127.0.0.1:" + PORT + "/axis2/services/SecureServiceSC" + i));
 
                 //Create a new service client instance for each secure conversation scenario
                 serviceClient = getServiceClientInstance();

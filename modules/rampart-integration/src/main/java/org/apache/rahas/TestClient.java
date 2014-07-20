@@ -28,7 +28,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.integration.UtilServer;
+import org.apache.axis2.integration.JettyServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
@@ -37,18 +37,18 @@ import junit.framework.TestCase;
 
 public abstract class TestClient extends TestCase {
 
-    protected int port = UtilServer.TESTING_PORT;
+    protected int port = 5555;
 
     public TestClient(String name) {
         super(name);
     }
 
     protected void setUp() throws Exception {
-        UtilServer.start(Constants.TESTING_PATH + getServiceRepo(), null);
+        JettyServer.start(Constants.TESTING_PATH + getServiceRepo(), port, -1);
     }
 
     protected void tearDown() throws Exception {
-        UtilServer.stop();
+        JettyServer.stop();
     }
 
     /**

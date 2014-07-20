@@ -376,6 +376,83 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- Need to clean the keystore because keytool-maven-plugin is not idempotent and fails
+                             when executing mvn install twice in a row. Note that keytool-maven-plugin also has
+                             a "clean" goal but we don't use it because it generates a warning if the keystore
+                             doesn't exist. -->
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.build.directory}/test-resources/jetty</directory>
+                                    <includes>
+                                        <include>server.jks</include>
+                                        <include>server.cer</include>
+                                        <include>client.jks</include>
+                                    </includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>keytool-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>generate-key-pair</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>generateKeyPair</goal>
+                        </goals>
+                        <configuration>
+                            <alias>server</alias>
+                            <dname>cn=localhost,o=OASIS</dname>
+                            <keyalg>RSA</keyalg>
+                            <keypass>password</keypass>
+                            <keystore>${project.build.directory}/test-resources/jetty/server.jks</keystore>
+                            <storepass>password</storepass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>export-certificate</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>exportCertificate</goal>
+                        </goals>
+                        <configuration>
+                            <alias>server</alias>
+                            <file>${project.build.directory}/test-resources/jetty/server.cer</file>
+                            <keystore>${project.build.directory}/test-resources/jetty/server.jks</keystore>
+                            <storepass>password</storepass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>import-certificate</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>importCertificate</goal>
+                        </goals>
+                        <configuration>
+                            <alias>server</alias>
+                            <file>${project.build.directory}/test-resources/jetty/server.cer</file>
+                            <keystore>${project.build.directory}/test-resources/jetty/client.jks</keystore>
+                            <storepass>password</storepass>
+                            <noprompt>true</noprompt>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!--plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -415,16 +492,37 @@
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
             <version>${project.version}</version>
+            <!--  Use Jetty's servlet api (2.5) -->
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-trust</artifactId>
             <version>${project.version}</version>
+            <!--  Use Jetty's servlet api (2.5) -->
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-core</artifactId>
             <version>${project.version}</version>
+            <!--  Use Jetty's servlet api (2.5) -->
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -480,6 +578,21 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-testutils</artifactId>
+            <version>${axis2.version}</version>
         </dependency>
     </dependencies>
 </project>
