@@ -16,9 +16,9 @@
 
 package org.apache.rahas;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
+import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
@@ -324,8 +324,9 @@ public class RahasData {
             OMElement strElem = validateTargetElem.getFirstChildWithName(new QName(WSConstants.WSSE_NS,
                                                    "SecurityTokenReference"));
             
-            Element elem = (Element)(new StAXOMBuilder(new OMDOMFactory(), 
-                    strElem.getXMLStreamReader()).getDocumentElement());
+            Element elem = (Element)OMXMLBuilderFactory.createStAXOMBuilder(
+                    OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM).getOMFactory(),
+                    strElem.getXMLStreamReader()).getDocumentElement();
             
             try {
                 SecurityTokenReference str = new SecurityTokenReference((Element)elem);
@@ -350,8 +351,9 @@ public class RahasData {
             OMElement strElem = renewTargetElem.getFirstChildWithName(new QName(WSConstants.WSSE_NS,
                                                    "SecurityTokenReference"));
             
-            Element elem = (Element)(new StAXOMBuilder(new OMDOMFactory(), 
-                    strElem.getXMLStreamReader()).getDocumentElement());
+            Element elem = (Element)OMXMLBuilderFactory.createStAXOMBuilder(
+                    OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM).getOMFactory(),
+                    strElem.getXMLStreamReader()).getDocumentElement();
             
             try {
                 SecurityTokenReference str = new SecurityTokenReference((Element)elem);
