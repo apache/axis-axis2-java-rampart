@@ -24,9 +24,8 @@ import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 
 import junit.framework.TestCase;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Date;
@@ -157,7 +156,6 @@ public class SimpleTokenStoreTest extends TestCase {
 
     public void testSerialize()
         throws Exception {
-        String fileName = "test.ser";
 
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMNamespace ns1 = factory.createOMNamespace("bar", "x");
@@ -168,30 +166,13 @@ public class SimpleTokenStoreTest extends TestCase {
         SimpleTokenStore store = new SimpleTokenStore();
         store.add(t);
 
-        FileOutputStream fos = null;
-        ObjectOutputStream out = null;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(baos);
 
-        try {
-            fos = new FileOutputStream(fileName);
-            out = new ObjectOutputStream(fos);
-            out.writeObject(store);
-        } finally {
-            out.close();
-        }
+        out.writeObject(store);
 
-        SimpleTokenStore store2 = null;
-        FileInputStream fis = null;
-        ObjectInputStream in = null;
-        try {
-            fis = new FileInputStream(fileName);
-            in = new ObjectInputStream(fis);
-            store2 = (SimpleTokenStore)in.readObject();
-            in.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }
+        ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
+        SimpleTokenStore store2 = (SimpleTokenStore)in.readObject();
 
         assertEquals(store.getToken("#1232122").getId(), store2.getToken("#1232122").getId());
         assertEquals(store.getToken("#1232122").getCreated(), store2.getToken("#1232122").getCreated());
