@@ -384,5 +384,16 @@ public class WSDoAllReceiver extends WSDoAllHandler {
             }
         }
     }
+    
+    protected void doReceiverAction(int doAction, RequestData reqData)
+        throws WSSecurityException {
+        //backward compatibility, allow username tokens without password per default
+        //see https://issues.apache.org/jira/browse/WSS-420
+        Object msgContext = reqData.getMsgContext();
+        if (getProperty(msgContext, WSHandlerConstants.ALLOW_USERNAMETOKEN_NOPASSWORD) == null) {
+            setProperty(msgContext, WSHandlerConstants.ALLOW_USERNAMETOKEN_NOPASSWORD, "true");
+        }
+        super.doReceiverAction(doAction, reqData);
+    }
 
 }
