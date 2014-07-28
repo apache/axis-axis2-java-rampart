@@ -563,6 +563,10 @@
                                 <!-- Service 34 -->
                                 <copy overwrite="yes" file="src/test/resources/rampart/services-34.xml" tofile="target/temp-ramp/META-INF/services.xml" />
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService34.aar" basedir="target/temp-ramp" />
+                                
+                                <!-- Service 35 -->
+                                <copy overwrite="yes" file="src/test/resources/rampart/services-35.xml" tofile="target/temp-ramp/META-INF/services.xml" />
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService35.aar" basedir="target/temp-ramp" />
 
 
                                 <!-- Service SC-1 -->
