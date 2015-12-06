@@ -361,20 +361,6 @@
             <build>
                 <plugins>
                     <plugin>
-                        <!-- Generate the site for inclusion in the binary distribution -->
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-site-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>dist-site</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>site</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <executions>
                             <execution>

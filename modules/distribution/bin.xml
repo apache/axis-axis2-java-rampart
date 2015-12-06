@@ -45,10 +45,6 @@
             <outputDirectory>${dist.dir}/docs/apidocs</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../../target/site</directory>
-            <outputDirectory>${dist.dir}/docs</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>../rampart-samples</directory>
             <outputDirectory>${dist.dir}/samples</outputDirectory>
         </fileSet>
