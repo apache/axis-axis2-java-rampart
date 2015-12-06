@@ -58,6 +58,13 @@
                             <goal>javadoc</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>dist-javadoc</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                    </execution>
                 </executions>
                 <configuration>
                     <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
@@ -95,25 +102,4 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>apache-release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>dist-javadoc</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>javadoc</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
