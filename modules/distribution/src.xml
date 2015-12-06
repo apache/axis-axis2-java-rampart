@@ -40,4 +40,11 @@
             </includes>
         </fileSet>
     </fileSets>
+    <files>
+        <file>
+            <source>../../src/site/markdown/release-notes/${release_version}.md</source>
+            <outputDirectory>rampart-src-${project.version}</outputDirectory>
+            <destName>RELEASE-NOTE</destName>
+        </file>
+    </files>
 </assembly>
