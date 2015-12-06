@@ -296,13 +296,6 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-site-plugin</artifactId>
-                <inherited>false</inherited>
-                <configuration>
-                    <siteDirectory>modules/documentation/src/site</siteDirectory>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-publish-plugin</artifactId>
                 <version>1.0-beta-2</version>
