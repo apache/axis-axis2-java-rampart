@@ -153,9 +153,16 @@
                     <version>1.7</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.gmaven</groupId>
-                    <artifactId>gmaven-plugin</artifactId>
-                    <version>1.2</version>
+                    <groupId>org.codehaus.gmavenplus</groupId>
+                    <artifactId>gmavenplus-plugin</artifactId>
+                    <version>1.5</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.groovy</groupId>
+                            <artifactId>groovy-all</artifactId>
+                            <version>2.4.4</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -206,8 +213,8 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>initialize</id>
@@ -216,12 +223,14 @@
                             <goal>execute</goal>
                         </goals>
                         <configuration>
-                            <source>
-                                <!-- Skip Jacoco if necessary -->
-                                if (project.packaging == 'pom' || project.properties['skipTests'] == 'true') {
-                                    project.properties['skipJacoco'] = 'true'
-                                }
-                            </source>
+                            <scripts>
+                                <script>
+                                    <!-- Skip Jacoco if necessary -->
+                                    if (project.packaging == 'pom' || project.properties['skipTests'] == 'true') {
+                                        project.properties['skipJacoco'] = 'true'
+                                    }
+                                </script>
+                            </scripts>
                         </configuration>
                     </execution>
                 </executions>
