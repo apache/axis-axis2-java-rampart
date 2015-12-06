@@ -457,9 +457,6 @@
                     <name>release</name>
                 </property>
             </activation>
-            <modules>
-                <module>modules/distribution</module>
-            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -496,16 +493,6 @@
                 </plugins>
             </build>
         </profile>
-        
-        <profile>
-            <!-- Profile that includes all modules. This is handy when using maven-release-plugin
-                 for anything else than doing a release. -->
-            <id>everything</id>
-            <modules>
-                <module>modules/distribution</module>
-                <module>code-coverage</module>
-            </modules>
-        </profile>
     </profiles>
 
     <modules>
@@ -517,8 +504,9 @@
         <module>modules/rampart-mar</module>
         <module>modules/rampart-trust-mar</module>
         <module>modules/rampart-integration</module>
-        <!-- Compile sample codes -->
-        <module>modules/rampart-samples</module>
+        <module>modules/rampart-samples</module> <!-- Compile sample codes -->
+        <module>modules/distribution</module>
+        <module>code-coverage</module>
     </modules>
 
     <properties>
