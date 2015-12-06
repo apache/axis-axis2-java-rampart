@@ -173,6 +173,11 @@
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>1.7</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.axis2</groupId>
+                    <artifactId>axis2-repo-maven-plugin</artifactId>
+                    <version>${axis2.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
