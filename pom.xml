@@ -121,7 +121,7 @@
     <distributionManagement>
         <site>
             <id>site</id>
-            <url>scm:svn:https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart</url>
+            <url>scm:svn:https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart-staging</url>
         </site>
     </distributionManagement>
     
