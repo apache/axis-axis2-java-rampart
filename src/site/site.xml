@@ -20,60 +20,64 @@
 
 <project name="Apache Rampart">
 
-	<bannerLeft>
-		<name>Apache Rampart</name>
-		<href>images/apache-rampart-logo.jpg</href>
-	</bannerLeft>
-	    
+    <bannerLeft>
+        <name>Apache Rampart</name>
+        <href>images/apache-rampart-logo.jpg</href>
+    </bannerLeft>
+
     <bannerRight>
         <src>http://www.apache.org/images/asf_logo_wide.png</src>
         <href>http://www.apache.org</href>
     </bannerRight>
 
-	<skin>
-		<groupId>org.apache.maven.skins</groupId>
-		<artifactId>maven-default-skin</artifactId>
-		<version>1.0</version>
-	</skin>
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-default-skin</artifactId>
+        <version>1.0</version>
+    </skin>
 
-	<publishDate format="dd MMM yyyy"/>
+    <publishDate format="dd MMM yyyy"/>
 
-	<body>
-		<links>
-			<item name="Apache Axis2/Java" href="http://axis.apache.org/axis2/java/core/" />
-		</links>
-		
-		<menu name="Apache Rampart">
-			<item name="Home" href="index.html" />
-			<item name="Downloads" href="javascript:void(0)">
-			        <item name="Releases" href="download.html"/>
-			        <item name="Source Code" href="svn.html"/>
-			</item>
-		</menu>
-		<menu name="Documentation">
-		        <item name="Getting Started" href="quick-start.html"/>
-		        <item name="Samples" href="samples.html"/>
-		        <item name="FAQ" href="http://wiki.apache.org/ws/FrontPage/Rampart/FAQ"/>     
-		        <item name="Rampart Configuration" href="rampartconfig-guide.html"/>
-		        <item name="STS Configuration" href="setting-up-sts.html"/>
-		        <item name="Developer Guide" href="developer-guide.html"/>
-		        <item name="Build the Site" href="siteHowTo.html" /> 
-		</menu>
-		<menu name="Resources">
-		  <item name="Articles" href="articles.html" />
-		  <item name="Specifications" href="specifications.html"/>
-		  <item name="Online Javadocs" href="apidocs/index.html"/>
-		</menu>
-		<menu name="Project Information">
-		    <item name="Project Team" href="team-list.html" />
-		    <item name="Issue Tracking" href="http://issues.apache.org/jira/browse/Rampart" />
-		    <item name="Mailing Lists" href="mail-lists.html"/>
-		    <item name="Source Code"
-		       href="http://svn.apache.org/viewvc/axis/axis2/java/rampart/" />
-			<item name="License" href="http://www.apache.org/licenses/"/>
-			<item name="Sponsorship" href="http://www.apache.org/foundation/sponsorship.html"/>
-			<item name="Thanks" href="http://www.apache.org/foundation/thanks.html"/>
-			<item name="Security" href="http://www.apache.org/security/"/>
-		</menu>
-	</body>
+    <body>
+        <links>
+            <item name="Apache Axis2/Java" href="http://axis.apache.org/axis2/java/core/" />
+        </links>
+        
+        <menu name="Apache Rampart">
+            <item name="Home" href="index.html" />
+            <item name="Downloads" href="javascript:void(0)">
+                <item name="Releases" href="download.html"/>
+                <item name="Source Code" href="svn.html"/>
+            </item>
+            <item name="Release Notes" href="javascript:void(0)">
+                <item name="1.6.1" href="release-notes/1.6.1.html"/>
+                <item name="1.6.2" href="release-notes/1.6.2.html"/>
+                <item name="1.6.3" href="release-notes/1.6.3.html"/>
+            </item>
+        </menu>
+        <menu name="Documentation">
+            <item name="Getting Started" href="quick-start.html"/>
+            <item name="Samples" href="samples.html"/>
+            <item name="FAQ" href="http://wiki.apache.org/ws/FrontPage/Rampart/FAQ"/>
+            <item name="Rampart Configuration" href="rampartconfig-guide.html"/>
+            <item name="STS Configuration" href="setting-up-sts.html"/>
+            <item name="Developer Guide" href="developer-guide.html"/>
+            <item name="Build the Site" href="siteHowTo.html" /> 
+        </menu>
+        <menu name="Resources">
+            <item name="Articles" href="articles.html" />
+            <item name="Specifications" href="specifications.html"/>
+            <item name="Online Javadocs" href="apidocs/index.html"/>
+        </menu>
+        <menu name="Project Information">
+            <item name="Project Team" href="team-list.html" />
+            <item name="Issue Tracking" href="http://issues.apache.org/jira/browse/Rampart" />
+            <item name="Mailing Lists" href="mail-lists.html"/>
+            <item name="Source Code" href="http://svn.apache.org/viewvc/axis/axis2/java/rampart/" />
+            <item name="License" href="http://www.apache.org/licenses/"/>
+            <item name="Sponsorship" href="http://www.apache.org/foundation/sponsorship.html"/>
+            <item name="Thanks" href="http://www.apache.org/foundation/thanks.html"/>
+            <item name="Security" href="http://www.apache.org/security/"/>
+        </menu>
+    </body>
 </project>

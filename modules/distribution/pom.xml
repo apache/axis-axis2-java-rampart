@@ -51,6 +51,7 @@
                                     import java.util.Date 
                                     import java.text.MessageFormat 
                                     project.properties['buildTimestamp'] = MessageFormat.format("{0,date,MMM dd, yyyy}", new Date())
+                                    project.properties['release_version'] = project.version.replaceAll("-SNAPSHOT", "")
                                 </script>
                             </scripts>
                         </configuration>

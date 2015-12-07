@@ -72,8 +72,9 @@
             <destName>NOTICE</destName>
         </file>
         <file>
-            <source>../../release-docs/release-notes.html</source>
+            <source>../../src/site/markdown/release-notes/${release_version}.md</source>
             <outputDirectory>${dist.dir}</outputDirectory>
+            <destName>RELEASE-NOTE</destName>
         </file>
     </files>
 
