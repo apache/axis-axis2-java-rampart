@@ -1,19 +1,19 @@
 <assembly>
     <id>bin</id>
-    <includeBaseDirectory>false</includeBaseDirectory>
+    <baseDirectory>rampart-${version}</baseDirectory>
     <formats>
         <format>zip</format>
     </formats>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>${dist.dir}/modules</outputDirectory>
+            <outputDirectory>modules</outputDirectory>
             <includes>
                 <include>org.apache.rampart:rampart:mar</include>
                 <include>org.apache.rampart:rahas:mar</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>${dist.dir}/lib</outputDirectory>
+            <outputDirectory>lib</outputDirectory>
             <includes>
                 <include>org.apache.santuario:xmlsec:jar</include>
                 <include>opensaml:opensaml:jar</include>
@@ -39,7 +39,7 @@
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>${dist.dir}/docs/apidocs</outputDirectory>
+            <outputDirectory>docs/apidocs</outputDirectory>
             <includes>
                 <include>*:apidocs:zip:javadoc</include>
             </includes>
@@ -50,34 +50,30 @@
     <fileSets>
         <fileSet>
             <directory>../rampart-samples</directory>
-            <outputDirectory>${dist.dir}/samples</outputDirectory>
+            <outputDirectory>samples</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../../legal</directory>
-            <outputDirectory>${dist.dir}/lib</outputDirectory>
+            <outputDirectory>lib</outputDirectory>
         </fileSet>
     </fileSets>
 
     <files>
         <file>
             <source>../../release-docs/README.txt</source>
-            <outputDirectory>${dist.dir}</outputDirectory>
             <destName>README</destName>
             <filtered>true</filtered>
         </file>
         <file>
             <source>../../release-docs/LICENSE.txt</source>
-            <outputDirectory>${dist.dir}</outputDirectory>
             <destName>LICENSE</destName>
         </file>
         <file>
             <source>../../release-docs/NOTICE.txt</source>
-            <outputDirectory>${dist.dir}</outputDirectory>
             <destName>NOTICE</destName>
         </file>
         <file>
             <source>../../src/site/markdown/release-notes/${release_version}.md</source>
-            <outputDirectory>${dist.dir}</outputDirectory>
             <destName>RELEASE-NOTE</destName>
         </file>
     </files>
