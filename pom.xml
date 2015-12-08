@@ -545,8 +545,6 @@
 
         <bcprov.jdk15.version>1.49</bcprov.jdk15.version>
 
-        <!-- distribution properties -->
-        <dist.dir>rampart-${project.version}</dist.dir>
         <failIfNoTests>false</failIfNoTests>
 
         <jacoco.version>0.6.1.201212231917</jacoco.version>
