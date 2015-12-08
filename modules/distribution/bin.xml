@@ -38,12 +38,16 @@
                 <include>org.owasp.esapi:esapi:jar</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <outputDirectory>${dist.dir}/docs/apidocs</outputDirectory>
+            <includes>
+                <include>*:apidocs:zip:javadoc</include>
+            </includes>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>true</unpack>
+        </dependencySet>
     </dependencySets>
     <fileSets>
-        <fileSet>
-            <directory>../../apidocs/target/site</directory>
-            <outputDirectory>${dist.dir}/docs/apidocs</outputDirectory>
-        </fileSet>
         <fileSet>
             <directory>../rampart-samples</directory>
             <outputDirectory>${dist.dir}/samples</outputDirectory>

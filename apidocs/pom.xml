@@ -49,26 +49,30 @@
         <plugins>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
                 <executions>
                     <execution>
                         <id>site-javadoc</id>
                         <phase>site</phase>
                         <goals>
-                            <goal>javadoc</goal>
+                            <goal>javadoc-no-fork</goal>
                         </goals>
+                        <configuration>
+                            <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+                            <destDir>.</destDir>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>dist-javadoc</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>javadoc</goal>
+                            <goal>javadoc-no-fork</goal>
                         </goals>
+                        <configuration>
+                            <reportOutputDirectory>${project.build.directory}/apidocs</reportOutputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>
-                    <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
-                    <destDir>.</destDir>
                     <includeDependencySources>true</includeDependencySources>
                     <dependencySourceIncludes>
                         <dependencySourceInclude>${project.groupId}:*</dependencySourceInclude>
@@ -84,6 +88,22 @@
                     <!-- doctitle only appears in the summary and we should include the version there -->
                     <doctitle>Apache Rampart ${project.version}</doctitle>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/apidocs.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
