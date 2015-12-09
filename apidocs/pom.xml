@@ -63,7 +63,7 @@
                     </execution>
                     <execution>
                         <id>dist-javadoc</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>javadoc-no-fork</goal>
                         </goals>
