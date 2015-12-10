@@ -50,6 +50,10 @@
         <fileSet>
             <directory>../rampart-samples</directory>
             <outputDirectory>samples</outputDirectory>
+            <excludes>
+                <exclude>pom.xml</exclude>
+                <exclude>target/**</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>../../legal</directory>
