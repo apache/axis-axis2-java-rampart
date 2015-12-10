@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.rampart</groupId>
         <artifactId>rampart-project</artifactId>
-        <version>1.6.4-SNAPSHOT</version>
+        <version>1.6.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>apidocs</artifactId>
@@ -84,7 +84,7 @@
                          of changes between releases (to avoid mass changes when committing the site for a new release) -->
                     <notimestamp>true</notimestamp>
                     <windowtitle>Apache Rampart</windowtitle>
-                    <bottom>Copyright © {organizationName}. All Rights Reserved.</bottom>
+                    <bottom>Copyright &#169; {organizationName}. All Rights Reserved.</bottom>
                     <!-- doctitle only appears in the summary and we should include the version there -->
                     <doctitle>Apache Rampart ${project.version}</doctitle>
                 </configuration>
