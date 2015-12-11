@@ -59,6 +59,10 @@
             <directory>../../legal</directory>
             <outputDirectory>lib</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>src/main/files</directory>
+            <outputDirectory>.</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <files>
