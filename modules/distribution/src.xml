@@ -1,6 +1,6 @@
 <assembly>
     <id>src</id>
-    <includeBaseDirectory>false</includeBaseDirectory>
+    <baseDirectory>rampart-src-${project.version}</baseDirectory>
     <formats>
         <format>zip</format>
     </formats>
@@ -8,7 +8,6 @@
     <fileSets>
         <fileSet>
             <directory>../..</directory>
-            <outputDirectory>rampart-src-${project.version}</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
                 <!-- build output -->
@@ -46,21 +45,18 @@
                 <!-- release-plugin temp files -->
                 <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/)(.*/)?pom\.xml\.releaseBackup]</exclude>
                 <exclude>%regex[(?!((?!${project.build.directory}/)[^/]+/)*src/)(.*/)?release\.properties]</exclude>
+                
+                <exclude>README</exclude>
             </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>../..</directory>
-            <outputDirectory>rampart-src-${project.version}</outputDirectory>
-            <filtered>true</filtered>
-            <includes>
-                <include>release-docs/README.txt</include>
-            </includes>
         </fileSet>
     </fileSets>
     <files>
         <file>
+            <source>../../README</source>
+            <filtered>true</filtered>
+        </file>
+        <file>
             <source>../../src/site/markdown/release-notes/${release_version}.md</source>
-            <outputDirectory>rampart-src-${project.version}</outputDirectory>
             <destName>RELEASE-NOTE</destName>
         </file>
     </files>
