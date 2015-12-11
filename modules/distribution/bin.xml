@@ -63,17 +63,14 @@
 
     <files>
         <file>
-            <source>../../release-docs/README.txt</source>
-            <destName>README</destName>
+            <source>../../README</source>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../../release-docs/LICENSE.txt</source>
-            <destName>LICENSE</destName>
+            <source>../../LICENSE</source>
         </file>
         <file>
-            <source>../../release-docs/NOTICE.txt</source>
-            <destName>NOTICE</destName>
+            <source>../../NOTICE</source>
         </file>
         <file>
             <source>../../src/site/markdown/release-notes/${release_version}.md</source>
