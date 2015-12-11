@@ -84,7 +84,7 @@
                          of changes between releases (to avoid mass changes when committing the site for a new release) -->
                     <notimestamp>true</notimestamp>
                     <windowtitle>Apache Rampart</windowtitle>
-                    <bottom>Copyright &#169; {organizationName}. All Rights Reserved.</bottom>
+                    <bottom><![CDATA[Copyright &copy; {organizationName}. All Rights Reserved.]]></bottom>
                     <!-- doctitle only appears in the summary and we should include the version there -->
                     <doctitle>Apache Rampart ${project.version}</doctitle>
                 </configuration>
@@ -104,6 +104,12 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
