@@ -35,13 +35,6 @@
     <packaging>mar</packaging>
     <name>Rampart - Trust-Mar</name>
 
-    <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/tags/v1.6.3/branches/1_6</connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/tags/v1.6.3/branches/1_6</developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/tags/v1.6.3/branches/1_6</url>
-    </scm>
-
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
