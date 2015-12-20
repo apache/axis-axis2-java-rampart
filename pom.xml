@@ -538,8 +538,8 @@
     </modules>
 
     <properties>
-        <axis2.version>1.6.3</axis2.version>
-        <axiom.version>1.2.14</axiom.version>
+        <axis2.version>1.6.4-SNAPSHOT</axis2.version>
+        <axiom.version>1.2.15</axiom.version>
 
         <wss4j.version>1.6.16</wss4j.version>
         <opensaml.version>2.5.1-1</opensaml.version>
