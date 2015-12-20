@@ -29,6 +29,7 @@
         <h2> Policy samples </h2>
         <p>These samples use WS Security Policy Language for configuration. It is recommended to use policy based configuration model for all production scenarios </p>
         <h3>Running Samples</h3>
+        <p>Before beginning, please install Rampart as described <a href="quick-start.html">here</a>.</p>
         <p>Now we'll look at how to run the first sample inside samples/policy folder.</p>
         <ol>
             <li>Open a console and change the directory to sample/policy and give the following command. This will start the server at port 8080</li>
