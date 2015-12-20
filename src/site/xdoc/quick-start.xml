@@ -11,7 +11,7 @@
 		<p>Steps to install</p>
 		<ol>
 			<li>If you haven't installed Axis2, then download and extract the standard binary distribution. Make sure you have set the AXIS2_HOME environment variable</li>
-			<li>Run ant from the "samples" directory to copy the required libraries and modules to relevant directories in AXIS2_HOME.</li>
+			<li>Run ant from the top level directory of the Rampart distribution to copy the required libraries and modules to relevant directories in AXIS2_HOME.</li>
 		</ol>
 		<p></p>
 
