@@ -101,6 +101,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/apidocs.xml</descriptor>
                             </descriptors>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                 </executions>
