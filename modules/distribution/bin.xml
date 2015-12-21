@@ -41,7 +41,7 @@
         <dependencySet>
             <outputDirectory>docs/apidocs</outputDirectory>
             <includes>
-                <include>*:apidocs:zip:javadoc</include>
+                <include>*:apidocs:zip</include>
             </includes>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
