@@ -21,8 +21,7 @@
 <project name="Apache Rampart">
 
     <bannerLeft>
-        <name>Apache Rampart</name>
-        <href>images/apache-rampart-logo.jpg</href>
+        <src>images/apache-rampart-logo.jpg</src>
     </bannerLeft>
 
     <bannerRight>
