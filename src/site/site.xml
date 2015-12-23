@@ -21,8 +21,7 @@
 <project name="Apache Rampart">
 
     <bannerLeft>
-        <name>Apache Rampart</name>
-        <href>images/apache-rampart-logo.jpg</href>
+        <src>images/apache-rampart-logo.jpg</src>
     </bannerLeft>
 
     <bannerRight>
@@ -32,8 +31,8 @@
 
     <skin>
         <groupId>org.apache.maven.skins</groupId>
-        <artifactId>maven-default-skin</artifactId>
-        <version>1.0</version>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.4</version>
     </skin>
 
     <publishDate format="dd MMM yyyy"/>
