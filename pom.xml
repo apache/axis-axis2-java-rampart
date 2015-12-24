@@ -441,6 +441,12 @@
                 <version>${axis2.version}</version>
                 <classifier>impl</classifier>
             </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>addressing</artifactId>
+                <version>${axis2.version}</version>
+                <type>mar</type>
+            </dependency>
             
             <!-- Since Rampart depends on DOOM, but axiom-dom is not a transitive
                  dependency, we need to manage the Axiom version. -->

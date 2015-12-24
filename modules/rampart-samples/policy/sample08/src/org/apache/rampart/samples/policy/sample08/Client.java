@@ -31,6 +31,8 @@ import org.apache.rahas.client.STSClient;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.opensaml.common.xml.SAMLConstants;
 
+import java.net.URL;
+
 import javax.xml.namespace.QName;
 
 public class Client {
@@ -49,7 +51,7 @@ public class Client {
 		String action = TrustUtil.getActionValue(RahasConstants.VERSION_05_02, RahasConstants.RST_ACTION_ISSUE);
 		stsClient.setAction(action);
 		
-		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample08/policy.xml"), "http://localhost:8080/axis2/services/STS", loadPolicy("sample08/sts_policy.xml"), null);
+		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample08/policy.xml"), new URL(new URL(args[0]), "/axis2/services/STS").toString(), loadPolicy("sample08/sts_policy.xml"), null);
 		
 	        System.out.println("\n############################# Requested SAML 2.0 Token ###################################\n");
 	        System.out.println(responseToken.getToken().toString());

@@ -18,12 +18,13 @@
 
 <project basedir="." default="clean">
 
-	<property name="service.repos.dir" value="build/service_repositories"/>
-	<property name="client.repos.dir" value="build/client_repositories"/>
-	<property name="temp.dir" value="build/temp"/>
+	<property name="build.dir" value="build"/>
+	<property name="service.repos.dir" value="${build.dir}/service_repositories"/>
+	<property name="client.repos.dir" value="${build.dir}/client_repositories"/>
+	<property name="temp.dir" value="${build.dir}/temp"/>
 	<property name="keys.dir" value="../keys"/>
-	<property name="temp.client.dir" value="build/temp_client"/>
-    <property name="endorsed.dir" value="build/endorsed"/>
+	<property name="temp.client.dir" value="${build.dir}/temp_client"/>
+    <property name="endorsed.dir" value="${build.dir}/endorsed"/>
 	
 	<property name="client.port" value="8080"/>
 	<property name="server.port" value="8080"/>
@@ -133,7 +134,7 @@
 
 
 	<target name="clean">
-		<delete dir="build" />
+		<delete dir="${build.dir}" />
 	</target>
 	
 	<!-- Macro to create a service repo for a given sample -->
@@ -283,7 +284,7 @@
 
 	   		
 	   		<!-- Run client -->
-            <java classname="org.apache.rampart.samples.policy.sample@{sample.number}.Client" fork="true">
+            <java classname="org.apache.rampart.samples.policy.sample@{sample.number}.Client" fork="true" failonerror="true">
                     <arg value="${sample.services.url}/sample@{sample.number}"/>
                     <arg value="${client.repos.dir}/sample@{sample.number}"/>
                     <arg value="sample@{sample.number}/policy.xml"/>
