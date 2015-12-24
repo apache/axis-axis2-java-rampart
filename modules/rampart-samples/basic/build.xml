@@ -17,11 +17,12 @@
  !-->
 <project basedir="." default="clean">
 
-	<property name="service.repos.dir" value="build/service_repositories"/>
-	<property name="client.repos.dir" value="build/client_repositories"/>
-	<property name="temp.dir" value="build/temp"/>
+	<property name="build.dir" value="build"/>
+	<property name="service.repos.dir" value="${build.dir}/service_repositories"/>
+	<property name="client.repos.dir" value="${build.dir}/client_repositories"/>
+	<property name="temp.dir" value="${build.dir}/temp"/>
 	<property name="keys.dir" value="../keys"/>
-	<property name="temp.client.dir" value="build/temp_client"/>
+	<property name="temp.client.dir" value="${build.dir}/temp_client"/>
 	
 	<property name="client.port" value="8080"/>
 	<property name="server.port" value="8080"/>
@@ -155,7 +156,7 @@
 	
 	
 	<target name="clean">
-		<delete dir="build" />
+		<delete dir="${build.dir}" />
 	</target>
 	
 	<!-- Macro to create a service repo for a given sample -->
@@ -182,7 +183,7 @@
 	   		<mkdir dir="${temp.dir}/META-INF"/>
 	   		
 	   		<!-- Compile service -->
-            <javac srcdir="sample@{sample.number}/src" destdir="${temp.dir}">
+            <javac srcdir="sample@{sample.number}/src" destdir="${temp.dir}" failonerror="true">
                     <classpath>
                             <fileset dir="${lib.dir}">
                                     <include name="**/*.jar"/>

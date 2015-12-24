@@ -38,6 +38,17 @@ public class SampleTest extends TestCase {
 
     public static TestSuite suite() {
         TestSuite suite = new TestSuite();
+        suite.addTest(new SampleTest("basic", "01"));
+        suite.addTest(new SampleTest("basic", "02"));
+        suite.addTest(new SampleTest("basic", "03"));
+        suite.addTest(new SampleTest("basic", "04"));
+        suite.addTest(new SampleTest("basic", "05"));
+        suite.addTest(new SampleTest("basic", "06"));
+        suite.addTest(new SampleTest("basic", "07"));
+        suite.addTest(new SampleTest("basic", "08"));
+        suite.addTest(new SampleTest("basic", "09"));
+        suite.addTest(new SampleTest("basic", "10"));
+        suite.addTest(new SampleTest("basic", "11"));
         // TODO: failing
 //        suite.addTest(new SampleTest("policy", "01"));
         suite.addTest(new SampleTest("policy", "02"));
