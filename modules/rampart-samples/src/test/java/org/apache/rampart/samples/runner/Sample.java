@@ -25,11 +25,11 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
 final class Sample {
-    private final File buildFile;
+    private final String group;
     private final String sampleId;
 
-    Sample(File buildFile, String sampleId) {
-        this.buildFile = buildFile;
+    Sample(String group, String sampleId) {
+        this.group = group;
         this.sampleId = sampleId;
     }
 
@@ -40,7 +40,11 @@ final class Sample {
         project.setUserProperty("build.dir", new File(targetDir, "build").getAbsolutePath());
         project.setUserProperty("client.port", String.valueOf(port));
         project.setUserProperty("server.port", String.valueOf(port));
-        ProjectHelper.configureProject(project, buildFile);
+        String jacocoArgLineTemplate = System.getProperty("jacoco.argLineTemplate");
+        if (jacocoArgLineTemplate != null) {
+            project.setUserProperty("vmargs", jacocoArgLineTemplate.replace("@id@", group + ":" + target));
+        }
+        ProjectHelper.configureProject(project, new File(group + "/build.xml"));
         project.addBuildListener(logger);
         project.executeTarget(target);
     }

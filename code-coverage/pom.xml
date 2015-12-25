@@ -88,6 +88,14 @@
             <classifier>jacoco</classifier>
             <type>exec</type>
         </dependency>
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>rampart-sample</artifactId>
+            <version>${project.version}</version>
+            <classifier>jacoco</classifier>
+            <type>exec</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
