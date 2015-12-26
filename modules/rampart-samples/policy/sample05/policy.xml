@@ -35,7 +35,7 @@
 					<wsp:Policy>
 						<sp:IssuedToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
 							<Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-								<Address xmlns="http://www.w3.org/2005/08/addressing">http://localhost:8080/axis2/services/STS</Address>
+								<Address xmlns="http://www.w3.org/2005/08/addressing">http://localhost:@port@/axis2/services/STS</Address>
 							</Issuer>
 							<sp:RequestSecurityTokenTemplate>
 								<t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>

@@ -41,8 +41,8 @@ public class SampleTest extends TestCase {
         suite.addTest(new SampleTest("policy", "03"));
         suite.addTest(new SampleTest("policy", "04"));
         suite.addTest(new SampleTest("policy", "05"));
-        // TODO: these are failing
-//        suite.addTest(new SampleTest("policy", "06"));
+        suite.addTest(new SampleTest("policy", "06"));
+        // TODO: failing
 //        suite.addTest(new SampleTest("policy", "07"));
         suite.addTest(new SampleTest("policy", "08"));
         return suite;

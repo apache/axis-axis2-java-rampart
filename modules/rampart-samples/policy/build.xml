@@ -173,7 +173,11 @@
                     <exclude name="**/Client.java"/>
             </javac>
 	   		
-	   		<copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true"/>
+            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true">
+                <filterset>
+                    <filter token="port" value="${server.port}"/>
+                </filterset>
+            </copy>
 	   		<copy file="${keys.dir}/service.jks" tofile="${temp.dir}/service.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/sts.jks" tofile="${temp.dir}/sts.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/service.properties" tofile="${temp.dir}/service.properties" overwrite="true"/>
@@ -228,8 +232,16 @@
                     <exclude name="**/Client.java"/>
             </javac>
             
-            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true"/>
-            <copy file="sample@{sample.number}/mex_policy.xml" tofile="${temp.dir}/mex_policy.xml" overwrite="true"/>
+            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true">
+                <filterset>
+                    <filter token="port" value="${server.port}"/>
+                </filterset>
+            </copy>
+            <copy file="sample@{sample.number}/mex_policy.xml" tofile="${temp.dir}/mex_policy.xml" overwrite="true">
+                <filterset>
+                    <filter token="port" value="${server.port}"/>
+                </filterset>
+            </copy>
             <copy file="${keys.dir}/service.jks" tofile="${temp.dir}/service.jks" overwrite="true"/>
             <copy file="${keys.dir}/sts.jks" tofile="${temp.dir}/sts.jks" overwrite="true"/>
             <copy file="${keys.dir}/service.properties" tofile="${temp.dir}/service.properties" overwrite="true"/>
@@ -283,13 +295,18 @@
 
 	   		<copy file="${keys.dir}/client.jks" tofile="${temp.client.dir}/client.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/client.properties" tofile="${temp.client.dir}/client.properties" overwrite="true"/>
+            <copy file="sample@{sample.number}/policy.xml" tofile="${temp.client.dir}/policy.xml" overwrite="true">
+                <filterset>
+                    <filter token="port" value="${client.port}"/>
+                </filterset>
+            </copy>
 
 	   		
 	   		<!-- Run client -->
             <java classname="org.apache.rampart.samples.policy.sample@{sample.number}.Client" fork="true" failonerror="true">
                     <arg value="${sample.services.url}/sample@{sample.number}"/>
                     <arg value="${client.repos.dir}/sample@{sample.number}"/>
-                    <arg value="sample@{sample.number}/policy.xml"/>
+                    <arg value="${temp.client.dir}/policy.xml"/>
                     <classpath>
                         <path refid="runtime.classpath"/>
                   		<dirset dir="${temp.client.dir}" />
