@@ -33,6 +33,8 @@
     	
     <property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
     
+    <property name="vmargs" value=""/>
+    
     <path id="runtime.classpath">
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
@@ -206,6 +208,7 @@
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
                 	<classpath refid="runtime.classpath"/>
+                    <jvmarg line="${vmargs}"/>
             </java>
 
 	   </sequential>
@@ -257,6 +260,7 @@
                         <path refid="runtime.classpath"/>
                   		<dirset dir="${temp.client.dir}" />
                     </classpath>
+                    <jvmarg line="${vmargs}"/>
             </java>
 
 <!--	   		<delete dir="${temp.client.dir}"/> -->

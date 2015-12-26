@@ -18,8 +18,6 @@
  */
 package org.apache.rampart.samples.runner;
 
-import java.io.File;
-
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -28,7 +26,7 @@ public class SampleTest extends TestCase {
     
     public SampleTest(String group, String id) {
         super(group + "/" + id);
-        this.sample = new Sample(new File(group + "/build.xml"), id);
+        this.sample = new Sample(group, id);
     }
 
     @Override
