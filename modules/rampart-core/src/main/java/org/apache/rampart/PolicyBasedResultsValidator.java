@@ -321,8 +321,12 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 }
 
             } else if (token instanceof IssuedToken) {
-                //TODO is is enough to check for ST_UNSIGNED results ??
-                WSSecurityEngineResult samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_UNSIGNED);
+                WSSecurityEngineResult samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_SIGNED);
+                // Then check for unsigned saml tokens
+                if (samlResult == null) {
+                    log.debug("No signed SAMLToken found. Looking for unsigned SAMLTokens");
+                    samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_UNSIGNED);
+                }
                 if (samlResult == null) {
                     throw new RampartException("samlTokenMissing");
                 }

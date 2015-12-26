@@ -1,5 +1,6 @@
 package org.apache.rahas.impl.util;
 
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
@@ -31,8 +32,6 @@ import org.opensaml.xml.schema.impl.XSStringBuilder;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.signature.*;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.X509Data;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -458,7 +457,8 @@ public class SAMLUtils {
         assertion.setIssuer(issuerName);
         assertion.setConditions(SAMLUtils.createConditions(notBefore, notOnOrAfter));
         assertion.getStatements().addAll(statements);
-
+        assertion.setID(UIDGenerator.generateUID());
+        assertion.setIssueInstant(new DateTime());
         return assertion;
     }
 
@@ -706,7 +706,7 @@ public class SAMLUtils {
         // Encoding type set to http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0
         // #Base64Binary
         keyIdentifier.setEncodingType(KeyIdentifier.ENCODING_TYPE_BASE64_BINARY);
-        keyIdentifier.setValueType(WSSecurityConstants.THUMB_PRINT_SHA1);
+        keyIdentifier.setValueType(WSSecurityConstants.WS_SECURITY11_NS+"#ThumbprintSHA1");
         keyIdentifier.setValue(getThumbprintSha1(certificate));
 
         securityTokenReference.getUnknownXMLObjects().add(keyIdentifier);
