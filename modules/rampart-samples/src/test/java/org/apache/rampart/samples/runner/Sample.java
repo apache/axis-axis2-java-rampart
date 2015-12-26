@@ -40,10 +40,15 @@ final class Sample {
         project.setUserProperty("build.dir", new File(targetDir, "build").getAbsolutePath());
         project.setUserProperty("client.port", String.valueOf(port));
         project.setUserProperty("server.port", String.valueOf(port));
+        StringBuilder vmargs = new StringBuilder();
+        vmargs.append("-Dlog4j.configuration=");
+        vmargs.append(new File("src/test/conf/log4j.properties").getAbsoluteFile().toURI().toString());
         String jacocoArgLineTemplate = System.getProperty("jacoco.argLineTemplate");
         if (jacocoArgLineTemplate != null) {
-            project.setUserProperty("vmargs", jacocoArgLineTemplate.replace("@id@", group + ":" + target));
+            vmargs.append(" ");
+            vmargs.append(jacocoArgLineTemplate.replace("@id@", group + ":" + target));
         }
+        project.setUserProperty("vmargs", vmargs.toString());
         ProjectHelper.configureProject(project, new File(group + "/build.xml"));
         project.addBuildListener(logger);
         project.executeTarget(target);
