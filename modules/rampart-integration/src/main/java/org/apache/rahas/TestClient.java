@@ -16,10 +16,12 @@
 
 package org.apache.rahas;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -164,7 +166,7 @@ public abstract class TestClient extends TestCase {
     public abstract OMElement getRSTTemplate() throws TrustException;
 
     protected Policy getPolicy(String filePath) throws Exception {
-        StAXOMBuilder builder = new StAXOMBuilder(filePath);
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(filePath));
         OMElement elem = builder.getDocumentElement();
         return PolicyEngine.getPolicy(elem);
     }
