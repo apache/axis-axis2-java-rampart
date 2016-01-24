@@ -385,7 +385,7 @@ public class SAMLUtils {
      * This method creates the final SAML assertion. The final SAML assertion would looks like as follows,
      *  <saml:Assertion  AssertionID="_a75adf55-01d7-40cc-929f-dbd8372ebdfc"
      *                   IssueInstant="2003-04-17T00:46:02Z"
-     *                   Issuer=”www.opensaml.org”
+     *                   Issuer="www.opensaml.org"
      *                   MajorVersion="1"
      *                   MinorVersion="1"
      *                   xmlns="urn:oasis:names:tc:SAML:1.0:assertion">
