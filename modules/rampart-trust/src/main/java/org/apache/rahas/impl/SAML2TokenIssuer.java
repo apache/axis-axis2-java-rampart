@@ -441,7 +441,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
      * <saml:Subject>
      *       <saml:NameIdentifier
      *                   NameQualifier="www.example.com"
-     *                   Format=“urn:oasis:names:tc:SAML:1.1:nameid-
+     *                   Format="urn:oasis:names:tc:SAML:1.1:nameid-
      *           format:X509SubjectName">
      *           uid=joe,ou=people,ou=saml-demo,o=baltimore.com
      *       </saml:NameIdentifier>
