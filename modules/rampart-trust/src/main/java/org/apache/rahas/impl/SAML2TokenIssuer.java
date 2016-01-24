@@ -136,7 +136,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
      *       <wst:TokenType>...</wst:TokenType>
      *       <wst:RequestedSecurityToken>...</wst:RequestedSecurityToken>
      *       ...
-     *       <wsp:AppliesTo xmlns:wsp="...”>...</wsp:AppliesTo>
+     *       <wsp:AppliesTo xmlns:wsp="...">...</wsp:AppliesTo>
      *       <wst:RequestedAttachedReference>
      *       ...
      *       </wst:RequestedAttachedReference>
@@ -359,7 +359,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
      *           ...
      *       </saml2:NameID>
      *       <saml2:SubjectConfirmation
-     *               Method=”urn:oasis:names:tc:SAML:2.0:cm:holder-of-key”>
+     *               Method="urn:oasis:names:tc:SAML:2.0:cm:holder-of-key">
      *           <saml2:SubjectConfirmationData
      *                   xsi:type="saml2:KeyInfoConfirmationDataType">
      *               <ds:KeyInfo>
@@ -442,7 +442,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
      *       <saml:NameIdentifier
      *                   NameQualifier="www.example.com"
      *                   Format=“urn:oasis:names:tc:SAML:1.1:nameid-
-     *           format:X509SubjectName”>
+     *           format:X509SubjectName">
      *           uid=joe,ou=people,ou=saml-demo,o=baltimore.com
      *       </saml:NameIdentifier>
      *       <saml:SubjectConfirmation>
