@@ -614,7 +614,7 @@
 
         <failIfNoTests>false</failIfNoTests>
 
-        <jacoco.version>0.6.1.201212231917</jacoco.version>
+        <jacoco.version>0.7.5.201505241946</jacoco.version>
         
         <jetty.version>7.6.15.v20140411</jetty.version>
     </properties>
