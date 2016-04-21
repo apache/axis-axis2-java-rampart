@@ -148,7 +148,7 @@ public class RampartTest extends TestCase {
                 Options options = new Options();
                 
                 if( i == 13 ) {
-                    options.setTo(new EndpointReference("https://127.0.0.1:" +
+                    options.setTo(new EndpointReference("https://localhost:" +
                                     getHttpsPort() +  
                                     "/axis2/services/SecureService" + i));
                     //Username token created with user/pass from options
@@ -156,7 +156,7 @@ public class RampartTest extends TestCase {
                     options.setPassword("password");
                 }
                 else {
-                    options.setTo(new EndpointReference("http://127.0.0.1:" +
+                    options.setTo(new EndpointReference("http://localhost:" +
                                     getHttpPort() +  
                                     "/axis2/services/SecureService" + i));
                 }
@@ -224,7 +224,7 @@ public class RampartTest extends TestCase {
                 Options options = new Options();
 
                 if (i == 13) {
-                    options.setTo(new EndpointReference("https://127.0.0.1:" +
+                    options.setTo(new EndpointReference("https://localhost:" +
                                     getHttpsPort() +
                                     "/axis2/services/SecureService" + i));
                     //Username token created with user/pass from options
@@ -232,7 +232,7 @@ public class RampartTest extends TestCase {
                     options.setPassword("password");
                 }
                 else {
-                    options.setTo(new EndpointReference("http://127.0.0.1:" +
+                    options.setTo(new EndpointReference("http://localhost:" +
                                     getHttpPort() +
                                     "/axis2/services/SecureService" + i));
                 }
@@ -259,10 +259,10 @@ public class RampartTest extends TestCase {
                 Options options = new Options();
                 
                 if (i == 3 || i == 6) {
-                    options.setTo(new EndpointReference("https://127.0.0.1:" + getHttpsPort() + "/axis2/services/SecureServiceSC" + i));
+                    options.setTo(new EndpointReference("https://localhost:" + getHttpsPort() + "/axis2/services/SecureServiceSC" + i));
                 }
                 else {
-                    options.setTo(new EndpointReference("http://127.0.0.1:" + getHttpPort() + "/axis2/services/SecureServiceSC" + i));
+                    options.setTo(new EndpointReference("http://localhost:" + getHttpPort() + "/axis2/services/SecureServiceSC" + i));
                 }
 
                 System.out.println("Testing WS-SecConv: custom scenario " + i);
