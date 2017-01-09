@@ -231,20 +231,6 @@ public abstract class BindingBuilder {
         }
     }
     
-    //Deprecated after 1.5 release
-    @Deprecated 
-    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, 
-                                                Token token) throws RampartException {
-    	return getSignatureBuilder(rmd, token, null);
-    }
-
-    //Deprecated after 1.5 release
-    @Deprecated
-    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, Token token,
-                                                String userCertAlias) throws RampartException {
-    	return getSignatureBuilder(rmd, token, userCertAlias);
-    }
-    
     protected WSSecSignature getSignatureBuilder(RampartMessageData rmd, 
                                                  Token token)throws RampartException {
         return getSignatureBuilder(rmd, token, null);
