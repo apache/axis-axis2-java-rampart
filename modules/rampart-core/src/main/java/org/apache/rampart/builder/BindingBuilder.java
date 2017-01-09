@@ -351,20 +351,18 @@ public abstract class BindingBuilder {
      * @param suppTokens
      * @throws RampartException
      */
-    protected HashMap handleSupportingTokens(RampartMessageData rmd, SupportingToken suppTokens)
+    protected HashMap<Token,Object> handleSupportingTokens(RampartMessageData rmd, SupportingToken suppTokens)
             throws RampartException {
         
         //Create the list to hold the tokens
         // TODO putting different types of objects. Need to figure out a way to add single types of objects
-        HashMap endSuppTokMap = new HashMap();
+        HashMap<Token,Object> endSuppTokMap = new HashMap<Token,Object>();
         
         if(suppTokens != null && suppTokens.getTokens() != null &&
                 suppTokens.getTokens().size() > 0) {
             log.debug("Processing supporting tokens");
 
-            ArrayList tokens = suppTokens.getTokens();
-            for (Object objectToken : tokens) {
-                Token token = (Token) objectToken;
+            for (Token token : suppTokens.getTokens()) {
                 org.apache.rahas.Token endSuppTok = null;
                 if (token instanceof IssuedToken && rmd.isInitiator()) {
                     String id = RampartUtil.getIssuedToken(rmd, (IssuedToken) token);
