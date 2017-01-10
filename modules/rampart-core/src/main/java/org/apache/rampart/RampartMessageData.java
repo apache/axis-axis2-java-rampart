@@ -390,7 +390,7 @@ public class RampartMessageData {
     private void setWSSecurityVersions(String namespace) throws RampartException {
 
         if (namespace == null || namespace.equals("")) {
-            throw new RampartException("Security policy namespace cannot be null.");
+            throw new RampartException("securityPolicyNamespaceCannotBeNull");
         }
 
         if (SP11Constants.SP_NS.equals(namespace)) {
