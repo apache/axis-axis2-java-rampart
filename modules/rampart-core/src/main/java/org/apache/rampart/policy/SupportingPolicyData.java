@@ -26,47 +26,47 @@ import org.apache.ws.secpolicy.model.SupportingToken;
 
 public class SupportingPolicyData extends RampartPolicyData {
 
-	public void build(SupportingToken token) {
+    public void build(SupportingToken token) {
 
-		if (token.getSignedParts() != null && !token.getSignedParts().isOptional()) {
-			Iterator<Header> it = token.getSignedParts().getHeaders().iterator();
-			this.setSignBody(token.getSignedParts().isBody());
-			while (it.hasNext()) {
-				Header header = it.next();
-				this.addSignedPart(header.getNamespace(), header.getName());
-			}
-		}
+        if (token.getSignedParts() != null && !token.getSignedParts().isOptional()) {
+            Iterator<Header> it = token.getSignedParts().getHeaders().iterator();
+            this.setSignBody(token.getSignedParts().isBody());
+            while (it.hasNext()) {
+                Header header = it.next();
+                this.addSignedPart(header.getNamespace(), header.getName());
+            }
+        }
 
-		if (token.getEncryptedParts() != null && !token.getEncryptedParts().isOptional()) {
-			Iterator<Header> it = token.getEncryptedParts().getHeaders().iterator();
-			this.setEncryptBody(token.getEncryptedParts().isBody());
-			while (it.hasNext()) {
-				Header header = it.next();
-				this.setEncryptedParts(header.getNamespace(), header.getName(),
-						"Header");
-			}
-		}
+        if (token.getEncryptedParts() != null && !token.getEncryptedParts().isOptional()) {
+            Iterator<Header> it = token.getEncryptedParts().getHeaders().iterator();
+            this.setEncryptBody(token.getEncryptedParts().isBody());
+            while (it.hasNext()) {
+                Header header = it.next();
+                this.setEncryptedParts(header.getNamespace(), header.getName(),
+                        "Header");
+            }
+        }
 
-		if (token.getSignedElements() != null && !token.getSignedElements().isOptional()) {
-			Iterator<String> it = token.getSignedElements().getXPathExpressions()
-					.iterator();
-			while (it.hasNext()) {
-				this.setSignedElements(it.next());
-			}
-			this.addDeclaredNamespaces(token.getSignedElements()
-					.getDeclaredNamespaces());
-		}
+        if (token.getSignedElements() != null && !token.getSignedElements().isOptional()) {
+            Iterator<String> it = token.getSignedElements().getXPathExpressions()
+                    .iterator();
+            while (it.hasNext()) {
+                this.setSignedElements(it.next());
+            }
+            this.addDeclaredNamespaces(token.getSignedElements()
+                    .getDeclaredNamespaces());
+        }
 
-		if (token.getEncryptedElements() != null && !token.getEncryptedElements().isOptional()) {
-			Iterator<String> it = token.getEncryptedElements().getXPathExpressions()
-					.iterator();
-			while (it.hasNext()) {
-				this.setEncryptedElements(it.next());
-			}
-			if (token.getSignedElements() == null) {
-				this.addDeclaredNamespaces(token.getEncryptedElements()
-						.getDeclaredNamespaces());
-			}
-		}
-	}
+        if (token.getEncryptedElements() != null && !token.getEncryptedElements().isOptional()) {
+            Iterator<String> it = token.getEncryptedElements().getXPathExpressions()
+                    .iterator();
+            while (it.hasNext()) {
+                this.setEncryptedElements(it.next());
+            }
+            if (token.getSignedElements() == null) {
+                this.addDeclaredNamespaces(token.getEncryptedElements()
+                        .getDeclaredNamespaces());
+            }
+        }
+    }
 }
