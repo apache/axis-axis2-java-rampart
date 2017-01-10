@@ -200,12 +200,12 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
             // TODO may contain deifferent types of objects as values, therefore cannot use strongly type maps
             // need to figure out a way
-            HashMap sigSuppTokMap = null;
-            HashMap endSuppTokMap = null;
-            HashMap sgndEndSuppTokMap = null;
-            HashMap sgndEncSuppTokMap = null;
-            HashMap endEncSuppTokMap = null;
-            HashMap sgndEndEncSuppTokMap = null;
+            HashMap<Token,Object> sigSuppTokMap = null;
+            HashMap<Token,Object> endSuppTokMap = null;
+            HashMap<Token,Object> sgndEndSuppTokMap = null;
+            HashMap<Token,Object> sgndEncSuppTokMap = null;
+            HashMap<Token,Object> endEncSuppTokMap = null;
+            HashMap<Token,Object> sgndEndEncSuppTokMap = null;
             
             if(this.timestampElement != null){
             	sigParts.add(RampartUtil.createEncryptionPart(WSConstants.TIMESTAMP_TOKEN_LN,

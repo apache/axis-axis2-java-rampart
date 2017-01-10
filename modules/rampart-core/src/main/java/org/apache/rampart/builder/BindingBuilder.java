@@ -474,17 +474,13 @@ public abstract class BindingBuilder {
     }
     
     
-    protected List<byte[]> doEndorsedSignatures(RampartMessageData rmd, HashMap tokenMap) throws RampartException {
-        
-        Set tokenSet = tokenMap.keySet();
+    protected List<byte[]> doEndorsedSignatures(RampartMessageData rmd, HashMap<Token,Object> tokenMap) throws RampartException {
         
         List<byte[]> sigValues = new ArrayList<byte[]>();
 
-        for (Object aTokenSet : tokenSet) {
-
-            Token token = (Token) aTokenSet;
-
-            Object tempTok = tokenMap.get(token);
+        for (Map.Entry<Token,Object> entry : tokenMap.entrySet()) {
+            Token token = entry.getKey();
+            Object tempTok = entry.getValue();
 
             // Migrating to a list
             List<WSEncryptionPart> sigParts = new ArrayList<WSEncryptionPart>();
