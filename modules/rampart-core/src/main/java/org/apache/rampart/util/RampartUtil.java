@@ -1975,9 +1975,7 @@ public class RampartUtil {
         }
         
         Collection<UsernameToken> usernameTokens = new ArrayList<UsernameToken>();
-        ArrayList tokens = suppTok.getTokens();
-        for (Iterator iter = tokens.iterator(); iter.hasNext();) {
-            org.apache.ws.secpolicy.model.Token token = (org.apache.ws.secpolicy.model.Token) iter.next();
+        for (org.apache.ws.secpolicy.model.Token token : suppTok.getTokens()) {
             if (token instanceof UsernameToken) {
                 usernameTokens.add((UsernameToken)token);
             }
