@@ -73,8 +73,8 @@ public class JettyServer extends ExternalResource {
     private static final Logger logger = LoggerFactory.getLogger(JettyServer.class);
     
     private final String repository;
-    private final int httpPort;
-    private final int httpsPort;
+    private final int port;
+    private final boolean secure;
     private Server server;
     private boolean systemPropertiesSet;
     private String savedTrustStore;
@@ -86,49 +86,32 @@ public class JettyServer extends ExternalResource {
      * 
      * @param repository
      *            The path to the Axis2 repository to use. Must not be null or empty.
-     * @param httpPort
-     *            The http port to use. Set to <code>-1</code> to disable http connector. Set to
-     *            <code>0</code> to enable dynamic port allocation.
-     * @param httpsPort
-     *            The https port to use. Set to <code>-1</code> to disable https connector. Set to
-     *            <code>0</code> to enable dynamic port allocation.
-     * @throws IllegalArgumentException If both ports are set to <code>-1</code>
+     * @param port
+     *            The port to use. Set to <code>0</code> to enable dynamic port allocation.
+     * @param secure
+     *            Whether to enable HTTPS.
      */
-    public JettyServer(String repository, int httpPort, int httpsPort) {
+    public JettyServer(String repository, int port, boolean secure) {
         if (repository == null || repository.trim().length() == 0) {
             throw new IllegalArgumentException("Axis2 repository must not be null or empty");
         }
-        if (httpPort == -1 && httpsPort == -1) {
-            throw new IllegalArgumentException("At least one port must be specified.");
-        }
         this.repository = repository;
-        this.httpPort = httpPort;
-        this.httpsPort = httpsPort;
+        this.port = port;
+        this.secure = secure;
     }
     
     @Override
     protected void before() throws Throwable {
-        int httpPort = this.httpPort == 0 ? PortAllocator.allocatePort() : this.httpPort;
-        int httpsPort = this.httpsPort == 0 ? PortAllocator.allocatePort() : this.httpsPort;
+        int port = this.port == 0 ? PortAllocator.allocatePort() : this.port;
         
         server = new Server();
         
-        SelectChannelConnector connector = null;
-        if (httpPort == -1) {
-            logger.debug("Http connector is disabled");
-        }
-        else {
-            logger.info("Starting http connector on port: " + httpPort);
-            
-            connector = new SelectChannelConnector();
-            connector.setPort(httpPort);
+        logger.info("Starting server on port: " + port);
+        if (!secure) {
+            SelectChannelConnector connector = new SelectChannelConnector();
+            connector.setPort(port);
             server.addConnector(connector);
-        }
-        
-        if (httpsPort == -1) {
-            logger.debug("Https connector is disabled");
-        }
-        else {
+        } else {
             SslContextFactory sslContextFactory = new SslContextFactory();
             sslContextFactory.setKeyStorePath(KEYSTORE);
             sslContextFactory.setKeyStorePassword(KEYSTORE_PASSWORD);
@@ -138,14 +121,8 @@ public class JettyServer extends ExternalResource {
             sslContextFactory.setCertAlias(CERT_ALIAS);
             SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(sslContextFactory);
             
-            logger.info("Starting https connector on port: " + httpsPort);
-            
-            sslConnector.setPort(httpsPort);
+            sslConnector.setPort(port);
             server.addConnector(sslConnector);
-            
-            if (connector != null) {
-                connector.setConfidentialPort(httpsPort);
-            }
             
             savedTrustStore = System.getProperty("javax.net.ssl.trustStore");
             System.setProperty("javax.net.ssl.trustStore", CLIENT_KEYSTORE);
@@ -231,8 +208,13 @@ public class JettyServer extends ExternalResource {
      * @return Jetty's http connector port. 
      * @throws IllegalStateException If Jetty is not running or the http connector cannot be found.
      */
-    public int getHttpPort() throws IllegalStateException {
-        assertStarted();
+    public int getPort() throws IllegalStateException {
+        if (server == null) {
+            throw new IllegalStateException("Jetty server is not initialized");
+        }
+        if (!server.isStarted()) {
+            throw new IllegalStateException("Jetty server is not started");
+        }
         
         Connector[] connectors = server.getConnectors();
         if (connectors.length == 0) {
@@ -240,44 +222,12 @@ public class JettyServer extends ExternalResource {
         }
         
         for (Connector connector : connectors) {
-            if ((connector instanceof SelectChannelConnector) &&
-                !(connector instanceof SslSelectChannelConnector)) {
+            if (connector instanceof SelectChannelConnector) {
                 //must be the http connector
                 return connector.getPort();
             }
         }
         
         throw new IllegalStateException("Could not find Jetty http connector");
-    }
-    
-    /**
-     * @return Jetty's ssl connector port. 
-     * @throws IllegalStateException If Jetty is not running or the ssl connector cannot be found.
-     */
-    public int getHttpsPort() throws IllegalStateException {
-        assertStarted();
-        
-        Connector[] connectors = server.getConnectors();
-        if (connectors.length == 0) {
-            throw new IllegalStateException("Jetty server is not configured with any connectors");
-        }
-        
-        for (Connector connector : connectors) {
-            if (connector instanceof SslSelectChannelConnector) {
-                //must be the https connector
-                return connector.getPort();
-            }
-        }
-        
-        throw new IllegalStateException("Could not find Jetty https connector");
-    }
-    
-    private void assertStarted() throws IllegalStateException {
-        if (server == null) {
-            throw new IllegalStateException("Jetty server is not initialized");
-        }
-        else if (!server.isStarted()) {
-            throw new IllegalStateException("Jetty server is not started");
-        }
     }
 }

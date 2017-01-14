@@ -42,7 +42,7 @@ public abstract class TestClient {
     protected int port = 5555;
 
     @Rule
-    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + getServiceRepo(), port, -1);
+    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + getServiceRepo(), port, false);
 
     /**
      */

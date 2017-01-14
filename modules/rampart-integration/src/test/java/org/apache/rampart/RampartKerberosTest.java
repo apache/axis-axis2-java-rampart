@@ -65,7 +65,7 @@ public class RampartKerberosTest extends AbstractRampartTest {
     public static final String KERBEROS_CONF_KDC_PORT_TOKEN = "KDC_PORT";
     
     @Rule
-    public final JettyServer server = new JettyServer("target/test-resources/rampart_service_repo", -1, 0);
+    public final JettyServer server = new JettyServer("target/test-resources/rampart_service_repo", 0, true);
     
     /**
      * Stores any original JAAS configuration set via {@link #JAAS_CONF_SYS_PROP} property to restore it after test execution.
@@ -80,7 +80,7 @@ public class RampartKerberosTest extends AbstractRampartTest {
     @Test
     public void testKerberosOverTransportKeytab() throws XMLStreamException, SAXException, IOException {
         final String serviceName = "KerberosOverTransportKeytab";
-        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getHttpsPort(), serviceName));
+        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getPort(), serviceName));
         
         ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
 
@@ -107,7 +107,7 @@ public class RampartKerberosTest extends AbstractRampartTest {
     @Test
     public void testKerberosOverTransportPWCB() throws XMLStreamException, SAXException, IOException {
         final String serviceName = "KerberosOverTransportPWCB";
-        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getHttpsPort(), serviceName));
+        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getPort(), serviceName));
         
         ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
 
@@ -136,7 +136,7 @@ public class RampartKerberosTest extends AbstractRampartTest {
     @Test
     public void testKerberosDelegation() throws XMLStreamException, SAXException, IOException {
         final String serviceName = "KerberosDelegation";
-        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getHttpsPort(), serviceName));
+        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getPort(), serviceName));
 
         ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
 
