@@ -38,37 +38,37 @@ public class JettyServer extends ExternalResource {
     /**
      * Keystore to configure for Jetty's ssl context factory: {@value}
      */
-    public static final String KEYSTORE = "target/test-resources/jetty/server.jks";
+    private static final String KEYSTORE = "target/test-resources/jetty/server.jks";
     
     /**
      * Keymanager password to configure for Jetty's ssl context factory: {@value
      */
-    public static final String KEYMAN_PASSWORD = "password";
+    private static final String KEYMAN_PASSWORD = "password";
     
     /**
      * Keystore password to configure for Jetty's ssl context factory: {@value} 
      */
-    public static final String KEYSTORE_PASSWORD = "password";
+    private static final String KEYSTORE_PASSWORD = "password";
     
     /**
      * The alias of the certificate to configure for Jetty's ssl context factory: {@value}
      */
-    public static final String CERT_ALIAS = "server";
+    private static final String CERT_ALIAS = "server";
     
     /**
      * Client keystore containing Jetty's server certificate as trusted certificate entry: : {@value}
      */
-    public static final String CLIENT_KEYSTORE = "target/test-resources/jetty/client.jks";
+    private static final String CLIENT_KEYSTORE = "target/test-resources/jetty/client.jks";
                     
     /**
      * Axis2 configuration file to use: {@value}
      */
-    public static final String AXIS2_XML = "src/test/resources/conf/axis2.xml";
+    private static final String AXIS2_XML = "src/test/resources/conf/axis2.xml";
     
     /**
      * Webapp resource base directory to use: {@value}
      */
-    public static final String WEBAPP_DIR = "target" + File.separator + "webapp";
+    private static final String WEBAPP_DIR = "target" + File.separator + "webapp";
     
     private static final Logger logger = LoggerFactory.getLogger(JettyServer.class);
     
@@ -76,6 +76,10 @@ public class JettyServer extends ExternalResource {
     private final int httpPort;
     private final int httpsPort;
     private Server server;
+    private boolean systemPropertiesSet;
+    private String savedTrustStore;
+    private String savedTrustStorePassword;
+    private String savedTrustStoreType;
     
     /**
      * Constructor.
@@ -142,6 +146,14 @@ public class JettyServer extends ExternalResource {
             if (connector != null) {
                 connector.setConfidentialPort(httpsPort);
             }
+            
+            savedTrustStore = System.getProperty("javax.net.ssl.trustStore");
+            System.setProperty("javax.net.ssl.trustStore", CLIENT_KEYSTORE);
+            savedTrustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+            System.setProperty("javax.net.ssl.trustStorePassword", KEYSTORE_PASSWORD);
+            savedTrustStoreType = System.getProperty("javax.net.ssl.trustStoreType");
+            System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+            systemPropertiesSet = true;
         }
         
         WebAppContext context = new WebAppContext();
@@ -191,6 +203,27 @@ public class JettyServer extends ExternalResource {
                 logger.error("Failed to stop Jetty server", ex);
             }
             server = null;
+        }
+        if (systemPropertiesSet) {
+            if (savedTrustStore != null) {
+                System.setProperty("javax.net.ssl.trustStore", savedTrustStore);
+            } else {
+                System.clearProperty("javax.net.ssl.trustStore");
+            }
+            if (savedTrustStorePassword != null) {
+                System.setProperty("javax.net.ssl.trustStorePassword", savedTrustStorePassword);    
+            } else {
+                System.clearProperty("javax.net.ssl.trustStorePassword");
+            }
+            if (savedTrustStoreType != null) {
+                System.setProperty("javax.net.ssl.trustStoreType", savedTrustStoreType);
+            } else {
+                System.clearProperty("javax.net.ssl.trustStoreType");
+            }
+            savedTrustStore = null;
+            savedTrustStorePassword = null;
+            savedTrustStoreType = null;
+            systemPropertiesSet = false;
         }
     }
 

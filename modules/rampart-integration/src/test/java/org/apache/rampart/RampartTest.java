@@ -16,8 +16,6 @@
 
 package org.apache.rampart;
 
-import static org.apache.axis2.integration.JettyServer.CLIENT_KEYSTORE;
-import static org.apache.axis2.integration.JettyServer.KEYSTORE_PASSWORD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -38,14 +36,11 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.integration.JettyServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 
 public class RampartTest {
 
@@ -54,52 +49,12 @@ public class RampartTest {
     @Rule
     public final JettyServer server = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", 0, 0);
     
-    private String trustStore;
-    private String trustStorePassword;
-    private String trustStoreType;
     
     static {
         try {
             resources = ResourceBundle.getBundle("org.apache.rampart.errors");
         } catch (MissingResourceException e) {
             throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        trustStore = System.getProperty("javax.net.ssl.trustStore");
-        System.setProperty("javax.net.ssl.trustStore", CLIENT_KEYSTORE);
-        
-        trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
-        System.setProperty("javax.net.ssl.trustStorePassword", KEYSTORE_PASSWORD);
-        
-        trustStoreType = System.getProperty("javax.net.ssl.trustStoreType");
-        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
-    }
-    
-
-    @After
-    public void tearDown() throws Exception {
-        if (trustStore != null) {
-            System.setProperty("javax.net.ssl.trustStore", trustStore);
-        }
-        else {
-            System.clearProperty("javax.net.ssl.trustStore");
-        }
-        
-        if (trustStorePassword != null) {
-            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);    
-        }
-        else {
-            System.clearProperty("javax.net.ssl.trustStorePassword");
-        }
-        
-        if (trustStoreType != null) {
-            System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
-        }
-        else {
-            System.clearProperty("javax.net.ssl.trustStoreType");
         }
     }
 
