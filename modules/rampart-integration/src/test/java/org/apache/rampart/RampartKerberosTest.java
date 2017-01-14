@@ -11,6 +11,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.integration.JettyServer;
 import org.apache.commons.io.IOUtils;
 import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.KerberosConfig;
@@ -19,6 +20,7 @@ import org.apache.rampart.util.KerberosServer;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -61,6 +63,9 @@ public class RampartKerberosTest extends AbstractRampartTest {
      * A token literal in kerberos5 configuration file template that must be replaced with actual KDC port value: {@value}
      */
     public static final String KERBEROS_CONF_KDC_PORT_TOKEN = "KDC_PORT";
+    
+    @Rule
+    public final JettyServer server = new JettyServer("target/test-resources/rampart_service_repo", -1, 0);
     
     /**
      * Stores any original JAAS configuration set via {@link #JAAS_CONF_SYS_PROP} property to restore it after test execution.
@@ -243,22 +248,5 @@ public class RampartKerberosTest extends AbstractRampartTest {
         }
         
         return krb5Conf;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.rampart.AbstractRampartTest#isEnableHttp()
-     */
-    @Override
-    protected boolean isEnableHttp() {
-        //Kerberos test does not use http
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.rampart.AbstractRampartTest#isEnableHttps()
-     */
-    @Override
-    protected boolean isEnableHttps() {
-        return true;
     }
 }

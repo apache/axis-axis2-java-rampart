@@ -17,8 +17,6 @@
 package org.apache.rampart;
 
 import java.net.URL;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -32,7 +30,6 @@ import org.apache.axis2.integration.JettyServer;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.junit.Rule;
 
 /**
  * Base test class for integration tests that require Axis2 web application running in a web container.
@@ -47,22 +44,6 @@ public abstract class AbstractRampartTest {
     
     protected static final String RAMPART_CLIENT_REPO_PATH = "target/test-resources/rampart_client_repo";
     
-    protected static final String RAMPART_SERVICE_REPO_PATH = "target/test-resources/rampart_service_repo";
-    
-    protected static ResourceBundle resources;
-    
-    @Rule
-    public final JettyServer server = new JettyServer(
-            RAMPART_SERVICE_REPO_PATH, isEnableHttp() ? 0 : -1, isEnableHttps() ? 0 : -1);
-    
-    static {
-        try {
-            resources = ResourceBundle.getBundle("org.apache.rampart.errors");
-        } catch (MissingResourceException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
     protected ServiceClient getServiceClientInstance() throws AxisFault {
         return getServiceClientInstance(null);
     }
@@ -136,14 +117,4 @@ public abstract class AbstractRampartTest {
     protected Policy loadPolicy(String xmlPath) {
         return PolicyEngine.getPolicy(this.getClass().getResourceAsStream(xmlPath));
     }
-    
-    /**
-     * @return Implementations must return <code>true</code> to enable startup of web container's http connector or false otherwise.
-     */
-    protected abstract boolean isEnableHttp();
-    
-    /**
-     * @return Implementations must return <code>true</code> to enable startup of web container's https connector or false otherwise.
-     */
-    protected abstract boolean isEnableHttps();
 }
