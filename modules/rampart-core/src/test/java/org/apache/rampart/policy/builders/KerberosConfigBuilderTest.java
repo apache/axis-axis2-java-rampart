@@ -31,6 +31,8 @@ import javax.xml.stream.XMLStreamWriter;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyBuilder;
@@ -42,8 +44,6 @@ import org.apache.ws.secpolicy.WSSPolicyException;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.exceptions.XpathException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -51,7 +51,7 @@ public class KerberosConfigBuilderTest extends TestCase {
 
     public static final String KERBEROS_CONFIG_POLICY_FILE = "kerberosConfig.policy";
     
-    private static Logger log = LoggerFactory.getLogger(KerberosConfigBuilderTest.class);
+    private static Log log = LogFactory.getLog(KerberosConfigBuilderTest.class);
     
     public void testBuildKerberosConfig() throws WSSPolicyException {
         Policy kerberosConfigPolicy = loadKerberosConfigPolicy();

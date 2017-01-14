@@ -29,6 +29,8 @@ import java.util.List;
 
 import org.apache.axis2.testutils.PortAllocator;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.ldif.LdifEntry;
 import org.apache.directory.api.ldap.model.ldif.LdifReader;
@@ -44,8 +46,6 @@ import org.apache.directory.server.kerberos.kdc.KdcServer;
 import org.apache.directory.server.protocol.shared.transport.Transport;
 import org.apache.directory.server.protocol.shared.transport.UdpTransport;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Runs an Apache DS Kerberos server.
@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 public class KerberosServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(KerberosServer.class);
+    private static final Log log = LogFactory.getLog(KerberosServer.class);
     
     /**
      * The used DirectoryService instance
@@ -143,7 +143,7 @@ public class KerberosServer {
         kdcServer.setServiceName("DefaultKrbServer");        
         
         final String kdcHostname = "localhost";
-        logger.info(String.format("Starting service on %s:%s", kdcHostname, kdcPort));
+        log.info(String.format("Starting service on %s:%s", kdcHostname, kdcPort));
         
         UdpTransport udp = new UdpTransport(kdcHostname, kdcPort);
         kdcServer.addTransports(udp);
@@ -181,7 +181,7 @@ public class KerberosServer {
      * @throws Exception
      */
     public static synchronized void stopKerberosServer() throws Exception {
-        logger.info("Stop called");
+        log.info("Stop called");
         try {        
             if (directoryService != null) {
                 try {
@@ -192,7 +192,7 @@ public class KerberosServer {
                         FileUtils.deleteDirectory(workDir);
                     }
                     catch (IOException e) {
-                        logger.error("Failed to delete Apache DS working directory: " + workDir.getAbsolutePath() , e);
+                        log.error("Failed to delete Apache DS working directory: " + workDir.getAbsolutePath() , e);
                     }
                 }
                 directoryService = null;
