@@ -16,9 +16,6 @@
 
 package org.apache.rampart;
 
-import static org.apache.axis2.integration.JettyServer.CLIENT_KEYSTORE;
-import static org.apache.axis2.integration.JettyServer.KEYSTORE_PASSWORD;
-
 import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -35,8 +32,6 @@ import org.apache.axis2.integration.JettyServer;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 
 /**
@@ -60,10 +55,6 @@ public abstract class AbstractRampartTest {
     public final JettyServer server = new JettyServer(
             RAMPART_SERVICE_REPO_PATH, isEnableHttp() ? 0 : -1, isEnableHttps() ? 0 : -1);
     
-    protected String trustStore;
-    protected String trustStorePassword;
-    protected String trustStoreType;
-    
     static {
         try {
             resources = ResourceBundle.getBundle("org.apache.rampart.errors");
@@ -72,43 +63,6 @@ public abstract class AbstractRampartTest {
         }
     }
 
-    @Before
-    public void setUp() throws Exception {
-        trustStore = System.getProperty("javax.net.ssl.trustStore");
-        System.setProperty("javax.net.ssl.trustStore", CLIENT_KEYSTORE);
-        
-        trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
-        System.setProperty("javax.net.ssl.trustStorePassword", KEYSTORE_PASSWORD);
-        
-        trustStoreType = System.getProperty("javax.net.ssl.trustStoreType");
-        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
-    }
-    
-
-    @After
-    public void tearDown() throws Exception {
-        if (trustStore != null) {
-            System.setProperty("javax.net.ssl.trustStore", trustStore);
-        }
-        else {
-            System.clearProperty("javax.net.ssl.trustStore");
-        }
-        
-        if (trustStorePassword != null) {
-            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);    
-        }
-        else {
-            System.clearProperty("javax.net.ssl.trustStorePassword");
-        }
-        
-        if (trustStoreType != null) {
-            System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
-        }
-        else {
-            System.clearProperty("javax.net.ssl.trustStoreType");
-        }
-    }
-    
     protected ServiceClient getServiceClientInstance() throws AxisFault {
         return getServiceClientInstance(null);
     }
