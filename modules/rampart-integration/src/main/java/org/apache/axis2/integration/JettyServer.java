@@ -28,7 +28,6 @@ import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.testutils.PortAllocator;
 import org.apache.axis2.transport.http.AxisServlet;
 
 /**
@@ -103,11 +102,8 @@ public class JettyServer extends ExternalResource {
     
     @Override
     protected void before() throws Throwable {
-        int port = this.port == 0 ? PortAllocator.allocatePort() : this.port;
-        
         server = new Server();
         
-        logger.info("Starting server on port: " + port);
         if (!secure) {
             SelectChannelConnector connector = new SelectChannelConnector();
             connector.setPort(port);
@@ -169,6 +165,8 @@ public class JettyServer extends ExternalResource {
                 throw e;
             }
         }
+        
+        logger.info("Server started on port " + getPort());
     }
     
     @Override
@@ -225,7 +223,7 @@ public class JettyServer extends ExternalResource {
         for (Connector connector : connectors) {
             if (connector instanceof SelectChannelConnector) {
                 //must be the http connector
-                return connector.getPort();
+                return connector.getLocalPort();
             }
         }
         
