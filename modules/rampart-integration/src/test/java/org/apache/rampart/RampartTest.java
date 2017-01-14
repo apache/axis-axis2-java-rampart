@@ -16,6 +16,8 @@
 
 package org.apache.rampart;
 
+import static org.apache.axis2.integration.TestConstants.AXIS2_XML;
+import static org.apache.axis2.integration.TestConstants.TESTING_PATH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -46,10 +48,10 @@ public class RampartTest {
     private static ResourceBundle resources;
     
     @Rule
-    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", false);
+    public final JettyServer server = new JettyServer(TESTING_PATH + "rampart_service_repo", AXIS2_XML, false);
     
     @Rule
-    public final JettyServer secureServer = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", true);
+    public final JettyServer secureServer = new JettyServer(TESTING_PATH + "rampart_service_repo", AXIS2_XML, true);
     
     static {
         try {
@@ -61,7 +63,7 @@ public class RampartTest {
 
     private ServiceClient getServiceClientInstance() throws AxisFault {
 
-        String repository = Constants.TESTING_PATH + "rampart_client_repo";
+        String repository = TESTING_PATH + "rampart_client_repo";
 
         ConfigurationContext configContext = ConfigurationContextFactory.
                 createConfigurationContextFromFileSystem(repository, null);

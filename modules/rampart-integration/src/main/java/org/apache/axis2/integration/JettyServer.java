@@ -62,11 +62,6 @@ public class JettyServer extends ExternalResource {
     private static final String CERT_ALIAS = "server";
     
     /**
-     * Axis2 configuration file to use: {@value}
-     */
-    private static final String AXIS2_XML = "src/test/resources/conf/axis2.xml";
-    
-    /**
      * Webapp resource base directory to use: {@value}
      */
     private static final String WEBAPP_DIR = "target" + File.separator + "webapp";
@@ -74,6 +69,7 @@ public class JettyServer extends ExternalResource {
     private static final Logger logger = LoggerFactory.getLogger(JettyServer.class);
     
     private final String repository;
+    private final String axis2xml;
     private final boolean secure;
     private File keyStoreFile;
     private File trustStoreFile;
@@ -91,11 +87,12 @@ public class JettyServer extends ExternalResource {
      * @param secure
      *            Whether to enable HTTPS.
      */
-    public JettyServer(String repository, boolean secure) {
+    public JettyServer(String repository, String axis2xml, boolean secure) {
         if (repository == null || repository.trim().length() == 0) {
             throw new IllegalArgumentException("Axis2 repository must not be null or empty");
         }
         this.repository = repository;
+        this.axis2xml = axis2xml;
         this.secure = secure;
     }
     
@@ -190,7 +187,7 @@ public class JettyServer extends ExternalResource {
         context.setThrowUnavailableOnStartupException(true);
         
         final ConfigurationContext configurationContext =
-                ConfigurationContextFactory.createConfigurationContextFromFileSystem(repository, AXIS2_XML);
+                ConfigurationContextFactory.createConfigurationContextFromFileSystem(repository, axis2xml);
         @SuppressWarnings("serial")
         ServletHolder servlet = new ServletHolder(new AxisServlet() {
             @Override

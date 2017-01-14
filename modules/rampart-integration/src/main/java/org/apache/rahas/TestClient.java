@@ -16,6 +16,9 @@
 
 package org.apache.rahas;
 
+import static org.apache.axis2.integration.TestConstants.AXIS2_XML;
+import static org.apache.axis2.integration.TestConstants.TESTING_PATH;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 
@@ -39,14 +42,14 @@ import org.junit.Test;
 public abstract class TestClient {
 
     @Rule
-    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + getServiceRepo(), false);
+    public final JettyServer server = new JettyServer(TESTING_PATH + getServiceRepo(), AXIS2_XML, false);
 
     /**
      */
     @Test
     public void testRequest() throws Exception {
         // Get the repository location from the args
-        String repo = Constants.TESTING_PATH + "rahas_client_repo";
+        String repo = TESTING_PATH + "rahas_client_repo";
 
         ConfigurationContext configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(repo,
                                                                                                                   null);
