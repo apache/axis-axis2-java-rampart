@@ -5,7 +5,7 @@
                 <rampart:timestampPrecisionInMilliseconds>true</rampart:timestampPrecisionInMilliseconds>
                 <rampart:timestampTTL>300</rampart:timestampTTL>
                 <rampart:timestampMaxSkew>300</rampart:timestampMaxSkew>
-				<rampart:timestampStrict>false</rampart:timestampStrict>	
+                <rampart:timestampStrict>false</rampart:timestampStrict>
                 <rampart:nonceLifeTime>300</rampart:nonceLifeTime>
                 <rampart:kerberosConfig>
                     <rampart:jaasContext>alice</rampart:jaasContext>

@@ -5,10 +5,10 @@
 
     <parameter locked="false" name="ServiceClass">org.apache.rampart.Service</parameter>
 
-	<transports>
-		<transport>https</transport>
-	</transports>
-	
+    <transports>
+        <transport>https</transport>
+    </transports>
+    
     <operation name="echo">
         <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver" />
         <actionMapping>urn:echo</actionMapping>

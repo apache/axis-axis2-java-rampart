@@ -42,8 +42,8 @@ public class KerberosTokenBuilder implements AssertionBuilder<OMElement> {
      * @see org.apache.neethi.builders.AssertionBuilder#build(java.lang.Object,
      * org.apache.neethi.AssertionBuilderFactory)
      */
-	public Assertion build(OMElement element, AssertionBuilderFactory arg1) 
-	    throws IllegalArgumentException {
+    public Assertion build(OMElement element, AssertionBuilderFactory arg1) 
+            throws IllegalArgumentException {
         KerberosToken kerberosToken = new KerberosToken(SPConstants.SP_V12);
 
         OMElement policyElement = element.getFirstElement();

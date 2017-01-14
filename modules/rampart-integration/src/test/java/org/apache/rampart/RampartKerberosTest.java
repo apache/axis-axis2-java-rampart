@@ -210,60 +210,60 @@ public class RampartKerberosTest extends AbstractRampartTest {
      * @throws IOException 
      */
     protected File generateKerberosConf() throws IOException {
-    	File tmpDir = new File("target" + File.separator + "tmp");
-    	if (!tmpDir.exists() && !tmpDir.mkdirs()) {
-    		throw new RuntimeException("Failed to create temp directory: " + tmpDir.getAbsolutePath());
-    	}
-    	
-    	File krb5ConfTemplate = new File(KERBEROS_CONF_TEMPLATE);
-    	if (!krb5ConfTemplate.exists()) {
-    		throw new IllegalArgumentException("Cannot find kerberos configuration file template: " + krb5ConfTemplate.getAbsolutePath());
-    	}
-    	
-    	FileInputStream krb5ConfTemplateIn = null;
-    	String krb5ConfContent;
-    	try {
-    		krb5ConfTemplateIn = new FileInputStream(krb5ConfTemplate);
-    		krb5ConfContent = IOUtils.toString(krb5ConfTemplateIn);
-    	}
-    	finally {
-    		IOUtils.closeQuietly(krb5ConfTemplateIn);
-    	}
-    	
-		if (krb5ConfContent.indexOf(KERBEROS_CONF_KDC_PORT_TOKEN) == -1) {
-			throw new IllegalArgumentException(String.format("Cannot find any %s token in kerberos configuration file template: %s",
-					KERBEROS_CONF_KDC_PORT_TOKEN, krb5ConfTemplate.getAbsolutePath()));
-		}
-    		
-		krb5ConfContent = krb5ConfContent.replace(KERBEROS_CONF_KDC_PORT_TOKEN, String.valueOf(KerberosServer.getPort()));
-    	
-    	File krb5Conf = new File(tmpDir, this.getClass().getSimpleName() + "_krb5.conf");
-    	FileOutputStream krb5ConfOut = null;
-    	try {
-    		krb5ConfOut = new FileOutputStream(krb5Conf);
-    		IOUtils.write(krb5ConfContent, krb5ConfOut);
-    	}
-    	finally {
-    		IOUtils.closeQuietly(krb5ConfOut);
-    	}
-    	
-    	return krb5Conf;
+        File tmpDir = new File("target" + File.separator + "tmp");
+        if (!tmpDir.exists() && !tmpDir.mkdirs()) {
+            throw new RuntimeException("Failed to create temp directory: " + tmpDir.getAbsolutePath());
+        }
+        
+        File krb5ConfTemplate = new File(KERBEROS_CONF_TEMPLATE);
+        if (!krb5ConfTemplate.exists()) {
+            throw new IllegalArgumentException("Cannot find kerberos configuration file template: " + krb5ConfTemplate.getAbsolutePath());
+        }
+        
+        FileInputStream krb5ConfTemplateIn = null;
+        String krb5ConfContent;
+        try {
+            krb5ConfTemplateIn = new FileInputStream(krb5ConfTemplate);
+            krb5ConfContent = IOUtils.toString(krb5ConfTemplateIn);
+        }
+        finally {
+            IOUtils.closeQuietly(krb5ConfTemplateIn);
+        }
+        
+        if (krb5ConfContent.indexOf(KERBEROS_CONF_KDC_PORT_TOKEN) == -1) {
+            throw new IllegalArgumentException(String.format("Cannot find any %s token in kerberos configuration file template: %s",
+                    KERBEROS_CONF_KDC_PORT_TOKEN, krb5ConfTemplate.getAbsolutePath()));
+        }
+            
+        krb5ConfContent = krb5ConfContent.replace(KERBEROS_CONF_KDC_PORT_TOKEN, String.valueOf(KerberosServer.getPort()));
+        
+        File krb5Conf = new File(tmpDir, this.getClass().getSimpleName() + "_krb5.conf");
+        FileOutputStream krb5ConfOut = null;
+        try {
+            krb5ConfOut = new FileOutputStream(krb5Conf);
+            IOUtils.write(krb5ConfContent, krb5ConfOut);
+        }
+        finally {
+            IOUtils.closeQuietly(krb5ConfOut);
+        }
+        
+        return krb5Conf;
     }
 
-	/* (non-Javadoc)
-	 * @see org.apache.rampart.AbstractRampartTest#isEnableHttp()
-	 */
-	@Override
-	protected boolean isEnableHttp() {
-		//Kerberos test does not use http
-		return false;
-	}
+    /* (non-Javadoc)
+     * @see org.apache.rampart.AbstractRampartTest#isEnableHttp()
+     */
+    @Override
+    protected boolean isEnableHttp() {
+        //Kerberos test does not use http
+        return false;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.apache.rampart.AbstractRampartTest#isEnableHttps()
-	 */
-	@Override
-	protected boolean isEnableHttps() {
-		return true;
-	}
+    /* (non-Javadoc)
+     * @see org.apache.rampart.AbstractRampartTest#isEnableHttps()
+     */
+    @Override
+    protected boolean isEnableHttps() {
+        return true;
+    }
 }

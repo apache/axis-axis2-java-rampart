@@ -315,7 +315,7 @@
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureServiceSC6.aar" basedir="target/temp-ramp" />
                                 
                                 <!--  Kerberos Services -->
-								<copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosOverTransportKeytab.xml" tofile="target/temp-ramp/META-INF/services.xml" />
+                                <copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosOverTransportKeytab.xml" tofile="target/temp-ramp/META-INF/services.xml" />
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/KerberosOverTransportKeytab.aar" basedir="target/temp-ramp" />
                                 
                                 <copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosOverTransportPWCB.xml" tofile="target/temp-ramp/META-INF/services.xml" />
@@ -692,15 +692,15 @@
             </exclusions>
         </dependency>
         <dependency>
-		  <groupId>org.apache.directory.api</groupId>
-		  <artifactId>api-ldap-codec-standalone</artifactId>
-		  <version>1.0.0-M33</version>
-		</dependency>
-		<dependency>
-		  <groupId>org.apache.directory.api</groupId>
-		  <artifactId>api-ldap-extras-codec-api</artifactId>
-		  <version>1.0.0-M33</version>
-		</dependency>
+            <groupId>org.apache.directory.api</groupId>
+            <artifactId>api-ldap-codec-standalone</artifactId>
+            <version>1.0.0-M33</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.api</groupId>
+            <artifactId>api-ldap-extras-codec-api</artifactId>
+            <version>1.0.0-M33</version>
+        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

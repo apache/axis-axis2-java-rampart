@@ -53,8 +53,8 @@ import org.slf4j.LoggerFactory;
  */
 public class KerberosServer {
 
-	private static final Logger logger = LoggerFactory.getLogger(KerberosServer.class);
-	
+    private static final Logger logger = LoggerFactory.getLogger(KerberosServer.class);
+    
     /**
      * The used DirectoryService instance
      */
@@ -77,8 +77,8 @@ public class KerberosServer {
      * @throws Exception
      */
     public static synchronized void startKerberosServer() throws Exception {
-    	int kdcPort = PortAllocator.allocatePort();
-    	
+        int kdcPort = PortAllocator.allocatePort();
+        
         DatagramSocket datagramSocket = new DatagramSocket(kdcPort);
         datagramSocket.setReuseAddress(true);
         datagramSocket.close();
@@ -156,24 +156,24 @@ public class KerberosServer {
      * @throws IllegalArgumentException If server or respective transport are not initialized
      */
     public static synchronized int getPort() throws IllegalArgumentException {
-    	if (kdcServer == null) {
-    		throw new IllegalStateException("Kerberos server is not initialized");
-    	}
+        if (kdcServer == null) {
+            throw new IllegalStateException("Kerberos server is not initialized");
+        }
 
-    	Transport[] transports =  kdcServer.getTransports();
-    	if (transports == null || transports.length == 0) {
-    		throw new IllegalStateException("Kerberos server does not configure any transports");
-    	}
-    	
-    	for (Transport transport : transports) {
-    		if (transport instanceof UdpTransport) {
-    			return transport.getPort();
-    		}
-    	}
-    	
-    	throw new IllegalStateException(
-    			String.format("Cannot identify Kerberos server port. List of transports does not contain an %s instance",
-    					UdpTransport.class.getName()));
+        Transport[] transports =  kdcServer.getTransports();
+        if (transports == null || transports.length == 0) {
+            throw new IllegalStateException("Kerberos server does not configure any transports");
+        }
+        
+        for (Transport transport : transports) {
+            if (transport instanceof UdpTransport) {
+                return transport.getPort();
+            }
+        }
+        
+        throw new IllegalStateException(
+                String.format("Cannot identify Kerberos server port. List of transports does not contain an %s instance",
+                        UdpTransport.class.getName()));
     } 
     
     /**
@@ -181,34 +181,34 @@ public class KerberosServer {
      * @throws Exception
      */
     public static synchronized void stopKerberosServer() throws Exception {
-    	logger.info("Stop called");
-		try {    	
-			if (directoryService != null) {
-				try {
-					directoryService.shutdown();
-				}
-				finally {					
-					try {
-						FileUtils.deleteDirectory(workDir);
-					}
-					catch (IOException e) {
-						logger.error("Failed to delete Apache DS working directory: " + workDir.getAbsolutePath() , e);
-					}
-				}
-				directoryService = null;
-			}
-		}
-		finally {
-			if (kdcServer != null) {
-				kdcServer.stop();
-				kdcServer = null;
-			}
-			
+        logger.info("Stop called");
+        try {        
+            if (directoryService != null) {
+                try {
+                    directoryService.shutdown();
+                }
+                finally {                    
+                    try {
+                        FileUtils.deleteDirectory(workDir);
+                    }
+                    catch (IOException e) {
+                        logger.error("Failed to delete Apache DS working directory: " + workDir.getAbsolutePath() , e);
+                    }
+                }
+                directoryService = null;
+            }
+        }
+        finally {
+            if (kdcServer != null) {
+                kdcServer.stop();
+                kdcServer = null;
+            }
+            
             if (provider != null) {
                 //restore BC position
                 Security.removeProvider("BC");
                 Security.insertProviderAt(provider, providerPos);
             }
-		}
+        }
     }
 }

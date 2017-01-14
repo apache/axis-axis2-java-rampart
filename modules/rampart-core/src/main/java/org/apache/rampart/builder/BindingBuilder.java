@@ -869,16 +869,16 @@ public abstract class BindingBuilder {
         }
         
         String password = krbConfig.getPrincipalPassword();
-		if (password == null) {
+        if (password == null) {
             CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
 
             if (handler != null) {
-            	if (user == null) {
+                if (user == null) {
                     log.debug("Password callback is configured but no user value is specified in the configuration");
                     throw new RampartException("userMissing");
-            	}
-            	
-            	//TODO We do not have a separate usage type for Kerberos token, let's use custom token
+                }
+                
+                //TODO We do not have a separate usage type for Kerberos token, let's use custom token
                 WSPasswordCallback[] cb = { new WSPasswordCallback(user, WSPasswordCallback.CUSTOM_TOKEN) };
                 try {
                     handler.handle(cb);
@@ -913,15 +913,14 @@ public abstract class BindingBuilder {
                     }
                 }
                 else {
-                	OMElement upnClaim = addressingIdentity.getFirstChildWithName(AddressingConstants.QNAME_IDENTITY_UPN);
-                	if (upnClaim != null) {
-                		principalName = upnClaim.getText();
-                		isUsernameServiceNameForm = true;
+                    OMElement upnClaim = addressingIdentity.getFirstChildWithName(AddressingConstants.QNAME_IDENTITY_UPN);
+                    if (upnClaim != null) {
+                        principalName = upnClaim.getText();
+                        isUsernameServiceNameForm = true;
                         if (log.isDebugEnabled()) {
                             log.debug("Found UPN identity claim: " + principalName);
                         }
-                	}
-                    else if (log.isDebugEnabled()) {
+                    } else if (log.isDebugEnabled()) {
                         log.debug(String.format("Neither SPN nor UPN identity claim found in %s EPR element for endpoint %s.", addressingIdentity.getQName().toString(), endpoint.getName()));
                     }
                 }

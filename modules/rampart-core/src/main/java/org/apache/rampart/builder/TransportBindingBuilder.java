@@ -146,7 +146,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                         handleSecureConversationTokens(rmd, (SecureConversationToken) token);
                         signatureValues.add(doSecureConversationSignature(rmd, token, signdParts));
                     } else if (token instanceof KerberosToken) {
-                    	signatureValues.add(doKerberosTokenSignature(rmd, (KerberosToken)token, signdParts));
+                        signatureValues.add(doKerberosTokenSignature(rmd, (KerberosToken)token, signdParts));
                     }
                 }
             }
@@ -316,7 +316,7 @@ public class TransportBindingBuilder extends BindingBuilder {
         
         //TODO Shall we always include a timestamp?
         if (this.timestampElement != null) {
-            sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
+            sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));
         }
         
         if (signdParts != null) {
@@ -335,33 +335,32 @@ public class TransportBindingBuilder extends BindingBuilder {
             }
         }
 
-    	try {
-    		KerberosSecurity kerberosBst = addKerberosToken(rmd, token);
-    		kerberosBst.setID("Id-" + kerberosBst.hashCode());
-    		 
-    	    WSSecSignature sign = new WSSecSignature();
-    	    sign.setSignatureAlgorithm(SignatureMethod.HMAC_SHA1);
-    	    
-    	    if (token.isRequiresKeyIdentifierReference()) {
-	            sign.setKeyIdentifierType(WSConstants.CUSTOM_KEY_IDENTIFIER);
-	           
-	            byte[] digestBytes = WSSecurityUtil.generateDigest(kerberosBst.getToken());
-	            sign.setCustomTokenId(Base64.encode(digestBytes));
-	            sign.setCustomTokenValueType(WSConstants.WSS_KRB_KI_VALUE_TYPE);
-    	    }
-    	    else {
-	    	    sign.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
-	    	    
-	    	    sign.setCustomTokenId(kerberosBst.getID());
-	    	    sign.setCustomTokenValueType(kerberosBst.getValueType());
-    	    }
-    	        
-    	    SecretKey secretKey = kerberosBst.getSecretKey();
-    	    sign.setSecretKey(secretKey.getEncoded());
-    	        
-    	    sign.prepare(doc, null, rmd.getSecHeader());
-    	    
-    	    WSSecurityUtil.prependChildElement(rmd.getSecHeader().getSecurityHeader(), kerberosBst.getElement());
+        try {
+            KerberosSecurity kerberosBst = addKerberosToken(rmd, token);
+            kerberosBst.setID("Id-" + kerberosBst.hashCode());
+            
+            WSSecSignature sign = new WSSecSignature();
+            sign.setSignatureAlgorithm(SignatureMethod.HMAC_SHA1);
+            
+            if (token.isRequiresKeyIdentifierReference()) {
+                sign.setKeyIdentifierType(WSConstants.CUSTOM_KEY_IDENTIFIER);
+               
+                byte[] digestBytes = WSSecurityUtil.generateDigest(kerberosBst.getToken());
+                sign.setCustomTokenId(Base64.encode(digestBytes));
+                sign.setCustomTokenValueType(WSConstants.WSS_KRB_KI_VALUE_TYPE);
+            } else {
+                sign.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                
+                sign.setCustomTokenId(kerberosBst.getID());
+                sign.setCustomTokenValueType(kerberosBst.getValueType());
+            }
+            
+            SecretKey secretKey = kerberosBst.getSecretKey();
+            sign.setSecretKey(secretKey.getEncoded());
+            
+            sign.prepare(doc, null, rmd.getSecHeader());
+            
+            WSSecurityUtil.prependChildElement(rmd.getSecHeader().getSecurityHeader(), kerberosBst.getElement());
             
             List<Reference> referenceList = sign.addReferencesToSign(sigParts, rmd.getSecHeader());
 
