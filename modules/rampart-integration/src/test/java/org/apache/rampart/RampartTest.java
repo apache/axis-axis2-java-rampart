@@ -135,7 +135,7 @@ public class RampartTest extends TestCase {
             }
 
             //for (int i = 34; i <= 34; i++) { //<-The number of tests we have
-            for (int i = 1; i <= 35; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 42; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
                     continue;
@@ -179,7 +179,7 @@ public class RampartTest extends TestCase {
                 }
                 
                 // Invoking the service in the TestCase-28 should fail. So handling it differently..
-                if (i == 28 || i == 34) {
+                if (i == 28 || i == 34 || i == 37 || i == 39 || i == 40 || i == 41) {
                     try {
 
                         //Blocking invocation
@@ -203,6 +203,8 @@ public class RampartTest extends TestCase {
                             // Need to find the exact cause
                             //assertEquals(resources.getString("invalidSignatureAlgo"), axisFault.getMessage());
                             System.out.println(axisFault.getMessage());
+                        }else{
+                        	assertNotNull(axisFault);
                         }
 
                     }

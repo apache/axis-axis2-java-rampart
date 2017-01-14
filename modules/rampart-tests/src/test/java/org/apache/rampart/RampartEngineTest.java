@@ -53,48 +53,44 @@ public class RampartEngineTest extends MessageBuilderTestBase {
     }
 
     public void testValidSOAPMessage() throws Exception {
-
-        MessageContext ctx = getMsgCtx();
-
-        String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml";
-        Policy policy = loadPolicy(policyXml);
-
-        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
-
-        MessageBuilder builder = new MessageBuilder();
-        builder.build(ctx);
-
-        // Building the SOAP envelope from the OMElement
-        buildSOAPEnvelope(ctx);
-
-        RampartEngine engine = new RampartEngine();
-        List<WSSecurityEngineResult> results = engine.process(ctx);
-
-        /*
-        The principle purpose of the test case is to verify that the above processes
-        without throwing an exception. However, perform a minimal amount of validation on the
-        results.
-        */
-        assertNotNull("RampartEngine returned null result", results);
-        //verify cert was stored
-        X509Certificate usedCert = null;
-        for (WSSecurityEngineResult result : results) {
-            Integer action = (Integer) result.get(WSSecurityEngineResult.TAG_ACTION);
-            if (action == WSConstants.SIGN) {
-                //the result is for the signature, which contains the used certificate
-                usedCert = (X509Certificate) result.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
-                break;
-            }
-        }
-        assertNotNull("Result of processing did not include a certificate", usedCert);
+    	runValidRampartProcessing(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml");
     }
 
     public void testValidSOAP12Message() throws Exception {
+        runValidRampartProcessing(getMsgCtx12(), "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml");
+    }
+    
+    public void testValidSOAPMessageWithActor() throws Exception {
+    	runValidRampartProcessing(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-outbound-actor.xml");
+    }
+    
+    public void testValidSOAP12MessageWithRole() throws Exception {
+    	runValidRampartProcessing(getMsgCtx12(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-outbound-actor.xml");
+    }
+    
+    public void testMissingSOAPInboundActor() throws Exception {
+    	runValidRampartProcessing(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-outbound-actor.xml");
+    }
+    
+    public void testMissingSOAPOutboundActor() throws Exception {
+    	try{
+        	runValidRampartProcessing(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-actor.xml");
+        	fail("Failure is expected because no outbound actor is set.");
+    	}catch(RampartException e){
+    		assertNotNull(e);
+    	}
+    }
 
-        MessageContext ctx = getMsgCtx12();
-
-        String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml";
-        Policy policy = loadPolicy(policyXml);
+    private void buildSOAPEnvelope(MessageContext ctx) throws Exception {
+        SOAPBuilder soapBuilder = new SOAPBuilder();
+        SOAPEnvelope env = ctx.getEnvelope();
+        ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
+        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, getContentTypeForEnvelope(env), ctx);
+        ctx.setEnvelope(env);
+    }
+    
+    private void runValidRampartProcessing(MessageContext ctx, String policyXmlPath) throws Exception{    	
+        Policy policy = loadPolicy(policyXmlPath);
 
         ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
 
@@ -124,13 +120,5 @@ public class RampartEngineTest extends MessageBuilderTestBase {
             }
         }
         assertNotNull("Result of processing did not include a certificate", usedCert);
-    }
-
-    private void buildSOAPEnvelope(MessageContext ctx) throws Exception {
-        SOAPBuilder soapBuilder = new SOAPBuilder();
-        SOAPEnvelope env = ctx.getEnvelope();
-        ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
-        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, getContentTypeForEnvelope(env), ctx);
-        ctx.setEnvelope(env);
     }
 }

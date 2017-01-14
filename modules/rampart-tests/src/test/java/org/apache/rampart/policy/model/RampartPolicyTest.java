@@ -77,6 +77,9 @@ public class RampartPolicyTest extends TestCase {
                 .getProperty("keystoreFile"));
         assertEquals("Incorrect property value", "password", prop
                 .getProperty("keystorePassword"));
+        
+        assertEquals("myInboundActor", config.getInboundActor());
+        assertEquals("myOutboundActor", config.getOutboundActor());
     }
     
 }

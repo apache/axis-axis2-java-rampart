@@ -3,6 +3,8 @@
 		<ramp:user>alice</ramp:user>
 		<ramp:encryptionUser>bob</ramp:encryptionUser>
 		<ramp:passwordCallbackClass>org.apache.axis2.security.PWCallback</ramp:passwordCallbackClass>
+		<ramp:inboundActor>myInboundActor</ramp:inboundActor>
+		<ramp:outboundActor>myOutboundActor</ramp:outboundActor>
 		
 		<ramp:signatureCrypto>
 			<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">

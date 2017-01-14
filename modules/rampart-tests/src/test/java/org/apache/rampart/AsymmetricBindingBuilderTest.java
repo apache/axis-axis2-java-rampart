@@ -16,14 +16,15 @@
 
 package org.apache.rampart;
 
+import java.util.ArrayList;
+
+import javax.xml.namespace.QName;
+
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.context.MessageContext;
 import org.apache.neethi.Policy;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.conversation.ConversationConstants;
-
-import javax.xml.namespace.QName;
-
-import java.util.ArrayList;
 
 public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
     
@@ -178,6 +179,56 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
         
         this.verifySecHeader(list.iterator(), ctx.getEnvelope());
+        
+        //verify that no actor attribute is available
+        OMElement secHeader =
+        		ctx.getEnvelope().getHeader().
+                        getFirstChildWithName(new QName(WSConstants.WSSE_NS,
+                                                        WSConstants.WSSE_LN));        
+        String actor = secHeader.getAttributeValue(new QName(ctx.getEnvelope().getNamespaceURI(), WSConstants.ATTR_ACTOR));        
+        assertNull("It is expected that 'actor' attribute is not available in case when no outboundActor is configured.", actor);
+    }
+    
+    public void testAsymmBindingTripleDesRSA15WithOutboundActor() throws Exception {
+        MessageContext ctx = getMsgCtx();
+        
+        String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-outbound-actor.xml";
+        Policy policy = this.loadPolicy(policyXml);
+        
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+        
+        MessageBuilder builder = new MessageBuilder();
+        builder.build(ctx);
+        
+        OMElement secHeader =
+        		ctx.getEnvelope().getHeader().
+                        getFirstChildWithName(new QName(WSConstants.WSSE_NS,
+                                                        WSConstants.WSSE_LN));
+        
+        String actor = secHeader.getAttributeValue(new QName(ctx.getEnvelope().getNamespaceURI(), WSConstants.ATTR_ACTOR));
+        
+        assertEquals("myOutboundActor", actor);
+    }
+    
+    public void testAsymmBindingTripleDesRSA15WithOutboundRole() throws Exception {
+        MessageContext ctx = getMsgCtx12();
+        
+        String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-outbound-actor.xml";
+        Policy policy = this.loadPolicy(policyXml);
+        
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+        
+        MessageBuilder builder = new MessageBuilder();
+        builder.build(ctx);
+        
+        OMElement secHeader =
+        		ctx.getEnvelope().getHeader().
+                        getFirstChildWithName(new QName(WSConstants.WSSE_NS,
+                                                        WSConstants.WSSE_LN));
+        
+        String actor = secHeader.getAttributeValue(new QName(ctx.getEnvelope().getNamespaceURI(), WSConstants.ATTR_ROLE));
+        
+        assertEquals("myOutboundActor", actor);
     }
 
     public void testAsymmBindingTripleDesRSA15DK() throws Exception {
