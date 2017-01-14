@@ -16,17 +16,22 @@
 
 package org.apache.rahas;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.message.token.Reference;
-
-import javax.xml.namespace.QName;
-
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.xml.namespace.QName;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.message.token.Reference;
 
 /**
  * In-memory implementation of the token storage
@@ -86,17 +91,17 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
     }
 
     public String[] getTokenIdentifiers() throws TrustException {       
-        List identifiers = new ArrayList();
         
+    	String [] tokenIdentifiers = null;
+    	
         readLock.lock();
-        try {
-            for (Iterator iterator = tokens.keySet().iterator(); iterator.hasNext();) {
-                identifiers.add(iterator.next());
-            }
-        } finally {
-            readLock.unlock();
-        }
-        return (String[]) identifiers.toArray(new String[identifiers.size()]);
+        
+        Set identifiers = tokens.keySet();
+        tokenIdentifiers = (String[]) identifiers.toArray(new String[identifiers.size()]); 
+        
+        readLock.unlock();
+        
+        return tokenIdentifiers;
     }
 
     public Token[] getValidTokens() throws TrustException {
@@ -117,7 +122,6 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
     }
 
     private Token[] getTokens(int[] states) throws TrustException {
-        processTokenExpiry();
         List tokens = new ArrayList();
         
         readLock.lock();
@@ -125,6 +129,7 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         try {
             for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
                 Token token = (Token) iterator.next();
+                processTokenExpiry(token);
                 for (int i = 0; i < states.length; i++) {
                     if (token.getState() == states[i]) {
                         tokens.add(token);
@@ -139,54 +144,38 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
     }
 
     private Token[] getTokens(int state) throws TrustException {
-        processTokenExpiry();
-        List tokens = new ArrayList();
-        
-        readLock.lock();
-        
-        try {
-            for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
-                Token token = (Token) iterator.next();
-                if (token.getState() == state) {
-                    tokens.add(token);
-                }
-            }
-        } finally {
-            readLock.unlock();
-        }
-        return (Token[]) tokens.toArray(new Token[tokens.size()]);
+        int[] states = new int[]{state};        
+        return getTokens(states);
     }
 
     public Token getToken(String id) throws TrustException {
-        processTokenExpiry();
-        
         readLock.lock();
         
         Token token;
         
         try {
-            
-            token = (Token) this.tokens.get(id);
-            
-            if(token == null) {
-                //Try to find the token using attached refs & unattached refs
-                for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
-                    Token tempToken = (Token) iterator.next();
-                    OMElement elem = tempToken.getAttachedReference();
-                    if(elem != null && id.equals(this.getIdFromSTR(elem))) {
-                        token = tempToken;
-                    }
-                    elem = tempToken.getUnattachedReference();
-                    if(elem != null && id.equals(this.getIdFromSTR(elem))) {
-                        token = tempToken;
-                    }
-                    
-                }
-                
-            }
-        
+
+        	token = (Token) this.tokens.get(id);            
+        	if(token != null) {
+        		processTokenExpiry(token);                
+        	}else{
+        		//Try to find the token using attached refs & unattached refs
+        		for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
+        			Token tempToken = (Token) iterator.next();
+        			processTokenExpiry(tempToken);
+        			OMElement elem = tempToken.getAttachedReference();
+        			if(elem != null && id.equals(this.getIdFromSTR(elem))) {
+        				token = tempToken;
+        			}
+        			elem = tempToken.getUnattachedReference();
+        			if(elem != null && id.equals(this.getIdFromSTR(elem))) {
+        				token = tempToken;
+        			}                    
+        		}
+        	}
+
         } finally {
-            readLock.unlock();
+        	readLock.unlock();
         }        
         return token;
     }
@@ -202,20 +191,10 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         }        
     }
     
-    protected void processTokenExpiry() throws TrustException {
-        
-        readLock.lock();
-        
-        try {
-            for (Iterator iterator = tokens.values().iterator(); iterator.hasNext();) {
-                Token token = (Token) iterator.next();
-                if (token.getExpires() != null &&
-                    token.getExpires().getTime() < System.currentTimeMillis()) {
-                    token.setState(Token.EXPIRED);
-                }
-            }
-        } finally {
-            readLock.unlock();
+    protected void processTokenExpiry(Token token) throws TrustException {
+    	if (token.getExpires() != null &&
+            token.getExpires().getTime() < System.currentTimeMillis()) {
+            token.setState(Token.EXPIRED);
         }
     }
     
