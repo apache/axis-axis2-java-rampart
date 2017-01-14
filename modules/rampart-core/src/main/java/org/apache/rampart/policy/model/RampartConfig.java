@@ -114,6 +114,8 @@ public class RampartConfig implements Assertion {
 
     public final static String SSL_CONFIG = "sslConfig";
     
+    public final static String KERBEROS_CONFIG = "kerberosConfig";
+    
     private String user;
     
     private String userCertAlias;
@@ -150,7 +152,17 @@ public class RampartConfig implements Assertion {
     private String nonceLifeTime = Integer.toString(DEFAULT_NONCE_LIFE_TIME);
     
     private SSLConfig sslConfig;
+    
+    private KerberosConfig kerberosConfig;
+    
+    public KerberosConfig getKerberosConfig() {
+        return kerberosConfig;
+    }
 
+    public void setKerberosConfig(KerberosConfig kerberosConfig) {
+        this.kerberosConfig = kerberosConfig;
+    }
+    
     /*To set timeStampStrict in WSSConfig through rampartConfig - default value is false*/
     private boolean timeStampStrict = false;
     
@@ -389,6 +401,12 @@ public class RampartConfig implements Assertion {
         if (sigCryptoConfig != null) {
             writer.writeStartElement(NS, SIG_CRYPTO_LN);
             sigCryptoConfig.serialize(writer);
+            writer.writeEndElement();
+        }
+        
+        if (kerberosConfig != null) {
+            writer.writeStartElement(NS, KERBEROS_CONFIG);
+            kerberosConfig.serialize(writer);
             writer.writeEndElement();
         }
         

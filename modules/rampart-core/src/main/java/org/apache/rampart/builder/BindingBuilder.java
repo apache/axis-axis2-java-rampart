@@ -17,7 +17,10 @@
 package org.apache.rampart.builder;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.addressing.AddressingConstants;
+import org.apache.axis2.addressing.AddressingHelper;
 import org.apache.axis2.client.Options;
+import org.apache.axis2.description.AxisEndpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.EncryptedKeyToken;
@@ -28,6 +31,7 @@ import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.policy.model.RampartConfig;
+import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.SPConstants;
@@ -38,6 +42,7 @@ import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
 import org.apache.ws.secpolicy.model.X509Token;
+import org.apache.ws.security.NamePasswordCallbackHandler;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSPasswordCallback;
@@ -53,6 +58,7 @@ import org.apache.ws.security.message.WSSecSignature;
 import org.apache.ws.security.message.WSSecSignatureConfirmation;
 import org.apache.ws.security.message.WSSecTimestamp;
 import org.apache.ws.security.message.WSSecUsernameToken;
+import org.apache.ws.security.message.token.KerberosSecurity;
 import org.apache.ws.security.message.token.SecurityTokenReference;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
@@ -846,5 +852,96 @@ public abstract class BindingBuilder {
         }
     }
 
-    
+    protected KerberosSecurity addKerberosToken(RampartMessageData rmd, Token token)
+            throws RampartException {
+        RampartPolicyData rpd = rmd.getPolicyData();
+        KerberosConfig krbConfig = rpd.getRampartConfig().getKerberosConfig();
+
+        if (krbConfig == null) {
+            throw new RampartException("noKerberosConfigDefined");
+        }
+
+        log.debug("Token inclusion: " + token.getInclusion());
+
+        String user = krbConfig.getPrincipalName();
+        if (user == null) {
+            user = rpd.getRampartConfig().getUser();
+        }
+        
+        String password = krbConfig.getPrincipalPassword();
+		if (password == null) {
+            CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
+
+            if (handler != null) {
+            	if (user == null) {
+                    log.debug("Password callback is configured but no user value is specified in the configuration");
+                    throw new RampartException("userMissing");
+            	}
+            	
+            	//TODO We do not have a separate usage type for Kerberos token, let's use custom token
+                WSPasswordCallback[] cb = { new WSPasswordCallback(user, WSPasswordCallback.CUSTOM_TOKEN) };
+                try {
+                    handler.handle(cb);
+                    if (cb[0].getPassword() != null && !"".equals(cb[0].getPassword())) {
+                        password = cb[0].getPassword();
+                    }
+                } catch (IOException e) {
+                    throw new RampartException("errorInGettingPasswordForUser", new String[] { user }, e);
+                } catch (UnsupportedCallbackException e) {
+                    throw new RampartException("errorInGettingPasswordForUser", new String[] { user }, e);
+                }
+            }
+        }
+        
+        String principalName = null;
+        boolean isUsernameServiceNameForm = KerberosConfig.USERNAME_NAME_FORM.equals(krbConfig.getServicePrincipalNameForm());
+        
+        AxisEndpoint endpoint = rmd.getMsgContext().findEndpoint();
+        if (endpoint != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Identified endpoint: " + endpoint.getName() + ". Looking for SPN identity claim.");
+            }
+            
+            OMElement addressingIdentity = AddressingHelper.getAddressingIdentityParameterValue(endpoint);
+            if (addressingIdentity != null) {
+                OMElement spnClaim = addressingIdentity.getFirstChildWithName(AddressingConstants.QNAME_IDENTITY_SPN);
+                if (spnClaim != null) {
+                    principalName = spnClaim.getText();
+                    isUsernameServiceNameForm = false;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found SPN identity claim: " + principalName);
+                    }
+                }
+                else {
+                	OMElement upnClaim = addressingIdentity.getFirstChildWithName(AddressingConstants.QNAME_IDENTITY_UPN);
+                	if (upnClaim != null) {
+                		principalName = upnClaim.getText();
+                		isUsernameServiceNameForm = true;
+                        if (log.isDebugEnabled()) {
+                            log.debug("Found UPN identity claim: " + principalName);
+                        }
+                	}
+                    else if (log.isDebugEnabled()) {
+                        log.debug(String.format("Neither SPN nor UPN identity claim found in %s EPR element for endpoint %s.", addressingIdentity.getQName().toString(), endpoint.getName()));
+                    }
+                }
+            }
+        }
+        
+        if (principalName == null) {
+        	principalName = krbConfig.getServicePrincipalName();
+        }
+        
+        try {
+            KerberosSecurity bst = new KerberosSecurity(rmd.getDocument());
+            
+            NamePasswordCallbackHandler cb = new NamePasswordCallbackHandler(user, password);
+            bst.retrieveServiceTicket(krbConfig.getJaasContext(), cb, principalName, isUsernameServiceNameForm,
+                krbConfig.isRequstCredentialDelegation(), krbConfig.getDelegationCredential());
+            
+            return bst;
+        } catch (WSSecurityException e) {
+            throw new RampartException("errorInBuildingKereberosToken", e);
+        }
+    }
 }

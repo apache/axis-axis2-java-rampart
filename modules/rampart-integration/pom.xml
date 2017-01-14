@@ -161,6 +161,8 @@
 
                                 <copy overwrite="yes" file="target/classes/org/apache/rampart/Service.class" tofile="target/temp-ramp/org/apache/rampart/Service.class" />
                                 <copy overwrite="yes" file="target/classes/org/apache/rampart/PWCallback.class" tofile="target/temp-ramp/org/apache/rampart/PWCallback.class" />
+                                <copy overwrite="yes" file="target/classes/org/apache/rampart/KerberosDelegationService.class" tofile="target/temp-ramp/org/apache/rampart/KerberosDelegationService.class" />
+                                <copy overwrite="yes" file="target/classes/org/apache/rampart/KerberosDelegationServiceValidator.class" tofile="target/temp-ramp/org/apache/rampart/KerberosDelegationServiceValidator.class" />
                                 <copy overwrite="yes" file="src/test/resources/rampart/store.jks" tofile="target/temp-ramp/store.jks" />
                                 <!--path id="ramp.client.props" location="test-resources/rampart"/-->
                                 <!--maven:addPath id="maven.dependency.classpath" refid="ramp.client.props" -->
@@ -311,6 +313,17 @@
                                 <copy overwrite="yes" file="src/test/resources/rampart/issuer.properties" tofile="target/temp-ramp/issuer.properties" />
                                 <copy overwrite="yes" file="src/test/resources/rampart/services-sc-6.xml" tofile="target/temp-ramp/META-INF/services.xml" />
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureServiceSC6.aar" basedir="target/temp-ramp" />
+                                
+                                <!--  Kerberos Services -->
+								<copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosOverTransportKeytab.xml" tofile="target/temp-ramp/META-INF/services.xml" />
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/KerberosOverTransportKeytab.aar" basedir="target/temp-ramp" />
+                                
+                                <copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosOverTransportPWCB.xml" tofile="target/temp-ramp/META-INF/services.xml" />
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/KerberosOverTransportPWCB.aar" basedir="target/temp-ramp" />
+                                
+                                <copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosDelegation.xml" tofile="target/temp-ramp/META-INF/services.xml" />
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/KerberosDelegation.aar" basedir="target/temp-ramp" />
+                                
 
                                 <!--
                                  Set up the infra for rahas tests and the rahas client repo
@@ -478,7 +491,7 @@
             </plugin>
         </plugins>
     </build>
-
+    
     <dependencies>
         <dependency>
             <groupId>org.apache.rampart</groupId>
@@ -557,6 +570,153 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>addressing</artifactId>
             <type>mar</type>
+        </dependency>
+        <!--dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-kerberos-shared</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.server</groupId>
+                    <artifactId>apacheds-i18n</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.server</groupId>
+                    <artifactId>apacheds-core-jndi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.server</groupId>
+                    <artifactId>apacheds-protocol-shared</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldap</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldap-schema</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldap-schema-loader</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldap-schema-manager</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-cursor</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldap-jndi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-asn1-codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldap-constants</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldap-converter</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldap-schema-dao</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-ldif</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.directory.shared</groupId>
+                    <artifactId>shared-dsml-parser</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency-->
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-core-annotations</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-protocol-shared</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-protocol-kerberos</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-interceptor-kerberos</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+		  <groupId>org.apache.directory.api</groupId>
+		  <artifactId>api-ldap-codec-standalone</artifactId>
+		  <version>1.0.0-M33</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.directory.api</groupId>
+		  <artifactId>api-ldap-extras-codec-api</artifactId>
+		  <version>1.0.0-M33</version>
+		</dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

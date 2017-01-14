@@ -31,12 +31,22 @@ import org.apache.rampart.saml.SAMLAssertionHandler;
 import org.apache.rampart.saml.SAMLAssertionHandlerFactory;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
+import org.apache.rampart.policy.model.KerberosConfig;
+import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.secpolicy.model.UsernameToken;
+import org.apache.ws.secpolicy.model.KerberosToken;
+import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.validate.KerberosTokenDecoder;
+import org.apache.ws.security.validate.KerberosTokenValidator;
 
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.xml.namespace.QName;
+
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -88,6 +98,89 @@ public class RampartEngine {
 		//Set rampart's configuration of WSS4J
 		engine.setWssConfig(rmd.getConfig());
 
+		RampartConfig rampartConfig = rpd.getRampartConfig();
+		if (rampartConfig != null) {
+			WSSConfig config = engine.getWssConfig();
+
+            // Inbound Kerberos authentication for web services
+            // Check the service policy for Kerberos token and add KerberosTokenValidator for BINARY_TOKEN validation
+            SupportingToken endSupptokens = rpd.getEndorsingSupportingTokens();
+            if (endSupptokens != null && endSupptokens.getTokens() != null &&
+                endSupptokens.getTokens().size() > 0) {
+                
+            	log.debug("Processing endorsing supporting tokens");
+                List tokens = endSupptokens.getTokens();
+                
+                for (Object objectToken : tokens) {                    
+                    if (objectToken instanceof KerberosToken) {
+                        log.debug("KerberosToken is found as part of the endorsing supporting tokens.Check for KerberosConfig.");
+                        KerberosConfig kerberosConfig = rampartConfig.getKerberosConfig();
+                        
+                        if (null != kerberosConfig){
+                            log.debug("KerberosConfig is found.");
+                            log.debug("Creating KerberosTokenValidor with the available KerberosConfig.");
+                            KerberosTokenValidator kerberosValidator = new KerberosTokenValidator();
+                            
+                            KerberosTokenDecoder kerberosTokenDecoder = RampartUtil.getKerberosTokenDecoder(msgCtx, kerberosConfig);
+                            if (kerberosTokenDecoder != null) {
+                                kerberosValidator.setKerberosTokenDecoder(kerberosTokenDecoder);
+                            }
+                            kerberosValidator.setContextName(kerberosConfig.getJaasContext());
+                            kerberosValidator.setServiceName(kerberosConfig.getServicePrincipalName());
+                            String serviceNameForm = kerberosConfig.getServicePrincipalNameForm();
+                            
+                            if (KerberosConfig.USERNAME_NAME_FORM.equals(serviceNameForm)) {
+                                kerberosValidator.setUsernameServiceNameForm(true);    
+                            }
+                            
+                            String principalName = kerberosConfig.getPrincipalName();
+                            if (null == principalName){
+                                log.debug("Principal name is not available in the KerberosConfig.Using the Rampart configuration's user.");
+                                principalName = rampartConfig.getUser();
+                            }
+                            
+                            String password = kerberosConfig.getPrincipalPassword();
+                            if (password == null) {
+                                log.debug("Principal password is not available in the KerberosConfig.Trying with the configured Rampart password callback.");
+                                CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
+
+                                if (handler != null) {
+                                    WSPasswordCallback[] cb = { 
+                                    		new WSPasswordCallback(principalName, WSPasswordCallback.CUSTOM_TOKEN) 
+                                    };
+                                    
+                                    try {
+                                        handler.handle(cb);
+                                        if (cb[0].getPassword() != null && !"".equals(cb[0].getPassword())) {
+                                            password = cb[0].getPassword();
+                                        }
+                                    } catch (IOException e) {
+                                        throw new RampartException("errorInGettingPasswordForUser", new String[] { principalName }, e);
+                                    } catch (UnsupportedCallbackException e) {
+                                        throw new RampartException("errorInGettingPasswordForUser", new String[] { principalName }, e);
+                                    }
+                                } else{
+                                    log.debug("No Rampart password handler is configured.");
+                                }
+                            }
+                            
+                            if (principalName != null && password != null) {
+                                NamePasswordCallbackHandler cb = new NamePasswordCallbackHandler(principalName, password);                            
+                                kerberosValidator.setCallbackHandler(cb);
+                            }
+                            
+                            config.setValidator(WSSecurityEngine.BINARY_TOKEN, kerberosValidator);
+                            log.debug("KerberosTokenValidator is configured and set for BINARY_TOKEN.");
+                        } else {
+                            log.debug("KerberosConfig is not found.Skipping configurating and setting of a Kerberos validator.");
+                        }
+                    }
+                }
+            }            
+            
+            engine.setWssConfig(config);
+		}
+		
 		ValidatorData data = new ValidatorData(rmd);
 
 		SOAPHeader header = rmd.getMsgContext().getEnvelope().getHeader();

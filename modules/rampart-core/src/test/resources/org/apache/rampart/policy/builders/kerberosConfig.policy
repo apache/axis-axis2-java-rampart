@@ -1,0 +1,22 @@
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+    <wsp:ExactlyOne>
+        <wsp:All>
+            <rampart:RampartConfig xmlns:rampart="http://ws.apache.org/rampart/policy">
+                <rampart:timestampPrecisionInMilliseconds>true</rampart:timestampPrecisionInMilliseconds>
+                <rampart:timestampTTL>300</rampart:timestampTTL>
+                <rampart:timestampMaxSkew>300</rampart:timestampMaxSkew>
+				<rampart:timestampStrict>false</rampart:timestampStrict>	
+                <rampart:nonceLifeTime>300</rampart:nonceLifeTime>
+                <rampart:kerberosConfig>
+                    <rampart:jaasContext>alice</rampart:jaasContext>
+                    <rampart:principalName>alice</rampart:principalName>
+                    <rampart:principalPassword>changeit</rampart:principalPassword>
+                    <rampart:servicePrincipalName>bob/example.com</rampart:servicePrincipalName>
+                    <rampart:servicePrincipalNameForm>username</rampart:servicePrincipalNameForm>
+                    <rampart:kerberosTokenDecoderClass>org.foo.KerberosTokenDecoderImpl</rampart:kerberosTokenDecoderClass>
+                    <rampart:requestCredentialDelegation>true</rampart:requestCredentialDelegation>
+                </rampart:kerberosConfig>
+            </rampart:RampartConfig>
+        </wsp:All>
+    </wsp:ExactlyOne>
+</wsp:Policy>
