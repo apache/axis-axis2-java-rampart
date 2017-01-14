@@ -39,12 +39,12 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.rules.ExternalResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.transport.http.AxisServlet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -66,7 +66,7 @@ public class JettyServer extends ExternalResource {
      */
     private static final String WEBAPP_DIR = "target" + File.separator + "webapp";
     
-    private static final Logger logger = LoggerFactory.getLogger(JettyServer.class);
+    private static final Log log = LogFactory.getLog(JettyServer.class);
     
     private final String repository;
     private final String axis2xml;
@@ -178,7 +178,7 @@ public class JettyServer extends ExternalResource {
         WebAppContext context = new WebAppContext();
         File webappDir = new File(WEBAPP_DIR);
         if (!webappDir.exists() && !webappDir.mkdirs()) {
-            logger.error("Failed to create Axis2 webapp directory: " + webappDir.getAbsolutePath());
+            log.error("Failed to create Axis2 webapp directory: " + webappDir.getAbsolutePath());
         }
         
         context.setResourceBase(webappDir.getAbsolutePath());
@@ -210,24 +210,24 @@ public class JettyServer extends ExternalResource {
         }
         catch (SecurityException e) {
             if (e.getMessage().equals("class \"javax.servlet.ServletRequestListener\"'s signer information does not match signer information of other classes in the same package")) {
-                logger.error(
+                log.error(
                  "It is likely your test classpath contains multiple different versions of servlet api.\n" +
                  "If you are running this test in an IDE, please configure it to exclude Rampart's core module servlet api dependency.");
                 throw e;
             }
         }
         
-        logger.info("Server started on port " + getPort());
+        log.info("Server started on port " + getPort());
     }
     
     @Override
     protected void after() {
         if (server != null) {
-            logger.info("Stop called");
+            log.info("Stop called");
             try {
                 server.stop();
             } catch (Exception ex) {
-                logger.error("Failed to stop Jetty server", ex);
+                log.error("Failed to stop Jetty server", ex);
             }
             server = null;
         }
