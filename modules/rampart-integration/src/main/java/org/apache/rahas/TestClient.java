@@ -34,27 +34,19 @@ import org.apache.axis2.integration.JettyServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
+import org.junit.Rule;
+import org.junit.Test;
 
-import junit.framework.TestCase;
-
-public abstract class TestClient extends TestCase {
+public abstract class TestClient {
 
     protected int port = 5555;
 
-    public TestClient(String name) {
-        super(name);
-    }
-
-    protected void setUp() throws Exception {
-        JettyServer.start(Constants.TESTING_PATH + getServiceRepo(), port, -1);
-    }
-
-    protected void tearDown() throws Exception {
-        JettyServer.stop();
-    }
+    @Rule
+    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + getServiceRepo(), port, -1);
 
     /**
      */
+    @Test
     public void testRequest() throws Exception {
         // Get the repository location from the args
         String repo = Constants.TESTING_PATH + "rahas_client_repo";

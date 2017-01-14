@@ -22,17 +22,11 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
 import org.apache.ws.secpolicy.SP12Constants;
 
+import static org.junit.Assert.assertNotNull;
+
 import javax.xml.namespace.QName;
 
 public class RahasSAMLTokenUTForBearerV1205Test extends TestClient {
-
-    /**
-     * @param name
-     */
-    public RahasSAMLTokenUTForBearerV1205Test(String name) {
-        super(name);
-    }
-
     public OMElement getRequest() {
         try {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_12);

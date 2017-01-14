@@ -22,18 +22,11 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
 import org.apache.ws.secpolicy.SP11Constants;
 
+import static org.junit.Assert.assertNotNull;
+
 import javax.xml.namespace.QName;
 
 public class RahasSAMLTokenTest extends TestClient {
-
-
-    /**
-     * @param name
-     */
-    public RahasSAMLTokenTest(String name) {
-        super(name);
-    }
-
     public String getServiceRepo() {
         return "rahas_service_repo_1";
     }

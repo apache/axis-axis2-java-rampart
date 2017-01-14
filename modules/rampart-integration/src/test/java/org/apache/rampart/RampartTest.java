@@ -16,12 +16,11 @@
 
 package org.apache.rampart;
 
-import static org.apache.axis2.integration.JettyServer.getHttpPort;
-import static org.apache.axis2.integration.JettyServer.getHttpsPort;
 import static org.apache.axis2.integration.JettyServer.CLIENT_KEYSTORE;
 import static org.apache.axis2.integration.JettyServer.KEYSTORE_PASSWORD;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import junit.framework.TestCase;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -39,14 +38,22 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.integration.JettyServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 
-public class RampartTest extends TestCase {
+public class RampartTest {
 
     private static ResourceBundle resources;
+    
+    @Rule
+    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", 0, 0);
+    
     private String trustStore;
     private String trustStorePassword;
     private String trustStoreType;
@@ -59,11 +66,8 @@ public class RampartTest extends TestCase {
         }
     }
 
-    public RampartTest(String name) {
-        super(name);
-    }
-
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         trustStore = System.getProperty("javax.net.ssl.trustStore");
         System.setProperty("javax.net.ssl.trustStore", CLIENT_KEYSTORE);
         
@@ -72,36 +76,30 @@ public class RampartTest extends TestCase {
         
         trustStoreType = System.getProperty("javax.net.ssl.trustStoreType");
         System.setProperty("javax.net.ssl.trustStoreType", "JKS");
-             
-        JettyServer.start(Constants.TESTING_PATH + "rampart_service_repo");
     }
     
 
-    protected void tearDown() throws Exception {
-        try {
-            JettyServer.stop();
+    @After
+    public void tearDown() throws Exception {
+        if (trustStore != null) {
+            System.setProperty("javax.net.ssl.trustStore", trustStore);
         }
-        finally {
-            if (trustStore != null) {
-                System.setProperty("javax.net.ssl.trustStore", trustStore);
-            }
-            else {
-                System.clearProperty("javax.net.ssl.trustStore");
-            }
-            
-            if (trustStorePassword != null) {
-                System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);    
-            }
-            else {
-                System.clearProperty("javax.net.ssl.trustStorePassword");
-            }
-            
-            if (trustStoreType != null) {
-                System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
-            }
-            else {
-                System.clearProperty("javax.net.ssl.trustStoreType");
-            }
+        else {
+            System.clearProperty("javax.net.ssl.trustStore");
+        }
+        
+        if (trustStorePassword != null) {
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);    
+        }
+        else {
+            System.clearProperty("javax.net.ssl.trustStorePassword");
+        }
+        
+        if (trustStoreType != null) {
+            System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
+        }
+        else {
+            System.clearProperty("javax.net.ssl.trustStoreType");
         }
     }
 
@@ -121,6 +119,7 @@ public class RampartTest extends TestCase {
 
     }
 
+    @Test
     public void testWithPolicy() {
         try {
 
@@ -149,7 +148,7 @@ public class RampartTest extends TestCase {
                 
                 if( i == 13 ) {
                     options.setTo(new EndpointReference("https://localhost:" +
-                                    getHttpsPort() +  
+                                    server.getHttpsPort() +  
                                     "/axis2/services/SecureService" + i));
                     //Username token created with user/pass from options
                     options.setUserName("alice");
@@ -157,7 +156,7 @@ public class RampartTest extends TestCase {
                 }
                 else {
                     options.setTo(new EndpointReference("http://localhost:" +
-                                    getHttpPort() +  
+                                    server.getHttpPort() +  
                                     "/axis2/services/SecureService" + i));
                 }
                 
@@ -225,7 +224,7 @@ public class RampartTest extends TestCase {
 
                 if (i == 13) {
                     options.setTo(new EndpointReference("https://localhost:" +
-                                    getHttpsPort() +
+                                    server.getHttpsPort() +
                                     "/axis2/services/SecureService" + i));
                     //Username token created with user/pass from options
                     options.setUserName("alice");
@@ -233,7 +232,7 @@ public class RampartTest extends TestCase {
                 }
                 else {
                     options.setTo(new EndpointReference("http://localhost:" +
-                                    getHttpPort() +
+                                    server.getHttpPort() +
                                     "/axis2/services/SecureService" + i));
                 }
                 System.out.println("Testing WS-Sec: negative scenario " + i);
@@ -259,10 +258,10 @@ public class RampartTest extends TestCase {
                 Options options = new Options();
                 
                 if (i == 3 || i == 6) {
-                    options.setTo(new EndpointReference("https://localhost:" + getHttpsPort() + "/axis2/services/SecureServiceSC" + i));
+                    options.setTo(new EndpointReference("https://localhost:" + server.getHttpsPort() + "/axis2/services/SecureServiceSC" + i));
                 }
                 else {
-                    options.setTo(new EndpointReference("http://localhost:" + getHttpPort() + "/axis2/services/SecureServiceSC" + i));
+                    options.setTo(new EndpointReference("http://localhost:" + server.getHttpPort() + "/axis2/services/SecureServiceSC" + i));
                 }
 
                 System.out.println("Testing WS-SecConv: custom scenario " + i);
