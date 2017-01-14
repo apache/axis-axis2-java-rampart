@@ -46,10 +46,10 @@ public class RampartTest {
     private static ResourceBundle resources;
     
     @Rule
-    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", 0, false);
+    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", false);
     
     @Rule
-    public final JettyServer secureServer = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", 0, true);
+    public final JettyServer secureServer = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", true);
     
     static {
         try {

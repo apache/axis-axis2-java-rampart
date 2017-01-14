@@ -73,7 +73,6 @@ public class JettyServer extends ExternalResource {
     private static final Logger logger = LoggerFactory.getLogger(JettyServer.class);
     
     private final String repository;
-    private final int port;
     private final boolean secure;
     private Server server;
     private boolean systemPropertiesSet;
@@ -86,17 +85,14 @@ public class JettyServer extends ExternalResource {
      * 
      * @param repository
      *            The path to the Axis2 repository to use. Must not be null or empty.
-     * @param port
-     *            The port to use. Set to <code>0</code> to enable dynamic port allocation.
      * @param secure
      *            Whether to enable HTTPS.
      */
-    public JettyServer(String repository, int port, boolean secure) {
+    public JettyServer(String repository, boolean secure) {
         if (repository == null || repository.trim().length() == 0) {
             throw new IllegalArgumentException("Axis2 repository must not be null or empty");
         }
         this.repository = repository;
-        this.port = port;
         this.secure = secure;
     }
     
@@ -106,7 +102,6 @@ public class JettyServer extends ExternalResource {
         
         if (!secure) {
             SelectChannelConnector connector = new SelectChannelConnector();
-            connector.setPort(port);
             server.addConnector(connector);
         } else {
             SslContextFactory sslContextFactory = new SslContextFactory();
@@ -118,7 +113,6 @@ public class JettyServer extends ExternalResource {
             sslContextFactory.setCertAlias(CERT_ALIAS);
             SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(sslContextFactory);
             
-            sslConnector.setPort(port);
             server.addConnector(sslConnector);
             
             savedTrustStore = System.getProperty("javax.net.ssl.trustStore");
