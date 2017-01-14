@@ -27,7 +27,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.axis2.testutils.PortAllocator;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.transport.http.AxisServlet;
 
 /**
@@ -73,7 +73,6 @@ public class JettyServer extends ExternalResource {
     private static final Logger logger = LoggerFactory.getLogger(JettyServer.class);
     
     private final String repository;
-    private final int port;
     private final boolean secure;
     private Server server;
     private boolean systemPropertiesSet;
@@ -86,30 +85,23 @@ public class JettyServer extends ExternalResource {
      * 
      * @param repository
      *            The path to the Axis2 repository to use. Must not be null or empty.
-     * @param port
-     *            The port to use. Set to <code>0</code> to enable dynamic port allocation.
      * @param secure
      *            Whether to enable HTTPS.
      */
-    public JettyServer(String repository, int port, boolean secure) {
+    public JettyServer(String repository, boolean secure) {
         if (repository == null || repository.trim().length() == 0) {
             throw new IllegalArgumentException("Axis2 repository must not be null or empty");
         }
         this.repository = repository;
-        this.port = port;
         this.secure = secure;
     }
     
     @Override
     protected void before() throws Throwable {
-        int port = this.port == 0 ? PortAllocator.allocatePort() : this.port;
-        
         server = new Server();
         
-        logger.info("Starting server on port: " + port);
         if (!secure) {
             SelectChannelConnector connector = new SelectChannelConnector();
-            connector.setPort(port);
             server.addConnector(connector);
         } else {
             SslContextFactory sslContextFactory = new SslContextFactory();
@@ -121,7 +113,6 @@ public class JettyServer extends ExternalResource {
             sslContextFactory.setCertAlias(CERT_ALIAS);
             SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(sslContextFactory);
             
-            sslConnector.setPort(port);
             server.addConnector(sslConnector);
             
             savedTrustStore = System.getProperty("javax.net.ssl.trustStore");
@@ -168,6 +159,8 @@ public class JettyServer extends ExternalResource {
                 throw e;
             }
         }
+        
+        logger.info("Server started on port " + getPort());
     }
     
     @Override
@@ -224,10 +217,18 @@ public class JettyServer extends ExternalResource {
         for (Connector connector : connectors) {
             if (connector instanceof SelectChannelConnector) {
                 //must be the http connector
-                return connector.getPort();
+                return connector.getLocalPort();
             }
         }
         
         throw new IllegalStateException("Could not find Jetty http connector");
+    }
+
+    public String getEndpoint(String serviceName) {
+        return String.format("%s://localhost:%s/axis2/services/%s", secure ? "https" : "http", getPort(), serviceName);
+    }
+
+    public EndpointReference getEndpointReference(String serviceName) {
+        return new EndpointReference(getEndpoint(serviceName));
     }
 }

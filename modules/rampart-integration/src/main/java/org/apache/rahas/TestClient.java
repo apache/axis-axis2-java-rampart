@@ -24,7 +24,6 @@ import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
@@ -39,10 +38,8 @@ import org.junit.Test;
 
 public abstract class TestClient {
 
-    protected int port = 5555;
-
     @Rule
-    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + getServiceRepo(), port, false);
+    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + getServiceRepo(), false);
 
     /**
      */
@@ -62,7 +59,7 @@ public abstract class TestClient {
         System.setProperty("javax.net.ssl.trustStorePassword", "password");
         System.setProperty("javax.net.ssl.trustStoreType","JKS");
 
-        options.setTo(new EndpointReference("http://127.0.0.1:" + port + "/axis2/services/SecureService"));
+        options.setTo(server.getEndpointReference("SecureService"));
 //        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/UTSAMLHoK"));
 //        options.setTo(new EndpointReference("https://www-lk.wso2.com:8443/axis2/services/UTSAMLHoK"));
 //        options.setTo(new EndpointReference("https://192.18.49.133:2343/jaxws-s1-sts/sts"));
