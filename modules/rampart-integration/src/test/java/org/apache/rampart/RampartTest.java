@@ -47,8 +47,10 @@ public class RampartTest {
     private static ResourceBundle resources;
     
     @Rule
-    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", 0, 0);
+    public final JettyServer server = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", 0, false);
     
+    @Rule
+    public final JettyServer secureServer = new JettyServer(Constants.TESTING_PATH + "rampart_service_repo", 0, true);
     
     static {
         try {
@@ -103,7 +105,7 @@ public class RampartTest {
                 
                 if( i == 13 ) {
                     options.setTo(new EndpointReference("https://localhost:" +
-                                    server.getHttpsPort() +  
+                                    secureServer.getPort() +  
                                     "/axis2/services/SecureService" + i));
                     //Username token created with user/pass from options
                     options.setUserName("alice");
@@ -111,7 +113,7 @@ public class RampartTest {
                 }
                 else {
                     options.setTo(new EndpointReference("http://localhost:" +
-                                    server.getHttpPort() +  
+                                    server.getPort() +  
                                     "/axis2/services/SecureService" + i));
                 }
                 
@@ -179,7 +181,7 @@ public class RampartTest {
 
                 if (i == 13) {
                     options.setTo(new EndpointReference("https://localhost:" +
-                                    server.getHttpsPort() +
+                                    secureServer.getPort() +
                                     "/axis2/services/SecureService" + i));
                     //Username token created with user/pass from options
                     options.setUserName("alice");
@@ -187,7 +189,7 @@ public class RampartTest {
                 }
                 else {
                     options.setTo(new EndpointReference("http://localhost:" +
-                                    server.getHttpPort() +
+                                    server.getPort() +
                                     "/axis2/services/SecureService" + i));
                 }
                 System.out.println("Testing WS-Sec: negative scenario " + i);
@@ -213,10 +215,10 @@ public class RampartTest {
                 Options options = new Options();
                 
                 if (i == 3 || i == 6) {
-                    options.setTo(new EndpointReference("https://localhost:" + server.getHttpsPort() + "/axis2/services/SecureServiceSC" + i));
+                    options.setTo(new EndpointReference("https://localhost:" + secureServer.getPort() + "/axis2/services/SecureServiceSC" + i));
                 }
                 else {
-                    options.setTo(new EndpointReference("http://localhost:" + server.getHttpPort() + "/axis2/services/SecureServiceSC" + i));
+                    options.setTo(new EndpointReference("http://localhost:" + server.getPort() + "/axis2/services/SecureServiceSC" + i));
                 }
 
                 System.out.println("Testing WS-SecConv: custom scenario " + i);
