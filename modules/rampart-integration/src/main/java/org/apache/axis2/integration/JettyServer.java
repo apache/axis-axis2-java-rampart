@@ -28,6 +28,9 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Random;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
@@ -39,6 +42,8 @@ import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.transport.http.AxisServlet;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -184,10 +189,16 @@ public class JettyServer extends ExternalResource {
         context.setParentLoaderPriority(true);
         context.setThrowUnavailableOnStartupException(true);
         
-        ServletHolder servlet = new ServletHolder();
-        servlet.setClassName(AxisServlet.class.getName());
-        servlet.setInitParameter("axis2.repository.path", repository);
-        servlet.setInitParameter("axis2.xml.path", AXIS2_XML);
+        final ConfigurationContext configurationContext =
+                ConfigurationContextFactory.createConfigurationContextFromFileSystem(repository, AXIS2_XML);
+        @SuppressWarnings("serial")
+        ServletHolder servlet = new ServletHolder(new AxisServlet() {
+            @Override
+            protected ConfigurationContext initConfigContext(ServletConfig config)
+                    throws ServletException {
+                return configurationContext;
+            }
+        });
         
         //load on startup to trigger Axis2 initialization and service deployment
         //this is for backward compatibility with the SimpleHttpServer which initializes Axis2 on startup
