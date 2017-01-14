@@ -27,7 +27,6 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
@@ -104,17 +103,13 @@ public class RampartTest {
                 Options options = new Options();
                 
                 if( i == 13 ) {
-                    options.setTo(new EndpointReference("https://localhost:" +
-                                    secureServer.getPort() +  
-                                    "/axis2/services/SecureService" + i));
+                    options.setTo(secureServer.getEndpointReference("SecureService" + i));
                     //Username token created with user/pass from options
                     options.setUserName("alice");
                     options.setPassword("password");
                 }
                 else {
-                    options.setTo(new EndpointReference("http://localhost:" +
-                                    server.getPort() +  
-                                    "/axis2/services/SecureService" + i));
+                    options.setTo(server.getEndpointReference("SecureService" + i));
                 }
                 
                 System.out.println("Testing WS-Sec: custom scenario " + i);
@@ -180,17 +175,13 @@ public class RampartTest {
                 Options options = new Options();
 
                 if (i == 13) {
-                    options.setTo(new EndpointReference("https://localhost:" +
-                                    secureServer.getPort() +
-                                    "/axis2/services/SecureService" + i));
+                    options.setTo(secureServer.getEndpointReference("SecureService" + i));
                     //Username token created with user/pass from options
                     options.setUserName("alice");
                     options.setPassword("password");
                 }
                 else {
-                    options.setTo(new EndpointReference("http://localhost:" +
-                                    server.getPort() +
-                                    "/axis2/services/SecureService" + i));
+                    options.setTo(server.getEndpointReference("SecureService" + i));
                 }
                 System.out.println("Testing WS-Sec: negative scenario " + i);
                 options.setAction("urn:returnError");
@@ -215,10 +206,10 @@ public class RampartTest {
                 Options options = new Options();
                 
                 if (i == 3 || i == 6) {
-                    options.setTo(new EndpointReference("https://localhost:" + secureServer.getPort() + "/axis2/services/SecureServiceSC" + i));
+                    options.setTo(secureServer.getEndpointReference("SecureServiceSC" + i));
                 }
                 else {
-                    options.setTo(new EndpointReference("http://localhost:" + server.getPort() + "/axis2/services/SecureServiceSC" + i));
+                    options.setTo(server.getEndpointReference("SecureServiceSC" + i));
                 }
 
                 System.out.println("Testing WS-SecConv: custom scenario " + i);

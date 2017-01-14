@@ -27,6 +27,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.testutils.PortAllocator;
 import org.apache.axis2.transport.http.AxisServlet;
 
@@ -229,5 +230,13 @@ public class JettyServer extends ExternalResource {
         }
         
         throw new IllegalStateException("Could not find Jetty http connector");
+    }
+
+    public String getEndpoint(String serviceName) {
+        return String.format("%s://localhost:%s/axis2/services/%s", secure ? "https" : "http", getPort(), serviceName);
+    }
+
+    public EndpointReference getEndpointReference(String serviceName) {
+        return new EndpointReference(getEndpoint(serviceName));
     }
 }
