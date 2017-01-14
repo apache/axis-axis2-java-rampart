@@ -24,6 +24,7 @@ import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.axis2.testutils.PortAllocator;
@@ -32,7 +33,7 @@ import org.apache.axis2.transport.http.AxisServlet;
 /**
  * Support for running an embedded Jetty server
  */
-public class JettyServer {
+public class JettyServer extends ExternalResource {
 
     /**
      * Keystore to configure for Jetty's ssl context factory: {@value}
@@ -71,57 +72,41 @@ public class JettyServer {
     
     private static final Logger logger = LoggerFactory.getLogger(JettyServer.class);
     
-    private static Server server;
-    
-    private JettyServer() {
-        
-    }
-    
-    /**
-     * Starts the embedded Jetty server using dynamic port allocation with both http and https connectors enabled.
-     * 
-     * @param repository The path to the Axis2 repository to use. Must not be null or empty.
-     * 
-     * @throws Exception
-     */
-    public static synchronized void start(String repository) throws Exception {
-        start(repository, true, true);
-    }
+    private final String repository;
+    private final int httpPort;
+    private final int httpsPort;
+    private Server server;
     
     /**
-     * Starts the embedded Jetty server using dynamic port allocation.
+     * Constructor.
      * 
-     * @param repository The path to the Axis2 repository to use. Must not be null or empty.
-     * @param enableHttp Specifies whether to enable http connector.
-     * @param enableHttps Specifies whether to enable https connector.
-     * 
-     * @throws Exception
-     */
-    public static synchronized void start(String repository, boolean enableHttp, boolean enableHttps) throws Exception {
-        int httpPort = enableHttp ? PortAllocator.allocatePort() : -1;
-        int httpsPort = enableHttps ? PortAllocator.allocatePort() : -1;
-        
-        start(repository, httpPort, httpsPort);
-    }
-    
-    /**
-     * Starts the embedded Jetty server.
-     * 
-     * @param repository The path to the Axis2 repository to use. Must not be null or empty.
-     * @param httpPort The http port to use. Set to <code>-1</code> to disable http connector.
-     * @param httpsPort The https port to use. Set to <code>-1</code> to disable https connector.
-     * 
-     * @throws Exception
+     * @param repository
+     *            The path to the Axis2 repository to use. Must not be null or empty.
+     * @param httpPort
+     *            The http port to use. Set to <code>-1</code> to disable http connector. Set to
+     *            <code>0</code> to enable dynamic port allocation.
+     * @param httpsPort
+     *            The https port to use. Set to <code>-1</code> to disable https connector. Set to
+     *            <code>0</code> to enable dynamic port allocation.
      * @throws IllegalArgumentException If both ports are set to <code>-1</code>
      */
-    public static synchronized void start(String repository, int httpPort, int httpsPort) throws Exception {
+    public JettyServer(String repository, int httpPort, int httpsPort) {
         if (repository == null || repository.trim().length() == 0) {
             throw new IllegalArgumentException("Axis2 repository must not be null or empty");
         }
-        else if (httpPort == -1 && httpsPort == -1) {
+        if (httpPort == -1 && httpsPort == -1) {
             throw new IllegalArgumentException("At least one port must be specified.");
         }
+        this.repository = repository;
+        this.httpPort = httpPort;
+        this.httpsPort = httpsPort;
+    }
     
+    @Override
+    protected void before() throws Throwable {
+        int httpPort = this.httpPort == 0 ? PortAllocator.allocatePort() : this.httpPort;
+        int httpsPort = this.httpsPort == 0 ? PortAllocator.allocatePort() : this.httpsPort;
+        
         server = new Server();
         
         SelectChannelConnector connector = null;
@@ -196,15 +181,15 @@ public class JettyServer {
         }
     }
     
-    /**
-     * Stops the embedded Jetty server.
-     * 
-     * @throws Exception
-     */
-    public static synchronized void stop() throws Exception {
+    @Override
+    protected void after() {
         if (server != null) {
             logger.info("Stop called");
-            server.stop();
+            try {
+                server.stop();
+            } catch (Exception ex) {
+                logger.error("Failed to stop Jetty server", ex);
+            }
             server = null;
         }
     }
@@ -213,7 +198,7 @@ public class JettyServer {
      * @return Jetty's http connector port. 
      * @throws IllegalStateException If Jetty is not running or the http connector cannot be found.
      */
-    public static synchronized int getHttpPort() throws IllegalStateException {
+    public int getHttpPort() throws IllegalStateException {
         assertStarted();
         
         Connector[] connectors = server.getConnectors();
@@ -236,7 +221,7 @@ public class JettyServer {
      * @return Jetty's ssl connector port. 
      * @throws IllegalStateException If Jetty is not running or the ssl connector cannot be found.
      */
-    public static synchronized int getHttpsPort() throws IllegalStateException {
+    public int getHttpsPort() throws IllegalStateException {
         assertStarted();
         
         Connector[] connectors = server.getConnectors();
@@ -254,7 +239,7 @@ public class JettyServer {
         throw new IllegalStateException("Could not find Jetty https connector");
     }
     
-    private static void assertStarted() throws IllegalStateException {
+    private void assertStarted() throws IllegalStateException {
         if (server == null) {
             throw new IllegalStateException("Jetty server is not initialized");
         }

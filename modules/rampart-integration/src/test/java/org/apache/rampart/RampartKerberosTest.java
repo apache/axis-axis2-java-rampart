@@ -17,6 +17,9 @@ import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.KerberosServer;
 import org.custommonkey.xmlunit.XMLAssert;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 
 /**
@@ -69,9 +72,10 @@ public class RampartKerberosTest extends AbstractRampartTest {
      */
     protected String krb5Conf;
     
+    @Test
     public void testKerberosOverTransportKeytab() throws XMLStreamException, SAXException, IOException {
         final String serviceName = "KerberosOverTransportKeytab";
-        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", getHttpsPort(), serviceName));
+        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getHttpsPort(), serviceName));
         
         ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
 
@@ -95,9 +99,10 @@ public class RampartKerberosTest extends AbstractRampartTest {
         XMLAssert.assertXMLEqual(echoElement.toStringWithConsume(), result.toStringWithConsume());
     }
     
+    @Test
     public void testKerberosOverTransportPWCB() throws XMLStreamException, SAXException, IOException {
         final String serviceName = "KerberosOverTransportPWCB";
-        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", getHttpsPort(), serviceName));
+        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getHttpsPort(), serviceName));
         
         ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
 
@@ -123,10 +128,10 @@ public class RampartKerberosTest extends AbstractRampartTest {
         XMLAssert.assertXMLEqual(echoElement.toStringWithConsume(), result.toStringWithConsume());
     }
     
-    
+    @Test
     public void testKerberosDelegation() throws XMLStreamException, SAXException, IOException {
         final String serviceName = "KerberosDelegation";
-        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", getHttpsPort(), serviceName));
+        URL serviceUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", server.getHttpsPort(), serviceName));
 
         ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
 
@@ -151,13 +156,8 @@ public class RampartKerberosTest extends AbstractRampartTest {
         XMLAssert.assertXMLEqual(echoElement.toStringWithConsume(), result.toStringWithConsume());
     }
     
-    /* (non-Javadoc)
-     * @see org.apache.rampart.AbstractRampartTest#setUp()
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        
+    @Before
+    public void setUpKerberos() throws Exception {
         System.setProperty("sun.security.krb5.debug", "true");
         System.setProperty("sun.security.jgss.debug", "true");
         
@@ -176,13 +176,8 @@ public class RampartKerberosTest extends AbstractRampartTest {
         System.setProperty(JAAS_CONF_SYS_PROP, KERBEROS_JAAS_CONF);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.rampart.AbstractRampartTest#tearDown()
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        
+    @After
+    public void tearDownKerberos() throws Exception {
         KerberosServer.stopKerberosServer();
         
         if (jaasConf != null) {

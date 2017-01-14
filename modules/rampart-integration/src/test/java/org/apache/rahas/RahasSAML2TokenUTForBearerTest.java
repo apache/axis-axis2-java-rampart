@@ -33,6 +33,10 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
@@ -41,11 +45,6 @@ import java.util.List;
  * @author Ruchith Fernando (ruchith.fernando@gmail.com)
  */
 public class RahasSAML2TokenUTForBearerTest extends TestClient {
-
-    public RahasSAML2TokenUTForBearerTest(String name) {
-        super(name);
-    }
-
     public OMElement getRequest() {
         try {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_02);

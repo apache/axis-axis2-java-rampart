@@ -23,8 +23,6 @@ import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import junit.framework.TestCase;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -37,12 +35,15 @@ import org.apache.axis2.integration.JettyServer;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 
 /**
  * Base test class for integration tests that require Axis2 web application running in a web container.
  * The class uses Axis2 web application deployed via {@link JettyServer}.
  */
-public abstract class AbstractRampartTest extends TestCase {
+public abstract class AbstractRampartTest {
     
     /**
      * Default client connection timeout in milliseconds: {@value}
@@ -54,6 +55,11 @@ public abstract class AbstractRampartTest extends TestCase {
     protected static final String RAMPART_SERVICE_REPO_PATH = "target/test-resources/rampart_service_repo";
     
     protected static ResourceBundle resources;
+    
+    @Rule
+    public final JettyServer server = new JettyServer(
+            RAMPART_SERVICE_REPO_PATH, isEnableHttp() ? 0 : -1, isEnableHttps() ? 0 : -1);
+    
     protected String trustStore;
     protected String trustStorePassword;
     protected String trustStoreType;
@@ -65,19 +71,9 @@ public abstract class AbstractRampartTest extends TestCase {
             throw new RuntimeException(e.getMessage());
         }
     }
-    
-    public AbstractRampartTest() {
-        
-    }
 
-    public AbstractRampartTest(String name) {
-        super(name);
-    }
-
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         trustStore = System.getProperty("javax.net.ssl.trustStore");
         System.setProperty("javax.net.ssl.trustStore", CLIENT_KEYSTORE);
         
@@ -86,54 +82,31 @@ public abstract class AbstractRampartTest extends TestCase {
         
         trustStoreType = System.getProperty("javax.net.ssl.trustStoreType");
         System.setProperty("javax.net.ssl.trustStoreType", "JKS");
-             
-        JettyServer.start(RAMPART_SERVICE_REPO_PATH, isEnableHttp(), isEnableHttps());
     }
     
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#tearDown()
-     */
-    protected void tearDown() throws Exception {
-        try {
-            JettyServer.stop();
+    @After
+    public void tearDown() throws Exception {
+        if (trustStore != null) {
+            System.setProperty("javax.net.ssl.trustStore", trustStore);
         }
-        finally {
-            if (trustStore != null) {
-                System.setProperty("javax.net.ssl.trustStore", trustStore);
-            }
-            else {
-                System.clearProperty("javax.net.ssl.trustStore");
-            }
-            
-            if (trustStorePassword != null) {
-                System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);    
-            }
-            else {
-                System.clearProperty("javax.net.ssl.trustStorePassword");
-            }
-            
-            if (trustStoreType != null) {
-                System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
-            }
-            else {
-                System.clearProperty("javax.net.ssl.trustStoreType");
-            }
+        else {
+            System.clearProperty("javax.net.ssl.trustStore");
         }
-    }
-    
-    /**
-     * @return Jetty http port, see {@link JettyServer#getHttpPort()}
-     */
-    protected int getHttpPort() {
-        return JettyServer.getHttpPort();
-    }
-    
-    /**
-     * @return Jetty https port, see {@link JettyServer#getHttpsPort()}
-     */
-    protected int getHttpsPort() {
-        return JettyServer.getHttpsPort();
+        
+        if (trustStorePassword != null) {
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);    
+        }
+        else {
+            System.clearProperty("javax.net.ssl.trustStorePassword");
+        }
+        
+        if (trustStoreType != null) {
+            System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
+        }
+        else {
+            System.clearProperty("javax.net.ssl.trustStoreType");
+        }
     }
     
     protected ServiceClient getServiceClientInstance() throws AxisFault {

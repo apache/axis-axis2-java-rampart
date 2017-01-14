@@ -3,6 +3,7 @@ package org.apache.rampart;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -13,7 +14,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.axis2.integration.JettyServer;
+import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.KerberosConfig;
@@ -26,9 +27,10 @@ public class KerberosDelegationService extends PolicyBasedResultsValidator{
     
     
     public OMElement echo(OMElement elem) throws MalformedURLException, IllegalStateException, AxisFault {
+        int port = ((HttpServletRequest)MessageContext.getCurrentMessageContext().getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST)).getLocalPort();
         
         final String serviceName = "KerberosOverTransportKeytab";
-        URL wsdlUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", JettyServer.getHttpsPort(), serviceName));
+        URL wsdlUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", port, serviceName));
         
         ConfigurationContext configContext = ConfigurationContextFactory.
                         createConfigurationContextFromFileSystem("target/test-resources/rampart_client_repo", null);
