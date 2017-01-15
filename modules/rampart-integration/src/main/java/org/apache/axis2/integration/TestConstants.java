@@ -20,7 +20,6 @@ package org.apache.axis2.integration;
 
 public final class TestConstants {
     public static final String TESTING_PATH = "target/test-resources/";
-    public static final String AXIS2_XML = "src/test/resources/conf/axis2.xml";
     
     private TestConstants() {}
 }

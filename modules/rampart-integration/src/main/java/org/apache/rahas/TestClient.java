@@ -16,7 +16,6 @@
 
 package org.apache.rahas;
 
-import static org.apache.axis2.integration.TestConstants.AXIS2_XML;
 import static org.apache.axis2.integration.TestConstants.TESTING_PATH;
 
 import java.io.FileInputStream;
@@ -42,7 +41,7 @@ import org.junit.Test;
 public abstract class TestClient {
 
     @Rule
-    public final JettyServer server = new JettyServer(TESTING_PATH + getServiceRepo(), AXIS2_XML, false);
+    public final JettyServer server = new JettyServer(TESTING_PATH + getServiceRepo(), false);
 
     /**
      */
