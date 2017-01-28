@@ -98,9 +98,9 @@ public class RampartEngine {
 		//Set rampart's configuration of WSS4J
 		engine.setWssConfig(rmd.getConfig());
 
-		RampartConfig rampartConfig = rpd.getRampartConfig();
-		if (rampartConfig != null) {
-			WSSConfig config = engine.getWssConfig();
+        RampartConfig rampartConfig = rpd.getRampartConfig();
+        if (rampartConfig != null) {
+            WSSConfig config = engine.getWssConfig();
 
             // Inbound Kerberos authentication for web services
             // Check the service policy for Kerberos token and add KerberosTokenValidator for BINARY_TOKEN validation
@@ -108,11 +108,10 @@ public class RampartEngine {
             if (endSupptokens != null && endSupptokens.getTokens() != null &&
                 endSupptokens.getTokens().size() > 0) {
                 
-            	log.debug("Processing endorsing supporting tokens");
-                List tokens = endSupptokens.getTokens();
+                log.debug("Processing endorsing supporting tokens");
                 
-                for (Object objectToken : tokens) {                    
-                    if (objectToken instanceof KerberosToken) {
+                for (org.apache.ws.secpolicy.model.Token token : endSupptokens.getTokens()) {
+                    if (token instanceof KerberosToken) {
                         log.debug("KerberosToken is found as part of the endorsing supporting tokens.Check for KerberosConfig.");
                         KerberosConfig kerberosConfig = rampartConfig.getKerberosConfig();
                         
@@ -146,7 +145,7 @@ public class RampartEngine {
 
                                 if (handler != null) {
                                     WSPasswordCallback[] cb = { 
-                                    		new WSPasswordCallback(principalName, WSPasswordCallback.CUSTOM_TOKEN) 
+                                            new WSPasswordCallback(principalName, WSPasswordCallback.CUSTOM_TOKEN) 
                                     };
                                     
                                     try {
@@ -176,12 +175,12 @@ public class RampartEngine {
                         }
                     }
                 }
-            }            
+            }
             
             engine.setWssConfig(config);
-		}
-		
-		ValidatorData data = new ValidatorData(rmd);
+        }
+
+        ValidatorData data = new ValidatorData(rmd);
 
 		SOAPHeader header = rmd.getMsgContext().getEnvelope().getHeader();
 		if(header == null) {
