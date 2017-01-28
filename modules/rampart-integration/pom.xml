@@ -161,7 +161,6 @@
                                 <mkdir dir="target/temp-ramp" />
                                 <mkdir dir="target/temp-ramp/META-INF" />
 
-                                <copy overwrite="yes" file="target/classes/org/apache/rampart/KerberosDelegationServiceValidator.class" tofile="target/temp-ramp/org/apache/rampart/KerberosDelegationServiceValidator.class" />
                                 <copy overwrite="yes" file="src/test/resources/rampart/store.jks" tofile="target/temp-ramp/store.jks" />
                                 <!--path id="ramp.client.props" location="test-resources/rampart"/-->
                                 <!--maven:addPath id="maven.dependency.classpath" refid="ramp.client.props" -->
