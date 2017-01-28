@@ -28,11 +28,6 @@ import org.apache.rampart.policy.model.RampartConfig;
  * Builder for {@link KerberosConfig} assertion.
  */
 public class KerberosConfigBuilder implements AssertionBuilder<OMElement> {
-
-    /* (non-Javadoc)
-     * @see org.apache.neethi.builders.AssertionBuilder#build(java.lang.Object, 
-     * org.apache.neethi.AssertionBuilderFactory)
-     */
     public Assertion build(OMElement element, AssertionBuilderFactory factory) 
         throws IllegalArgumentException {
 
@@ -93,9 +88,6 @@ public class KerberosConfigBuilder implements AssertionBuilder<OMElement> {
         return kerberosConfig;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.neethi.builders.AssertionBuilder#getKnownElements()
-     */
     public QName[] getKnownElements() {
         return new QName[] {
             new QName(RampartConfig.NS, KerberosConfig.KERBEROS_LN) 

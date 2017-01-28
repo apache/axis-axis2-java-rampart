@@ -47,7 +47,7 @@ public class KerberosConfigBuilderTest extends TestCase {
 
     public static final String KERBEROS_CONFIG_POLICY_FILE = "kerberosConfig.policy";
     
-    private static Log log = LogFactory.getLog(KerberosConfigBuilderTest.class);
+    private static final Log log = LogFactory.getLog(KerberosConfigBuilderTest.class);
     
     public void testBuildKerberosConfig() throws WSSPolicyException {
         Policy kerberosConfigPolicy = loadKerberosConfigPolicy();

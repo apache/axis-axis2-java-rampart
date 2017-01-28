@@ -6,19 +6,12 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.ietf.jgss.GSSCredential;
 
-/**
- * 
- */
 public class KerberosDelegationServiceValidator extends PolicyBasedResultsValidator {
-    
-    private static GSSCredential delegationCredential = null;
+    private static GSSCredential delegationCredential;
 
     @Override
     public void validate(ValidatorData data, List<WSSecurityEngineResult> results) throws RampartException {
-
         super.validate(data, results);
-        
-
         for (WSSecurityEngineResult wsSecEngineResult : results) {
             Integer actInt = (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
             if (actInt == WSConstants.BST) {                
@@ -32,5 +25,4 @@ public class KerberosDelegationServiceValidator extends PolicyBasedResultsValida
     static GSSCredential getDelegationCredential(){
         return delegationCredential;
     }
-
 }

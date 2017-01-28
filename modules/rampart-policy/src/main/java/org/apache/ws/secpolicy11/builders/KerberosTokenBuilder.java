@@ -35,13 +35,6 @@ import org.apache.ws.secpolicy.model.KerberosToken;
  * Builder for {@link KerberosToken} assertion (WS Security Policy version 1.1)
  */
 public class KerberosTokenBuilder implements AssertionBuilder<OMElement> {
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.neethi.builders.AssertionBuilder#build(java.lang.Object,
-     * org.apache.neethi.AssertionBuilderFactory)
-     */
     public Assertion build(OMElement element, AssertionBuilderFactory arg1) 
             throws IllegalArgumentException {
         KerberosToken kerberosToken = new KerberosToken(SPConstants.SP_V11);
@@ -59,9 +52,9 @@ public class KerberosTokenBuilder implements AssertionBuilder<OMElement> {
 
         if (policyElement != null) {
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
-            policy = (Policy) policy.normalize(false);
-            for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-                processAlternative((List) iterator.next(), kerberosToken);
+            policy = policy.normalize(false);
+            for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+                processAlternative(iterator.next(), kerberosToken);
                  // there should be only one alternative
                 break;
             }
@@ -69,13 +62,9 @@ public class KerberosTokenBuilder implements AssertionBuilder<OMElement> {
         return kerberosToken;
     }
 
-    private void processAlternative(List assertions, KerberosToken parent) {
-        Assertion assertion;
-        QName name;
-
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            assertion = (Assertion) iterator.next();
-            name = assertion.getName();
+    private void processAlternative(List<Assertion> assertions, KerberosToken parent) {
+        for (Assertion assertion : assertions) {
+            QName name = assertion.getName();
             if (SP11Constants.REQUIRE_KERBEROS_V5_TOKEN_11.equals(name)) {
                 parent.setRequiresKerberosV5Token(true);
             } else if (SP11Constants.REQUIRE_KERBEROS_GSS_V5_TOKEN_11.equals(name)) {

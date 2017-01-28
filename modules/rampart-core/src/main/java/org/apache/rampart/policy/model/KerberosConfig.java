@@ -47,6 +47,7 @@ public class KerberosConfig implements Assertion {
     public final static String REQUEST_CREDENTIAL_DELEGATION_LN  = "requestCredentialDelegation";
     
     public final static String DELEGATION_CREDENTIAL_LN = "delegationCredential";
+
     /**
      * Specifies that the service principal name should be interpreted as a 
      * "host-based" name as specified in GSS API RFC, 
@@ -87,6 +88,7 @@ public class KerberosConfig implements Assertion {
     public String getJaasContext() {
         return jaasContext;
     }
+
     /**
      * Sets the JAAS context name to use to obtain a TGT (Ticket granting ticket).
      * @param jaasContext the jaasContext to set

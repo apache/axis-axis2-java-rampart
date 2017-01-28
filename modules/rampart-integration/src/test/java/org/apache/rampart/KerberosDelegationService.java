@@ -11,12 +11,7 @@ import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 
-/**
- * 
- */
 public class KerberosDelegationService extends PolicyBasedResultsValidator{
-    
-    
     public OMElement echo(OMElement elem) throws Exception {
         final String serviceName = "KerberosOverTransportKeytab";
 
@@ -61,6 +56,5 @@ public class KerberosDelegationService extends PolicyBasedResultsValidator{
      */
     public OMElement returnError(OMElement element) throws Exception {
         throw new Exception("Testing negative scenarios with Apache Rampart. Intentional Exception");
-    }    
-    
+    }
 }
