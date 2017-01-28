@@ -465,6 +465,11 @@
                 <artifactId>axiom-dom</artifactId>
                 <version>${axiom.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-truth</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
 
             <!-- Other Rampart Dependencies -->
             <dependency>
@@ -495,6 +500,10 @@
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>log4j-over-slf4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcprov-jdk15</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -615,8 +624,6 @@
         <failIfNoTests>false</failIfNoTests>
 
         <jacoco.version>0.7.5.201505241946</jacoco.version>
-        
-        <jetty.version>7.6.15.v20140411</jetty.version>
     </properties>
 
     <pluginRepositories>
