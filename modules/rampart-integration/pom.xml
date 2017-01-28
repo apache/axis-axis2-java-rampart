@@ -311,6 +311,17 @@
                                 <copy overwrite="yes" file="src/test/resources/rampart/issuer.properties" tofile="target/temp-ramp/issuer.properties" />
                                 <copy overwrite="yes" file="src/test/resources/rampart/services-sc-6.xml" tofile="target/temp-ramp/META-INF/services.xml" />
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureServiceSC6.aar" basedir="target/temp-ramp" />
+                                
+                                <!--  Kerberos Services -->
+                                <copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosOverTransportKeytab.xml" tofile="target/temp-ramp/META-INF/services.xml" />
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/KerberosOverTransportKeytab.aar" basedir="target/temp-ramp" />
+                                
+                                <copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosOverTransportPWCB.xml" tofile="target/temp-ramp/META-INF/services.xml" />
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/KerberosOverTransportPWCB.aar" basedir="target/temp-ramp" />
+                                
+                                <copy overwrite="yes" file="src/test/resources/rampart/kerberos/KerberosDelegation.xml" tofile="target/temp-ramp/META-INF/services.xml" />
+                                <jar jarfile="target/test-resources/rampart_service_repo/services/KerberosDelegation.aar" basedir="target/temp-ramp" />
+                                
 
                                 <!--
                                  Set up the infra for rahas tests and the rahas client repo
@@ -478,6 +489,81 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>addressing</artifactId>
             <type>mar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-core-annotations</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-protocol-shared</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-protocol-kerberos</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-interceptor-kerberos</artifactId>
+            <version>2.0.0-M21</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.api</groupId>
+            <artifactId>api-ldap-codec-standalone</artifactId>
+            <version>1.0.0-M33</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.api</groupId>
+            <artifactId>api-ldap-extras-codec-api</artifactId>
+            <version>1.0.0-M33</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-truth</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
