@@ -18,15 +18,16 @@
  */
 package org.apache.rampart.policy.builders;
 
+import static com.google.common.truth.Truth.assertAbout;
+import static org.apache.axiom.truth.xml.XMLTruth.xml;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import junit.framework.TestCase;
@@ -41,11 +42,6 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.custommonkey.xmlunit.XMLAssert;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.custommonkey.xmlunit.exceptions.XpathException;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 public class KerberosConfigBuilderTest extends TestCase {
 
@@ -77,7 +73,7 @@ public class KerberosConfigBuilderTest extends TestCase {
         assertTrue("Request for Kerberos credential delegation is expected to be enabled.", kerberosConfig.isRequstCredentialDelegation());
     }
 
-    public void testSerializeKerberosConfig() throws XMLStreamException, SAXException, IOException, XpathException {
+    public void testSerializeKerberosConfig() throws Exception {
         Policy kerberosConfigPolicy = loadKerberosConfigPolicy();
         assertNotNull(String.format("Failed to parse policy file: %s", KERBEROS_CONFIG_POLICY_FILE), kerberosConfigPolicy);
         
@@ -94,15 +90,10 @@ public class KerberosConfigBuilderTest extends TestCase {
             }
         }
         
-        InputStream kerberosConfigStream = null;
-        try {
-            kerberosConfigStream = this.getClass().getResourceAsStream(KERBEROS_CONFIG_POLICY_FILE);
-            XMLUnit.setIgnoreWhitespace(true);
-            XMLAssert.assertXMLEqual("Serialized rampart:kerberosConfig element does not match the initial one.", new InputSource(kerberosConfigStream), new InputSource(new StringReader(writer.toString())));
-        }
-        finally {
-            closeStream(kerberosConfigStream);
-        }
+        assertAbout(xml())
+                .that(writer.toString())
+                .ignoringWhitespace()
+                .hasSameContentAs(KerberosConfigBuilderTest.class.getResource(KERBEROS_CONFIG_POLICY_FILE));
     }
 
     private Policy loadKerberosConfigPolicy() {

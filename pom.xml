@@ -465,6 +465,11 @@
                 <artifactId>axiom-dom</artifactId>
                 <version>${axiom.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-truth</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
 
             <!-- Other Rampart Dependencies -->
             <dependency>
@@ -548,11 +553,6 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.12</version>
-            </dependency>
-            <dependency>
-                <groupId>xmlunit</groupId>
-                <artifactId>xmlunit</artifactId>
-                <version>1.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

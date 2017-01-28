@@ -1,5 +1,8 @@
 package org.apache.rampart;
 
+import static com.google.common.truth.Truth.assertAbout;
+import static org.apache.axiom.truth.xml.XMLTruth.xml;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,11 +23,9 @@ import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.KerberosServer;
-import org.custommonkey.xmlunit.XMLAssert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -129,7 +130,7 @@ public class RampartKerberosTest {
         QName operation = new QName("http://rampart.apache.org", "echo");
         OMElement echoElement = getEchoElement();
         OMElement result = serviceClient.sendReceive(operation, echoElement);
-        XMLAssert.assertXMLEqual(echoElement.toStringWithConsume(), result.toStringWithConsume());
+        assertAbout(xml()).that(result).ignoringNamespaceDeclarations().hasSameContentAs(echoElement);
     }
     
     @Test
@@ -157,7 +158,7 @@ public class RampartKerberosTest {
         QName operation = new QName("http://rampart.apache.org", "echo");
         OMElement echoElement = getEchoElement();
         OMElement result = serviceClient.sendReceive(operation, echoElement);
-        XMLAssert.assertXMLEqual(echoElement.toStringWithConsume(), result.toStringWithConsume());
+        assertAbout(xml()).that(result).ignoringNamespaceDeclarations().hasSameContentAs(echoElement);
     }
     
     @Test
@@ -184,7 +185,7 @@ public class RampartKerberosTest {
         QName operation = new QName("http://rampart.apache.org", "echo");
         OMElement echoElement = getEchoElement();
         OMElement result = serviceClient.sendReceive(operation, echoElement);
-        XMLAssert.assertXMLEqual(echoElement.toStringWithConsume(), result.toStringWithConsume());
+        assertAbout(xml()).that(result).ignoringNamespaceDeclarations().hasSameContentAs(echoElement);
     }
     
     @Before

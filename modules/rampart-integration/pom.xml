@@ -633,8 +633,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>xmlunit</groupId>
-            <artifactId>xmlunit</artifactId>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-truth</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -18,10 +18,12 @@
  */
 package org.apache.ws.secpolicy;
 
+import static com.google.common.truth.Truth.assertAbout;
+import static org.apache.axiom.truth.xml.XMLTruth.xml;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -46,27 +48,11 @@ import org.apache.neethi.PolicyEngine;
 import org.apache.ws.secpolicy.model.KerberosToken;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
-import org.custommonkey.xmlunit.XMLAssert;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.xml.sax.SAXException;
 
 /**
  * Tests building and serialization of {@link KerberosToken} assertion.
  */
 public class KerberosPolicyTest extends TestCase {
-    private boolean isXmlUnitIgnoreWhitespace;
-
-    @Override
-    protected void setUp() throws Exception {
-        isXmlUnitIgnoreWhitespace = XMLUnit.getIgnoreWhitespace();
-        XMLUnit.setIgnoreWhitespace(true);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        XMLUnit.setIgnoreWhitespace(isXmlUnitIgnoreWhitespace);
-    }
-    
     public void testKerberosGssKeyRefPolicy11() throws Exception {
         System.out.println(getName());
         File policyFile = new File("src/test/resources/policy/kerberos-gss-keyref-11.xml");
@@ -163,12 +149,14 @@ public class KerberosPolicyTest extends TestCase {
             requiresKerberosV5, kerberosToken.isRequiresKerberosV5Token());
     }
     
-    private void assertPolicyEquals(File expected, Policy actual) throws IOException, XMLStreamException, SAXException {
+    private void assertPolicyEquals(File expected, Policy actual) throws Exception {
         StringWriter writer = new StringWriter();
         serializePolicy(actual, writer);
-        
-        XMLAssert.assertXMLEqual(String.format("Serialized policy '%s' differs from control policy '%s'", writer.toString(), printPolicy(actual)),
-            new FileReader(expected), new StringReader(writer.toString()));
+        assertAbout(xml())
+                .that(writer.toString())
+                .ignoringWhitespace()
+                .ignoringNamespaceDeclarations()
+                .hasSameContentAs(expected);
     }
     
     private Policy loadPolicy(File file) throws IOException {
