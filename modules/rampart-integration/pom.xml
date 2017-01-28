@@ -161,8 +161,6 @@
                                 <mkdir dir="target/temp-ramp" />
                                 <mkdir dir="target/temp-ramp/META-INF" />
 
-                                <copy overwrite="yes" file="target/classes/org/apache/rampart/Service.class" tofile="target/temp-ramp/org/apache/rampart/Service.class" />
-                                <copy overwrite="yes" file="target/classes/org/apache/rampart/PWCallback.class" tofile="target/temp-ramp/org/apache/rampart/PWCallback.class" />
                                 <copy overwrite="yes" file="target/classes/org/apache/rampart/KerberosDelegationServiceValidator.class" tofile="target/temp-ramp/org/apache/rampart/KerberosDelegationServiceValidator.class" />
                                 <copy overwrite="yes" file="src/test/resources/rampart/store.jks" tofile="target/temp-ramp/store.jks" />
                                 <!--path id="ramp.client.props" location="test-resources/rampart"/-->
@@ -331,8 +329,6 @@
                                 -->
                                 <mkdir dir="target/temp-rahas" />
                                 <mkdir dir="target/temp-rahas/META-INF" />
-                                <copy overwrite="yes" file="target/classes/org/apache/rahas/Service.class" tofile="target/temp-rahas/org/apache/rahas/Service.class" />
-                                <copy overwrite="yes" file="target/classes/org/apache/rahas/PWCallback.class" tofile="target/temp-rahas/org/apache/rahas/PWCallback.class" />
                                 <copy overwrite="yes" todir="target/temp-rahas">
                                     <fileset dir="src/test/resources/rahas">
                                         <include name="issuer.properties" />
