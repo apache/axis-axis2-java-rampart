@@ -4,14 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.testutils.ClientHelper;
 import org.apache.axis2.testutils.JettyServer;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.io.IOUtils;
 import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.KerberosConfig;
@@ -22,7 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 /**
  * Tests Kerberos authentication over transport binding using a Kerberos token as supporting endorsing token.
@@ -30,7 +32,7 @@ import org.xml.sax.SAXException;
  * 
  * The test is tailored for Oracle Java execution since it uses <code>com.sun.security.auth.module.Krb5LoginModule</code> JAAS login module for Kerberos authentication.
  */
-public class RampartKerberosTest extends AbstractRampartTest {
+public class RampartKerberosTest {
 
     /**
      * Java system property for setting JAAS configuration file: {@value}
@@ -67,6 +69,20 @@ public class RampartKerberosTest extends AbstractRampartTest {
     @Rule
     public final JettyServer server = new JettyServer("target/test-resources/rampart_service_repo", true);
     
+    @Rule
+    public final ClientHelper clientHelper = new ClientHelper(server, "target/test-resources/rampart_client_repo") {
+        @Override
+        protected void configureServiceClient(ServiceClient serviceClient) throws Exception {
+            int timeout = 200000;
+            serviceClient.getOptions().setTimeOutInMilliSeconds(timeout);
+            serviceClient.getOptions().setProperty(HTTPConstants.SO_TIMEOUT, timeout);
+            serviceClient.getOptions().setProperty(HTTPConstants.CONNECTION_TIMEOUT, timeout);
+
+            serviceClient.engageModule("addressing");
+            serviceClient.engageModule("rampart");
+        }
+    };
+    
     /**
      * Stores any original JAAS configuration set via {@link #JAAS_CONF_SYS_PROP} property to restore it after test execution.
      */
@@ -77,12 +93,23 @@ public class RampartKerberosTest extends AbstractRampartTest {
      */
     protected String krb5Conf;
     
+    private static OMElement getEchoElement() {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMNamespace omNs = fac.createOMNamespace(
+                "http://example1.org/example1", "example1");
+        OMElement method = fac.createOMElement("echo", omNs);
+        OMElement value = fac.createOMElement("Text", omNs);
+        value.addChild(fac.createOMText(value, "Testing Rampart with WS-SecPolicy"));
+        method.addChild(value);
+
+        return method;
+    }
+
     @Test
-    public void testKerberosOverTransportKeytab() throws XMLStreamException, SAXException, IOException {
+    public void testKerberosOverTransportKeytab() throws Exception {
         final String serviceName = "KerberosOverTransportKeytab";
-        URL serviceUrl = new URL(server.getEndpoint(serviceName) + "?wsdl");
         
-        ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
+        ServiceClient serviceClient = clientHelper.createServiceClient(serviceName, null, null);
 
         System.out.println("Testing WS-Sec: Kerberos scenario: " + serviceName);
                 
@@ -105,11 +132,10 @@ public class RampartKerberosTest extends AbstractRampartTest {
     }
     
     @Test
-    public void testKerberosOverTransportPWCB() throws XMLStreamException, SAXException, IOException {
+    public void testKerberosOverTransportPWCB() throws Exception {
         final String serviceName = "KerberosOverTransportPWCB";
-        URL serviceUrl = new URL(server.getEndpoint(serviceName) + "?wsdl");
         
-        ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
+        ServiceClient serviceClient = clientHelper.createServiceClient(serviceName, null, null);
 
         System.out.println("Testing WS-Sec: Kerberos scenario: " + serviceName);
 
@@ -134,11 +160,10 @@ public class RampartKerberosTest extends AbstractRampartTest {
     }
     
     @Test
-    public void testKerberosDelegation() throws XMLStreamException, SAXException, IOException {
+    public void testKerberosDelegation() throws Exception {
         final String serviceName = "KerberosDelegation";
-        URL serviceUrl = new URL(server.getEndpoint(serviceName) + "?wsdl");
 
-        ServiceClient serviceClient = getServiceClientInstance(serviceUrl);
+        ServiceClient serviceClient = clientHelper.createServiceClient(serviceName, null, null);
 
         System.out.println("Testing WS-Sec: Kerberos scenario: " + serviceName);
                 
