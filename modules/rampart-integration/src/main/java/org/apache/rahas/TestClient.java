@@ -28,10 +28,9 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.integration.JettyServer;
+import org.apache.axis2.testutils.ClientHelper;
+import org.apache.axis2.testutils.JettyServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
@@ -43,40 +42,15 @@ public abstract class TestClient {
     @Rule
     public final JettyServer server = new JettyServer(TESTING_PATH + getServiceRepo(), false);
 
+    @Rule
+    public final ClientHelper clientHelper = new ClientHelper(server, TESTING_PATH + "rahas_client_repo");
+
     /**
      */
     @Test
     public void testRequest() throws Exception {
-        // Get the repository location from the args
-        String repo = TESTING_PATH + "rahas_client_repo";
-
-        ConfigurationContext configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(repo,
-                                                                                                                  null);
-        ServiceClient serviceClient = new ServiceClient(configContext, null);
-        Options options = new Options();
-
-        System.setProperty("javax.net.ssl.keyStorePassword", "password");
-        System.setProperty("javax.net.ssl.keyStoreType", "JKS");
-        System.setProperty("javax.net.ssl.trustStore", "/home/ruchith/Desktop/interop/certs/interop2.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "password");
-        System.setProperty("javax.net.ssl.trustStoreType","JKS");
-
-        options.setTo(server.getEndpointReference("SecureService"));
-//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/UTSAMLHoK"));
-//        options.setTo(new EndpointReference("https://www-lk.wso2.com:8443/axis2/services/UTSAMLHoK"));
-//        options.setTo(new EndpointReference("https://192.18.49.133:2343/jaxws-s1-sts/sts"));
-//        options.setTo(new EndpointReference("https://207.200.37.116/SxSts/Scenario_1_IssuedTokenOverTransport_UsernameOverTransport"));
-//        options.setTo(new EndpointReference("http://localhost:9090/SxSts/Scenario_4_IssuedToken_MutualCertificate10"));
-
-//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/MutualCertsSAMLHoK"));
-//        options.setTo(new EndpointReference("http://www-lk.wso2.com:8888/axis2/services/MutualCertsSAMLHoK"));
-//        options.setTo(new EndpointReference("https://131.107.72.15/trust/Addressing2004/UserName"));
-//        options.setTo(new EndpointReference("https://131.107.72.15/trust/UserName"));
-//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/trust/X509WSS10"));
-//        options.setTo(new EndpointReference("https://131.107.72.15/trust/UserName"));
-//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/jaxws-s4-sts/sts"));
-//        options.setTo(new EndpointReference("http://127.0.0.1:9090/jaxws-s4/simple"));
-//        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/UTSAMLBearer"));
+        ServiceClient serviceClient = clientHelper.createServiceClient("SecureService");
+        Options options = serviceClient.getOptions();
 
         options.setTransportInProtocol(Constants.TRANSPORT_HTTP);
         options.setAction(this.getRequestAction());
@@ -89,8 +63,6 @@ public abstract class TestClient {
         
         serviceClient.engageModule("addressing");
         serviceClient.engageModule("rampart");
-
-        serviceClient.setOptions(options);
 
         //Blocking invocation
 

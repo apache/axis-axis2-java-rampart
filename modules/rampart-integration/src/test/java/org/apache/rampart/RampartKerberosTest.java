@@ -11,7 +11,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.integration.JettyServer;
+import org.apache.axis2.testutils.JettyServer;
 import org.apache.commons.io.IOUtils;
 import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.KerberosConfig;
