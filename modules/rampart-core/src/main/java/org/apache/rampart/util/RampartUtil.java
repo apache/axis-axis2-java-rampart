@@ -29,6 +29,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.dataretrieval.DRConstants;
 import org.apache.axis2.dataretrieval.client.MexClient;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.mex.MexConstants;
 import org.apache.axis2.mex.MexException;
@@ -55,6 +56,7 @@ import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.policy.model.CryptoConfig;
+import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.*;
@@ -75,6 +77,7 @@ import org.apache.ws.security.message.WSSecBase;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.ws.security.validate.KerberosTokenDecoder;
 import org.apache.xml.security.utils.Constants;
 import org.jaxen.JaxenException;
 import org.jaxen.XPath;
@@ -163,6 +166,64 @@ public class RampartUtil {
         }
         
         return cbHandler;
+    }
+    
+    /**
+     * Instantiates any Kerberos token decoder implementation configured via {@link KerberosConfig#setKerberosTokenDecoderClass(String)}
+     * using the {@link AxisService#getClassLoader() class loader} of the specified message context's {@link MessageContext#getAxisService() service}.
+     * 
+     * @param msgContext The current message context. Must not be null and must contain a valid service instance.
+     * @param kerberosConfig Rampart's Kerberos configuration.
+     * 
+     * @return A new instance of {@link KerberosTokenDecoder} implementation configured via {@link KerberosConfig#setKerberosTokenDecoderClass(String)} or <code>null</code>
+     * if no Kerberos token decoder is configured.
+     * @throws RampartException If the class cannot be loaded or instantiated.
+     */
+    public static KerberosTokenDecoder getKerberosTokenDecoder(MessageContext msgContext, KerberosConfig kerberosConfig) throws RampartException {
+        if (kerberosConfig == null) {
+            throw new IllegalArgumentException("Kerberos config must not be null");
+        }
+        else if (msgContext == null) {
+            throw new IllegalArgumentException("Message context must not be null");
+        }
+        
+        AxisService service = msgContext.getAxisService();
+        if (service == null) {
+            throw new IllegalArgumentException("No service available in message context: " + msgContext.getLogIDString());
+        }
+        
+        KerberosTokenDecoder kerberosTokenDecoder;
+        
+        String kerberosTokenDecoderClass = kerberosConfig.getKerberosTokenDecoderClass();
+        if (kerberosTokenDecoderClass == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No Kerberos token decoder class configured for service: " + service.getName());
+            }
+            return null;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Loading Kerberos token decoder class '%s' using class loader of service '%s'", kerberosTokenDecoderClass, service.getName()));
+        }
+        
+        ClassLoader classLoader = service.getClassLoader();
+        Class krbTokenDecoderClass;
+        try {
+            krbTokenDecoderClass = Loader.loadClass(classLoader, kerberosTokenDecoderClass);
+        } 
+        catch (ClassNotFoundException e) {
+            throw new RampartException("cannotLoadKrbTokenDecoderClass", 
+                    new String[] { kerberosTokenDecoderClass }, e);
+        }
+        
+        try {
+            kerberosTokenDecoder = (KerberosTokenDecoder) krbTokenDecoderClass.newInstance();
+        } catch (java.lang.Exception e) {
+            throw new RampartException("cannotCreateKrbTokenDecoderInstance",
+                    new String[] { kerberosTokenDecoderClass }, e);
+        }
+
+        return kerberosTokenDecoder;
     }
     
    /**

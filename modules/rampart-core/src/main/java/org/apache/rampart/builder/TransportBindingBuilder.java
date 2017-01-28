@@ -32,6 +32,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.IssuedToken;
+import org.apache.ws.secpolicy.model.KerberosToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
@@ -44,10 +45,16 @@ import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.message.*;
+import org.apache.ws.security.message.token.KerberosSecurity;
+import org.apache.ws.security.util.Base64;
+import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.crypto.SecretKey;
 import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.SignatureMethod;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -138,6 +145,8 @@ public class TransportBindingBuilder extends BindingBuilder {
                     } else if (token instanceof SecureConversationToken) {
                         handleSecureConversationTokens(rmd, (SecureConversationToken) token);
                         signatureValues.add(doSecureConversationSignature(rmd, token, signdParts));
+                    } else if (token instanceof KerberosToken) {
+                        signatureValues.add(doKerberosTokenSignature(rmd, (KerberosToken)token, signdParts));
                     }
                 }
             }
@@ -292,6 +301,77 @@ public class TransportBindingBuilder extends BindingBuilder {
         
     }
 
+    /**
+     * Generates a signature over the timestamp element (if any) using the Kerberos client/server session key.
+     * 
+     * @param rmd
+     * @param token
+     * @param signdParts 
+     */
+    private byte[] doKerberosTokenSignature(RampartMessageData rmd, KerberosToken token, SignedEncryptedParts signdParts) throws RampartException {
+        
+        Document doc = rmd.getDocument();
+        
+        List<WSEncryptionPart> sigParts = new ArrayList<WSEncryptionPart>();
+        
+        //TODO Shall we always include a timestamp?
+        if (this.timestampElement != null) {
+            sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));
+        }
+        
+        if (signdParts != null) {
+            if (signdParts.isBody()) {
+                SOAPEnvelope env = rmd.getMsgContext().getEnvelope();
+                sigParts.add(new WSEncryptionPart(RampartUtil.addWsuIdToElement(env.getBody())));
+            }
+    
+            ArrayList headers = signdParts.getHeaders();
+            for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
+                Header header = (Header) iterator.next();
+                WSEncryptionPart wep = new WSEncryptionPart(header.getName(), 
+                        header.getNamespace(),
+                        "Content");
+                sigParts.add(wep);
+            }
+        }
+
+        try {
+            KerberosSecurity kerberosBst = addKerberosToken(rmd, token);
+            kerberosBst.setID("Id-" + kerberosBst.hashCode());
+            
+            WSSecSignature sign = new WSSecSignature();
+            sign.setSignatureAlgorithm(SignatureMethod.HMAC_SHA1);
+            
+            if (token.isRequiresKeyIdentifierReference()) {
+                sign.setKeyIdentifierType(WSConstants.CUSTOM_KEY_IDENTIFIER);
+               
+                byte[] digestBytes = WSSecurityUtil.generateDigest(kerberosBst.getToken());
+                sign.setCustomTokenId(Base64.encode(digestBytes));
+                sign.setCustomTokenValueType(WSConstants.WSS_KRB_KI_VALUE_TYPE);
+            } else {
+                sign.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                
+                sign.setCustomTokenId(kerberosBst.getID());
+                sign.setCustomTokenValueType(kerberosBst.getValueType());
+            }
+            
+            SecretKey secretKey = kerberosBst.getSecretKey();
+            sign.setSecretKey(secretKey.getEncoded());
+            
+            sign.prepare(doc, null, rmd.getSecHeader());
+            
+            WSSecurityUtil.prependChildElement(rmd.getSecHeader().getSecurityHeader(), kerberosBst.getElement());
+            
+            List<Reference> referenceList = sign.addReferencesToSign(sigParts, rmd.getSecHeader());
+
+            sign.computeSignature(referenceList, false, null);
+
+            return sign.getSignatureValue();
+        } catch (WSSecurityException e) {
+            throw new RampartException("errorInSignatureWithKerberosToken", e);
+        }
+    }
+    
     private void appendToHeader(WSSecHeader secHeader, Element appendingChild) {
 
         // TODO this is bit dubious, before migration code was like "dkSig.appendSigToHeader(rmd.getSecHeader())"
