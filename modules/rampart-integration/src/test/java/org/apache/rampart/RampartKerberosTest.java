@@ -85,6 +85,9 @@ public class RampartKerberosTest {
         }
     };
     
+    @ClassRule
+    public static final KerberosServer kerberosServer = new KerberosServer();
+    
     /**
      * Stores any original JAAS configuration set via {@link #JAAS_CONF_SYS_PROP} property to restore it after test execution.
      */
@@ -189,12 +192,10 @@ public class RampartKerberosTest {
     }
     
     @Before
-    public void setUpKerberos() throws Exception {
+    public void setUp() throws Exception {
         System.setProperty("sun.security.krb5.debug", "true");
         System.setProperty("sun.security.jgss.debug", "true");
         
-        KerberosServer.startKerberosServer();
-                        
         //configure JGSS
         krb5Conf = System.getProperty(KRB5_CONF_SYS_PROP);
         
@@ -209,9 +210,7 @@ public class RampartKerberosTest {
     }
 
     @After
-    public void tearDownKerberos() throws Exception {
-        KerberosServer.stopKerberosServer();
-        
+    public void tearDown() throws Exception {
         if (jaasConf != null) {
             System.setProperty(JAAS_CONF_SYS_PROP, jaasConf);
         }
@@ -262,7 +261,7 @@ public class RampartKerberosTest {
                     KERBEROS_CONF_KDC_PORT_TOKEN, krb5ConfTemplate.getAbsolutePath()));
         }
             
-        krb5ConfContent = krb5ConfContent.replace(KERBEROS_CONF_KDC_PORT_TOKEN, String.valueOf(KerberosServer.getPort()));
+        krb5ConfContent = krb5ConfContent.replace(KERBEROS_CONF_KDC_PORT_TOKEN, String.valueOf(kerberosServer.getPort()));
         
         File krb5Conf = new File(tmpDir, this.getClass().getSimpleName() + "_krb5.conf");
         FileOutputStream krb5ConfOut = null;

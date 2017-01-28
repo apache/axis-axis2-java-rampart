@@ -46,37 +46,32 @@ import org.apache.directory.server.kerberos.kdc.KdcServer;
 import org.apache.directory.server.protocol.shared.transport.Transport;
 import org.apache.directory.server.protocol.shared.transport.UdpTransport;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
+import org.junit.rules.ExternalResource;
 
 /**
  * Runs an Apache DS Kerberos server.
- * @see org.apache.wss4j.integration.test.common.KerberosServiceStarter
  */
-public class KerberosServer {
+public final class KerberosServer extends ExternalResource {
 
     private static final Log log = LogFactory.getLog(KerberosServer.class);
     
     /**
      * The used DirectoryService instance
      */
-    private static DirectoryService directoryService;
+    private DirectoryService directoryService;
 
     /**
      * The used KdcServer instance
      */
-    private static KdcServer kdcServer;
+    private KdcServer kdcServer;
 
-    private static Provider provider = null;
-    private static int providerPos = 2;
+    private Provider provider;
+    private int providerPos = 2;
     
-    private static File workDir = null;
+    private File workDir;
     
-    /**
-     * Starts an Apache DS Kerberos server with dynamically allocated port.
-     * 
-     * @return
-     * @throws Exception
-     */
-    public static synchronized void startKerberosServer() throws Exception {
+    @Override
+    protected void before() throws Throwable {
         int kdcPort = PortAllocator.allocatePort();
         
         DatagramSocket datagramSocket = new DatagramSocket(kdcPort);
@@ -155,7 +150,7 @@ public class KerberosServer {
      * @return The Apache DS Kerberos server port.
      * @throws IllegalArgumentException If server or respective transport are not initialized
      */
-    public static synchronized int getPort() throws IllegalArgumentException {
+    public int getPort() throws IllegalArgumentException {
         if (kdcServer == null) {
             throw new IllegalStateException("Kerberos server is not initialized");
         }
@@ -176,18 +171,16 @@ public class KerberosServer {
                         UdpTransport.class.getName()));
     } 
     
-    /**
-     * Stops the Apache DS Kerberos server.
-     * @throws Exception
-     */
-    public static synchronized void stopKerberosServer() throws Exception {
+    @Override
+    protected void after() {
         log.info("Stop called");
         try {        
             if (directoryService != null) {
                 try {
                     directoryService.shutdown();
-                }
-                finally {                    
+                } catch (Exception ex) {
+                    log.error("Failed to stop server", ex);
+                } finally {
                     try {
                         FileUtils.deleteDirectory(workDir);
                     }
