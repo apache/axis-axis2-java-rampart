@@ -85,6 +85,7 @@
                         </goals>
                         <configuration>
                             <modules>addressing,rampart,rahas</modules>
+                            <axis2xml>src/test/resources/conf/axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/rampart_service_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -105,6 +106,7 @@
                         </goals>
                         <configuration>
                             <modules>addressing,rampart,rahas</modules>
+                            <axis2xml>src/test/resources/conf/axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/rahas_service_repo_1</outputDirectory>
                         </configuration>
                     </execution>
@@ -115,6 +117,7 @@
                         </goals>
                         <configuration>
                             <modules>addressing,rampart,rahas</modules>
+                            <axis2xml>src/test/resources/conf/axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/rahas_service_repo_3</outputDirectory>
                         </configuration>
                     </execution>
@@ -126,6 +129,7 @@
                         <configuration>
                             <modules>addressing,rampart</modules>
                             <axis2xml>src/test/resources/conf/axis2.xml</axis2xml>
+                            <configurationDirectory>conf</configurationDirectory>
                             <outputDirectory>target/test-resources/default_security_client_repo</outputDirectory>
                         </configuration>
                     </execution>
@@ -136,13 +140,11 @@
                         </goals>
                         <configuration>
                             <modules>addressing,rampart,rahas</modules>
+                            <axis2xml>src/test/resources/conf/axis2.xml</axis2xml>
                             <outputDirectory>target/test-resources/rahas_service_repo_5</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <configurationDirectory>conf</configurationDirectory>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -378,83 +380,6 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <!-- Need to clean the keystore because keytool-maven-plugin is not idempotent and fails
-                             when executing mvn install twice in a row. Note that keytool-maven-plugin also has
-                             a "clean" goal but we don't use it because it generates a warning if the keystore
-                             doesn't exist. -->
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                        <configuration>
-                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                            <filesets>
-                                <fileset>
-                                    <directory>${project.build.directory}/test-resources/jetty</directory>
-                                    <includes>
-                                        <include>server.jks</include>
-                                        <include>server.cer</include>
-                                        <include>client.jks</include>
-                                    </includes>
-                                </fileset>
-                            </filesets>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>keytool-maven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>generate-key-pair</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>generateKeyPair</goal>
-                        </goals>
-                        <configuration>
-                            <alias>server</alias>
-                            <dname>cn=localhost,o=OASIS</dname>
-                            <keyalg>RSA</keyalg>
-                            <keypass>password</keypass>
-                            <keystore>${project.build.directory}/test-resources/jetty/server.jks</keystore>
-                            <storepass>password</storepass>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>export-certificate</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>exportCertificate</goal>
-                        </goals>
-                        <configuration>
-                            <alias>server</alias>
-                            <file>${project.build.directory}/test-resources/jetty/server.cer</file>
-                            <keystore>${project.build.directory}/test-resources/jetty/server.jks</keystore>
-                            <storepass>password</storepass>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>import-certificate</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>importCertificate</goal>
-                        </goals>
-                        <configuration>
-                            <alias>server</alias>
-                            <file>${project.build.directory}/test-resources/jetty/server.cer</file>
-                            <keystore>${project.build.directory}/test-resources/jetty/client.jks</keystore>
-                            <storepass>password</storepass>
-                            <noprompt>true</noprompt>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -744,6 +669,11 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-testutils</artifactId>
             <version>${axis2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bcprov.jdk15.version}</version>
         </dependency>
     </dependencies>
 </project>
