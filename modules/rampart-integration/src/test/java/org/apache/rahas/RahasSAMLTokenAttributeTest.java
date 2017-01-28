@@ -1,5 +1,7 @@
 package org.apache.rahas;
 
+import static org.junit.Assert.assertNotNull;
+
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -9,11 +11,6 @@ import org.apache.neethi.Policy;
 import org.apache.ws.secpolicy.SP11Constants;
 
 public class RahasSAMLTokenAttributeTest  extends TestClient{
-    
-	public RahasSAMLTokenAttributeTest(String name) {
-        super(name);
-    }
-    
     public OMElement getRequest() {
         try {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_02);

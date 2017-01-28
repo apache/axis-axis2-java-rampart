@@ -22,15 +22,11 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
 import org.apache.ws.secpolicy.SP12Constants;
 
+import static org.junit.Assert.assertNotNull;
+
 import javax.xml.namespace.QName;
 
 public class RahasSAMLTokenCertForHoKV1205Test extends TestClient {
-
-
-    public RahasSAMLTokenCertForHoKV1205Test(String name) {
-        super(name);
-    }
-
     public OMElement getRequest() {
         try {
             OMElement rstElem =

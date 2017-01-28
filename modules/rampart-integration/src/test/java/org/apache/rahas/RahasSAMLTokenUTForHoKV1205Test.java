@@ -16,6 +16,8 @@
 
 package org.apache.rahas;
 
+import static org.junit.Assert.assertNotNull;
+
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -30,13 +32,6 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
 
     byte[] clientEntr;
     
-    /**
-     * @param name
-     */
-    public RahasSAMLTokenUTForHoKV1205Test(String name) {
-        super(name);
-    }
-
     public OMElement getRequest() {
         try {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_12);

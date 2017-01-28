@@ -16,6 +16,8 @@
 
 package org.apache.rahas;
 
+import static org.apache.axis2.integration.TestConstants.TESTING_PATH;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 
@@ -24,7 +26,6 @@ import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
@@ -34,30 +35,20 @@ import org.apache.axis2.integration.JettyServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
+import org.junit.Rule;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+public abstract class TestClient {
 
-public abstract class TestClient extends TestCase {
-
-    protected int port = 5555;
-
-    public TestClient(String name) {
-        super(name);
-    }
-
-    protected void setUp() throws Exception {
-        JettyServer.start(Constants.TESTING_PATH + getServiceRepo(), port, -1);
-    }
-
-    protected void tearDown() throws Exception {
-        JettyServer.stop();
-    }
+    @Rule
+    public final JettyServer server = new JettyServer(TESTING_PATH + getServiceRepo(), false);
 
     /**
      */
+    @Test
     public void testRequest() throws Exception {
         // Get the repository location from the args
-        String repo = Constants.TESTING_PATH + "rahas_client_repo";
+        String repo = TESTING_PATH + "rahas_client_repo";
 
         ConfigurationContext configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(repo,
                                                                                                                   null);
@@ -70,7 +61,7 @@ public abstract class TestClient extends TestCase {
         System.setProperty("javax.net.ssl.trustStorePassword", "password");
         System.setProperty("javax.net.ssl.trustStoreType","JKS");
 
-        options.setTo(new EndpointReference("http://127.0.0.1:" + port + "/axis2/services/SecureService"));
+        options.setTo(server.getEndpointReference("SecureService"));
 //        options.setTo(new EndpointReference("http://127.0.0.1:" + 9090 + "/axis2/services/UTSAMLHoK"));
 //        options.setTo(new EndpointReference("https://www-lk.wso2.com:8443/axis2/services/UTSAMLHoK"));
 //        options.setTo(new EndpointReference("https://192.18.49.133:2343/jaxws-s1-sts/sts"));
