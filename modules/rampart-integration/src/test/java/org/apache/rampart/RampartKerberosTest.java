@@ -23,6 +23,7 @@ import org.apache.rampart.util.KerberosServer;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -66,11 +67,11 @@ public class RampartKerberosTest {
      */
     public static final String KERBEROS_CONF_KDC_PORT_TOKEN = "KDC_PORT";
     
-    @Rule
-    public final JettyServer server = new JettyServer("target/test-resources/rampart_service_repo", true);
+    @ClassRule
+    public static final JettyServer server = new JettyServer("target/test-resources/rampart_service_repo", true);
     
-    @Rule
-    public final ClientHelper clientHelper = new ClientHelper(server, "target/test-resources/rampart_client_repo") {
+    @ClassRule
+    public static final ClientHelper clientHelper = new ClientHelper(server, "target/test-resources/rampart_client_repo") {
         @Override
         protected void configureServiceClient(ServiceClient serviceClient) throws Exception {
             int timeout = 200000;

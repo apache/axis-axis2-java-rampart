@@ -163,7 +163,6 @@
 
                                 <copy overwrite="yes" file="target/classes/org/apache/rampart/Service.class" tofile="target/temp-ramp/org/apache/rampart/Service.class" />
                                 <copy overwrite="yes" file="target/classes/org/apache/rampart/PWCallback.class" tofile="target/temp-ramp/org/apache/rampart/PWCallback.class" />
-                                <copy overwrite="yes" file="target/classes/org/apache/rampart/KerberosDelegationService.class" tofile="target/temp-ramp/org/apache/rampart/KerberosDelegationService.class" />
                                 <copy overwrite="yes" file="target/classes/org/apache/rampart/KerberosDelegationServiceValidator.class" tofile="target/temp-ramp/org/apache/rampart/KerberosDelegationServiceValidator.class" />
                                 <copy overwrite="yes" file="src/test/resources/rampart/store.jks" tofile="target/temp-ramp/store.jks" />
                                 <!--path id="ramp.client.props" location="test-resources/rampart"/-->

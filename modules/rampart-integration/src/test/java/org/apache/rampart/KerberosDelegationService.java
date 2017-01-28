@@ -1,21 +1,12 @@
 package org.apache.rampart;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.RampartConfig;
@@ -26,24 +17,11 @@ import org.apache.rampart.policy.model.RampartConfig;
 public class KerberosDelegationService extends PolicyBasedResultsValidator{
     
     
-    public OMElement echo(OMElement elem) throws MalformedURLException, IllegalStateException, AxisFault {
-        int port = ((HttpServletRequest)MessageContext.getCurrentMessageContext().getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST)).getLocalPort();
-        
+    public OMElement echo(OMElement elem) throws Exception {
         final String serviceName = "KerberosOverTransportKeytab";
-        URL wsdlUrl = new URL(String.format("https://localhost:%s/axis2/services/%s?wsdl", port, serviceName));
-        
-        ConfigurationContext configContext = ConfigurationContextFactory.
-                        createConfigurationContextFromFileSystem("target/test-resources/rampart_client_repo", null);
 
-        ServiceClient serviceClient = new ServiceClient(configContext, wsdlUrl, null, null);
+        ServiceClient serviceClient = RampartKerberosTest.clientHelper.createServiceClient(serviceName, null, null);
 
-        serviceClient.getOptions().setTimeOutInMilliSeconds(200000);
-        serviceClient.getOptions().setProperty(HTTPConstants.SO_TIMEOUT, 200000);
-        serviceClient.getOptions().setProperty(HTTPConstants.CONNECTION_TIMEOUT, 200000);
-
-        serviceClient.engageModule("addressing");
-        serviceClient.engageModule("rampart");     
-        
         RampartConfig rampartConfig = new RampartConfig();  
         
         KerberosConfig kerberosConfig = new KerberosConfig();
