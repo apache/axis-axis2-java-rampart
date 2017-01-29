@@ -98,7 +98,7 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     protected String issuerName;
     protected Map trustedServices = new HashMap();
     protected String trustStorePropFile;
-    protected SAMLCallbackHandler callbackHander;
+    protected SAMLCallbackHandler callbackHandler;
     protected String callbackHandlerName;
   
     /**
@@ -258,7 +258,7 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
 				try {
 					String value = attrElemet.getText();
 					Class handlerClass = Class.forName(value);
-					this.callbackHander = (SAMLCallbackHandler)handlerClass.newInstance();
+					this.callbackHandler = (SAMLCallbackHandler)handlerClass.newInstance();
 				} catch (ClassNotFoundException e) {
 					log.debug("Error loading class" , e);
 					throw new TrustException("Error loading class" , e);
@@ -300,6 +300,9 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         OMElement callbackHandlerName = fac.createOMElement(ATTR_CALLBACK_HANDLER_NAME, configElem);
         callbackHandlerName.setText(this.callbackHandlerName);
         
+        OMElement timeToLive = fac.createOMElement(TTL, configElem);
+        timeToLive.setText(String.valueOf(this.ttl));
+
         configElem.addChild(this.cryptoPropertiesElement);
         
         OMElement keySizeElem = fac.createOMElement(KEY_SIZE, configElem);
@@ -405,12 +408,22 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         return trustedServices;
     }
 
+    @Deprecated
 	public SAMLCallbackHandler getCallbackHander() {
-		return callbackHander;
+		return callbackHandler;
 	}
 
-	public void setCallbackHander(SAMLCallbackHandler callbackHander) {
-		this.callbackHander = callbackHander;
+    @Deprecated
+	public void setCallbackHander(SAMLCallbackHandler callbackHandler) {
+		this.callbackHandler = callbackHandler;
+	}
+	
+	public SAMLCallbackHandler getCallbackHandler() {
+		return callbackHandler;
+	}
+
+	public void setCallbackHandler(SAMLCallbackHandler callbackHandler) {
+		this.callbackHandler = callbackHandler;
 	}
 	
 	public String getCallbackHandlerName() {

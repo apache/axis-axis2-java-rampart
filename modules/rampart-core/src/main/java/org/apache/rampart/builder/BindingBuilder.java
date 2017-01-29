@@ -218,7 +218,7 @@ public abstract class BindingBuilder {
         WSSecEncryptedKey encrKey = new WSSecEncryptedKey();
         
         try {
-            RampartUtil.setKeyIdentifierType(rpd, encrKey, token);
+            RampartUtil.setKeyIdentifierType(rmd, encrKey, token);
             RampartUtil.setEncryptionUser(rmd, encrKey);
             encrKey.setKeySize(rpd.getAlgorithmSuite().getMaximumSymmetricKeyLength());
             encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
@@ -231,13 +231,27 @@ public abstract class BindingBuilder {
         }
     }
     
-    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, Token token)
-            throws RampartException {
-        return getSignatureBuider(rmd, token, null);
+    //Deprecated after 1.5 release
+    @Deprecated 
+    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, 
+                                                Token token) throws RampartException {
+    	return getSignatureBuilder(rmd, token, null);
+    }
+
+    //Deprecated after 1.5 release
+    @Deprecated
+    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, Token token,
+                                                String userCertAlias) throws RampartException {
+    	return getSignatureBuilder(rmd, token, userCertAlias);
     }
     
-    protected WSSecSignature getSignatureBuider(RampartMessageData rmd, Token token,
-            String userCertAlias) throws RampartException {
+    protected WSSecSignature getSignatureBuilder(RampartMessageData rmd, 
+                                                 Token token)throws RampartException {
+        return getSignatureBuilder(rmd, token, null);
+    }
+    
+    protected WSSecSignature getSignatureBuilder(RampartMessageData rmd, Token token,
+                                                 String userCertAlias) throws RampartException {
 
         RampartPolicyData rpd = rmd.getPolicyData();
         
@@ -247,7 +261,7 @@ public abstract class BindingBuilder {
         
         log.debug("Token inclusion: " + token.getInclusion());
         
-        RampartUtil.setKeyIdentifierType(rpd, sig, token);
+        RampartUtil.setKeyIdentifierType(rmd, sig, token);
 
         String user = null;
         
@@ -370,7 +384,7 @@ public abstract class BindingBuilder {
 
                         //We have to use a cert
                         //Prepare X509 signature
-                        WSSecSignature sig = this.getSignatureBuider(rmd, token);
+                        WSSecSignature sig = this.getSignatureBuilder(rmd, token);
                         Element bstElem = sig.getBinarySecurityTokenElement();
                         if(bstElem != null) {   
                             bstElem = RampartUtil.insertSiblingAfter(rmd, 

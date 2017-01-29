@@ -175,7 +175,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     encr.setDocument(doc);
                     RampartUtil.setEncryptionUser(rmd, encr);
                     encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
-                    RampartUtil.setKeyIdentifierType(rpd,encr, encryptionToken);
+                    RampartUtil.setKeyIdentifierType(rmd, encr, encryptionToken);
                     encr.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(config, rmd.getCustomClassLoader()));
 
@@ -528,7 +528,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     
                     WSSecEncrypt encr = new WSSecEncrypt();
                     
-                    RampartUtil.setKeyIdentifierType(rpd, encr, encrToken);
+                    RampartUtil.setKeyIdentifierType(rmd, encr, encrToken);
                     
                     encr.setWsConfig(rmd.getConfig());
                     
@@ -616,7 +616,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         if (!(supportingSigToken instanceof X509Token)) {
             return;
         }
-        supportingSig = this.getSignatureBuider(rmd, supportingSigToken,
+        supportingSig = this.getSignatureBuilder(rmd, supportingSigToken,
                 ((X509Token) supportingSigToken).getUserCertAlias());
         Element bstElem = supportingSig.getBinarySecurityTokenElement();
         if (bstElem != null) {
@@ -719,7 +719,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
 
         } else {
-            sig = this.getSignatureBuider(rmd, sigToken);
+            sig = this.getSignatureBuilder(rmd, sigToken);
             Element bstElem = sig.getBinarySecurityTokenElement();
             if(bstElem != null) {
                 bstElem = RampartUtil.insertSiblingAfter(rmd, this
@@ -765,7 +765,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
             WSSecEncrypt encr = new WSSecEncrypt();
 
-            RampartUtil.setKeyIdentifierType(rpd, encr, encrToken);
+            RampartUtil.setKeyIdentifierType(rmd, encr, encrToken);
 
             encr.setWsConfig(rmd.getConfig());
 

@@ -19,6 +19,8 @@ package org.apache.rampart;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAP11Constants;
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
@@ -63,8 +65,28 @@ public class MessageBuilderTestBase extends TestCase {
      * @throws AxisFault
      */
     protected MessageContext getMsgCtx() throws Exception {
+        return initMsgCtxFromMessage("test-resources/policy/soapmessage.xml");
+    }
+
+    /**
+     * Return a message context initialized with a SOAP 1.2 message.
+     *
+     * @throws XMLStreamException
+     * @throws FactoryConfigurationError
+     * @throws AxisFault
+     */
+    protected MessageContext getMsgCtx12() throws Exception {
+        return initMsgCtxFromMessage("test-resources/policy/soapmessage.xml");
+    }
+
+    /**
+     * @throws XMLStreamException
+     * @throws FactoryConfigurationError
+     * @throws AxisFault
+     */
+    private MessageContext initMsgCtxFromMessage(String messageResource) throws Exception {
         MessageContext ctx = new MessageContext();
-        
+
         AxisConfiguration axisConfiguration = new AxisConfiguration();
         AxisService axisService = new AxisService("TestService");
         axisConfiguration.addService(axisService);
@@ -88,7 +110,7 @@ public class MessageBuilderTestBase extends TestCase {
 
         XMLStreamReader reader =
                 XMLInputFactory.newInstance().
-                        createXMLStreamReader(new FileInputStream("test-resources/policy/soapmessage.xml"));
+                        createXMLStreamReader(new FileInputStream(messageResource));
         ctx.setEnvelope(new StAXSOAPModelBuilder(reader, null).getSOAPEnvelope());
         return ctx;
     }
@@ -119,6 +141,17 @@ public class MessageBuilderTestBase extends TestCase {
             fail("Incorrect number of children in the security header: " +
                  "next expected element" + qnameList.next().toString());
         }
+    }
+
+    public String getContentTypeForEnvelope(SOAPEnvelope env) {
+        String contentType = SOAP11Constants.SOAP_11_CONTENT_TYPE;  //default
+        if (SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI.equals(env.getNamespace().getNamespaceURI())) {
+            contentType = SOAP11Constants.SOAP_11_CONTENT_TYPE;
+        }
+        else if (SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI.equals(env.getNamespace().getNamespaceURI())) {
+            contentType = SOAP12Constants.SOAP_12_CONTENT_TYPE;
+        }
+        return contentType;
     }
 
 }

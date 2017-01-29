@@ -25,7 +25,7 @@ public abstract class AbstractSecurityAssertion implements Assertion {
 
     private boolean isOptional;
     
-    private boolean normalized = false; 
+    private boolean normalized = true; 
     
     protected int version;
 
@@ -50,7 +50,7 @@ public abstract class AbstractSecurityAssertion implements Assertion {
     }
     
     public boolean isNormalized() {
-        return true;
+        return this.normalized;
     }
 
     public PolicyComponent normalize() {

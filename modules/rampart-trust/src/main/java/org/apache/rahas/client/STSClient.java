@@ -17,10 +17,9 @@
 package org.apache.rahas.client;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
+import java.text.DateFormat;
+import java.text.ParseException;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -29,6 +28,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.om.util.Base64;
@@ -66,6 +66,7 @@ import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.token.Reference;
 import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Element;
 
 public class STSClient {
@@ -142,10 +143,14 @@ public class STSClient {
             //Process the STS and service policy policy
             this.processPolicy(issuerPolicy, servicePolicy);
             
-            OMElement response = client.sendReceive(rstQn,
-                                                    createIssueRequest(requestType, appliesTo));
-
-            return processIssueResponse(version, response, issuerAddress);
+            try {
+                OMElement response = client.sendReceive(rstQn,
+                                                        createIssueRequest(requestType, appliesTo));
+    
+                return processIssueResponse(version, response, issuerAddress);
+            } finally {
+                client.cleanupTransport();
+            }
         } catch (AxisFault e) {
             log.error("errorInObtainingToken", e);
             throw new TrustException("errorInObtainingToken", new String[]{issuerAddress},e);
@@ -243,7 +248,120 @@ public class STSClient {
         }
         
     }
-    
+
+    /**
+     * Renews the token referenced by the token id, updates the token store
+     * @param tokenId
+     * @param issuerAddress
+     * @param issuerPolicy
+     * @param store
+     * @return status
+     * @throws TrustException
+     */
+    public boolean renewToken(String tokenId,
+                              String issuerAddress,
+                              Policy issuerPolicy, TokenStorage store) throws TrustException {
+
+        try {
+            QName rstQn = new QName("requestSecurityToken");
+
+            ServiceClient client = getServiceClient(rstQn, issuerAddress);
+
+            client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
+            client.getOptions().setSoapVersionURI(this.soapVersion);
+            if (this.addressingNs != null) {
+                client.getOptions().setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.addressingNs);
+            }
+            client.engageModule("addressing");
+            client.engageModule("rampart");
+
+            this.processPolicy(issuerPolicy, null);
+
+            String tokenType = RahasConstants.TOK_TYPE_SAML_10;
+
+            OMElement response = client.sendReceive(rstQn,
+                    createRenewRequest(tokenType, tokenId));
+            store.update(processRenewResponse(version, response, store, tokenId));
+
+            return true;
+
+        } catch (AxisFault e) {
+            log.error("errorInRenewingToken", e);
+            throw new TrustException("errorInRenewingToken", new String[]{issuerAddress}, e);
+        }
+
+    }
+
+    /**
+     * Processes the response and update the token store
+     * @param version
+     * @param elem
+     * @param store
+     * @param id
+     * @return
+     * @throws TrustException
+     */
+    private Token processRenewResponse(int version, OMElement elem, TokenStorage store, String id) throws TrustException {
+        OMElement rstr = elem;
+        if (version == RahasConstants.VERSION_05_12) {
+            //The WS-SX result will be an RSTRC
+            rstr = elem.getFirstElement();
+        }
+        //get the corresponding WS-Trust NS
+        String ns = TrustUtil.getWSTNamespace(version);
+
+        //Get the RequestedAttachedReference
+        OMElement reqSecToken = rstr.getFirstChildWithName(new QName(
+                ns, RahasConstants.IssuanceBindingLocalNames.REQUESTED_SECURITY_TOKEN));
+
+        if (reqSecToken == null) {
+            throw new TrustException("reqestedSecTokMissing");
+        }
+
+        //Extract the life-time element
+        OMElement lifeTimeEle = rstr.getFirstChildWithName(new QName(
+                ns, RahasConstants.IssuanceBindingLocalNames.LIFETIME));
+
+        if (lifeTimeEle == null) {
+            throw new TrustException("lifeTimeElemMissing");
+        }
+
+        //update the existing token
+        OMElement tokenElem = reqSecToken.getFirstElement();
+        Token token = store.getToken(id);
+        token.setPreviousToken(token.getToken());
+        token.setToken(tokenElem);
+        token.setState(Token.RENEWED);
+        token.setExpires(extractExpiryDate(lifeTimeEle));
+
+        return token;
+    }
+
+    /**
+     * extracts the expiry date from the Lifetime element of the RSTR
+     * @param lifetimeElem
+     * @return
+     * @throws TrustException
+     */
+    private Date extractExpiryDate(OMElement lifetimeElem) throws TrustException {
+        try {
+            DateFormat zulu = new XmlSchemaDateFormat();
+
+            OMElement expiresElem =
+                    lifetimeElem.getFirstChildWithName(new QName(WSConstants.WSU_NS,
+                            WSConstants.EXPIRES_LN));
+            Date expires = zulu.parse(expiresElem.getText());
+            return expires;
+        } catch (OMException e) {
+            throw new TrustException("lifeTimeProcessingError",
+                    new String[]{lifetimeElem.toString()}, e);
+        } catch (ParseException e) {
+            throw new TrustException("lifeTimeProcessingError",
+                    new String[]{lifetimeElem.toString()}, e);
+        }
+    }
+
+
     private ServiceClient getServiceClient(QName rstQn,
                                            String issuerAddress) throws AxisFault {
         AxisService axisService =
@@ -429,6 +547,11 @@ public class STSClient {
         } else {
             //Return wsu:Id of the token element
             id = token.getAttributeValue(new QName(WSConstants.WSU_NS, "Id"));
+            if ( id == null )
+            {
+            	// If we are dealing with a SAML Assetion, look for AssertionID.
+            	id = token.getAttributeValue(new QName( "AssertionID"));
+            }
         }
         return id;
     }
@@ -794,7 +917,7 @@ public class STSClient {
         this.rstTemplate = rstTemplate;
     }
 
-    private class CBHandler implements CallbackHandler {
+    private static class CBHandler implements CallbackHandler {
 
         private String passwd;
 

@@ -55,13 +55,13 @@ Subversion repository, you must use one of the following URLs
 depending on your level of access to the Rampart source code:</p>
 <ul>
 <li><b>If you are not a committer:</b> <a href=
-"http://svn.apache.org/repos/asf/webservices/rampart/trunk/java"
+"http://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk"
 target=
-"_blank">http://svn.apache.org/repos/asf/webservices/rampart/trunk/java</a></li>
+"_blank">http://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk</a></li>
 <li><b>If you are a committer:</b> <a href=
-"https://svn.apache.org/repos/asf/webservices/rampart/trunk/java"
+"https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk"
 target=
-"_blank">https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</a></li>
+"_blank">https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk</a></li>
 </ul>
 If you are a committer, make sure that you have selected an
 svnpasswd. To do this, you must log into svn.apache.org. For more

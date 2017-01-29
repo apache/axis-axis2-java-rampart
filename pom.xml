@@ -36,10 +36,10 @@
     <mailingLists>
         <mailingList>
             <name>Rampart Developers</name>
-            <subscribe>rampart-dev-subscribe@ws.apache.org</subscribe>
-            <unsubscribe>rampart-dev-unsubscribe@ws.apache.org</unsubscribe>
-            <post>rampart-dev@ws.apache.org</post>
-            <archive>http://mail-archives.apache.org/mod_mbox/ws-rampart-dev/</archive>
+            <subscribe>java-dev-subscribe@axis.apache.org</subscribe>
+            <unsubscribe>java-dev-unsubscribe@axis.apache.org</unsubscribe>
+            <post>java-dev@axis.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/axis-java-dev/</archive>
             <otherArchives>
                 <otherArchive>http://markmail.org/search/list:org.apache.ws.rampart-dev</otherArchive>
             </otherArchives>
@@ -70,29 +70,43 @@
         <developer>
             <name>Davanum Srinivas</name>
             <id>dims</id>
-            <email>dims AT wso2.com</email>
-            <organization>WSO2</organization>
+            <email>dims AT apache.org</email>
+            <organization>IBM</organization>
         </developer>
         <developer>
             <name>Nandana Mihindukulasooriya</name>
             <id>nandana</id>
-            <email>nandana AT wso2.com</email>
-            <organization>WSO2</organization>
+            <email>nandana AT apache.org</email>
+            <organization></organization>
         </developer>
     </developers>
 
     <scm>
         <connection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
+            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
+            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
         </developerConnection>
-        <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
+        <url>https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk</url>
     </scm>
 
 
     <repositories>
+	
+	<repository>
+            <id>wso2-maven2-repository</id>
+            <name>WSO2 Maven2 Repository</name>
+            <url>http://dist.wso2.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+        </repository>
 
         <repository>
             <releases>
@@ -166,7 +180,7 @@
 
     <dependencies>
 
-        <!-- Axis2 Dependencies -->
+        <!-- Axis2 and Axiom Dependencies -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
@@ -188,8 +202,12 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>addressing</artifactId>
             <type>mar</type>
-            <version>${addressing.mar.version}</version>
+            <version>${axis2.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-dom</artifactId>
         </dependency>
 
         <!-- Other Rampart Dependencies -->
@@ -219,20 +237,25 @@
             <version>${xmlsec.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml1</artifactId>
-            <version>1.1</version>
+            <groupId>opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>1.1.406</version>
         </dependency>
-	<dependency>
-           <groupId>org.opensaml</groupId>
-           <artifactId>opensaml</artifactId>
-           <version>2.2.3</version>
-       </dependency>
-       	<dependency>
-   		<groupId>org.slf4j</groupId>
-   		<artifactId>slf4j-jdk14</artifactId>
-   		<version>1.5.2</version>
-	</dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.3</version>
+        </dependency>
 
         <dependency>
             <groupId>log4j</groupId>
@@ -277,6 +300,27 @@
 
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Since Rampart depends on DOOM, but axiom-dom is not a transitive
+                 dependency, we need to manage the Axiom version. -->
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-dom</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <profiles>
         <profile>
@@ -320,34 +364,6 @@
                 <module>modules/distribution</module>
             </modules>
         </profile>
-
-        <profile>
-            <id>axiom-managed</id>
-            <activation>
-                <property>
-                    <name>axiom.version</name>
-                </property>
-            </activation>
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.ws.commons.axiom</groupId>
-                        <artifactId>axiom-api</artifactId>
-                        <version>${axiom.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.ws.commons.axiom</groupId>
-                        <artifactId>axiom-impl</artifactId>
-                        <version>${axiom.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.ws.commons.axiom</groupId>
-                        <artifactId>axiom-dom</artifactId>
-                        <version>${axiom.version}</version>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
-        </profile>
     </profiles>
 
     <modules>
@@ -366,10 +382,10 @@
         <rampart.mar.version>SNAPSHOT</rampart.mar.version>
         <rahas.mar.version>SNAPSHOT</rahas.mar.version>
 
-        <axis2.version>SNAPSHOT</axis2.version>
-        <addressing.mar.version>SNAPSHOT</addressing.mar.version>
+        <axis2.version>1.5.3</axis2.version>
+        <axiom.version>1.2.10</axiom.version>
 
-        <wss4j.version>1.5.9</wss4j.version>
+        <wss4j.version>1.5.10</wss4j.version>
 	<xmlsec.version>1.4.2</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
 

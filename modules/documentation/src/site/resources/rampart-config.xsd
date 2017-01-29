@@ -20,18 +20,29 @@
 				<xs:element name="timestampMaxSkew" type="xs:integer"  minOccurs="0"/>
 				<xs:element name="tokenStoreClass" type="xs:string" minOccurs="0"/>
 				<xs:element name="optimizeParts" type="xs:string" minOccurs="0"/>				
-				<xs:element name="sslConfig" type="ssl" minOccurs="0"/>
+				<xs:element name="sslConfig" type="ramp:ssl" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="crypto">
-		<xs:annotation>
-			<xs:documentation>http://ws.apache.org/wss4j/apidocs/org/apache/ws/security/components/crypto/Crypto.html</xs:documentation>
-		</xs:annotation>
-		<xs:sequence maxOccurs="unbounded">
-			<xs:element name="property" type="xs:string"/>
-		</xs:sequence>
-		<xs:attribute name="provider"/>
+	   <xs:sequence maxOccurs="1">
+	       <xs:element name="crypto">
+	           <xs:complexType>
+                   <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="property">
+	                        <xs:complexType>
+		                        <xs:simpleContent>
+			                        <xs:extension base="xs:string">
+			                          <xs:attribute name="name" type="xs:string" use="required"/>
+			                        </xs:extension>
+		                        </xs:simpleContent>
+	                        </xs:complexType>
+                        </xs:element>
+                   </xs:sequence>
+                   <xs:attribute name="provider" type="xs:string" use="required"/>
+                </xs:complexType>
+	       </xs:element>
+	   </xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="ssl">
 		<xs:sequence maxOccurs="unbounded">

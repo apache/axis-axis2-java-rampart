@@ -56,6 +56,7 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.opensaml.SAMLAssertion;
 import org.w3c.dom.Document;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import java.util.ArrayList;
@@ -369,7 +370,9 @@ public class RampartMessageData {
            // To handle scenarios where password type is not set by default.
             this.config.setHandleCustomPasswordTypes(true);
 
-            this.customClassLoader = msgCtx.getAxisService().getClassLoader();
+            if (axisService != null) { 
+                this.customClassLoader = axisService.getClassLoader(); 
+            } 
             
             if(this.sender && this.policyData != null) {
                 this.secHeader = new WSSecHeader();
@@ -621,21 +624,19 @@ public class RampartMessageData {
             return this.tokenStorage;
         }
 
-        TokenStorage storage = (TokenStorage) this.msgContext.getProperty(
+        TokenStorage storage = (TokenStorage) this.msgContext.getConfigurationContext().getProperty(
                         TokenStorage.TOKEN_STORAGE_KEY);
 
         if (storage != null) {
             this.tokenStorage = storage;
         } else {
-
             if (this.policyData.getRampartConfig() != null &&
                     this.policyData.getRampartConfig().getTokenStoreClass() != null) {
                 Class stClass = null;
                 String storageClass = this.policyData.getRampartConfig()
-                        .getTokenStoreClass(); 
+                        .getTokenStoreClass();
                 try {
-                    stClass = Loader.loadClass(msgContext.getAxisService()
-                            .getClassLoader(), storageClass);
+                    stClass = Loader.loadClass(this.customClassLoader, storageClass);
                 } catch (ClassNotFoundException e) {
                     throw new RampartException(
                             "WSHandler: cannot load token storage class: "

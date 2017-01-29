@@ -438,18 +438,18 @@ public class RampartUtil {
      */
     public static String processIssuerAddress(OMElement issuerAddress) 
         throws RampartException {
-        if(issuerAddress != null && issuerAddress.getText() != null && 
-                !"".equals(issuerAddress.getText())) {
-            return issuerAddress.getText().trim();
-        } else {
-            if(issuerAddress != null) {
-                throw new RampartException("invalidIssuerAddress",
-                    new String[] { issuerAddress.toString() });
-            } else {
-                throw new RampartException("invalidIssuerAddress",
-                        new String[] { "Issuer address null" });
-            }
+
+    	if(issuerAddress == null){
+    		throw new RampartException("invalidIssuerAddress", 
+    		                           new String[] { "Issuer address null" });
+    	}
+    	
+    	if(issuerAddress.getText() == null || "".equals(issuerAddress.getText())) {
+    		throw new RampartException("invalidIssuerAddress", 
+    		                           new String[] { issuerAddress.toString() });
         }
+
+    	return issuerAddress.getText().trim();
     }
     
     /**
@@ -881,6 +881,19 @@ public class RampartUtil {
 	public static Vector getSignedParts(RampartMessageData rmd) {
 		RampartPolicyData rpd = rmd.getPolicyData();
 		SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
+
+        //"signAllHeaders" indicates that all the headers should be signed.
+        if (rpd.isSignAllHeaders()) {
+            Iterator childHeaders = envelope.getHeader().getChildElements();
+            while (childHeaders.hasNext()) {
+               OMElement hb = (OMElement) childHeaders.next();
+                if (!(hb.getLocalName().equals(WSConstants.WSSE_LN)
+                        && hb.getNamespace().getNamespaceURI().equals(WSConstants.WSSE_NS))) {
+                    rpd.addSignedPart(hb.getNamespace().getNamespaceURI(),hb.getLocalName());
+                }
+           }
+        }
+
 		return getPartsAndElements(true, envelope, rpd.isSignBody()
 				&& !rpd.isSignBodyOptional(), rpd.getSignedParts(), rpd
 				.getSignedElements(), rpd.getDeclaredNamespaces());
@@ -1151,9 +1164,12 @@ public class RampartUtil {
      * @return
      */
     public static boolean checkRequiredElements(SOAPEnvelope envelope, HashMap decNamespaces, String expression ) {
+
+        // The XPath expression must be evaluated against the SOAP header
+        // http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/ws-securitypolicy-1.2-spec-os.html#_Toc161826519
+        SOAPHeader header = envelope.getHeader();
         
-        
-        Set namespaces = findAllPrefixNamespaces(envelope, decNamespaces);
+        Set namespaces = findAllPrefixNamespaces(header, decNamespaces);
 
         try {
                         XPath xp = new AXIOMXPath(expression);
@@ -1165,7 +1181,7 @@ public class RampartUtil {
                                 xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
                         }
                         
-                        List selectedNodes = xp.selectNodes(envelope);
+                        List selectedNodes = xp.selectNodes(header);
                         
                         if (selectedNodes.size() == 0 ) {
                             return false;
@@ -1288,10 +1304,16 @@ public class RampartUtil {
      * the WSS11 and WSS10 assertions
      */
     
-    public static void setKeyIdentifierType(RampartPolicyData rpd, WSSecBase secBase,org.apache.ws.secpolicy.model.Token token) {
-		
-    	if (token.getInclusion() == SPConstants.INCLUDE_TOKEN_NEVER) {
-			
+    public static void setKeyIdentifierType(RampartMessageData rmd, WSSecBase secBase,org.apache.ws.secpolicy.model.Token token) {
+
+        // Use a reference rather than the binary security token if: the policy never allows the token to be
+        // included; or this is the recipient and the token should only be included in requests; or this is
+        // the initiator and the token should only be included in responses.
+        final boolean useReference = token.getInclusion() == SPConstants.INCLUDE_TOKEN_NEVER
+                                     || !rmd.isInitiator() && token.getInclusion() == SPConstants.INCLUDE_TOEKN_ALWAYS_TO_RECIPIENT
+                                     || rmd.isInitiator() && token.getInclusion() == SPConstants.INCLUDE_TOEKN_ALWAYS_TO_INITIATOR;
+        if (useReference) {
+
     		boolean tokenTypeSet = false;
     		
     		if(token instanceof X509Token) {
@@ -1310,6 +1332,7 @@ public class RampartUtil {
     		} 
     		
     		if (!tokenTypeSet) {
+                final RampartPolicyData rpd = rmd.getPolicyData();
 	    		Wss10 wss = rpd.getWss11();
 				if (wss == null) {
 					wss = rpd.getWss10();
@@ -1555,7 +1578,26 @@ public class RampartUtil {
             if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
                 return true;
             }
-        
+       
+            supportingTokens = rpd.getEncryptedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getSignedEncryptedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getEndorsingEncryptedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
+            
+            supportingTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();
+            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+                return true;
+            }
         }
         
         return false;

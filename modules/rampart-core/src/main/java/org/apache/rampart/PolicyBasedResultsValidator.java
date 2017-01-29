@@ -399,7 +399,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                     .get(WSSecurityEngineResult.TAG_ACTION);
             int action = actInt.intValue();
             if(WSConstants.SIGN == action || WSConstants.ENCR == action) {
-                sigEncrActions.add(new Integer(action));
+                sigEncrActions.add(Integer.valueOf(action));
             }
             
         }

@@ -127,6 +127,7 @@ public class RampartPolicyBuilder {
     private static void processTransportBinding(TransportBinding binding, RampartPolicyData rpd) {
         binding(binding, rpd);
         rpd.setTransportBinding(true);
+        rpd.setTokenProtection(binding.isTokenProtection());
         TransportToken transportToken = binding.getTransportToken();
         if ( transportToken != null ) {
             rpd.setTransportToken(transportToken.getTransportToken());
@@ -233,6 +234,7 @@ public class RampartPolicyBuilder {
         if (sep.isSignedParts()) {
             rpd.setSignBody(sep.isBody());
             rpd.setSignAttachments(sep.isAttachments());
+            rpd.setSignAllHeaders(sep.isSignAllHeaders());
            	rpd.setSignBodyOptional(sep.isOptional());
            	rpd.setSignAttachmentsOptional(sep.isOptional());
             while (it.hasNext()) {

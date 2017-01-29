@@ -41,9 +41,15 @@ public class SignedPartsBuilder implements AssertionBuilder {
         
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			signedEncryptedParts.setOptional((new Boolean(isOptional.getAttributeValue())
-					.booleanValue()));
+			signedEncryptedParts.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
+					.booleanValue());
 		}
+
+        //presense of <sp:SignedParts/> enforces the requirement for sign body and all the header blocks
+        if(!element.getChildren().hasNext()){
+            signedEncryptedParts.setBody(true);
+            signedEncryptedParts.setSignAllHeaders(true);
+        }
         
         return signedEncryptedParts;
     }
