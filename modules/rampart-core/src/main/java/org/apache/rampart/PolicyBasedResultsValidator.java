@@ -1090,8 +1090,8 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 continue;
             }
 
-            if (!(algorithmSuite.getEncryption().equals(dataRef.getAlgo()))) {
-                throw new RampartException("invalidAlgorithm", new String[]{algorithmSuite.getEncryption(), dataRef.getAlgo()});
+            if (!(algorithmSuite.getEncryption().equals(dataRef.getAlgorithm()))) {
+                throw new RampartException("invalidAlgorithm", new String[]{algorithmSuite.getEncryption(), dataRef.getAlgorithm()});
             }
         }
     }
