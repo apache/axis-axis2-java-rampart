@@ -1,9 +1,9 @@
 <service name="SecureService38">
 
-	<module ref="addressing"/>
-	<module ref="rampart"/>
+    <module ref="addressing"/>
+    <module ref="rampart"/>
 
-	<parameter locked="false" name="ServiceClass">org.apache.rampart.Service</parameter>
+    <parameter locked="false" name="ServiceClass">org.apache.rampart.Service</parameter>
 
     <operation name="echo">
         <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
@@ -70,7 +70,7 @@
                     <ramp:encryptionUser>bob</ramp:encryptionUser>
                     <ramp:passwordCallbackClass>org.apache.rampart.PWCallback</ramp:passwordCallbackClass>
                     <ramp:inboundActor>outboundActor</ramp:inboundActor>
-					<ramp:outboundActor>inboundActor</ramp:outboundActor>
+                    <ramp:outboundActor>inboundActor</ramp:outboundActor>
 
                     <ramp:signatureCrypto>
                         <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">

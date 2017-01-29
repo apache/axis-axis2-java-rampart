@@ -1,9 +1,9 @@
 <service name="SecureService39">
 
-	<module ref="addressing"/>
-	<module ref="rampart"/>
+    <module ref="addressing"/>
+    <module ref="rampart"/>
 
-	<parameter locked="false" name="ServiceClass">org.apache.rampart.Service</parameter>
+    <parameter locked="false" name="ServiceClass">org.apache.rampart.Service</parameter>
 
     <operation name="echo">
         <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
