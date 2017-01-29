@@ -242,12 +242,7 @@ public class RampartEngine {
 		}
 		
 		if(null == actorValue){
-		    String actorAttribute = WSConstants.ATTR_ACTOR;
-		    if (WSConstants.URI_SOAP12_ENV.equals(rmd.getSoapConstants().getEnvelopeURI())) {
-		        actorAttribute = WSConstants.ATTR_ROLE;
-		    }
-			
-		    actorValue = secHeader.getAttributeValue(new QName(rmd.getSoapConstants().getEnvelopeURI(), actorAttribute));
+		    actorValue = secHeader.getRole();
 		}
 
 		Crypto signatureCrypto = RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
