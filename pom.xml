@@ -369,7 +369,7 @@
         <axis2.version>SNAPSHOT</axis2.version>
         <addressing.mar.version>SNAPSHOT</addressing.mar.version>
 
-        <wss4j.version>1.5.8</wss4j.version>
+        <wss4j.version>1.5.9</wss4j.version>
 	<xmlsec.version>1.4.2</xmlsec.version>
         <opensaml.version>1.1</opensaml.version>
 

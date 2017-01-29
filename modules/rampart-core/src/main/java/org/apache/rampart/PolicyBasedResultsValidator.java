@@ -453,6 +453,8 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
 
         }
 
+        //validate the algorithms
+        validateEncryptionAlgorithm(encrRefs, rpd.getAlgorithmSuite());
         
         //Check for encrypted body
         if(rpd.isEncryptBody()&& !rpd.isEncryptBodyOptional()) {
@@ -546,6 +548,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
     throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
+        RampartPolicyData rpd = rmd.getPolicyData();
         
         Node envelope = rmd.getDocument().getFirstChild();
         
@@ -553,9 +556,35 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
 
         // Find elements that are signed
         Vector actuallySigned = new Vector();
-        if (actionResults != null) {
+        if (actionResults != null) {            
+            
+            AlgorithmSuite suite = rpd.getAlgorithmSuite();          
+            
             for (int j = 0; j < actionResults.length; j++) {
                 WSSecurityEngineResult actionResult = actionResults[j];
+
+                // Validate signature algorithms
+                String sigMethod = null;
+                String canonMethod = null;
+                sigMethod = (String) actionResult.get(WSSecurityEngineResult.TAG_SIGNATURE_METHOD);
+                canonMethod = (String) actionResult
+                        .get(WSSecurityEngineResult.TAG_CANONICALIZATION_METHOD);
+
+                if (sigMethod == null || canonMethod == null) {
+                    throw new RampartException("algorithmNotFound");
+                }
+                // Check whether signature algorithm is correct
+                if (!(sigMethod.equals(suite.getAsymmetricSignature()) || sigMethod.equals(suite
+                        .getSymmetricSignature()))) {
+                    throw new RampartException("invalidAlgorithm", new String[] {
+                            suite.getAsymmetricSignature(), sigMethod });
+                }
+                // Check whether the canonicalization algorithm is correct
+                if (!canonMethod.equals(suite.getInclusiveC14n())) {
+                    throw new RampartException("invalidAlgorithm", new String[] {
+                            suite.getInclusiveC14n(), canonMethod });
+                }
+
                 Set signedIDs = (Set) actionResult
                         .get(WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS);
                 for (Iterator i = signedIDs.iterator(); i.hasNext();) {
@@ -940,6 +969,22 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
 
         return (WSSecurityEngineResult[]) wsResult.toArray(new WSSecurityEngineResult[wsResult
                 .size()]);
+    }
+    
+    private void validateEncryptionAlgorithm(ArrayList refList, AlgorithmSuite algorithmSuite) throws RampartException {
+
+        for (int i = 0; i < refList.size(); i++) {
+            WSDataRef dataRef = (WSDataRef) refList.get(i);
+
+            //ArrayList can contain null elements
+            if (dataRef == null) {
+                continue;
+            }
+
+            if (!(algorithmSuite.getEncryption().equals(dataRef.getAlgo()))) {
+                throw new RampartException("invalidAlgorithm", new String[]{algorithmSuite.getEncryption(), dataRef.getAlgo()});
+            }
+        }
     }
     
     private boolean isRefIdPresent(ArrayList refList , QName qname) {
