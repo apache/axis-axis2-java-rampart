@@ -151,40 +151,15 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
         
+        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
         
-        String prefix;
-        String writerPrefix = writer.getPrefix(namespaceURI);
-        
-        if (writerPrefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        } else {
-            prefix = writerPrefix;
-        }
-
         // <sp:SymmetricBinding>
-        writer.writeStartElement(prefix, localname, namespaceURI);
+        writeStartElement(writer, prefix, localname, namespaceURI);
         
-        // xmlns:sp=".."
-        writer.writeNamespace(prefix, namespaceURI);
-               
-        String policyLocalName = SPConstants.POLICY.getLocalPart();
-        String policyNamespaceURI = SPConstants.POLICY.getNamespaceURI();
-        
-        String wspPrefix;
-        
-        String wspWriterPrefix = writer.getPrefix(policyNamespaceURI);
-        if (wspWriterPrefix == null) {
-            wspPrefix = SPConstants.POLICY.getPrefix();
-            writer.setPrefix(wspPrefix, policyNamespaceURI);
-            
-        } else {
-           wspPrefix = wspWriterPrefix;
-        }
         // <wsp:Policy>
-        writer.writeStartElement(wspPrefix, policyLocalName, policyNamespaceURI);
+        writeStartElement(writer, SPConstants.POLICY);
         
         if (encryptionToken != null) {
             encryptionToken.serialize(writer);
@@ -212,20 +187,17 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         
         if (isIncludeTimestamp()) {
             // <sp:IncludeTimestamp />
-            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
         }
         
         if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
             // <sp:EncryptBeforeSigning />
-            writer.writeStartElement(prefix, SPConstants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
         }
         
         if (isSignatureProtection()) {
             // <sp:EncryptSignature />
-            writer.writeStartElement(prefix, SPConstants.ENCRYPT_SIGNATURE , namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.ENCRYPT_SIGNATURE , namespaceURI);
         }
         
         if(isEntireHeadersAndBodySignatures()) {

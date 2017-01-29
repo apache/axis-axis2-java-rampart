@@ -45,7 +45,7 @@ import org.apache.rampart.policy.model.RampartConfig;
 </pre>
  * @see OptimizePartsConfig
  */
-public class OptimizePartsBuilder implements AssertionBuilder{
+public class OptimizePartsBuilder implements AssertionBuilder<OMElement> {
 
 	public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
 		OptimizePartsConfig assertion = new OptimizePartsConfig();

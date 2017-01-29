@@ -47,6 +47,11 @@ public class CryptoConfig implements Assertion {
     public final static String PROPERTY_NAME_ATTR = "name";
     public final static String CRYPTO_KEY_ATTR = "cryptoKey";
     public final static String CACHE_REFRESH_INTVL = "cacheRefreshInterval";
+    public static final String CACHE_ENABLED = "enableCryptoCaching";
+
+    private Properties prop;
+
+    private boolean cacheEnabled = true;
 
     private String provider;
     private String cryptoKey;
@@ -68,17 +73,18 @@ public class CryptoConfig implements Assertion {
         this.cacheRefreshInterval = cacheRefreshInterval;
     }
 
-    private Properties prop;
-    
     public Properties getProp() {
         return prop;
     }
+
     public void setProp(Properties prop) {
         this.prop = prop;
     }
+
     public String getProvider() {
         return provider;
     }
+
     public void setProvider(String provider) {
         this.provider = provider;
     }
@@ -91,10 +97,23 @@ public class CryptoConfig implements Assertion {
         // TODO TODO
         throw new UnsupportedOperationException("TODO");
     }
+    
+    public boolean isIgnorable() {
+        // TODO TODO
+        throw new UnsupportedOperationException("TODO");
+    }
  
     public PolicyComponent normalize() {
         // TODO TODO
         throw new UnsupportedOperationException("TODO");
+    }
+
+    public boolean isCacheEnabled() {
+        return cacheEnabled;
+    }
+
+    public void setCacheEnabled(boolean cacheEnabled) {
+        this.cacheEnabled = cacheEnabled;
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
@@ -119,7 +138,9 @@ public class CryptoConfig implements Assertion {
             writer.writeAttribute(CACHE_REFRESH_INTVL, getCacheRefreshInterval());    
         }
 
-
+        if(!isCacheEnabled()){
+            writer.writeAttribute(CACHE_ENABLED, Boolean.toString(isCacheEnabled()));
+        }
         
         String key;
         String value;

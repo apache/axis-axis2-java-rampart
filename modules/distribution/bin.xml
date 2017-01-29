@@ -22,15 +22,19 @@
                 <include>org.apache.rampart:rampart-core:jar</include>
                 <include>org.apache.rampart:rampart-policy:jar</include>
                 <include>org.apache.rampart:rampart-trust:jar</include>
+                <include>org.opensaml:opensaml1:jar</include>
                 <include>org.opensaml:opensaml:jar</include>
                 <include>org.opensaml:xmltooling:jar</include>
                 <include>joda-time:joda-time:jar</include>
                 <include>org.slf4j:slf4j-api:jar</include>
-                <include>org.slf4j:slf4j-jdk14:jar</include>
+                <include>org.slf4j:slf4j-jcl:jar</include>
                 <include>velocity:velocity:jar</include>
                 <include>commons-collections:commons-collections:jar</include>
                 <include>org.opensaml:openws:jar</include>
                 <include>commons-lang:commons-lang:jar</include>
+                <include>org.apache.xerces:xercesImpl:jar</include>
+                <include>org.apache.xerces:resolver:jar</include>
+                <include>org.apache.xerces:serializer:jar</include>
             </includes>
         </dependencySet>
     </dependencySets>
@@ -58,6 +62,7 @@
             <source>../../release-docs/README.txt</source>
             <outputDirectory>${dist.dir}</outputDirectory>
             <destName>README</destName>
+            <filtered>true</filtered>
         </file>
         <file>
             <source>../../release-docs/LICENSE.txt</source>

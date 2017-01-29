@@ -8,7 +8,7 @@
     <fileSets>
         <fileSet>
             <directory>../..</directory>
-            <outputDirectory>rampart-src-${rampart.version}</outputDirectory>
+            <outputDirectory>rampart-src-${project.version}</outputDirectory>
             <includes>
                 <include>**/modules/**/*</include>
                 <include>**/pom.xml</include>
@@ -28,7 +28,16 @@
                 <exclude>**/.settings</exclude>
                 <exclude>**/.settings/**/*</exclude>
                 <exclude>**/.svn/**</exclude>
+                <exclude>release-docs/README.txt</exclude>
             </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>../..</directory>
+            <outputDirectory>rampart-src-${project.version}</outputDirectory>
+            <filtered>true</filtered>
+            <includes>
+                <include>release-docs/README.txt</include>
+            </includes>
         </fileSet>
     </fileSets>
 </assembly>

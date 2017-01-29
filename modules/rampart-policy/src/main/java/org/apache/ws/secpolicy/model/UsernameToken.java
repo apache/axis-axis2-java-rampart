@@ -91,19 +91,12 @@ public class UsernameToken extends Token {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
+        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(namespaceURI);
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-
         // <sp:UsernameToken
-        writer.writeStartElement(prefix, localname, namespaceURI);
-
-        writer.writeNamespace(prefix, namespaceURI);
+        writeStartElement(writer, prefix, localname, namespaceURI);
 
         String inclusion;
         
@@ -114,49 +107,36 @@ public class UsernameToken extends Token {
         }
 
         if (inclusion != null) {
-            writer.writeAttribute(prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
+            writeAttribute(writer, prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
         }
 
         if (isUseUTProfile10() || isUseUTProfile11()) {
-            String pPrefix = writer.getPrefix(SPConstants.POLICY
-                    .getNamespaceURI());
-            if (pPrefix == null) {
-                writer.setPrefix(SPConstants.POLICY.getPrefix(), SPConstants.POLICY
-                        .getNamespaceURI());
-            }
-
             // <wsp:Policy>
-            writer.writeStartElement(prefix, SPConstants.POLICY.getLocalPart(),
-                    SPConstants.POLICY.getNamespaceURI());
+            writeStartElement(writer, SPConstants.POLICY);
 
             // CHECKME
             if (isUseUTProfile10()) {
                 // <sp:WssUsernameToken10 />
-                writer.writeStartElement(prefix, SPConstants.USERNAME_TOKEN10 , namespaceURI);
+                writeStartElement(writer, prefix, SPConstants.USERNAME_TOKEN10 , namespaceURI);
             } else {
                 // <sp:WssUsernameToken11 />
-                writer.writeStartElement(prefix, SPConstants.USERNAME_TOKEN11 , namespaceURI);
+                writeStartElement(writer, prefix, SPConstants.USERNAME_TOKEN11 , namespaceURI);
             }
             
             if (version == SPConstants.SP_V12) {
                 
                 if (isNoPassword()) {
-                    writer.writeStartElement(prefix, SPConstants.NO_PASSWORD, namespaceURI);
-                    writer.writeEndElement();    
+                    writeEmptyElement(writer, prefix, SPConstants.NO_PASSWORD, namespaceURI);
                 } else if (isHashPassword()){
-                    writer.writeStartElement(prefix, SPConstants.HASH_PASSWORD, namespaceURI);
-                    writer.writeEndElement(); 
+                    writeEmptyElement(writer, prefix, SPConstants.HASH_PASSWORD, namespaceURI);
                 }
                 
                 if (isDerivedKeys()) {
-                    writer.writeStartElement(prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
-                    writer.writeEndElement();  
+                    writeEmptyElement(writer, prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
                 } else if (isExplicitDerivedKeys()) {
-                    writer.writeStartElement(prefix, SPConstants.REQUIRE_EXPLICIT_DERIVED_KEYS, namespaceURI);
-                    writer.writeEndElement();  
+                    writeEmptyElement(writer, prefix, SPConstants.REQUIRE_EXPLICIT_DERIVED_KEYS, namespaceURI);
                 } else if (isImpliedDerivedKeys()) {
-                    writer.writeStartElement(prefix, SPConstants.REQUIRE_IMPLIED_DERIVED_KEYS, namespaceURI);
-                    writer.writeEndElement();  
+                    writeEmptyElement(writer, prefix, SPConstants.REQUIRE_IMPLIED_DERIVED_KEYS, namespaceURI);
                 }
                 
             }

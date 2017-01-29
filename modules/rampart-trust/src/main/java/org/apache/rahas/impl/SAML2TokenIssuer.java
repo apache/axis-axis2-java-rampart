@@ -19,7 +19,6 @@ package org.apache.rahas.impl;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
-import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
@@ -36,6 +35,7 @@ import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Base64;
 import org.apache.ws.security.util.Loader;
+import org.apache.ws.security.util.UUIDGenerator;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.apache.xml.security.c14n.Canonicalizer;
 import org.apache.xml.security.signature.XMLSignature;
@@ -43,7 +43,7 @@ import org.apache.xml.security.utils.EncryptionConstants;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.SAMLException;
+import org.opensaml.common.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml1.core.NameIdentifier;
@@ -100,20 +100,20 @@ public class SAML2TokenIssuer implements TokenIssuer {
     private static Log log = LogFactory.getLog(SAML2TokenIssuer.class);
 
     static {
-            try {
-                // Set the "javax.xml.parsers.DocumentBuilderFactory" system property
-                // to the endorsed JAXP impl.
-                System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
-                        "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-                DefaultBootstrap.bootstrap();
-            } catch (ConfigurationException e) {
-                log.error("SAML2TokenIssuerBootstrapError", e);
-                throw new RuntimeException(e);
-            } finally {
-                // Unset the DOM impl to default
-                DocumentBuilderFactoryImpl.setDOOMRequired(false);
-            }
+        try {
+            // Set the "javax.xml.parsers.DocumentBuilderFactory" system property
+            // to the endorsed JAXP impl.
+            System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
+                    "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+            DefaultBootstrap.bootstrap();
+        } catch (ConfigurationException e) {
+            log.error("SAML2TokenIssuerBootstrapError", e);
+            throw new RuntimeException(e);
+        } finally {
+            // Unset the DOM impl to default
+            DocumentBuilderFactoryImpl.setDOOMRequired(false);
         }
+    }
     
     public SOAPEnvelope issue(RahasData data) throws TrustException {
         MessageContext inMsgCtx = data.getInMessageContext();
@@ -164,7 +164,6 @@ public class SAML2TokenIssuer implements TokenIssuer {
             }
 
 
-
             // Get the document
             Document doc = ((Element) env).getOwnerDocument();
 
@@ -205,7 +204,14 @@ public class SAML2TokenIssuer implements TokenIssuer {
             assertion.setConditions(conditions);
 
             // Create the subject
-            Subject subject = createSubject(config, doc, crypto, creationDate, expirationDate, data);
+            Subject subject;
+
+            if (!data.getKeyType().endsWith(RahasConstants.KEY_TYPE_BEARER)) {
+                subject = createSubjectWithHolderOfKeySC(config, doc, crypto, creationDate, expirationDate, data);
+            }
+            else{
+                subject = createSubjectWithBearerSC(data);
+            }
 
             // Set the subject
             assertion.setSubject(subject);
@@ -217,6 +223,9 @@ public class SAML2TokenIssuer implements TokenIssuer {
             } else {
                 AuthnStatement authStmt = createAuthnStatement(data);
                 assertion.getAuthnStatements().add(authStmt);
+                if (data.getClaimDialect() != null && data.getClaimElem() != null) {
+                    assertion.getAttributeStatements().add(createAttributeStatement(data, config));
+                }
             }
 
             // Create a SignKeyHolder to hold the crypto objects that are used to sign the assertion
@@ -299,7 +308,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
             DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(new ByteArrayInputStream(elementString.trim().getBytes()));
             Element assertionElement = document.getDocumentElement();
-            
+
             reqSecTokenElem.addChild((OMNode) ((Element) rstrElem)
                     .getOwnerDocument().importNode(tempNode, true));
 
@@ -314,11 +323,11 @@ public class SAML2TokenIssuer implements TokenIssuer {
             TrustUtil.getTokenStore(inMsgCtx).add(assertionToken);
 
             if (keyType.endsWith(RahasConstants.KEY_TYPE_SYMM_KEY)
-                    && config.keyComputation != SAMLTokenIssuerConfig.KeyComputation.KEY_COMP_USE_REQ_ENT) {
+                && config.keyComputation != SAMLTokenIssuerConfig.KeyComputation.KEY_COMP_USE_REQ_ENT) {
 
                 // Add the RequestedProofToken
                 TokenIssuerUtil.handleRequestedProofToken(data, wstVersion,
-                        config, rstrElem, assertionToken, doc);
+                                                          config, rstrElem, assertionToken, doc);
             }
 
             return env;
@@ -346,9 +355,10 @@ public class SAML2TokenIssuer implements TokenIssuer {
      * @return Subject
      * @throws Exception
      */
-    private Subject createSubject(SAMLTokenIssuerConfig config,
-                                  Document doc, Crypto crypto, DateTime creationTime,
-                                  DateTime expirationTime, RahasData data) throws Exception {
+    private Subject createSubjectWithHolderOfKeySC(SAMLTokenIssuerConfig config,
+                                                   Document doc, Crypto crypto,
+                                                   DateTime creationTime,
+                                                   DateTime expirationTime, RahasData data) throws Exception {
 
 
         XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
@@ -422,7 +432,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         }
 
         // If it is a public Key
-        else {
+        else if(data.getKeyType().endsWith(RahasConstants.KEY_TYPE_PUBLIC_KEY)){
             try {
                 String subjectNameId = data.getPrincipal().getName();
 
@@ -456,15 +466,13 @@ public class SAML2TokenIssuer implements TokenIssuer {
                 x509CertElem.appendChild(base64CertText);
                 Element x509DataElem = doc.createElementNS(WSConstants.SIG_NS,
                         "ds:X509Data");
-                
+                x509DataElem.appendChild(x509CertElem);
+
+
                 if (x509DataElem != null) {
-                	x509DataElem.appendChild(x509CertElem);
                     keyInfoElem = doc.createElementNS(WSConstants.SIG_NS, "ds:KeyInfo");
                     ((OMElement) x509DataElem).declareNamespace(
                             WSConstants.SIG_NS, WSConstants.SIG_PREFIX);
-                    ((OMElement) x509DataElem).declareNamespace(
-                            WSConstants.ENC_NS, WSConstants.ENC_PREFIX);
-
                     keyInfoElem.appendChild(x509DataElem);
                 }
 
@@ -523,9 +531,36 @@ public class SAML2TokenIssuer implements TokenIssuer {
         //set the subject confirmation
         subject.getSubjectConfirmations().add(subjectConfirmation);
 
-        if(log.isDebugEnabled()){
-            log.debug("SAML2.0 subject is constructed successfully.");
-        }
+        log.debug("SAML2.0 subject is constructed successfully.");
+        return subject;
+    }
+
+    /**
+     * This method creates a subject element with the bearer subject confirmation method
+     * @param data RahasData element
+     * @return  SAML 2.0 Subject element with Bearer subject confirmation
+     */
+    private Subject createSubjectWithBearerSC(RahasData data){
+        XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
+        SAMLObjectBuilder<Subject> subjectBuilder =
+                (SAMLObjectBuilder<Subject>) builderFactory.getBuilder(Subject.DEFAULT_ELEMENT_NAME);
+        Subject subject = subjectBuilder.buildObject();
+
+        //Create NameID and attach it to the subject
+        NameID nameID = new NameIDBuilder().buildObject();
+        nameID.setValue(data.getPrincipal().getName());
+        nameID.setFormat(NameIdentifier.EMAIL);
+        subject.setNameID(nameID);
+
+        //Build the Subject Confirmation
+        SAMLObjectBuilder<SubjectConfirmation> subjectConfirmationBuilder =
+                (SAMLObjectBuilder<SubjectConfirmation>) builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
+        SubjectConfirmation subjectConfirmation = subjectConfirmationBuilder.buildObject();
+
+        //Set the subject Confirmation method
+        subjectConfirmation.setMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer");
+
+        subject.getSubjectConfirmations().add(subjectConfirmation);
         return subject;
     }
 
@@ -537,7 +572,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
      * @return Assertion
      * @throws Exception
      */
-    public Assertion setSignature(Assertion assertion, SignKeyHolder cred) throws Exception{
+    public Assertion setSignature(Assertion assertion, SignKeyHolder cred) throws Exception {
 
         // Build the signature object and set the credentials.
         Signature signature = (Signature) buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
@@ -555,30 +590,24 @@ public class SAML2TokenIssuer implements TokenIssuer {
             data.getX509Certificates().add(cert);
             keyInfo.getX509Datas().add(data);
             signature.setKeyInfo(keyInfo);
+            assertion.setSignature(signature);
+            signatureList.add(signature);
 
-
-
-
-        assertion.setSignature(signature);
-        signatureList.add(signature);
-
-        //Marshall and Sign
-        MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
-        Marshaller marshaller = marshallerFactory.getMarshaller(assertion);
-        marshaller.marshall(assertion);
-        org.apache.xml.security.Init.init();
-        Signer.signObjects(signatureList);
+            //Marshall and Sign
+            MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
+            Marshaller marshaller = marshallerFactory.getMarshaller(assertion);
+            marshaller.marshall(assertion);
+            org.apache.xml.security.Init.init();
+            Signer.signObjects(signatureList);
         } catch (CertificateEncodingException e) {
             throw new TrustException("Error in setting the signature", e);
-        }  catch (SignatureException e) {
+        } catch (SignatureException e) {
             throw new TrustException("errorMarshellingOrSigning", e);
         } catch (MarshallingException e) {
             throw new TrustException("errorMarshellingOrSigning", e);
         }
 
-        if(log.isDebugEnabled()){
-            log.debug("SAML2.0 assertion is marshalled and signed..");
-        }
+        log.debug("SAML2.0 assertion is marshalled and signed..");
 
         return assertion;
     }
@@ -632,9 +661,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
             throw new TrustException("Error creating issuer signature");
         }
 
-        if(log.isDebugEnabled()){
-            log.debug("SignKeyHolder object is created with the credentials..");
-        }
+        log.debug("SignKeyHolder object is created with the credentials..");
 
         return signKeyHolder;
     }
@@ -709,9 +736,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         //add attributes to the attribute statement
         attrstmt.getAttributes().addAll(Arrays.asList(attributes));
 
-        if(log.isDebugEnabled()){
-            log.debug("SAML2.0 attribute statement is constructed successfully.");
-        }
+        log.debug("SAML2.0 attribute statement is constructed successfully.");
 
         return attrstmt;
     }
@@ -754,9 +779,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         authContext.setAuthnContextClassRef(authCtxClassRef);
         authStmt.setAuthnContext(authContext);
 
-        if(log.isDebugEnabled()){
-            log.debug("SAML2.0 authentication statement is constructed successfully.");
-        }
+        log.debug("SAML2.0 authentication statement is constructed successfully.");
 
         return authStmt;
     }

@@ -27,9 +27,11 @@ import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.SupportingPolicyData;
+import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.Constants;
 import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.IssuedToken;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
 import org.apache.ws.secpolicy.model.SupportingToken;
@@ -70,7 +72,7 @@ import java.util.Map.Entry;
 
 public abstract class BindingBuilder {
     private static Log log = LogFactory.getLog(BindingBuilder.class);
-            
+
     private Element insertionLocation;
     
     protected String mainSigId = null;
@@ -87,7 +89,7 @@ public abstract class BindingBuilder {
      */
     protected void addTimestamp(RampartMessageData rmd) {
         log.debug("Adding timestamp");
-        
+
         WSSecTimestamp timestampBuilder = new WSSecTimestamp();
         timestampBuilder.setWsConfig(rmd.getConfig());
 
@@ -97,9 +99,10 @@ public abstract class BindingBuilder {
 
         timestampBuilder.build(rmd.getDocument(), rmd
                 .getSecHeader());
-        
-        log.debug("Timestamp id: " + timestampBuilder.getId());
 
+        if (log.isDebugEnabled()) {
+            log.debug("Timestamp id: " + timestampBuilder.getId());
+        }
         rmd.setTimestampId(timestampBuilder.getId());
         
         this.timestampElement = timestampBuilder.getElement();
@@ -113,9 +116,9 @@ public abstract class BindingBuilder {
      * @throws RampartException
      */
     protected WSSecUsernameToken addUsernameToken(RampartMessageData rmd, UsernameToken token) throws RampartException {
-       
+
         log.debug("Adding a UsernameToken");
-        
+
         RampartPolicyData rpd = rmd.getPolicyData();
         
         //Get the user
@@ -130,8 +133,10 @@ public abstract class BindingBuilder {
         }
         
         if(user != null && !"".equals(user)) {
-            log.debug("User : " + user);
-            
+            if (log.isDebugEnabled()) {
+                log.debug("User : " + user);
+            }
+
             // If NoPassword property is set we don't need to set the password
             if (token.isNoPassword()) {
                 WSSecUsernameToken utBuilder = new WSSecUsernameToken();
@@ -170,9 +175,7 @@ public abstract class BindingBuilder {
                 //get the password
                 password = cb[0].getPassword();
             }
-            
-            log.debug("Password : " + password);
-            
+
             if(password != null && !"".equals(password)) {
                 //If the password is available then build the token
                 
@@ -258,9 +261,11 @@ public abstract class BindingBuilder {
         WSSecSignature sig = new WSSecSignature();
         checkForX509PkiPath(sig, token);
         sig.setWsConfig(rmd.getConfig());
-        
-        log.debug("Token inclusion: " + token.getInclusion());
-        
+
+        if (log.isDebugEnabled()) {
+            log.debug("Token inclusion: " + token.getInclusion());
+        }
+
         RampartUtil.setKeyIdentifierType(rmd, sig, token);
 
         String user = null;
@@ -270,21 +275,28 @@ public abstract class BindingBuilder {
         }
 
         // Get the user - First check whether userCertAlias present
-        if (user == null) {
-            user = rpd.getRampartConfig().getUserCertAlias();
+        RampartConfig rampartConfig = rpd.getRampartConfig();
+        if(rampartConfig == null) {
+        	throw new RampartException("rampartConfigMissing");
+        }
+        
+		if (user == null) {
+            user = rampartConfig.getUserCertAlias();
         }
         
         // If userCertAlias is not present, use user property as Alias
         
         if (user == null) {
-            user = rpd.getRampartConfig().getUser();
+            user = rampartConfig.getUser();
         }
             
         String password = null;
 
         if(user != null && !"".equals(user)) {
-            log.debug("User : " + user);
-            
+            if (log.isDebugEnabled()) {
+                log.debug("User : " + user);
+            }
+
             //Get the password
             CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
             
@@ -300,7 +312,9 @@ public abstract class BindingBuilder {
                 handler.handle(cb);
                 if(cb[0].getPassword() != null && !"".equals(cb[0].getPassword())) {
                     password = cb[0].getPassword();
-                    log.debug("Password : " + password);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Password : " + password);
+                    }
                 } else {
                     //If there's no password then throw an exception
                     throw new RampartException("noPasswordForUser", 
@@ -320,12 +334,13 @@ public abstract class BindingBuilder {
         }
         
         sig.setUserInfo(user, password);
-        sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
-        sig.setSigCanonicalization(rpd.getAlgorithmSuite().getInclusiveC14n());
+        AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
+		sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
+        sig.setSigCanonicalization(algorithmSuite.getInclusiveC14n());
+        sig.setDigestAlgo(algorithmSuite.getDigest());
         
         try {
-            sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
-                    .getRampartConfig(), rmd.getCustomClassLoader()), 
+            sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rampartConfig, rmd.getCustomClassLoader()), 
                     rmd.getSecHeader());
         } catch (WSSecurityException e) {
             throw new RampartException("errorInSignatureWithX509Token", e);
@@ -348,7 +363,7 @@ public abstract class BindingBuilder {
         if(suppTokens != null && suppTokens.getTokens() != null &&
                 suppTokens.getTokens().size() > 0) {
             log.debug("Processing supporting tokens");
-            
+
             ArrayList tokens = suppTokens.getTokens();
             for (Iterator iter = tokens.iterator(); iter.hasNext();) {
                 Token token = (Token) iter.next();
@@ -531,7 +546,8 @@ public abstract class BindingBuilder {
         
         RampartPolicyData rpd = rmd.getPolicyData();
         
-        if(policyToken.isDerivedKeys()) {
+        AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
+		if(policyToken.isDerivedKeys()) {
             try {
                 WSSecDKSign dkSign = new WSSecDKSign();  
                 
@@ -577,8 +593,9 @@ public abstract class BindingBuilder {
                 }
 
                 //Set the algo info
-                dkSign.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
-                dkSign.setDerivedKeyLength(rpd.getAlgorithmSuite().getSignatureDerivedKeyLength()/8);
+                dkSign.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
+                dkSign.setDerivedKeyLength(algorithmSuite.getSignatureDerivedKeyLength()/8);
+//                dkSign.setDigestAlgorithm(algorithmSuite.getDigest()); //uncomment when wss4j version is updated
                 if(tok instanceof EncryptedKeyToken) {
                     //Set the value type of the reference
                     dkSign.setCustomValueType(WSConstants.SOAPMESSAGE_NS11 + "#"
@@ -691,8 +708,9 @@ public abstract class BindingBuilder {
                 
                 sig.setCustomTokenId(sigTokId);
                 sig.setSecretKey(tok.getSecret());
-                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getAsymmetricSignature());
-                sig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
+                sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
+                sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
+                sig.setDigestAlgo(algorithmSuite.getDigest());
                 sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
                         .getRampartConfig(), rmd.getCustomClassLoader()),
                         rmd.getSecHeader());

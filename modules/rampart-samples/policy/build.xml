@@ -24,17 +24,22 @@
 	<property name="keys.dir" value="../keys"/>
 	<property name="temp.client.dir" value="build/temp_client"/>
 	
-	<property name="addressing.mar" value="addressing-SNAPSHOT.mar"/>
-	<property name="rampart.mar" value="rampart-SNAPSHOT.mar"/>
-	<property name="rahas.mar" value="rahas-SNAPSHOT.mar"/>
-
 	<property name="client.port" value="8080"/>
 	<property name="server.port" value="8080"/>
 	
 	<property name="sample.services.url" value="http://localhost:${client.port}/axis2/services"/>
 	
     <property environment="env"/>
-    	
+    
+    <property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
+    
+    <path id="runtime.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+        <pathelement location="${env.AXIS2_HOME}/conf"/>
+    </path>
+    
 	<target name="check.dependency" unless="env.AXIS2_HOME">
         <echo message="AXIS2_HOME must be set"/>
     </target>
@@ -130,16 +135,19 @@
 	   	<sequential>
 	   		
 	   		<property name="modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
-	   		<property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
 	   		
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}"/>
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}/services"/>
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}/modules"/>
 	   		
 	   		<!-- copy modules -->
-	   		<copy file="${modules.dir}/${addressing.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${addressing.mar}" overwrite="true"/>
-	   		<copy file="${modules.dir}/${rampart.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rampart.mar}" overwrite="true"/>
-	   		<copy file="${modules.dir}/${rahas.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rahas.mar}" overwrite="true"/>
+	   		<copy todir="${service.repos.dir}/sample@{sample.number}/modules">
+	   		    <fileset dir="${modules.dir}">
+	   		        <include name="addressing-*.mar"/>
+	   		        <include name="rampart-*.mar"/>
+	   		        <include name="rahas-*.mar"/>
+	   		    </fileset>
+	   		</copy>
 	   		
 	   		<!-- create service -->
 	   		<mkdir dir="${temp.dir}"/>
@@ -169,11 +177,7 @@
             <java classname="org.apache.axis2.transport.http.SimpleHTTPServer" fork="true">
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
-                    <classpath>
-                            <fileset dir="${lib.dir}">
-                                    <include name="**/*.jar"/>
-                            </fileset>
-                    </classpath>
+                    <classpath refid="runtime.classpath"/>
             </java>
 
 	   </sequential>
@@ -185,16 +189,19 @@
         <sequential>
             
             <property name="modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
-            <property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
             
             <mkdir dir="${service.repos.dir}/sample@{sample.number}"/>
             <mkdir dir="${service.repos.dir}/sample@{sample.number}/services"/>
             <mkdir dir="${service.repos.dir}/sample@{sample.number}/modules"/>
             
             <!-- copy modules -->
-            <copy file="${modules.dir}/${addressing.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${addressing.mar}" overwrite="true"/>
-            <copy file="${modules.dir}/${rampart.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rampart.mar}" overwrite="true"/>
-            <copy file="${modules.dir}/${rahas.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rahas.mar}" overwrite="true"/>
+	   		<copy todir="${service.repos.dir}/sample@{sample.number}/modules">
+	   		    <fileset dir="${modules.dir}">
+	   		        <include name="addressing-*.mar"/>
+	   		        <include name="rampart-*.mar"/>
+	   		        <include name="rahas-*.mar"/>
+	   		    </fileset>
+	   		</copy>
             
             <!-- create service -->
             <mkdir dir="${temp.dir}"/>
@@ -225,11 +232,7 @@
             <java classname="org.apache.axis2.transport.http.SimpleHTTPServer" fork="true">
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
-                    <classpath>
-                            <fileset dir="${lib.dir}">
-                                    <include name="**/*.jar"/>
-                            </fileset>
-                    </classpath>
+                    <classpath refid="runtime.classpath"/>
             </java>
 
        </sequential>
@@ -240,7 +243,6 @@
 	   	<sequential>
 	   		
 	   		<property name="modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
-	   		<property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
 	   		
 	   		<!-- Create the client repo -->
 	   		<mkdir dir="${client.repos.dir}/sample@{sample.number}"/>
@@ -248,8 +250,12 @@
 	   		<mkdir dir="${client.repos.dir}/sample@{sample.number}/modules"/>
 	   		
 	   		<!-- copy modules -->
-	   		<copy file="${modules.dir}/${addressing.mar}" tofile="${client.repos.dir}/sample@{sample.number}/modules/${addressing.mar}" overwrite="true"/>
-	   		<copy file="${modules.dir}/${rampart.mar}" tofile="${client.repos.dir}/sample@{sample.number}/modules/${rampart.mar}" overwrite="true"/>
+	   		<copy todir="${client.repos.dir}/sample@{sample.number}/modules">
+	   		    <fileset dir="${modules.dir}">
+	   		        <include name="addressing-*.mar"/>
+	   		        <include name="rampart-*.mar"/>
+	   		    </fileset>
+	   		</copy>
 	   		
 	   		<mkdir dir="${temp.client.dir}"/>
 	   		
@@ -273,9 +279,7 @@
                     <arg value="${client.repos.dir}/sample@{sample.number}"/>
                     <arg value="sample@{sample.number}/policy.xml"/>
                     <classpath>
-                        <fileset dir="${lib.dir}">
-                        	<include name="**/*.jar"/>
-                        </fileset>
+                        <path refid="runtime.classpath"/>
                   		<dirset dir="${temp.client.dir}" />
                     </classpath>
             </java>

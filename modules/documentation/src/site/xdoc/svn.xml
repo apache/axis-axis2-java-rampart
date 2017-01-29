@@ -71,7 +71,7 @@ information, please read the ASF <a href=
 <p>Once you have successfully installed Subversion, you can check
 out Rampart trunk by following these steps:</p>
 <ol type="1">
-<li>Run <strong>svn co &lt;repository URL&gt; axis2</strong> where
+<li>Run <strong>svn co &lt;repository URL&gt; rampart</strong> where
 the repository URL is one of the URLs from the previous list.</li>
 <li>This step will check out the latest version of the Rampart Java
 codebase to a directory named "rampart". The second parameter to the

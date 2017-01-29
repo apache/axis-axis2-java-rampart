@@ -28,7 +28,7 @@ import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
 import org.apache.ws.security.message.token.SecurityTokenReference;
-import org.opensaml.SAMLAssertion;
+import org.opensaml.saml1.core.Assertion;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
@@ -84,7 +84,7 @@ public class RahasData {
     
     private String  claimDialect;
     
-    private SAMLAssertion assertion;
+    private Assertion assertion;
     /**
      * Create a new RahasData instance and populate it with the information from
      * the request.
@@ -182,7 +182,7 @@ public class RahasData {
                         this.clientCert = certificates[0];
                         this.principal = this.clientCert.getSubjectDN();
                     } else if (act == WSConstants.ST_UNSIGNED) {
-                        this.assertion = (SAMLAssertion) wser
+                        this.assertion = (Assertion) wser
                                 .get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
                         
                     }
@@ -305,15 +305,15 @@ public class RahasData {
      *
      */
     private void processClaims() throws TrustException{
-        	claimElem = this.rstElement
-        			.getFirstChildWithName(new QName(this.wstNs,
-        					RahasConstants.IssuanceBindingLocalNames.CLAIMS));
-        	
-        	if(claimElem != null){
-        		claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
-        					RahasConstants.ATTR_CLAIMS_DIALECT));
-        	}
-    	
+        claimElem = this.rstElement
+                .getFirstChildWithName(new QName(this.wstNs,
+                        RahasConstants.IssuanceBindingLocalNames.CLAIMS));
+        
+        if(claimElem != null){
+            claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
+                    RahasConstants.ATTR_CLAIMS_DIALECT));
+        }
+        
     }
     
     private void processValidateTarget()throws TrustException{
@@ -335,7 +335,7 @@ public class RahasData {
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
                 } else if(str.containsKeyIdentifier()){
-                	tokenId = str.getKeyIdentifierValue();
+                    tokenId = str.getKeyIdentifierValue();
                 }
             } catch (WSSecurityException e) {
                 throw new TrustException("errorExtractingTokenId",e);
@@ -361,7 +361,7 @@ public class RahasData {
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
                 } else if(str.containsKeyIdentifier()){
-                	tokenId = str.getKeyIdentifierValue();
+                    tokenId = str.getKeyIdentifierValue();
                 }
                 if(tokenId == null){
                     if(str.containsKeyIdentifier()){
@@ -535,13 +535,13 @@ public class RahasData {
         this.ephmeralKey = ephmeralKey;
     }
 
-	public String getClaimDialect() {
-		return claimDialect;
-	}
+    public String getClaimDialect() {
+        return claimDialect;
+    }
 
-	public OMElement getClaimElem() {
-		return claimElem;
-	}
+    public OMElement getClaimElem() {
+        return claimElem;
+    }
 
     public OMElement getAppliesToEpr() {
         return appliesToEpr;

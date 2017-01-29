@@ -16,23 +16,12 @@
 
 package org.apache.rahas.client;
 
-import java.io.IOException;
-import java.util.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.xml.namespace.QName;
-
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMException;
+import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.om.util.Base64;
-import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
@@ -65,9 +54,23 @@ import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.token.Reference;
 import org.apache.ws.security.processor.EncryptedKeyProcessor;
+import org.apache.ws.security.util.UUIDGenerator;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Element;
+
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 public class STSClient {
 
@@ -389,6 +392,22 @@ public class STSClient {
     private Token processIssueResponse(int version, OMElement result, 
             String issuerAddress) throws TrustException {
         OMElement rstr = result;
+
+        /**
+         * TODO :-
+         * There are 3 mechanisms to establish a security context token.
+         * They are,
+         * 1. Security context token created by a security token service
+         * 2. Security context token created by one of the communicating parties and propagated with a
+         * message
+         * 3. Security context token created through negotiation/exchanges
+         *
+         * As per now we are only supporting case 1. Therefore we always expect a
+         * wst:RequestSecurityTokenResponseCollection in the incoming message.
+         *
+         * This only applies when we use specification http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512
+         */
+
         if (version == RahasConstants.VERSION_05_12) {
             //The WS-SX result will be an RSTRC
             rstr = result.getFirstElement();
@@ -457,8 +476,9 @@ public class STSClient {
             } else if (child.getQName().equals(new QName(ns, WSConstants.ENC_KEY_LN))) {
                 try {
                     Element domChild = (Element) new StAXOMBuilder(
-                            DOOMAbstractFactory.getOMFactory(), child
-                            .getXMLStreamReader()).getDocumentElement();
+                            OMAbstractFactory.getMetaFactory(
+                            		OMAbstractFactory.FEATURE_DOM).getOMFactory(), 
+                            child.getXMLStreamReader()).getDocumentElement();
 
                     EncryptedKeyProcessor processor = new EncryptedKeyProcessor();
 
@@ -549,8 +569,8 @@ public class STSClient {
             id = token.getAttributeValue(new QName(WSConstants.WSU_NS, "Id"));
             if ( id == null )
             {
-            	// If we are dealing with a SAML Assetion, look for AssertionID.
-            	id = token.getAttributeValue(new QName( "AssertionID"));
+                // If we are dealing with a SAML Assetion, look for AssertionID.
+                id = token.getAttributeValue(new QName( "AssertionID"));
             }
         }
         return id;
@@ -601,8 +621,7 @@ public class STSClient {
                 //find the AlgorithmSuite assertion
                 if (tempAssertion instanceof Binding) {
 
-                    log.debug("Extracting algo suite from issuer " +
-                              "policy binding");
+                    log.debug("Extracting algo suite from issuer policy binding");
 
                     this.algorithmSuite = ((Binding) tempAssertion)
                             .getAlgorithmSuite();
@@ -620,12 +639,10 @@ public class STSClient {
                 Assertion tempAssertion = (Assertion) iter.next();
                 //find the Trust10 assertion
                 if (tempAssertion instanceof Trust10) {
-                    log.debug("Extracting Trust10 assertion from " +
-                              "service policy");
+                    log.debug("Extracting Trust10 assertion from service policy");
                     this.trust10 = (Trust10) tempAssertion;
                 } else if (tempAssertion instanceof Trust13) {
-                    log.debug("Extracting Trust13 assertion from " +
-                    "service policy");
+                    log.debug("Extracting Trust13 assertion from service policy");
                     this.trust13 = (Trust13) tempAssertion;
                 }
             }
@@ -643,8 +660,10 @@ public class STSClient {
     private OMElement createIssueRequest(String requestType,
                                          String appliesTo) throws TrustException {
 
-        log.debug("Creating request with request type: " + requestType +
-                  " and applies to: " + appliesTo);
+        if (log.isDebugEnabled()) {
+            log.debug("Creating request with request type: " + requestType +
+                      " and applies to: " + appliesTo);
+        }
 
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
 
@@ -657,7 +676,9 @@ public class STSClient {
         //Copy over the elements from the template
         if (this.rstTemplate != null) {
 
-            log.debug("Using RSTTemplate: " + this.rstTemplate.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Using RSTTemplate: " + this.rstTemplate.toString());
+            }
 
             Iterator templateChildren = rstTemplate.getChildElements();
             while (templateChildren.hasNext()) {
@@ -674,7 +695,9 @@ public class STSClient {
                             (childElem.getText() != null && !"".equals(childElem.getText())) ?
                             Integer.parseInt(childElem.getText()) :
                             -1;
-                    log.debug("Key size from RSTTemplate: " + this.keySize);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Key size from RSTTemplate: " + this.keySize);
+                    }
                 }
             }
         }
@@ -700,8 +723,9 @@ public class STSClient {
                                     getMaximumSymmetricKeyLength()/8);
                     binSec.setText(Base64.encode(this.requestorEntropy));
 
-                    log.debug("Clien entropy : "
-                              + Base64.encode(this.requestorEntropy));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Clien entropy : " + Base64.encode(this.requestorEntropy));
+                    }
 
                     // Add the ComputedKey element
                     TrustUtil.createComputedKeyAlgorithm(this.version, rst,
@@ -725,8 +749,9 @@ public class STSClient {
                                     getMaximumSymmetricKeyLength()/8);
                     binSec.setText(Base64.encode(this.requestorEntropy));
 
-                    log.debug("Clien entropy : "
-                              + Base64.encode(this.requestorEntropy));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Clien entropy : " + Base64.encode(this.requestorEntropy));
+                    }
 
                     // Add the ComputedKey element
                     TrustUtil.createComputedKeyAlgorithm(this.version, rst,
@@ -748,9 +773,11 @@ public class STSClient {
     }
     
     private OMElement createValidateRequest(String requestType, String tokenId) throws TrustException {
-        
-        log.debug("Creating request with request type: " + requestType);
-        
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating request with request type: " + requestType);
+        }
+
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
         
         TrustUtil.createRequestTypeElement(this.version, rst, requestType);
@@ -788,9 +815,11 @@ public class STSClient {
         
         String requestType =
             TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_RENEW;
-        
-        log.debug("Creating request with request type: " + requestType);
-        
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating request with request type: " + requestType);
+        }
+
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
         
         TrustUtil.createRequestTypeElement(this.version, rst, requestType);

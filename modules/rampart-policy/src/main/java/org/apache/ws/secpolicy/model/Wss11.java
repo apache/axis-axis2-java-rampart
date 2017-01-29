@@ -80,69 +80,49 @@ public class Wss11 extends Wss10 {
     }
     
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
+        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(namespaceURI);
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-
         // <sp:Wss11>
-        writer.writeStartElement(prefix, localname, namespaceURI);
-        
-        // xmlns:sp=".."
-        writer.writeNamespace(prefix, namespaceURI);
-        
-        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
-        if (pPrefix == null) {
-            writer.setPrefix(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getNamespaceURI());
-        }
+        writeStartElement(writer, prefix, localname, namespaceURI);
         
         // <wsp:Policy>
-        writer.writeStartElement(prefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+        writeStartElement(writer, SPConstants.POLICY);
         
         // <sp:MustSupportRefKeyIndentifier />
         if (isMustSupportRefKeyIdentifier()) {
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_KEY_IDENTIFIER , namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_KEY_IDENTIFIER , namespaceURI);
         }
         
         if (isMustSupportRefIssuerSerial()) {
             // <sp:MustSupportRefIssuerSerial />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_ISSUER_SERIAL , namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_ISSUER_SERIAL , namespaceURI);
         }
         
         if (isMustSupportRefExternalURI()) {
             // <sp:MustSupportRefExternalURI />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_EXTERNAL_URI , namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_EXTERNAL_URI , namespaceURI);
         }
         
         if (isMustSupportRefEmbeddedToken()) {
             // <sp:MustSupportRefEmbeddedToken />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_EMBEDDED_TOKEN , namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_EMBEDDED_TOKEN , namespaceURI);
         }
         
         if (isMustSupportRefThumbprint()) {
             // <sp:MustSupportRefThumbprint />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_THUMBPRINT , namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_THUMBPRINT , namespaceURI);
         }
         
         if (isMustSupportRefEncryptedKey()) {
             // <sp:MustSupportRefEncryptedKey />
-            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_REF_ENCRYPTED_KEY , namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_REF_ENCRYPTED_KEY , namespaceURI);
         }
         
         if (isRequireSignatureConfirmation()) {
             // <sp:RequireSignatureConfirmation />
-            writer.writeStartElement(prefix, SPConstants.REQUIRE_SIGNATURE_CONFIRMATION , namespaceURI);
-            writer.writeEndElement();
+            writeEmptyElement(writer, prefix, SPConstants.REQUIRE_SIGNATURE_CONFIRMATION , namespaceURI);
         }
         
         // </wsp:Policy>

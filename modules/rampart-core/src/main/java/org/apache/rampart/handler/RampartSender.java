@@ -36,7 +36,7 @@ import org.apache.ws.security.WSSecurityException;
 public class RampartSender implements Handler {
 	
 	private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
-	
+
     private static HandlerDescription EMPTY_HANDLER_METADATA =
         new HandlerDescription("default Handler");
 
@@ -54,10 +54,11 @@ public class RampartSender implements Handler {
     }
 
     public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
-        
+
         if (!msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
-          return InvocationResponse.CONTINUE;        
-        }        
+            return InvocationResponse.CONTINUE;
+        }
+
 
         MessageBuilder builder = new MessageBuilder();
         try {
@@ -67,7 +68,13 @@ public class RampartSender implements Handler {
         } catch (WSSPolicyException e) {
             throw new AxisFault(e.getMessage(), e);
         } catch (RampartException e) {
-            throw new AxisFault(e.getMessage(), e);
+            // If a framework exception is occurred while processing a security fault
+            // send the original fault to the client.
+            if (msgContext.isProcessingFault()) {
+                return InvocationResponse.CONTINUE;
+            } else {
+                throw new AxisFault(e.getMessage(), e);
+            }
         }
         
         if(mlog.isDebugEnabled()){

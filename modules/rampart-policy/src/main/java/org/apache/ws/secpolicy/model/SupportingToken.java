@@ -282,30 +282,11 @@ public class SupportingToken extends AbstractSecurityAssertion implements
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String namespaceURI = getName().getNamespaceURI();
-
-        String prefix = writer.getPrefix(namespaceURI);
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-
-        String localname = getName().getLocalPart();
-
         // <sp:SupportingToken>
-        writer.writeStartElement(prefix, localname, namespaceURI);
-        
-        // xmlns:sp=".."
-        writer.writeNamespace(prefix, namespaceURI);
+        writeStartElement(writer, getName());
 
-        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
-        if (pPrefix == null) {
-            pPrefix = SPConstants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
-        }
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(),
-                SPConstants.POLICY.getNamespaceURI());
+        writeStartElement(writer, SPConstants.POLICY);
 
         Token token;
         for (Iterator iterator = getTokens().iterator(); iterator.hasNext();) {

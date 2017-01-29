@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
 
 public class STSMessageReceiver extends AbstractInOutMessageReceiver {
     
-	private static final Log log = LogFactory.getLog(STSMessageReceiver.class);
+    private static final Log log = LogFactory.getLog(STSMessageReceiver.class);
     
     public void invokeBusinessLogic(MessageContext inMessage,
             MessageContext outMessage) throws AxisFault {
