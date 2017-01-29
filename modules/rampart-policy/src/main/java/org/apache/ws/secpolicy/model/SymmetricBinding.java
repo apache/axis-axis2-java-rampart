@@ -24,12 +24,14 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.All;
+import org.apache.neethi.Assertion;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.WSSPolicyException;
 
 public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
@@ -52,11 +54,13 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param encryptionToken The encryptionToken to set.
+     * @throws WSSPolicyException 
      */
-    public void setEncryptionToken(EncryptionToken encryptionToken)  {
+    public void setEncryptionToken(EncryptionToken encryptionToken) 
+    		throws WSSPolicyException  {
         if(this.protectionToken != null) {
-//            throw new WSSPolicyException("Cannot use an EncryptionToken in a " +
-//                    "SymmetricBinding when there is a ProtectionToken");
+            throw new WSSPolicyException("Cannot use an EncryptionToken in a " +
+                    "SymmetricBinding when there is a ProtectionToken");
         }
         this.encryptionToken = encryptionToken;
     }
@@ -70,12 +74,14 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param protectionToken The protectionToken to set.
+     * @throws WSSPolicyException 
      */
-    public void setProtectionToken(ProtectionToken protectionToken)  {
+    public void setProtectionToken(ProtectionToken protectionToken) 
+    		throws WSSPolicyException  {
         if(this.encryptionToken != null || this.signatureToken != null) {
-//            throw new WSSPolicyException("Cannot use a ProtectionToken in a " +
-//            "SymmetricBinding when there is a SignatureToken or an" +
-//            "EncryptionToken");
+            throw new WSSPolicyException("Cannot use a ProtectionToken in a " +
+            "SymmetricBinding when there is a SignatureToken or an" +
+            "EncryptionToken");
         }
         this.protectionToken = protectionToken;
     }
@@ -89,11 +95,13 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param signatureToken The signatureToken to set.
+     * @throws WSSPolicyException 
      */
-    public void setSignatureToken(SignatureToken signatureToken) {
+    public void setSignatureToken(SignatureToken signatureToken) 
+    		throws WSSPolicyException {
         if(this.protectionToken != null) {
-//            throw new WSSPolicyException("Cannot use a SignatureToken in a " +
-//                    "SymmetricBinding when there is a ProtectionToken");
+            throw new WSSPolicyException("Cannot use a SignatureToken in a " +
+                    "SymmetricBinding when there is a ProtectionToken");
         }
         this.signatureToken = signatureToken;
     }
@@ -113,7 +121,7 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         }
         
         AlgorithmSuite algorithmSuite = getAlgorithmSuite();
-        List configurations = algorithmSuite.getConfigurations();
+        List<Assertion> configurations = algorithmSuite.getConfigurations();
         
         Policy policy = new Policy();
         ExactlyOne exactlyOne = new ExactlyOne();
@@ -121,30 +129,33 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         All wrapper;
         SymmetricBinding symmetricBinding;
         
-        for (Iterator iterator = configurations.iterator(); iterator.hasNext();) {
-            wrapper = new All();
-            symmetricBinding = new SymmetricBinding(this.version);
-            
-            algorithmSuite = (AlgorithmSuite) iterator.next();
-            symmetricBinding.setAlgorithmSuite(algorithmSuite);
-            
-            symmetricBinding.setEncryptionToken(getEncryptionToken());
-            symmetricBinding.setEntireHeadersAndBodySignatures(isEntireHeadersAndBodySignatures());
-            symmetricBinding.setIncludeTimestamp(isIncludeTimestamp());
-            symmetricBinding.setLayout(getLayout());
-            symmetricBinding.setProtectionOrder(getProtectionOrder());
-            symmetricBinding.setProtectionToken(getProtectionToken());
-            symmetricBinding.setSignatureProtection(isSignatureProtection());
-            symmetricBinding.setSignatureToken(getSignatureToken());
-            symmetricBinding.setSignedEndorsingSupportingTokens(getSignedEndorsingSupportingTokens());
-            symmetricBinding.setSignedSupportingToken(getSignedSupportingToken());
-            symmetricBinding.setTokenProtection(isTokenProtection());
-            
-            symmetricBinding.setNormalized(true);
-            wrapper.addPolicyComponent(symmetricBinding);
-            exactlyOne.addPolicyComponent(wrapper);
+        try {
+	        for (Iterator<Assertion> iterator = configurations.iterator(); iterator.hasNext();) {
+	            wrapper = new All();
+	            symmetricBinding = new SymmetricBinding(this.version);
+	            
+	            algorithmSuite = (AlgorithmSuite) iterator.next();
+	            symmetricBinding.setAlgorithmSuite(algorithmSuite);
+	            
+	            symmetricBinding.setEncryptionToken(getEncryptionToken());
+	            symmetricBinding.setEntireHeadersAndBodySignatures(isEntireHeadersAndBodySignatures());
+	            symmetricBinding.setIncludeTimestamp(isIncludeTimestamp());
+	            symmetricBinding.setLayout(getLayout());
+	            symmetricBinding.setProtectionOrder(getProtectionOrder());
+	            symmetricBinding.setProtectionToken(getProtectionToken());
+	            symmetricBinding.setSignatureProtection(isSignatureProtection());
+	            symmetricBinding.setSignatureToken(getSignatureToken());
+	            symmetricBinding.setSignedEndorsingSupportingTokens(getSignedEndorsingSupportingTokens());
+	            symmetricBinding.setSignedSupportingToken(getSignedSupportingToken());
+	            symmetricBinding.setTokenProtection(isTokenProtection());
+	            
+	            symmetricBinding.setNormalized(true);
+	            wrapper.addPolicyComponent(symmetricBinding);
+	            exactlyOne.addPolicyComponent(wrapper);
+	        }
+        } catch (WSSPolicyException e) {
+        	throw new IllegalArgumentException(e);
         }
-        
         policy.addPolicyComponent(exactlyOne);
         return policy;
     }

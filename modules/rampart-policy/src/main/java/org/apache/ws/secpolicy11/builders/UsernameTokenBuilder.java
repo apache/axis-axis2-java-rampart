@@ -53,13 +53,13 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
         
         OMElement policyElement = element.getFirstElement();
         
-        if (policyElement != null && !policyElement.getQName().equals(org.apache.neethi.Constants.Q_ELEM_POLICY)) {
+        if (policyElement != null && policyElement.getQName().equals(org.apache.neethi.Constants.Q_ELEM_POLICY)) {
         
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
             policy = (Policy) policy.normalize(false);
             
-            for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-                processAlternative((List) iterator.next(), usernameToken);
+            for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+                processAlternative(iterator.next(), usernameToken);
                 
                 /*
                  * since there should be only one alternative
@@ -75,10 +75,10 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP11Constants.USERNAME_TOKEN};
     }
 
-    private void processAlternative(List assertions, UsernameToken parent) {
+    private void processAlternative(List<Assertion> assertions, UsernameToken parent) {
                 
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            Assertion assertion = (Assertion) iterator.next();
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+            Assertion assertion = iterator.next();
             QName qname = assertion.getName();
             
             if (SP11Constants.WSS_USERNAME_TOKEN10.equals(qname)) {

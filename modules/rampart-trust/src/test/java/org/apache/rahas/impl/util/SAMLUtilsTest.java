@@ -26,11 +26,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.Rahas;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
-import org.apache.rahas.impl.AbstractIssuerConfig;
+import org.apache.rahas.test.util.AbstractTestCase;
 import org.apache.rahas.test.util.TestUtil;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Base64;
 import org.joda.time.DateTime;
@@ -59,29 +58,17 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * A test class for SAML 1 Token Issuer.
  */
-public class SAMLUtilsTest extends TestCase{
-
-    protected static MarshallerFactory marshallerFactory;
-
-    private static final boolean PRINT = false;
+public class SAMLUtilsTest extends AbstractTestCase {
 
     private static final Log log = LogFactory.getLog(SAMLUtilsTest.class);
 
-    public void setUp() throws AxisFault {
-        Rahas rahas = new Rahas();
-        rahas.init(null, null);
-
-        marshallerFactory = Configuration.getMarshallerFactory();
-    }
-
     public void testBuildXMLObjectNegative() {
         try {
-            SAMLUtils.buildXMLObject(new QName("http://x.com", "y"));
+            CommonUtil.buildXMLObject(new QName("http://x.com", "y"));
             Assert.fail("This should throw an exception");
         } catch (TrustException e) {
         }
@@ -172,7 +159,7 @@ public class SAMLUtilsTest extends TestCase{
 
     public void testCreateKeyInfoWithX509Data() throws Exception {
 
-        X509Data x509Data = SAMLUtils.createX509Data(getTestCertificate());
+        X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
 
         org.opensaml.xml.signature.KeyInfo keyInfo = SAMLUtils.createKeyInfo(x509Data);
 
@@ -210,7 +197,7 @@ public class SAMLUtilsTest extends TestCase{
                 = SAMLUtils.createNamedIdentifier("joe,ou=people,ou=saml-demo,o=baltimore.com",
                                                     NameIdentifier.X509_SUBJECT);
 
-        X509Data x509Data = SAMLUtils.createX509Data(getTestCertificate());
+        X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
 
         org.opensaml.xml.signature.KeyInfo keyInfo = SAMLUtils.createKeyInfo(x509Data);
 
@@ -233,7 +220,7 @@ public class SAMLUtilsTest extends TestCase{
 
     public void testCreateX509Data() throws Exception {
 
-        X509Data x509Data = SAMLUtils.createX509Data(getTestCertificate());
+        X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
         Assert.assertNotNull(x509Data);
 
         marshallerFactory.getMarshaller(x509Data).marshall(x509Data);
@@ -273,16 +260,14 @@ public class SAMLUtilsTest extends TestCase{
         SOAPEnvelope env = TrustUtil.createSOAPEnvelope("http://schemas.xmlsoap.org/soap/envelope/");
         Document doc = ((Element) env).getOwnerDocument();
 
-        int keySize = 256;
-
         byte [] ephemeralKey = generateEphemeralKey(256);
 
         WSSecEncryptedKey encryptedKey
-                = SAMLUtils.getSymmetricKeyBasedKeyInfoContent(doc,
-                                            ephemeralKey, getTestCertificate(), keySize, TestUtil.getCrypto());
+                = CommonUtil.getSymmetricKeyBasedKeyInfoContent(doc,
+                                            ephemeralKey, getTestCertificate(), TestUtil.getCrypto());
 
         Assert.assertNotNull(encryptedKey.getEncryptedKeyElement());
-        printElement(encryptedKey.getEncryptedKeyElement());
+        //printElement(encryptedKey.getEncryptedKeyElement());
 
         return encryptedKey;
     }
@@ -300,13 +285,6 @@ public class SAMLUtilsTest extends TestCase{
 
 
 
-    private static void printElement(Element element) throws TransformerException {
-
-        // print xml
-        if (PRINT) {
-            System.out.println(getXMLString(element));
-        }
-    }
 
     private static X509Certificate getTestCertificate() throws IOException, WSSecurityException, TrustException {
 
@@ -315,21 +293,7 @@ public class SAMLUtilsTest extends TestCase{
         return CommonUtil.getCertificateByAlias(crypto, "apache");
     }
 
-    private static String getXMLString(Element element) throws TransformerException {
 
-        TransformerFactory transfac = TransformerFactory.newInstance();
-        Transformer trans = transfac.newTransformer();
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        trans.setOutputProperty(OutputKeys.INDENT, "yes");
-
-        // create string from xml tree
-        StringWriter sw = new StringWriter();
-        StreamResult result = new StreamResult(sw);
-        DOMSource source = new DOMSource(element);
-        trans.transform(source, result);
-        return sw.toString();
-
-    }
 
     private static boolean equals(String element1, String element2) throws ParserConfigurationException, IOException, SAXException {
 

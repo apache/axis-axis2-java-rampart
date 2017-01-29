@@ -60,28 +60,60 @@ public abstract class AbstractIssuerConfig {
     public void setAddRequestedAttachedRef(boolean addRequestedAttachedRef) {
         this.addRequestedAttachedRef = addRequestedAttachedRef;
     }
+
     public void setAddRequestedUnattachedRef(boolean addRequestedUnattachedRef) {
         this.addRequestedUnattachedRef = addRequestedUnattachedRef;
     }
+
     public void setKeyComputation(int keyComputation) {
         this.keyComputation = keyComputation;
     }
+
     public int getKeyComputation() {
         return keyComputation;
     }
+
     public void setProofKeyType(String proofKeyType) {
         this.proofKeyType = proofKeyType;
     }
+
     public void setTtl(long ttl) {
         this.ttl = ttl;
     }
+
     public void setKeySize(int keySize) {
         this.keySize = keySize;
     }
+
     public int getKeySize() {
         return keySize;
     }
+
     public String getProofKeyType() {
         return proofKeyType;
+    }
+
+    public boolean isAddRequestedAttachedRef() {
+        return addRequestedAttachedRef;
+    }
+
+    public boolean isAddRequestedUnattachedRef() {
+        return addRequestedUnattachedRef;
+    }
+
+    public long getTtl() {
+        return ttl;
+    }
+
+    public String getCryptoPropertiesFile() {
+        return cryptoPropertiesFile;
+    }
+
+    public OMElement getCryptoPropertiesElement() {
+        return cryptoPropertiesElement;
+    }
+
+    public OMElement getCryptoElement() {
+        return cryptoElement;
     }
 }

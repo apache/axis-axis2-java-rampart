@@ -18,11 +18,13 @@
 
 <project basedir="." default="clean">
 
-	<property name="service.repos.dir" value="build/service_repositories"/>
-	<property name="client.repos.dir" value="build/client_repositories"/>
-	<property name="temp.dir" value="build/temp"/>
+	<property name="build.dir" value="build"/>
+	<property name="service.repos.dir" value="${build.dir}/service_repositories"/>
+	<property name="client.repos.dir" value="${build.dir}/client_repositories"/>
+	<property name="temp.dir" value="${build.dir}/temp"/>
 	<property name="keys.dir" value="../keys"/>
-	<property name="temp.client.dir" value="build/temp_client"/>
+	<property name="temp.client.dir" value="${build.dir}/temp_client"/>
+    <property name="endorsed.dir" value="${build.dir}/endorsed"/>
 	
 	<property name="client.port" value="8080"/>
 	<property name="server.port" value="8080"/>
@@ -32,6 +34,8 @@
     <property environment="env"/>
     
     <property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
+    
+    <property name="vmargs" value=""/>
     
     <path id="runtime.classpath">
         <fileset dir="${lib.dir}">
@@ -124,9 +128,15 @@
         <create.and.run.client sample.number="08"/>
     </target>
 
+    <target name="setup">
+	<mkdir dir="${endorsed.dir}"/>
+        <get src="http://repo2.maven.org/maven2/xerces/xercesImpl/2.9.1/xercesImpl-2.9.1.jar"
+             dest="${endorsed.dir}/xercesImpl-2.9.1.jar" verbose="true"/>
+    </target>
+
 
 	<target name="clean">
-		<delete dir="build" />
+		<delete dir="${build.dir}" />
 	</target>
 	
 	<!-- Macro to create a service repo for a given sample -->
@@ -163,7 +173,11 @@
                     <exclude name="**/Client.java"/>
             </javac>
 	   		
-	   		<copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true"/>
+            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true">
+                <filterset>
+                    <filter token="port" value="${server.port}"/>
+                </filterset>
+            </copy>
 	   		<copy file="${keys.dir}/service.jks" tofile="${temp.dir}/service.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/sts.jks" tofile="${temp.dir}/sts.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/service.properties" tofile="${temp.dir}/service.properties" overwrite="true"/>
@@ -178,6 +192,7 @@
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
                     <classpath refid="runtime.classpath"/>
+                    <jvmarg line="-Djava.endorsed.dirs=${endorsed.dir} ${vmargs}"/>
             </java>
 
 	   </sequential>
@@ -217,8 +232,16 @@
                     <exclude name="**/Client.java"/>
             </javac>
             
-            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true"/>
-            <copy file="sample@{sample.number}/mex_policy.xml" tofile="${temp.dir}/mex_policy.xml" overwrite="true"/>
+            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true">
+                <filterset>
+                    <filter token="port" value="${server.port}"/>
+                </filterset>
+            </copy>
+            <copy file="sample@{sample.number}/mex_policy.xml" tofile="${temp.dir}/mex_policy.xml" overwrite="true">
+                <filterset>
+                    <filter token="port" value="${server.port}"/>
+                </filterset>
+            </copy>
             <copy file="${keys.dir}/service.jks" tofile="${temp.dir}/service.jks" overwrite="true"/>
             <copy file="${keys.dir}/sts.jks" tofile="${temp.dir}/sts.jks" overwrite="true"/>
             <copy file="${keys.dir}/service.properties" tofile="${temp.dir}/service.properties" overwrite="true"/>
@@ -233,6 +256,7 @@
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
                     <classpath refid="runtime.classpath"/>
+                    <jvmarg line="-Djava.endorsed.dirs=${endorsed.dir} ${vmargs}"/>
             </java>
 
        </sequential>
@@ -271,17 +295,23 @@
 
 	   		<copy file="${keys.dir}/client.jks" tofile="${temp.client.dir}/client.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/client.properties" tofile="${temp.client.dir}/client.properties" overwrite="true"/>
+            <copy file="sample@{sample.number}/policy.xml" tofile="${temp.client.dir}/policy.xml" overwrite="true">
+                <filterset>
+                    <filter token="port" value="${client.port}"/>
+                </filterset>
+            </copy>
 
 	   		
 	   		<!-- Run client -->
-            <java classname="org.apache.rampart.samples.policy.sample@{sample.number}.Client" fork="true">
+            <java classname="org.apache.rampart.samples.policy.sample@{sample.number}.Client" fork="true" failonerror="true">
                     <arg value="${sample.services.url}/sample@{sample.number}"/>
                     <arg value="${client.repos.dir}/sample@{sample.number}"/>
-                    <arg value="sample@{sample.number}/policy.xml"/>
+                    <arg value="${temp.client.dir}/policy.xml"/>
                     <classpath>
                         <path refid="runtime.classpath"/>
                   		<dirset dir="${temp.client.dir}" />
                     </classpath>
+                    <jvmarg line="${vmargs}"/>
             </java>
 
 <!--	   		<delete dir="${temp.client.dir}"/> -->

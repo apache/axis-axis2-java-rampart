@@ -26,12 +26,14 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.PolicyUtil;
 import org.apache.axis2.wsdl.WSDLConstants;
+import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.SimpleTokenStore;
 import org.apache.rahas.TokenStorage;
+import org.apache.rampart.handler.RampartUsernameTokenValidator;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.policy.RampartPolicyBuilder;
 import org.apache.rampart.policy.RampartPolicyData;
@@ -46,6 +48,7 @@ import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.SOAPConstants;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSConfig;
+import org.apache.ws.security.WSSecurityEngine;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.conversation.ConversationConstants;
@@ -58,6 +61,7 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class RampartMessageData {
@@ -170,6 +174,12 @@ public class RampartMessageData {
         this.msgContext = msgCtx;
         
         try {
+
+            // Set the WSSConfig
+            this.config = WSSConfig.getNewInstance();
+            
+            //Update the UsernameToken validator
+            this.config.setValidator(WSSecurityEngine.USERNAME_TOKEN, RampartUsernameTokenValidator.class);
             
             // First obtain the axis service as we have to do a null check, there can be situations 
             // where Axis Service is null
@@ -234,7 +244,7 @@ public class RampartMessageData {
                 } catch (NullPointerException e) {
                     //TODO remove this once AXIS2-4114 is fixed
                     if (axisService != null) {
-                        List<PolicyComponent> policyList = new ArrayList<PolicyComponent>();
+                        Collection<PolicyComponent> policyList = new ArrayList<PolicyComponent>();
                         policyList.addAll(axisService.getPolicySubject().getAttachedPolicyComponents());
                         AxisConfiguration axisConfiguration = axisService.getAxisConfiguration();
                         policyList.addAll(axisConfiguration.getPolicySubject().getAttachedPolicyComponents());
@@ -252,7 +262,7 @@ public class RampartMessageData {
             }
             
             if(this.servicePolicy != null){
-                List it = (List)this.servicePolicy.getAlternatives().next();
+                List<Assertion> it = this.servicePolicy.getAlternatives().next();
 
                 //Process policy and build policy data
                 this.policyData = RampartPolicyBuilder.build(it);
@@ -339,27 +349,23 @@ public class RampartMessageData {
                     msgContext.setProperty(SCT_ID, outMsgCtx.getProperty(SCT_ID));
                 }
             }
-            
-           // Check whether RampartConfig is present 
-           if (this.policyData != null && this.policyData.getRampartConfig() != null) {
-               
-               boolean timestampPrecisionInMilliseconds = Boolean.valueOf(this.policyData
-                       .getRampartConfig().getTimestampPrecisionInMilliseconds()).booleanValue();
-               
-               // This is not the default behavior, we clone the default WSSConfig to prevent this 
-               // affecting globally 
-               if (timestampPrecisionInMilliseconds == WSSConfig.getNewInstance()
-                                                           .isPrecisionInMilliSeconds()) {
-                   this.config = WSSConfig.getNewInstance();
-               } else {
-                   this.config = RampartUtil.getWSSConfigInstance();
-                   this.config.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);               
-               }
-           } else {
-               this.config = WSSConfig.getNewInstance();
-           }
-            
-           // To handle scenarios where password type is not set by default.
+
+            // Check whether RampartConfig is present
+            if (this.policyData != null && this.policyData.getRampartConfig() != null) {
+
+                boolean timestampPrecisionInMilliseconds = this.policyData
+                        .getRampartConfig().isDefaultTimestampPrecisionInMs();
+                boolean timestampStrict = this.policyData.getRampartConfig().isTimeStampStrict();
+
+
+                // We do not need earlier logic as now WSS4J returns a new instance of WSSConfig, rather
+                // than a singleton instance. Therefore modifying logic as follows,
+                this.config.setTimeStampStrict(timestampStrict);
+                this.config.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);
+
+            }
+
+            // To handle scenarios where password type is not set by default.
             this.config.setHandleCustomPasswordTypes(true);
 
             if (axisService != null) { 
@@ -384,7 +390,7 @@ public class RampartMessageData {
     private void setWSSecurityVersions(String namespace) throws RampartException {
 
         if (namespace == null || namespace.equals("")) {
-            throw new RampartException("Security policy namespace cannot be null.");
+            throw new RampartException("securityPolicyNamespaceCannotBeNull");
         }
 
         if (SP11Constants.SP_NS.equals(namespace)) {
@@ -425,7 +431,7 @@ public class RampartMessageData {
             this.servicePolicy.addAssertion(rc);
         }
 
-        List it = (List) this.servicePolicy.getAlternatives().next();
+        List<Assertion> it = this.servicePolicy.getAlternatives().next();
 
         //Process policy and build policy data
         try {
@@ -441,14 +447,6 @@ public class RampartMessageData {
      */
     public Document getDocument() {
         return document;
-    }
-
-    /**
-     * @param document The document to set.
-     * @deprecated document is derived from MessageContext passed in constructor
-     */
-    public void setDocument(Document document) {
-        this.document = document;
     }
 
     /**
@@ -502,40 +500,10 @@ public class RampartMessageData {
     }
 
     /**
-     * @param msgContext The msgContext to set.
-     * @deprecated MessageContext is set in constructor
-     */
-    public void setMsgContext(MessageContext msgContext) {
-        this.msgContext = msgContext;
-    }
-
-    /**
      * @return Returns the policyData.
      */
     public RampartPolicyData getPolicyData() {
         return policyData;
-    }
-
-    /**
-     * @param policyData The policyData to set.
-     * @deprecated Policy data determined within constructor
-     */
-    public void setPolicyData(RampartPolicyData policyData) throws RampartException {
-        this.policyData = policyData;
-        
-        try {
-            //if client side then check whether sig conf enabled 
-            //and get hold of the stored signature values
-            if(this.isInitiator && !this.sender && policyData.isSignatureConfirmation()) {
-                OperationContext opCtx = msgContext.getOperationContext();
-                MessageContext outMsgCtx = opCtx
-                        .getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-                msgContext.setProperty(WSHandlerConstants.SEND_SIGV, outMsgCtx
-                        .getProperty(WSHandlerConstants.SEND_SIGV));
-            }
-        } catch (AxisFault e) {
-            throw new RampartException("errorGettingSignatureValuesForSigconf", e);
-        }
     }
 
     /**
@@ -720,14 +688,6 @@ public class RampartMessageData {
     }
 
     /**
-     * @param wstVersion The wstVersion to set.
-     * @deprecated This is defined by the class.
-     */
-    public void setWstVersion(int wstVersion) {
-        this.wstVersion = wstVersion;
-    }
-
-    /**
      * @return Returns the secConvVersion.
      */
     public int getSecConvVersion() {
@@ -741,13 +701,6 @@ public class RampartMessageData {
         return servicePolicy;
     }
 
-    /**
-     * @param servicePolicy The servicePolicy to set.
-     * @deprecated servicePolicy determined in constructor
-     */
-    public void setServicePolicy(Policy servicePolicy) {
-        this.servicePolicy = servicePolicy;
-    }
     
     /**
      * @return Returns the timestampId.

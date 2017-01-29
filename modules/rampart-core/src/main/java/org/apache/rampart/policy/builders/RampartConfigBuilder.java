@@ -22,6 +22,7 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.rampart.policy.model.CryptoConfig;
+import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.OptimizePartsConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.policy.model.SSLConfig;
@@ -89,6 +90,16 @@ public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
         }
         
         childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.KERBEROS_CONFIG));
+        if (childElement != null) {                             
+            KerberosConfig kerberosConfig = (KerberosConfig)new KerberosConfigBuilder().
+                                      build(childElement, 
+                                      factory);
+            rampartConfig.setKerberosConfig(kerberosConfig);
+            
+        }
+        
+        childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.SIG_CRYPTO_LN));
         if (childElement != null) {
             rampartConfig.setSigCryptoConfig((CryptoConfig) factory
@@ -152,6 +163,12 @@ public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
         	OptimizePartsConfig config = (OptimizePartsConfig)new OptimizePartsBuilder().
             build(childElement, factory);
         	rampartConfig.setOptimizeParts(config);
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.TIMESTAMP_STRICT_LN));
+        if (childElement != null) {
+            rampartConfig.setTimeStampStrict(childElement.getText().trim());
         }
 
         return rampartConfig;

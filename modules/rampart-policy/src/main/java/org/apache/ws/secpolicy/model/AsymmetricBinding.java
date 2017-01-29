@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.All;
+import org.apache.neethi.Assertion;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
@@ -86,7 +87,7 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
         }
 
         AlgorithmSuite algorithmSuite = getAlgorithmSuite();
-        List configs = algorithmSuite.getConfigurations();
+        List<Assertion> configs = algorithmSuite.getConfigurations();
 
         Policy policy = new Policy();
         ExactlyOne exactlyOne = new ExactlyOne();
@@ -96,7 +97,7 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
         All wrapper;
         AsymmetricBinding asymmetricBinding;
 
-        for (Iterator iterator = configs.iterator(); iterator.hasNext();) {
+        for (Iterator<Assertion> iterator = configs.iterator(); iterator.hasNext();) {
             wrapper = new All();
             asymmetricBinding = new AsymmetricBinding(this.version);
 

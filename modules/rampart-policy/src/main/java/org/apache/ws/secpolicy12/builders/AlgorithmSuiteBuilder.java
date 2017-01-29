@@ -40,8 +40,8 @@ public class AlgorithmSuiteBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
                  
-        Iterator iterAlterns = policy.getAlternatives();
-        List assertions = ((List) iterAlterns.next());
+        Iterator<List<Assertion>> iterAlterns = policy.getAlternatives();
+        List<Assertion> assertions = iterAlterns.next();
         
         processAlternative(assertions, algorithmSuite);
                 
@@ -49,9 +49,9 @@ public class AlgorithmSuiteBuilder implements AssertionBuilder<OMElement> {
         
     }
     
-    private void processAlternative(List assertions, AlgorithmSuite algorithmSuite) {        
-        Iterator iterator = assertions.iterator();
-        Assertion assertion = ((Assertion) iterator.next());
+    private void processAlternative(List<Assertion> assertions, AlgorithmSuite algorithmSuite) {        
+        Iterator<Assertion> iterator = assertions.iterator();
+        Assertion assertion = iterator.next();
         String name = assertion.getName().getLocalPart();
         try {
             algorithmSuite.setAlgorithmSuite(name);

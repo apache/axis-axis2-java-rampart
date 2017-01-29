@@ -136,14 +136,14 @@ public class SCTIssuer implements TokenIssuer {
 
             OMElement reqAttachedRef = null;
             OMElement reqUnattachedRef = null;
-            if (config.addRequestedAttachedRef) {
+            if (config.isAddRequestedAttachedRef()) {
                 reqAttachedRef = TrustUtil.createRequestedAttachedRef(wstVersion,
                                                          rstrElem,
                                                          "#" + sct.getID(),
                                                          tokenType);
             }
 
-            if (config.addRequestedUnattachedRef) {
+            if (config.isAddRequestedUnattachedRef()) {
                 reqUnattachedRef = TrustUtil.createRequestedUnattachedRef(wstVersion,
                                                            rstrElem,
                                                            sct.getIdentifier(),
@@ -154,7 +154,7 @@ public class SCTIssuer implements TokenIssuer {
             Date creationTime = new Date();
             Date expirationTime = new Date();
 
-            expirationTime.setTime(creationTime.getTime() + config.ttl);
+            expirationTime.setTime(creationTime.getTime() + config.getTtl());
 
             // Use GMT time in milliseconds
             DateFormat zulu = new XmlSchemaDateFormat();
@@ -171,15 +171,15 @@ public class SCTIssuer implements TokenIssuer {
                                        creationTime,
                                        expirationTime);
             
-            if(config.addRequestedAttachedRef) {
+            if(config.isAddRequestedAttachedRef()) {
                 sctToken.setAttachedReference(reqAttachedRef.getFirstElement());
             }
             
-            if(config.addRequestedUnattachedRef) {
+            if(config.isAddRequestedUnattachedRef()) {
                 sctToken.setUnattachedReference(reqUnattachedRef.getFirstElement());
             }
 
-            byte[] secret = TokenIssuerUtil.getSharedSecret(data, config.keyComputation, config.keySize);
+            byte[] secret = TokenIssuerUtil.getSharedSecret(data, config.getKeyComputation(), config.getKeySize());
             sctToken.setSecret(secret);
             
             //Add the RequestedProofToken

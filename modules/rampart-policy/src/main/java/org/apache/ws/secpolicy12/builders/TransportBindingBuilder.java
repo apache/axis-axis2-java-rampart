@@ -42,8 +42,8 @@ public class TransportBindingBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), transportBinding, factory);
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative(iterator.next(), transportBinding, factory);
             
             /*
              * since there should be only one alternative
@@ -58,11 +58,11 @@ public class TransportBindingBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP12Constants.TRANSPORT_BINDING};
     }
 
-    private void processAlternative(List assertionList, TransportBinding parent, AssertionBuilderFactory factory) {
+    private void processAlternative(List<Assertion> assertionList, TransportBinding parent, AssertionBuilderFactory factory) {
         
-        for (Iterator iterator = assertionList.iterator(); iterator.hasNext(); ) {
+        for (Iterator<Assertion> iterator = assertionList.iterator(); iterator.hasNext(); ) {
             
-            Assertion primitive = (Assertion) iterator.next();
+            Assertion primitive = iterator.next();
             QName name = primitive.getName();
             
             if (name.equals(SP12Constants.ALGORITHM_SUITE)) {

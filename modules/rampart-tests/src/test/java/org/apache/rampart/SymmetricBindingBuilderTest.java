@@ -17,7 +17,6 @@
 package org.apache.rampart;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 import javax.xml.namespace.QName;
 
@@ -40,7 +39,7 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
@@ -89,7 +88,7 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
@@ -113,7 +112,7 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
@@ -137,7 +136,7 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
@@ -159,7 +158,7 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
