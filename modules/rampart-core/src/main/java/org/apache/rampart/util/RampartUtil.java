@@ -1872,7 +1872,7 @@ public class RampartUtil {
                 // verify client certificate used
                 // try to obtain the client certificate chain directly from the message context
                 // and then from the servlet request
-                if (((HttpsToken)rpd.getTransportToken()).isRequireClientCertificate()) {
+                if (((HttpsToken) rpd.getTransportToken()).isRequireClientCertificate()) {
                     Object certificateChainProperty = msgContext.getProperty(RampartConstants.HTTPS_CLIENT_CERT_KEY);
                     if (certificateChainProperty instanceof X509Certificate[]) {
                         // HTTPS client certificate chain found
