@@ -293,89 +293,90 @@ public class RampartEngine {
 		
 		//Store username in MessageContext property
 
-        for (int j = 0; j < results.size(); j++) {
-            WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
-            final Integer actInt =
-                    (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
-            if (WSConstants.ST_UNSIGNED == actInt.intValue()) {
+        if (results != null) {
+            for (int j = 0; j < results.size(); j++) {
+                WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
+                final Integer actInt =
+                        (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
+                if (WSConstants.ST_UNSIGNED == actInt.intValue()) {
 
-                Object samlAssertion = wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
+                    Object samlAssertion = wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
 
-                SAMLAssertionHandler samlAssertionHandler
-                        = SAMLAssertionHandlerFactory.createAssertionHandler(samlAssertion);
+                    SAMLAssertionHandler samlAssertionHandler
+                            = SAMLAssertionHandlerFactory.createAssertionHandler(samlAssertion);
 
-                if (samlAssertionHandler.isBearerAssertion()) {
-                    break;
-                }
-                //Store the token
-                try {
-                    TokenStorage store = rmd.getTokenStorage();
-                    if (store.getToken(samlAssertionHandler.getAssertionId()) == null) {
-                        Token token = new Token(samlAssertionHandler.getAssertionId(),
-                                samlAssertionHandler.getAssertionElement(),
-                                samlAssertionHandler.getDateNotBefore(),
-                                samlAssertionHandler.getDateNotOnOrAfter());
-
-                        token.setSecret(samlAssertionHandler.
-                                getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler));
-                        store.add(token);
+                    if (samlAssertionHandler.isBearerAssertion()) {
+                        break;
                     }
-                } catch (Exception e) {
-                    throw new RampartException(
-                            "errorInAddingTokenIntoStore", e);
-                }
-            } else if (WSConstants.UT == actInt) {
+                    //Store the token
+                    try {
+                        TokenStorage store = rmd.getTokenStorage();
+                        if (store.getToken(samlAssertionHandler.getAssertionId()) == null) {
+                            Token token = new Token(samlAssertionHandler.getAssertionId(),
+                                    samlAssertionHandler.getAssertionElement(),
+                                    samlAssertionHandler.getDateNotBefore(),
+                                    samlAssertionHandler.getDateNotOnOrAfter());
 
-		        WSUsernameTokenPrincipal userNameTokenPrincipal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
-
-                String username = userNameTokenPrincipal.getName();
-                msgCtx.setProperty(RampartMessageData.USERNAME, username);
-                
-                if (userNameTokenPrincipal.getNonce() != null) {
-                    // Check whether this is a replay attack. To verify that we need to check whether nonce value
-                    // is a repeating one
-                    int nonceLifeTimeInSeconds = 0;
-
-                    if (rpd.getRampartConfig() != null) {
-                        
-                        String stringLifeTime = rpd.getRampartConfig().getNonceLifeTime();
-
-                        try {
-                            nonceLifeTimeInSeconds = Integer.parseInt(stringLifeTime);
-
-                        } catch (NumberFormatException e) {
-                            log.error("Invalid value for nonceLifeTime in rampart configuration file.", e);
-                            throw new RampartException(
-                                        "invalidNonceLifeTime", e);
-
+                            token.setSecret(samlAssertionHandler.
+                                    getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler));
+                            store.add(token);
                         }
+                    } catch (Exception e) {
+                        throw new RampartException(
+                                "errorInAddingTokenIntoStore", e);
+                    }
+                } else if (WSConstants.UT == actInt) {
+
+                    WSUsernameTokenPrincipal userNameTokenPrincipal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
+
+                    String username = userNameTokenPrincipal.getName();
+                    msgCtx.setProperty(RampartMessageData.USERNAME, username);
+                    
+                    if (userNameTokenPrincipal.getNonce() != null) {
+                        // Check whether this is a replay attack. To verify that we need to check whether nonce value
+                        // is a repeating one
+                        int nonceLifeTimeInSeconds = 0;
+
+                        if (rpd.getRampartConfig() != null) {
+                            
+                            String stringLifeTime = rpd.getRampartConfig().getNonceLifeTime();
+
+                            try {
+                                nonceLifeTimeInSeconds = Integer.parseInt(stringLifeTime);
+
+                            } catch (NumberFormatException e) {
+                                log.error("Invalid value for nonceLifeTime in rampart configuration file.", e);
+                                throw new RampartException(
+                                            "invalidNonceLifeTime", e);
+
+                            }
+                        }
+
+                        String serviceEndpointName = msgCtx.getAxisService().getEndpointName();
+
+                        boolean valueRepeating = serviceNonceCache.isNonceRepeatingForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce());
+
+                        if (valueRepeating){
+                            throw new RampartException("repeatingNonceValue", new Object[]{ userNameTokenPrincipal.getNonce(), username} );
+                        }
+
+                        serviceNonceCache.addNonceForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce(), nonceLifeTimeInSeconds);
+                    }
+                } else if (WSConstants.SIGN == actInt) {
+                    X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+
+                    if (rpd.isAsymmetricBinding() && cert == null && rpd.getInitiatorToken() != null
+                            && !rpd.getInitiatorToken().isDerivedKeys()) {
+
+                        // If symmetric binding is used, the certificate should be null.
+                        // If certificate is not null then probably initiator and
+                        // recipient are using 2 different bindings.
+                        throw new RampartException("invalidSignatureAlgo");
                     }
 
-                    String serviceEndpointName = msgCtx.getAxisService().getEndpointName();
-
-                    boolean valueRepeating = serviceNonceCache.isNonceRepeatingForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce());
-
-                    if (valueRepeating){
-                        throw new RampartException("repeatingNonceValue", new Object[]{ userNameTokenPrincipal.getNonce(), username} );
-                    }
-
-                    serviceNonceCache.addNonceForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce(), nonceLifeTimeInSeconds);
+                    msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
                 }
-            } else if (WSConstants.SIGN == actInt) {
-                X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
-
-                if (rpd.isAsymmetricBinding() && cert == null && rpd.getInitiatorToken() != null
-                        && !rpd.getInitiatorToken().isDerivedKeys()) {
-
-                    // If symmetric binding is used, the certificate should be null.
-                    // If certificate is not null then probably initiator and
-                    // recipient are using 2 different bindings.
-                    throw new RampartException("invalidSignatureAlgo");
-                }
-
-                msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
             }
-
         }
 
 		SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
