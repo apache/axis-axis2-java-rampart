@@ -289,7 +289,7 @@
                                 <copy overwrite="yes" file="src/test/resources/rampart/services-37.xml" tofile="target/temp-ramp/META-INF/services.xml" />
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService37.aar" basedir="target/temp-ramp" />
 
-								<!-- Service 38 -->
+                                <!-- Service 38 -->
                                 <copy overwrite="yes" file="src/test/resources/rampart/services-38.xml" tofile="target/temp-ramp/META-INF/services.xml" />
                                 <jar jarfile="target/test-resources/rampart_service_repo/services/SecureService38.aar" basedir="target/temp-ramp" />
                                 

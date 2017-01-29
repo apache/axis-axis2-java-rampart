@@ -292,7 +292,7 @@ public class RampartEngine {
                 //get the sec context id from the req msg ctx 
 		
 		//Store username in MessageContext property
-		
+
         for (int j = 0; j < results.size(); j++) {
             WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
             final Integer actInt =
@@ -377,7 +377,6 @@ public class RampartEngine {
             }
 
         }
-
 
 		SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
 

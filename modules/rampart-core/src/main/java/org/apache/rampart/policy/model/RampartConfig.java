@@ -159,7 +159,7 @@ public class RampartConfig implements Assertion {
     private String nonceLifeTime = Integer.toString(DEFAULT_NONCE_LIFE_TIME);
     
     private SSLConfig sslConfig;
-
+    
     private KerberosConfig kerberosConfig;
     
     private String inboundActor;
@@ -322,15 +322,15 @@ public class RampartConfig implements Assertion {
         }
         
         if (getInboundActor() != null) {
-        	writer.writeStartElement(NS, INBOUND_ACTOR_LN);
-        	writer.writeCharacters(getInboundActor());
-        	writer.writeEndElement();
+            writer.writeStartElement(NS, INBOUND_ACTOR_LN);
+            writer.writeCharacters(getInboundActor());
+            writer.writeEndElement();
         }
         
         if (getOutboundActor() != null) {
-        	writer.writeStartElement(NS, OUTBOUND_ACTOR_LN);
-        	writer.writeCharacters(getOutboundActor());
-        	writer.writeEndElement();
+            writer.writeStartElement(NS, OUTBOUND_ACTOR_LN);
+            writer.writeCharacters(getOutboundActor());
+            writer.writeEndElement();
         }
         
         if (getUserCertAlias() != null) {
@@ -528,42 +528,42 @@ public class RampartConfig implements Assertion {
         this.timeStampStrict = Boolean.valueOf(timeStampStrict);
     }
     
-	/**	  
-	 * @return the inbound actor's URI
-	 * 
-	 */
-	public String getInboundActor() {
-		return inboundActor;
-	}
+    /**
+     * @return the inbound actor's URI
+     * 
+     */
+    public String getInboundActor() {
+        return inboundActor;
+    }
 
-	/**
-	 * Sets the SOAP 1.1 actor or SOAP 1.2 role identifying the incoming SOAP Security header to process.
-	 * If set, Rampart will expect a SOAP security header with a matching actor/role and fail if
-	 * such is not available in the request. If not set (<code>null</code>), Rampart will process the first
-	 * SOAP security header found.
-	 *  
-	 * @param the inbound actor URI to set
-	 */
-	public void setInboundActor(String inboundActorUri) {
-		this.inboundActor = inboundActorUri;
-	}	
-	
-	/**	  
-	 * @return the outbound actor's URI
-	 * 
-	 */
-	public String getOutboundActor() {
-		return outboundActor;
-	}
+    /**
+     * Sets the SOAP 1.1 actor or SOAP 1.2 role identifying the incoming SOAP Security header to process.
+     * If set, Rampart will expect a SOAP security header with a matching actor/role and fail if
+     * such is not available in the request. If not set (<code>null</code>), Rampart will process the first
+     * SOAP security header found.
+     *  
+     * @param the inbound actor URI to set
+     */
+    public void setInboundActor(String inboundActorUri) {
+        this.inboundActor = inboundActorUri;
+    }
+    
+    /**
+     * @return the outbound actor's URI
+     * 
+     */
+    public String getOutboundActor() {
+        return outboundActor;
+    }
 
-	/**	
-	 * Sets the SOAP 1.1 actor or SOAP 1.2 role to set in the outgoing SOAP Security header.
-	 * If not set (<code>null</code>), no SOAP actor/role attribute will be set in the SOAP security header.
- 
-	 * @param the outbound actor URI to set
-	 */
-	public void setOutboundActor(String outboundActorUri) {
-		this.outboundActor = outboundActorUri;
-	}
+    /**
+     * Sets the SOAP 1.1 actor or SOAP 1.2 role to set in the outgoing SOAP Security header.
+     * If not set (<code>null</code>), no SOAP actor/role attribute will be set in the SOAP security header.
+     *
+     * @param the outbound actor URI to set
+     */
+    public void setOutboundActor(String outboundActorUri) {
+        this.outboundActor = outboundActorUri;
+    }
     
 }

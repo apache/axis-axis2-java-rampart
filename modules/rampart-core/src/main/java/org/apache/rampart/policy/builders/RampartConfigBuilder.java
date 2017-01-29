@@ -49,15 +49,15 @@ public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
         }
                 
         childElement = element.getFirstChildWithName(new QName(RampartConfig.NS,
-        		RampartConfig.INBOUND_ACTOR_LN));
+                RampartConfig.INBOUND_ACTOR_LN));
         if (childElement != null) {
-        	rampartConfig.setInboundActor(childElement.getText().trim());
+            rampartConfig.setInboundActor(childElement.getText().trim());
         }
         
         childElement = element.getFirstChildWithName(new QName(RampartConfig.NS,
-        		RampartConfig.OUTBOUND_ACTOR_LN));
+                RampartConfig.OUTBOUND_ACTOR_LN));
         if (childElement != null) {
-        	rampartConfig.setOutboundActor(childElement.getText().trim());
+            rampartConfig.setOutboundActor(childElement.getText().trim());
         }
 
         childElement = element.getFirstChildWithName(new QName(

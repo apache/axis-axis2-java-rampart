@@ -16,10 +16,6 @@
 
 package org.apache.rampart;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
@@ -63,6 +59,10 @@ import org.apache.ws.security.message.token.SecurityContextToken;
 import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class RampartMessageData {
     
@@ -374,17 +374,14 @@ public class RampartMessageData {
             
             // set 'actor' of the WSSecHeader with the value from the rampart config 
             if (this.sender && this.policyData != null) {
-            	
-            	this.secHeader = new WSSecHeader();
-            	
-            	RampartConfig rampartConfig = this.policyData.getRampartConfig();
-            	if(null != rampartConfig){
-            		String actor = rampartConfig.getOutboundActor();
-            		if(null != actor){
-            			this.secHeader = new WSSecHeader(actor,true);
-            		}
-            	}
-                
+                this.secHeader = new WSSecHeader();
+                RampartConfig rampartConfig = this.policyData.getRampartConfig();
+                if(null != rampartConfig){
+                    String actor = rampartConfig.getOutboundActor();
+                    if(null != actor){
+                        this.secHeader = new WSSecHeader(actor,true);
+                    }
+                }
                 secHeader.insertSecurityHeader(this.document);
             }
             

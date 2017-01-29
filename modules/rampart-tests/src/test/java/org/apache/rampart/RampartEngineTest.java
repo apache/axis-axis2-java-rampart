@@ -80,14 +80,6 @@ public class RampartEngineTest extends MessageBuilderTestBase {
     		assertNotNull(e);
     	}
     }
-
-    private void buildSOAPEnvelope(MessageContext ctx) throws Exception {
-        SOAPBuilder soapBuilder = new SOAPBuilder();
-        SOAPEnvelope env = ctx.getEnvelope();
-        ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
-        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, getContentTypeForEnvelope(env), ctx);
-        ctx.setEnvelope(env);
-    }
     
     private void runValidRampartProcessing(MessageContext ctx, String policyXmlPath) throws Exception{    	
         Policy policy = loadPolicy(policyXmlPath);
@@ -120,5 +112,13 @@ public class RampartEngineTest extends MessageBuilderTestBase {
             }
         }
         assertNotNull("Result of processing did not include a certificate", usedCert);
+    }
+
+    private void buildSOAPEnvelope(MessageContext ctx) throws Exception {
+        SOAPBuilder soapBuilder = new SOAPBuilder();
+        SOAPEnvelope env = ctx.getEnvelope();
+        ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
+        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, getContentTypeForEnvelope(env), ctx);
+        ctx.setEnvelope(env);
     }
 }
