@@ -10,4 +10,10 @@ public class RampartConstants {
 
     public static final String XML_ENCRYPTION_MODIFIER_CONTENT = "Content";
     public static final String XML_ENCRYPTION_MODIFIER_ELEMENT = "Element";
+
+    /**
+     * The key under which the HTTPS client certificate, determened by the https listener, may
+     * be populated as a property of the message context.
+     */
+    public static final String HTTPS_CLIENT_CERT_KEY = "https.client.cert.key";
 }

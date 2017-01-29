@@ -31,11 +31,14 @@ import org.apache.axis2.dataretrieval.DRConstants;
 import org.apache.axis2.dataretrieval.client.MexClient;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.mex.MexConstants;
 import org.apache.axis2.mex.MexException;
 import org.apache.axis2.mex.om.Metadata;
 import org.apache.axis2.mex.om.MetadataReference;
 import org.apache.axis2.mex.om.MetadataSection;
+import org.apache.axis2.transport.TransportListener;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
@@ -1801,31 +1804,91 @@ public class RampartUtil {
         return  wssConfig;
        
     }
+    
 
-    public static void validateTransport(RampartMessageData rmd) throws RampartException {
-
-        RampartPolicyData rpd = rmd.getPolicyData();
-
-        if (rpd == null) {
-            return;
-        }
-
-        if (rpd.isTransportBinding() && !rmd.isInitiator()) {
-            if (rpd.getTransportToken() instanceof HttpsToken) {
-                String incomingTransport = rmd.getMsgContext().getIncomingTransportName();
-                if (!incomingTransport.equals(org.apache.axis2.Constants.TRANSPORT_HTTPS)) {
-                    throw new RampartException("invalidTransport",
-                            new String[]{incomingTransport});
-                }
-                if (((HttpsToken) rpd.getTransportToken()).isRequireClientCertificate()) {
-
-                    MessageContext messageContext = rmd.getMsgContext();
-                    HttpServletRequest request = ((HttpServletRequest) messageContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST));
-                    if (request == null || request.getAttribute("javax.servlet.request.X509Certificate") == null) {
-                        throw new RampartException("clientAuthRequired");
+    /**
+     * Validate transport binding policy assertions.
+     * In case an HttpsToken is required by the security policy the method will verify that the 
+     * HTTPS transport was used indeed. Furthermore if the assertion requires a client certificate
+     * being used, the method will try to obtain the client certificate chain first from the 
+     * message context properties directly under the key {@link RampartConstants#HTTPS_CLIENT_CERT_KEY}
+     * and, if the property is not available, will try to get the HttpsServletRequest from the 
+     * message context properties (populated there by the AxisServlet if axis2 is running inside a servlet
+     * engine) and retrieve the https client certificate chain from its attributes. The client certificate
+     * chain is expected to be available under the <code>javax.servlet.request.X509Certificate</code>
+     * attribute of the servlet request. No further trust verification is done for the client
+     * certificate - the transport listener should have already verified this.
+     * 
+     * @param messageData
+     * @throws RampartException
+     */
+    public static void validateTransport(RampartMessageData messageData) throws RampartException {
+        
+        MessageContext msgContext = messageData.getMsgContext();
+        RampartPolicyData policyData = messageData.getPolicyData();
+        AxisConfiguration axisConf = msgContext.getConfigurationContext().getAxisConfiguration();
+        
+        if(policyData != null && policyData.isTransportBinding() && !messageData.isInitiator()){
+            if (policyData.getTransportToken() instanceof HttpsToken) {
+                try {
+                    TransportInDescription transportIn = msgContext.getTransportIn();
+                    if (transportIn == null) {
+                        transportIn = msgContext.getOptions().getTransportIn();
+                    }
+                    
+                    //maybe the transportIn was not populated by the receiver
+                    if (transportIn == null) {
+                        transportIn = axisConf.getTransportIn(msgContext.getIncomingTransportName());
+                    }
+                    
+                    if (transportIn == null) {
+                        throw new RampartException("httpsVerificationFailed");
+                    }
+                    
+                    TransportListener receiver = transportIn.getReceiver();
+                    String incomingEPR = receiver.getEPRsForService(msgContext.getAxisService().getName(),
+                                                                          null)[0].getAddress();
+                    if (incomingEPR == null) {
+                        incomingEPR = msgContext.getIncomingTransportName();
+                    }
+    
+                    if (!incomingEPR.startsWith(org.apache.axis2.Constants.TRANSPORT_HTTPS)) {
+                        if (incomingEPR.indexOf(':') > 0) {
+                            incomingEPR = incomingEPR.substring(0, incomingEPR.indexOf(':'));
+                        }
+                        throw new RampartException("invalidTransport", new String[] { incomingEPR });
+                    }
+                } catch (AxisFault af) {
+                    String incomingTransport = msgContext.getIncomingTransportName();
+                    if (!incomingTransport.equals(org.apache.axis2.Constants.TRANSPORT_HTTPS)) {
+                        throw new RampartException("invalidTransport", new String[] { incomingTransport });
                     }
                 }
-
+                
+                // verify client certificate used
+                // try to obtain the client certificate chain directly from the message context
+                // and then from the servlet request
+                HttpsToken token = (HttpsToken)policyData.getTransportToken();
+                if (token.isRequireClientCertificate()) {
+                    Object certificateChainProperty = msgContext.getProperty(RampartConstants.HTTPS_CLIENT_CERT_KEY);
+                    if (certificateChainProperty instanceof X509Certificate[]) {
+                        // HTTPS client certificate chain found
+                        return;
+                    } else {
+                        Object requestProperty = msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
+                        if (requestProperty instanceof HttpServletRequest) {
+                            HttpServletRequest request = (HttpServletRequest)requestProperty;
+                            Object certificateChain = request.getAttribute("javax.servlet.request.X509Certificate"); //$NON-NLS-1$
+                            if (certificateChain instanceof X509Certificate[]) {
+                                // HTTPS client certificate chain found
+                                return;
+                            }
+                        }
+                    }
+                    
+                    // HTTPS client certificate chain NOT found
+                    throw new RampartException("httpsClientCertValidationFailed");
+                }
             }
         }
     }
