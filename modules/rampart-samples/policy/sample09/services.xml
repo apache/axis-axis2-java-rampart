@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ !
+ ! Copyright 2006 The Apache Software Foundation.
+ !
+ ! Licensed under the Apache License, Version 2.0 (the "License");
+ ! you may not use this file except in compliance with the License.
+ ! You may obtain a copy of the License at
+ !
+ !      http://www.apache.org/licenses/LICENSE-2.0
+ !
+ ! Unless required by applicable law or agreed to in writing, software
+ ! distributed under the License is distributed on an "AS IS" BASIS,
+ ! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ! See the License for the specific language governing permissions and
+ ! limitations under the License.
+ !-->
+<!-- services.xml for sample09 with different in,out policies -->
+<service>
+    <operation name="echo">
+        <messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </operation>
+    <parameter name="ServiceClass" locked="false">org.apache.rampart.samples.policy.sample09.SimpleService</parameter>
+
+    <module ref="rampart"/>
+    <module ref="addressing"/>
+
+    <wsp:PolicyAttachment xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+        <wsp:AppliesTo>
+            <policy-subject identifier="binding:soap11/operation:echo/in"/>
+            <policy-subject identifier="binding:soap12/operation:echo/in"/>
+        </wsp:AppliesTo>
+        <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+                    xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                    wsu:Id="EncryptOnly">
+            <wsp:ExactlyOne>
+                <wsp:All>
+                    <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                        <wsp:Policy>
+                            <sp:ProtectionToken>
+                                <wsp:Policy>
+                                    <sp:X509Token
+                                            sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+                                        <wsp:Policy>
+                                            <sp:RequireThumbprintReference/>
+                                            <sp:WssX509V3Token10/>
+                                        </wsp:Policy>
+                                    </sp:X509Token>
+                                </wsp:Policy>
+                            </sp:ProtectionToken>
+                            <sp:AlgorithmSuite>
+                                <wsp:Policy>
+                                    <sp:Basic256/>
+                                </wsp:Policy>
+                            </sp:AlgorithmSuite>
+                            <sp:Layout>
+                                <wsp:Policy>
+                                    <sp:Lax/>
+                                </wsp:Policy>
+                            </sp:Layout>
+                            <sp:IncludeTimestamp/>
+                            <sp:OnlySignEntireHeadersAndBody/>
+                        </wsp:Policy>
+                    </sp:SymmetricBinding>
+                    <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                        <sp:Body/>
+                    </sp:EncryptedParts>
+                    <sp:Wss11 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                        <wsp:Policy>
+                            <sp:MustSupportRefKeyIdentifier/>
+                            <sp:MustSupportRefIssuerSerial/>
+                            <sp:MustSupportRefThumbprint/>
+                            <sp:RequireSignatureConfirmation/>
+                        </wsp:Policy>
+                    </sp:Wss11>
+                    <sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                        <wsp:Policy>
+                            <sp:RequireClientEntropy/>
+                            <sp:RequireServerEntropy/>
+                            <sp:MustSupportIssuedTokens/>
+                        </wsp:Policy>
+                    </sp:Trust10>
+                    <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
+                        <ramp:user>service</ramp:user>
+                        <ramp:encryptionUser>service</ramp:encryptionUser>
+                        <ramp:passwordCallbackClass>org.apache.rampart.samples.policy.sample09.PWCBHandler
+                        </ramp:passwordCallbackClass>
+
+                        <ramp:encryptionCypto>
+                            <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
+                                <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
+                                <ramp:property name="org.apache.ws.security.crypto.merlin.file">service.jks</ramp:property>
+                                <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache
+                                </ramp:property>
+                            </ramp:crypto>
+                        </ramp:encryptionCypto>
+                        <ramp:signatureCrypto>
+                            <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
+                                <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
+                                <ramp:property name="org.apache.ws.security.crypto.merlin.file">service.jks</ramp:property>
+                                <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache
+                                </ramp:property>
+                            </ramp:crypto>
+                        </ramp:signatureCrypto>
+                        
+                    </ramp:RampartConfig>
+                    
+                </wsp:All>
+            </wsp:ExactlyOne>
+        </wsp:Policy>
+    </wsp:PolicyAttachment>
+    <wsp:PolicyAttachment xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+        <wsp:AppliesTo>
+            <policy-subject identifier="binding:soap11/operation:echo/out"/>
+            <policy-subject identifier="binding:soap12/operation:echo/out"/>
+        </wsp:AppliesTo>
+        <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+                    xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                    wsu:Id="SignOnly">
+            <wsp:ExactlyOne>
+                <wsp:All>
+                    <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                        <wsp:Policy>
+                            <sp:ProtectionToken>
+                                <wsp:Policy>
+                                    <sp:X509Token
+                                            sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+                                        <wsp:Policy>
+                                            <sp:RequireThumbprintReference/>
+                                            <sp:WssX509V3Token10/>
+                                        </wsp:Policy>
+                                    </sp:X509Token>
+                                </wsp:Policy>
+                            </sp:ProtectionToken>
+                            <sp:AlgorithmSuite>
+                                <wsp:Policy>
+                                    <sp:Basic256/>
+                                </wsp:Policy>
+                            </sp:AlgorithmSuite>
+                            <sp:Layout>
+                                <wsp:Policy>
+                                    <sp:Lax/>
+                                </wsp:Policy>
+                            </sp:Layout>
+                            <sp:IncludeTimestamp/>
+                            <sp:OnlySignEntireHeadersAndBody/>
+                        </wsp:Policy>
+                    </sp:SymmetricBinding>
+                    <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                        <sp:Body/>
+                    </sp:SignedParts>
+                    <sp:Wss11 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                        <wsp:Policy>
+                            <sp:MustSupportRefKeyIdentifier/>
+                            <sp:MustSupportRefIssuerSerial/>
+                            <sp:MustSupportRefThumbprint/>
+                            <sp:RequireSignatureConfirmation/>
+                        </wsp:Policy>
+                    </sp:Wss11>
+                    <sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                        <wsp:Policy>
+                            <sp:RequireClientEntropy/>
+                            <sp:RequireServerEntropy/>
+                            <sp:MustSupportIssuedTokens/>
+                        </wsp:Policy>
+                    </sp:Trust10>
+                    <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
+                    <ramp:user>service</ramp:user>
+                    <ramp:encryptionUser>service</ramp:encryptionUser>
+                    <ramp:passwordCallbackClass>org.apache.rampart.samples.policy.sample09.PWCBHandler
+                    </ramp:passwordCallbackClass>
+
+                    <ramp:signatureCrypto>
+                        <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
+                            <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
+                            <ramp:property name="org.apache.ws.security.crypto.merlin.file">service.jks</ramp:property>
+                            <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache
+                            </ramp:property>
+                        </ramp:crypto>
+                    </ramp:signatureCrypto>
+                    
+                </ramp:RampartConfig>
+                </wsp:All>
+            </wsp:ExactlyOne>
+        </wsp:Policy>
+
+    </wsp:PolicyAttachment>
+
+</service>
