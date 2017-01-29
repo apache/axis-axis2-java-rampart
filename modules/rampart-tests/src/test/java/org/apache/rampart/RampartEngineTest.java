@@ -118,7 +118,7 @@ public class RampartEngineTest extends MessageBuilderTestBase {
         SOAPBuilder soapBuilder = new SOAPBuilder();
         SOAPEnvelope env = ctx.getEnvelope();
         ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
-        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, getContentTypeForEnvelope(env), ctx);
+        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, env.getVersion().getMediaType().toString(), ctx);
         ctx.setEnvelope(env);
     }
 }
