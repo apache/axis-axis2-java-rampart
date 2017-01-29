@@ -26,63 +26,63 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.neethi.Policy;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityEngineResult;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public class RampartEngineTest extends MessageBuilderTestBase {
-
-    public RampartEngineTest(String name) {
-        super(name);
-    }
-
+    /**
+     * Tests that Rampart complains about missing security header in request.
+     * 
+     * @throws Exception
+     */
+    @Test(expected=RampartException.class)
     public void testEmptySOAPMessage() throws Exception {
+        MessageContext ctx = getMsgCtx();
 
-        try {
-            MessageContext ctx = getMsgCtx();
+        String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml";
+        Policy policy = this.loadPolicy(policyXml);
 
-            String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml";
-            Policy policy = this.loadPolicy(policyXml);
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
 
-            ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
-
-            RampartEngine engine = new RampartEngine();
-            engine.process(ctx);
-        }
-        catch (RampartException e) {
-            assertEquals("Expected rampart to complain about missing security header",
-                         "Missing wsse:Security header in request", e.getMessage());
-        }
+        RampartEngine engine = new RampartEngine();
+        engine.process(ctx);
     }
 
+    @Test
     public void testValidSOAPMessage() throws Exception {
-    	runValidRampartProcessing(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml");
+        runRampartEngine(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml");
     }
 
+    @Test
     public void testValidSOAP12Message() throws Exception {
-        runValidRampartProcessing(getMsgCtx12(), "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml");
+        runRampartEngine(getMsgCtx12(), "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml");
     }
     
+    @Test
     public void testValidSOAPMessageWithActor() throws Exception {
-    	runValidRampartProcessing(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-outbound-actor.xml");
+        runRampartEngine(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-outbound-actor.xml");
     }
     
+    @Test
     public void testValidSOAP12MessageWithRole() throws Exception {
-    	runValidRampartProcessing(getMsgCtx12(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-outbound-actor.xml");
+        runRampartEngine(getMsgCtx12(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-outbound-actor.xml");
     }
     
+    @Test
     public void testMissingSOAPInboundActor() throws Exception {
-    	runValidRampartProcessing(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-outbound-actor.xml");
+        runRampartEngine(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-outbound-actor.xml");
     }
     
+    // Failure is expected because no outbound actor is set.
+    @Test(expected=RampartException.class)
     public void testMissingSOAPOutboundActor() throws Exception {
-    	try{
-        	runValidRampartProcessing(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-actor.xml");
-        	fail("Failure is expected because no outbound actor is set.");
-    	}catch(RampartException e){
-    		assertNotNull(e);
-    	}
+        runRampartEngine(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15-inbound-actor.xml");
     }
     
-    private void runValidRampartProcessing(MessageContext ctx, String policyXmlPath) throws Exception{    	
-        Policy policy = loadPolicy(policyXmlPath);
+    private void runRampartEngine(MessageContext ctx, String policyXml) throws Exception {
+        Policy policy = loadPolicy(policyXml);
 
         ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
 
