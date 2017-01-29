@@ -1823,12 +1823,16 @@ public class RampartUtil {
      * @throws RampartException
      */
     public static void validateTransport(RampartMessageData rmd) throws RampartException {
-        
+
         MessageContext msgContext = rmd.getMsgContext();
         RampartPolicyData rpd = rmd.getPolicyData();
         AxisConfiguration axisConf = msgContext.getConfigurationContext().getAxisConfiguration();
-        
-        if(rpd != null && rpd.isTransportBinding() && !rmd.isInitiator()){
+
+        if (rpd == null) {
+            return;
+        }
+
+        if (rpd.isTransportBinding() && !rmd.isInitiator()) {
             if (rpd.getTransportToken() instanceof HttpsToken) {
                 try {
                     TransportInDescription transportIn = msgContext.getTransportIn();
@@ -1868,8 +1872,7 @@ public class RampartUtil {
                 // verify client certificate used
                 // try to obtain the client certificate chain directly from the message context
                 // and then from the servlet request
-                HttpsToken token = (HttpsToken)rpd.getTransportToken();
-                if (token.isRequireClientCertificate()) {
+                if (((HttpsToken)rpd.getTransportToken()).isRequireClientCertificate()) {
                     Object certificateChainProperty = msgContext.getProperty(RampartConstants.HTTPS_CLIENT_CERT_KEY);
                     if (certificateChainProperty instanceof X509Certificate[]) {
                         // HTTPS client certificate chain found
@@ -1889,6 +1892,7 @@ public class RampartUtil {
                     // HTTPS client certificate chain NOT found
                     throw new RampartException("httpsClientCertValidationFailed");
                 }
+
             }
         }
     }
