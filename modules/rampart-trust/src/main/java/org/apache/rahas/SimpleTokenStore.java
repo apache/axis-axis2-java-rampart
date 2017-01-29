@@ -92,8 +92,8 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
 
     public String[] getTokenIdentifiers() throws TrustException {       
         
-    	String [] tokenIdentifiers = null;
-    	
+        String [] tokenIdentifiers = null;
+        
         readLock.lock();
         
         Set identifiers = tokens.keySet();
@@ -155,27 +155,27 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         
         try {
 
-        	token = (Token) this.tokens.get(id);            
-        	if(token != null) {
-        		processTokenExpiry(token);                
-        	}else{
-        		//Try to find the token using attached refs & unattached refs
-        		for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
-        			Token tempToken = (Token) iterator.next();
-        			processTokenExpiry(tempToken);
-        			OMElement elem = tempToken.getAttachedReference();
-        			if(elem != null && id.equals(this.getIdFromSTR(elem))) {
-        				token = tempToken;
-        			}
-        			elem = tempToken.getUnattachedReference();
-        			if(elem != null && id.equals(this.getIdFromSTR(elem))) {
-        				token = tempToken;
-        			}                    
-        		}
-        	}
+            token = (Token) this.tokens.get(id);
+            if(token != null) {
+                processTokenExpiry(token);
+            }else{
+                //Try to find the token using attached refs & unattached refs
+                for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
+                    Token tempToken = (Token) iterator.next();
+                    processTokenExpiry(tempToken);
+                    OMElement elem = tempToken.getAttachedReference();
+                    if(elem != null && id.equals(this.getIdFromSTR(elem))) {
+                        token = tempToken;
+                    }
+                    elem = tempToken.getUnattachedReference();
+                    if(elem != null && id.equals(this.getIdFromSTR(elem))) {
+                        token = tempToken;
+                    }
+                }
+            }
 
         } finally {
-        	readLock.unlock();
+            readLock.unlock();
         }        
         return token;
     }
@@ -192,7 +192,7 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
     }
     
     protected void processTokenExpiry(Token token) throws TrustException {
-    	if (token.getExpires() != null &&
+        if (token.getExpires() != null &&
             token.getExpires().getTime() < System.currentTimeMillis()) {
             token.setState(Token.EXPIRED);
         }
