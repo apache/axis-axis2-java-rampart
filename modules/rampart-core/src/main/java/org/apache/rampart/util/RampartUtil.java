@@ -1819,17 +1819,17 @@ public class RampartUtil {
      * attribute of the servlet request. No further trust verification is done for the client
      * certificate - the transport listener should have already verified this.
      * 
-     * @param messageData
+     * @param rmd
      * @throws RampartException
      */
-    public static void validateTransport(RampartMessageData messageData) throws RampartException {
+    public static void validateTransport(RampartMessageData rmd) throws RampartException {
         
-        MessageContext msgContext = messageData.getMsgContext();
-        RampartPolicyData policyData = messageData.getPolicyData();
+        MessageContext msgContext = rmd.getMsgContext();
+        RampartPolicyData rpd = rmd.getPolicyData();
         AxisConfiguration axisConf = msgContext.getConfigurationContext().getAxisConfiguration();
         
-        if(policyData != null && policyData.isTransportBinding() && !messageData.isInitiator()){
-            if (policyData.getTransportToken() instanceof HttpsToken) {
+        if(rpd != null && rpd.isTransportBinding() && !rmd.isInitiator()){
+            if (rpd.getTransportToken() instanceof HttpsToken) {
                 try {
                     TransportInDescription transportIn = msgContext.getTransportIn();
                     if (transportIn == null) {
@@ -1868,7 +1868,7 @@ public class RampartUtil {
                 // verify client certificate used
                 // try to obtain the client certificate chain directly from the message context
                 // and then from the servlet request
-                HttpsToken token = (HttpsToken)policyData.getTransportToken();
+                HttpsToken token = (HttpsToken)rpd.getTransportToken();
                 if (token.isRequireClientCertificate()) {
                     Object certificateChainProperty = msgContext.getProperty(RampartConstants.HTTPS_CLIENT_CERT_KEY);
                     if (certificateChainProperty instanceof X509Certificate[]) {
