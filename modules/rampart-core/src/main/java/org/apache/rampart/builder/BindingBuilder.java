@@ -227,8 +227,8 @@ public abstract class BindingBuilder {
             RampartUtil.setEncryptionUser(rmd, encrKey);
 
             //TODO we do not need to pass keysize as it is taken from algorithm it self - verify
-            encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());	
-            encrKey.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
+            encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
+            
             encrKey.prepare(doc, RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
             
             return encrKey;
