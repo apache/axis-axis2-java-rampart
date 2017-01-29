@@ -56,10 +56,7 @@ import org.w3c.dom.Element;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
 import javax.xml.stream.XMLStreamReader;
 
@@ -100,16 +97,16 @@ public class SymmetricBindingBuilder extends BindingBuilder {
     	       	
         RampartPolicyData rpd = rmd.getPolicyData();
         
-        Vector signatureValues = new Vector();
+        List<byte[]> signatureValues = new ArrayList<byte[]>();
         
     	if(tlog.isDebugEnabled()){
     		t0 = System.currentTimeMillis();
     	}
         
         Token encryptionToken = rpd.getEncryptionToken();
-        Vector encrParts = RampartUtil.getEncryptedParts(rmd);
+        List<WSEncryptionPart> encrParts = RampartUtil.getEncryptedParts(rmd);
 
-        Vector sigParts = RampartUtil.getSignedParts(rmd);
+        List<WSEncryptionPart> sigParts = RampartUtil.getSignedParts(rmd);
         
         if(encryptionToken == null && encrParts.size() > 0) {
             throw new RampartException("encryptionTokenMissing");
@@ -222,7 +219,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 // SymmKey is already encrypted, no need to do it again
                 encr.setEncryptSymmKey(false);
                 if (!rmd.isInitiator() && tok instanceof EncryptedKeyToken) {
-                    encr.setUseKeyIdentifier(true);
+                    // TODO was encr.setUseKeyIdentifier(true); - verify
+                    encr.setEncKeyIdDirectId(true);
                     encr.setCustomReferenceValue(((EncryptedKeyToken)tok).getSHA1());
                     encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
                 }
@@ -287,9 +285,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 SupportingToken sgndEndEncSuppTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();           
                 sgndEndEncSuppTokMap = this.handleSupportingTokens(rmd, sgndEndEncSuppTokens);
                 
-                Vector supportingToks = rpd.getSupportingTokensList();
-                for (int i = 0; i < supportingToks.size(); i++) {
-                    this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
+                List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
+                for (SupportingToken supportingTok : supportingToks) {
+                    this.handleSupportingTokens(rmd, supportingTok);
                 } 
                 
                 SupportingToken encryptedSupportingToks = rpd.getEncryptedSupportingTokens();
@@ -317,16 +315,16 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 
                 endSuppTokMap.putAll(endEncSuppTokMap);
                 //Do endorsed signatures
-                Vector endSigVals = this.doEndorsedSignatures(rmd, endSuppTokMap);
-                for (Iterator iter = endSigVals.iterator(); iter.hasNext();) {
-                    signatureValues.add(iter.next());
+                List<byte[]> endSigVals = this.doEndorsedSignatures(rmd, endSuppTokMap);
+                for (byte[] endSigVal : endSigVals) {
+                    signatureValues.add(endSigVal);
                 }
                 
                 sgndEndSuppTokMap.putAll(sgndEndEncSuppTokMap);
                 //Do signed endorsing signatures
-                Vector sigEndSigVals = this.doEndorsedSignatures(rmd, sgndEndSuppTokMap);
-                for (Iterator iter = sigEndSigVals.iterator(); iter.hasNext();) {
-                    signatureValues.add(iter.next());
+                List<byte[]> sigEndSigVals = this.doEndorsedSignatures(rmd, sgndEndSuppTokMap);
+                for (byte[] sigEndSigVal : sigEndSigVals) {
+                    signatureValues.add(sigEndSigVal);
                 }
             }
             
@@ -344,7 +342,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             		t3 = System.currentTimeMillis();
             	}
                 log.debug("Signature protection");
-                Vector secondEncrParts = new Vector();
+                List<WSEncryptionPart> secondEncrParts = new ArrayList<WSEncryptionPart>();
                 
                 //Now encrypt the signature using the above token
                 if(rpd.isSignatureProtection()) {
@@ -352,8 +350,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 }
                 
                 if(rmd.isInitiator()) {
-                    for (int i = 0 ; i < encryptedTokensIdList.size(); i++) {
-                        secondEncrParts.add(new WSEncryptionPart((String)encryptedTokensIdList.get(i),"Element"));
+                    for (String anEncryptedTokensIdList : encryptedTokensIdList) {
+                        secondEncrParts.add(new WSEncryptionPart(anEncryptedTokensIdList, "Element"));
                     }
                 }
                 
@@ -415,7 +413,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         Element sigTokElem = null;
         
-        Vector signatureValues = new Vector();
+        List<byte[]> signatureValues = new ArrayList<byte[]>();
         
         if(sigToken != null) {
             if(sigToken instanceof SecureConversationToken) {
@@ -462,7 +460,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         HashMap endEncSuppTokMap = null;
         HashMap sgndEndEncSuppTokMap = null;
         
-        Vector sigParts = RampartUtil.getSignedParts(rmd);
+        List<WSEncryptionPart> sigParts = RampartUtil.getSignedParts(rmd);
         
         if(this.timestampElement != null){
         	sigParts.add(new WSEncryptionPart(RampartUtil
@@ -489,9 +487,9 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             SupportingToken sgndEndEncSuppTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();           
             sgndEndEncSuppTokMap = this.handleSupportingTokens(rmd, sgndEndEncSuppTokens);
             
-            Vector supportingToks = rpd.getSupportingTokensList();
-            for (int i = 0; i < supportingToks.size(); i++) {
-                this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
+            List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
+            for (SupportingToken supportingTok : supportingToks) {
+                this.handleSupportingTokens(rmd, supportingTok);
             } 
             
             SupportingToken encryptedSupportingToks = rpd.getEncryptedSupportingTokens();
@@ -519,18 +517,18 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             // Adding the endorsing encrypted supporting tokens to endorsing supporting tokens
             endSuppTokMap.putAll(endEncSuppTokMap);
             //Do endorsed signatures
-            Vector endSigVals = this.doEndorsedSignatures(rmd, endSuppTokMap);
-            
-            for (Iterator iter = endSigVals.iterator(); iter.hasNext();) {
-                signatureValues.add(iter.next());
+            List<byte[]> endSigVals = this.doEndorsedSignatures(rmd, endSuppTokMap);
+
+            for (byte[] endSigVal : endSigVals) {
+                signatureValues.add(endSigVal);
             }
              
             //Adding the signed endorsed encrypted tokens to signed endorsed supporting tokens
             sgndEndSuppTokMap.putAll(sgndEndEncSuppTokMap);
             //Do signed endorsing signatures
-            Vector sigEndSigVals = this.doEndorsedSignatures(rmd, sgndEndSuppTokMap);
-            for (Iterator iter = sigEndSigVals.iterator(); iter.hasNext();) {
-                signatureValues.add(iter.next());
+            List<byte[]> sigEndSigVals = this.doEndorsedSignatures(rmd, sgndEndSuppTokMap);
+            for (byte[] sigEndSigVal : sigEndSigVals) {
+                signatureValues.add(sigEndSigVal);
             }
         }
         
@@ -567,7 +565,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
         }
     
-        Vector encrParts = RampartUtil.getEncryptedParts(rmd);
+        List<WSEncryptionPart> encrParts = RampartUtil.getEncryptedParts(rmd);
         
         //Check for signature protection
         if(rpd.isSignatureProtection() && this.mainSigId != null) {
@@ -576,8 +574,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         }
         
         if(rmd.isInitiator()) {
-            for (int i = 0 ; i < encryptedTokensIdList.size(); i++) {
-                encrParts.add(new WSEncryptionPart((String)encryptedTokensIdList.get(i),"Element"));
+            for (String anEncryptedTokensIdList : encryptedTokensIdList) {
+                encrParts.add(new WSEncryptionPart(anEncryptedTokensIdList, "Element"));
             }
         }
         
@@ -592,8 +590,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     //Check whether it is security policy 1.2 and use the secure conversation accordingly
                     if (SPConstants.SP_V12 == encrToken.getVersion()) {
                         dkEncr.setWscVersion(ConversationConstants.VERSION_05_12);
-                    }                    
-                    
+                    }
+
                     if(encrTokElem != null && encrTok.getAttachedReference() != null) {
                         
                         dkEncr.setExternalKey(encrTok.getSecret(), (Element) doc
@@ -613,6 +611,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     	    tokenRef.setKeyIdentifierEncKeySHA1(((EncryptedKeyToken)encrTok).getSHA1());
                     	}
                     	dkEncr.setExternalKey(encrTok.getSecret(), tokenRef.getElement());
+                        tokenRef.addTokenType(WSConstants.WSS_ENC_KEY_VALUE_TYPE);  // TODO check this
                     	
                     } else {
                         dkEncr.setExternalKey(encrTok.getSecret(), encrTok.getId());
@@ -668,7 +667,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     // Use key identifier in the KeyInfo in server side
                     if (!rmd.isInitiator()) {
                         if (encrTok instanceof EncryptedKeyToken) {
-                            encr.setUseKeyIdentifier(true);
+                            // TODO was encr.setUseKeyIdentifier(true); verify
+                            encr.setEncKeyIdDirectId(true);
                             encr.setCustomReferenceValue(((EncryptedKeyToken) encrTok).getSHA1());
                             encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
                         }
@@ -790,49 +790,47 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         return Base64.encode(data);
     }
-    
-    private String getEncryptedKey(RampartMessageData rmd ) throws RampartException {
-    	
-    	Vector results = (Vector)rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
-    	
-        for (int i = 0; i < results.size(); i++) {
-            WSHandlerResult rResult =
-                    (WSHandlerResult) results.get(i);
 
-            Vector wsSecEngineResults = rResult.getResults();
-            
-            for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                WSSecurityEngineResult wser =
-                        (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                Integer actInt = (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-                if (actInt.intValue() == WSConstants.ENCR) {
-                    
-                	if (wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_ID) != null &&
-                	        ((String)wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_ID)).length() != 0) {
-                		
-                		try {
-                			
-	                		String encryptedKeyID = (String)wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_ID);
-	                		
-	                        Date created = new Date();
-	                        Date expires = new Date();
-	                        expires.setTime(System.currentTimeMillis() + 300000);
-	                        EncryptedKeyToken tempTok = new EncryptedKeyToken(encryptedKeyID,created,expires);
-	                        tempTok.setSecret((byte[])wser.get(WSSecurityEngineResult.TAG_DECRYPTED_KEY));
-	                        tempTok.setSHA1(getSHA1((byte[])wser.get(WSSecurityEngineResult.TAG_ENCRYPTED_EPHEMERAL_KEY)));
-	                        rmd.getTokenStorage().add(tempTok);
-	                        
-	                        return encryptedKeyID;
-                        
-                		} catch (TrustException e) {
-                			throw new RampartException("errorInAddingTokenIntoStore");
-                		}
-                		
-                	}
+    private String getEncryptedKey(RampartMessageData rmd) throws RampartException {
+
+        List<WSHandlerResult> results
+                = (List<WSHandlerResult>) rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
+
+        for (WSHandlerResult result : results) {
+
+            List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
+
+            for (WSSecurityEngineResult wsSecEngineResult : wsSecEngineResults) {
+                Integer actInt = (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
+                if (actInt == WSConstants.ENCR) {
+
+                    if (wsSecEngineResult.get(WSSecurityEngineResult.TAG_ID) != null &&
+                            ((String) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ID)).length() != 0) {
+
+                        try {
+
+                            String encryptedKeyID = (String) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ID);
+
+                            Date created = new Date();
+                            Date expires = new Date();
+                            expires.setTime(System.currentTimeMillis() + 300000);
+                            EncryptedKeyToken tempTok = new EncryptedKeyToken(encryptedKeyID, created, expires);
+                            tempTok.setSecret((byte[]) wsSecEngineResult.get(WSSecurityEngineResult.TAG_SECRET));
+                            tempTok.setSHA1(getSHA1((byte[]) wsSecEngineResult.
+                                    get(WSSecurityEngineResult.TAG_ENCRYPTED_EPHEMERAL_KEY)));
+                            rmd.getTokenStorage().add(tempTok);
+
+                            return encryptedKeyID;
+
+                        } catch (TrustException e) {
+                            throw new RampartException("errorInAddingTokenIntoStore");
+                        }
+
+                    }
                 }
             }
         }
-    	return null;
+        return null;
     }
     
     

@@ -24,10 +24,10 @@ import org.apache.rahas.RahasData;
 import org.apache.rahas.Token;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.WSSecEncryptedKey;
@@ -107,14 +107,13 @@ public class TokenIssuerUtil {
             if (TokenIssuerUtil.ENCRYPTED_KEY.equals(config.proofKeyType)) {
                 WSSecEncryptedKey encrKeyBuilder = new WSSecEncryptedKey();
                 Crypto crypto;
+
+                ClassLoader classLoader = data.getInMessageContext().getAxisService().getClassLoader();
+
                 if (config.cryptoElement != null) { // crypto props defined as elements
-                    crypto = CryptoFactory.getInstance(TrustUtil.toProperties(config.cryptoElement),
-                                                       data.getInMessageContext().
-                                                               getAxisService().getClassLoader());
+                    crypto = CommonUtil.getCrypto(TrustUtil.toProperties(config.cryptoElement),classLoader);
                 } else { // crypto props defined in a properties file
-                    crypto = CryptoFactory.getInstance(config.cryptoPropertiesFile,
-                                                       data.getInMessageContext().
-                                                               getAxisService().getClassLoader());
+                    crypto = CommonUtil.getCrypto(config.cryptoPropertiesFile, classLoader);
                 }
 
                 encrKeyBuilder.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);

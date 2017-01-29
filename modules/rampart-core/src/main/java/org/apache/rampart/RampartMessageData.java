@@ -59,7 +59,6 @@ import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class RampartMessageData {
     
@@ -349,15 +348,15 @@ public class RampartMessageData {
                
                // This is not the default behavior, we clone the default WSSConfig to prevent this 
                // affecting globally 
-               if (timestampPrecisionInMilliseconds == WSSConfig.getDefaultWSConfig()
+               if (timestampPrecisionInMilliseconds == WSSConfig.getNewInstance()
                                                            .isPrecisionInMilliSeconds()) {
-                   this.config = WSSConfig.getDefaultWSConfig();                
+                   this.config = WSSConfig.getNewInstance();
                } else {
                    this.config = RampartUtil.getWSSConfigInstance();
                    this.config.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);               
                }
            } else {
-               this.config = WSSConfig.getDefaultWSConfig();
+               this.config = WSSConfig.getNewInstance();
            }
             
            // To handle scenarios where password type is not set by default.
@@ -578,19 +577,17 @@ public class RampartMessageData {
             //Pick the first SAML token
             //TODO : This is a hack , MUST FIX
             //get the sec context id from the req msg ctx
-            Vector results = (Vector)this.msgContext.getProperty(WSHandlerConstants.RECV_RESULTS);
-            for (int i = 0; i < results.size(); i++) {
-                WSHandlerResult rResult = (WSHandlerResult) results.get(i);
-                Vector wsSecEngineResults = rResult.getResults();
+            List<WSHandlerResult> results
+                    = (List<WSHandlerResult>)this.msgContext.getProperty(WSHandlerConstants.RECV_RESULTS);
+            for (WSHandlerResult result : results) {
+                List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
 
-                for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                    WSSecurityEngineResult wser = (WSSecurityEngineResult) wsSecEngineResults
-                            .get(j);
-                    final Integer actInt = 
-                        (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-                    if(WSConstants.ST_UNSIGNED == actInt.intValue()) {
+                for (WSSecurityEngineResult wsSecEngineResult : wsSecEngineResults) {
+                    final Integer actInt =
+                            (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
+                    if (WSConstants.ST_UNSIGNED == actInt) {
                         final Object assertion =
-                             wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
+                                wsSecEngineResult.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
                         SAMLAssertionHandler samlAssertionHandler
                                 = SAMLAssertionHandlerFactory.createAssertionHandler(assertion);
 
@@ -621,20 +618,17 @@ public class RampartMessageData {
             id = (String) RampartUtil.getContextMap(this.msgContext).get(contextIdentifierKey);
         } else {
             //get the sec context id from the req msg ctx
-            Vector results = (Vector)this.msgContext.getProperty(WSHandlerConstants.RECV_RESULTS);
-            for (int i = 0; i < results.size(); i++) {
-                WSHandlerResult rResult = (WSHandlerResult) results.get(i);
-                Vector wsSecEngineResults = rResult.getResults();
+            List<WSHandlerResult> results = (List<WSHandlerResult>)this.msgContext.getProperty(WSHandlerConstants.RECV_RESULTS);
+            for (WSHandlerResult result : results) {
+                List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
 
-                for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                    WSSecurityEngineResult wser = (WSSecurityEngineResult) wsSecEngineResults
-                            .get(j);
-                    final Integer actInt = 
-                        (Integer)wser.get(WSSecurityEngineResult.TAG_ACTION);
-                    if(WSConstants.SCT == actInt.intValue()) {
-                        final SecurityContextToken sct = 
-                            ((SecurityContextToken) wser
-                                .get(WSSecurityEngineResult.TAG_SECURITY_CONTEXT_TOKEN));
+                for (WSSecurityEngineResult wsSecEngineResult : wsSecEngineResults) {
+                    final Integer actInt =
+                            (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
+                    if (WSConstants.SCT == actInt) {
+                        final SecurityContextToken sct =
+                                ((SecurityContextToken) wsSecEngineResult
+                                        .get(WSSecurityEngineResult.TAG_SECURITY_CONTEXT_TOKEN));
                         id = sct.getID();
                     }
 

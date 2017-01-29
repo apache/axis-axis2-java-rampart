@@ -28,7 +28,8 @@ import org.xmlsoap.ping.PingDocument;
 import org.xmlsoap.ping.PingResponse;
 import org.xmlsoap.ping.PingResponseDocument;
 
-import java.util.Vector;
+import java.security.Principal;
+import java.util.List;
 
 /**
  * Auto generated java skeleton for the service by the Axis code generator
@@ -41,25 +42,21 @@ public class PingPortSkeleton{
      */
     public PingResponseDocument ping
             (PingDocument param0) {
-        Vector results = null;
+        List<WSHandlerResult> results = null;
         MessageContext msgCtx = MessageContext.getCurrentMessageContext();
         if ((results =
-                (Vector) msgCtx.getProperty(WSHandlerConstants.RECV_RESULTS))
+                (List<WSHandlerResult>) msgCtx.getProperty(WSHandlerConstants.RECV_RESULTS))
                 == null) {
             System.out.println("No security results!!");
             throw new RuntimeException("No security results!!");
         } else {
             System.out.println("Number of results: " + results.size());
-            for (int i = 0; i < results.size(); i++) {
-                WSHandlerResult rResult =
-                        (WSHandlerResult) results.get(i);
-                Vector wsSecEngineResults = rResult.getResults();
-    
-                for (int j = 0; j < wsSecEngineResults.size(); j++) {
-                    WSSecurityEngineResult wser =
-                            (WSSecurityEngineResult) wsSecEngineResults.get(j);
-                    if (wser.getAction() != WSConstants.ENCR && wser.getPrincipal() != null) {
-                        System.out.println(wser.getPrincipal().getName());
+            for (WSHandlerResult result : results) {
+                List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
+
+                for (WSSecurityEngineResult wser : wsSecEngineResults) {
+                    if (getAction(wser) != WSConstants.ENCR && getPrincipal(wser) != null) {
+                        System.out.println(getPrincipal(wser).getName());
                     }
                 }
             }
@@ -68,6 +65,14 @@ public class PingPortSkeleton{
             pingRes.setText("Response: " + param0.getPing().getText());
             return response;
         }
+    }
+
+    private int getAction(WSSecurityEngineResult result) {
+        return (Integer)result.get(WSSecurityEngineResult.TAG_ACTION);
+    }
+
+    private Principal getPrincipal(WSSecurityEngineResult result) {
+        return (Principal)result.get(WSSecurityEngineResult.TAG_PRINCIPAL);
     }
 
 }

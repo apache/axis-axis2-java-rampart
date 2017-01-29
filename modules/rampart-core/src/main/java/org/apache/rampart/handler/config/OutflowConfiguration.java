@@ -583,6 +583,27 @@ public class OutflowConfiguration {
 		return (String) this.actionList[this.currentAction]
 				.get(WSSHandlerConstants.PRESERVE_ORIGINAL_ENV);
 	}
+
+    /**
+     * This will set whether request or response evaluation should adhere to "Basic Security Profile"
+     * @param value true if evaluation should adhere to "Basic Security Profile" else false. Default is true.
+     */
+	public void setBSPCompliant(boolean value) {
+		this.actionList[this.currentAction].put(
+				WSHandlerConstants.IS_BSP_COMPLIANT, value?"true":"false");
+	}
+
+
+    /**
+     * Gets whether security processing is configured to handle BSP compliant manner.
+     * "true" or "false"
+     * @return Returns "true" or "false".
+     */
+	public String getBSPCompliant() {
+		return (String) this.actionList[this.currentAction]
+				.get(WSHandlerConstants.IS_BSP_COMPLIANT);
+	}
+
     
     
     public void setSignAllHeadersAndBody() {

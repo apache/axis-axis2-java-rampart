@@ -28,6 +28,7 @@ import org.apache.rampart.RampartConstants;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.HandlerParameterDecoder;
 import org.apache.rampart.util.MessageOptimizer;
+import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.RequestData;
@@ -35,7 +36,8 @@ import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Document;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @deprecated
@@ -44,12 +46,17 @@ public class WSDoAllSender extends WSDoAllHandler {
     
     private static final Log log = LogFactory.getLog(WSDoAllSender.class);
     private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
+
+    // TODO can we get rid of this ?
+    private static final String SND_SECURITY = "SND_SECURITY";
     
     
     public WSDoAllSender() {
         super();
         inHandler = false;
     }
+
+
       
     public void processMessage(MessageContext msgContext) throws AxisFault {
         
@@ -57,8 +64,9 @@ public class WSDoAllSender extends WSDoAllHandler {
                 WSSHandlerConstants.USE_DOOM);
         boolean useDoom = useDoomValue != null
                 && Constants.VALUE_TRUE.equalsIgnoreCase(useDoomValue);
-        
+
         RequestData reqData = new RequestData();
+
         try {
             //If the msgs are msgs to an STS then use basic WS-Sec
             processBasic(msgContext, useDoom, reqData);
@@ -95,6 +103,9 @@ public class WSDoAllSender extends WSDoAllHandler {
         } catch (Exception e) {
             throw new AxisFault("Configureation error", e);
         }
+
+        // If encryption crypto is not already set use signatureCrypto as encryption crypto.
+        RampartUtil.setEncryptionCrypto(msgContext);
         
         if (doDebug) {
             log.debug("WSDoAllSender: enter invoke()");
@@ -132,7 +143,7 @@ public class WSDoAllSender extends WSDoAllHandler {
                 }
             }
         
-        Vector actions = new Vector();
+        List<Integer> actions = new ArrayList<Integer>();
         String action = null;
         if ((action = (String) getOption(WSSHandlerConstants.ACTION_ITEMS)) == null) {
             action = (String) getProperty(msgContext, WSSHandlerConstants.ACTION_ITEMS);
@@ -189,15 +200,15 @@ public class WSDoAllSender extends WSDoAllHandler {
          * a chained handler.
          */
         if ((doc = (Document) ((MessageContext)reqData.getMsgContext())
-                .getProperty(WSHandlerConstants.SND_SECURITY)) == null) {
+                .getProperty(SND_SECURITY)) == null) {
             try {
                 doc = Axis2Util.getDocumentFromSOAPEnvelope(msgContext.getEnvelope(), useDoom);
             } catch (WSSecurityException wssEx) {
                 throw new AxisFault("WSDoAllReceiver: Error in converting to Document", wssEx);
             }
         }
-        
-        
+
+
         doSenderAction(doAction, doc, reqData, actions, !msgContext.isServerSide());
         
         /*
@@ -209,7 +220,7 @@ public class WSDoAllSender extends WSDoAllHandler {
          *
          */
         if (reqData.isNoSerialization()) {
-            ((MessageContext)reqData.getMsgContext()).setProperty(WSHandlerConstants.SND_SECURITY,
+            ((MessageContext)reqData.getMsgContext()).setProperty(SND_SECURITY,
                     doc);
         } else {
             if(useDoom) {
@@ -217,7 +228,7 @@ public class WSDoAllSender extends WSDoAllHandler {
             } else {
                 msgContext.setEnvelope(Axis2Util.getSOAPEnvelopeFromDOMDocument(doc, useDoom));
             }
-            ((MessageContext)reqData.getMsgContext()).setProperty(WSHandlerConstants.SND_SECURITY, null);
+            ((MessageContext)reqData.getMsgContext()).setProperty(SND_SECURITY, null);
         }
         
 

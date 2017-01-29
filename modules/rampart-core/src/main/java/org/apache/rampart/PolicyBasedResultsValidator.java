@@ -27,6 +27,8 @@ import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.*;
 import org.apache.ws.security.*;
+import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.components.crypto.CryptoType;
 import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.w3c.dom.Element;
@@ -37,17 +39,24 @@ import org.jaxen.JaxenException;
 
 import javax.xml.namespace.QName;
 import java.math.BigInteger;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandler {
+public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallbackHandler {
     
     private static Log log = LogFactory.getLog(PolicyBasedResultsValidator.class);
+
+    public void validate(ValidatorData data, Vector results)
+    throws RampartException {
+        List<WSSecurityEngineResult> resultsList = new ArrayList<WSSecurityEngineResult>(results);
+        this.validate(data, resultsList);
+    }
     
     /** 
      * {@inheritDoc}
      */
-    public void validate(ValidatorData data, Vector results) 
+    public void validate(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
@@ -72,70 +81,82 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         }
         
         //sig/encr
-        Vector encryptedParts = RampartUtil.getEncryptedParts(rmd);
+        List<WSEncryptionPart> encryptedParts = RampartUtil.getEncryptedParts(rmd);
         if(rpd != null && rpd.isSignatureProtection() && isSignatureRequired(rmd)) {
             
             String sigId = RampartUtil.getSigElementId(rmd);
-            
-            encryptedParts.add(new WSEncryptionPart(WSConstants.SIG_LN, 
-                    WSConstants.SIG_NS, "Element"));
+
+            encryptedParts.add(RampartUtil.createEncryptionPart(WSConstants.SIG_LN, sigId, WSConstants.SIG_NS,
+                    RampartConstants.XML_ENCRYPTION_MODIFIER_ELEMENT));
         }
         
-        Vector signatureParts = RampartUtil.getSignedParts(rmd);
+        List<WSEncryptionPart> signatureParts = RampartUtil.getSignedParts(rmd);
 
         //Timestamp is not included in sig parts
-		if (tsResult != null || !rpd.isIncludeTimestampOptional()) {
-			if (rpd != null && rpd.isIncludeTimestamp()
-					&& !rpd.isTransportBinding()) {
-				signatureParts.add(new WSEncryptionPart("timestamp"));
-			}
-		}
-        
+        if (rpd != null) {
+            if (tsResult != null || !rpd.isIncludeTimestampOptional()) {
+                if (rpd.isIncludeTimestamp()
+                        && !rpd.isTransportBinding()) {
+                    signatureParts.add(RampartUtil.createEncryptionPart(WSConstants.TIMESTAMP_TOKEN_LN, "timestamp"));
+                }
+            }
+        }
+
         if(!rmd.isInitiator()) {
                         
             //Just an indicator for EndorsingSupportingToken signature
-            SupportingToken endSupportingToken = rpd.getEndorsingSupportingTokens();
+            SupportingToken endSupportingToken = null;
+            if (rpd != null) {
+                endSupportingToken = rpd.getEndorsingSupportingTokens();
+            }
+
             if(endSupportingToken !=  null && !endSupportingToken.isOptional()) {
                 SignedEncryptedParts endSignedParts = endSupportingToken.getSignedParts();
                 if((endSignedParts != null && !endSignedParts.isOptional() &&
                         (endSignedParts.isBody() || 
                                 endSignedParts.getHeaders().size() > 0)) ||
                                 rpd.isIncludeTimestamp()) {
-                    signatureParts.add(
-                            new WSEncryptionPart("EndorsingSupportingTokens"));
+
+                    signatureParts.add(RampartUtil.createEncryptionPart("EndorsingSupportingTokens",
+                            "EndorsingSupportingTokens"));
                 }
             }
             //Just an indicator for SignedEndorsingSupportingToken signature
-            SupportingToken sgndEndSupportingToken = rpd.getSignedEndorsingSupportingTokens();
+            SupportingToken sgndEndSupportingToken = null;
+            if (rpd != null) {
+                sgndEndSupportingToken = rpd.getSignedEndorsingSupportingTokens();
+            }
             if(sgndEndSupportingToken != null && !sgndEndSupportingToken.isOptional()) {
                 SignedEncryptedParts sgndEndSignedParts = sgndEndSupportingToken.getSignedParts();
                 if((sgndEndSignedParts != null && !sgndEndSignedParts.isOptional() &&
                         (sgndEndSignedParts.isBody() || 
                                 sgndEndSignedParts.getHeaders().size() > 0)) || 
                                 rpd.isIncludeTimestamp()) {
-                    signatureParts.add(
-                            new WSEncryptionPart("SignedEndorsingSupportingTokens"));
+
+                    signatureParts.add(RampartUtil.createEncryptionPart("SignedEndorsingSupportingTokens",
+                            "SignedEndorsingSupportingTokens"));
                 }
             }
-            
-            Vector supportingToks = rpd.getSupportingTokensList();
-            for (int i = 0; i < supportingToks.size(); i++) {
-                SupportingToken supportingToken = (SupportingToken) supportingToks.get(i);
-                if (supportingToken != null && !supportingToken.isOptional()) {
-                    SupportingPolicyData policyData = new SupportingPolicyData();
-                    policyData.build(supportingToken);
-                    encryptedParts.addAll(RampartUtil.getSupportingEncryptedParts(rmd, policyData));
-                    signatureParts.addAll(RampartUtil.getSupportingSignedParts(rmd, policyData));
+
+            if (rpd != null) {
+                List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
+                for (SupportingToken supportingToken : supportingToks) {
+                    if (supportingToken != null && !supportingToken.isOptional()) {
+                        SupportingPolicyData policyData = new SupportingPolicyData();
+                        policyData.build(supportingToken);
+                        encryptedParts.addAll(RampartUtil.getSupportingEncryptedParts(rmd, policyData));
+                        signatureParts.addAll(RampartUtil.getSupportingSignedParts(rmd, policyData));
+                    }
                 }
             }
         }
         
         validateEncrSig(data,encryptedParts, signatureParts, results);
-        
-        if(!rpd.isTransportBinding()) {
+
+        if(rpd != null && !rpd.isTransportBinding()) {
             validateProtectionOrder(data, results);
-        }  
-        
+        }
+
         validateEncryptedParts(data, encryptedParts, results);
 
         validateSignedPartsHeaders(data, signatureParts, results);
@@ -200,16 +221,17 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
      * @param encryptedParts
      * @param signatureParts
      */
-    protected void validateEncrSig(ValidatorData data,Vector encryptedParts, Vector signatureParts, Vector results) 
+    protected void validateEncrSig(ValidatorData data,List<WSEncryptionPart> encryptedParts,
+                                   List<WSEncryptionPart> signatureParts, List<WSSecurityEngineResult> results)
     throws RampartException {
-        ArrayList actions = getSigEncrActions(results);
+        List<Integer> actions = getSigEncrActions(results);
         boolean sig = false; 
         boolean encr = false;
-        for (Iterator iter = actions.iterator(); iter.hasNext();) {
-            Integer act = (Integer) iter.next();
-            if(act.intValue() == WSConstants.SIGN) {
+        for (Object action : actions) {
+            Integer act = (Integer) action;
+            if (act == WSConstants.SIGN) {
                 sig = true;
-            } else if(act.intValue() == WSConstants.ENCR) {
+            } else if (act == WSConstants.ENCR) {
                 encr = true;
             }
         }
@@ -234,12 +256,12 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         if(encr && encryptedParts.size() == 0) {
             
             //Check whether its just an encrypted key
-            ArrayList list = this.getResults(results, WSConstants.ENCR);
+            List<WSSecurityEngineResult> list = this.getResults(results, WSConstants.ENCR);
+
             boolean encrDataFound = false;
-            for (Iterator iter = list.iterator(); iter.hasNext();) {
-                WSSecurityEngineResult result = (WSSecurityEngineResult) iter.next();
-                ArrayList dataRefURIs = (ArrayList)result.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
-                if ( dataRefURIs != null && dataRefURIs.size() != 0) {
+            for (WSSecurityEngineResult result : list) {
+                ArrayList dataRefURIs = (ArrayList) result.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
+                if (dataRefURIs != null && dataRefURIs.size() != 0) {
                     encrDataFound = true;
                 }
             }
@@ -259,14 +281,13 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
      * @param data
      * @param results
      */
-    protected void validateSupportingTokens(ValidatorData data, Vector results) 
+    protected void validateSupportingTokens(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
         
         //Check for UsernameToken
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
-        Vector supportingToks = rpd.getSupportingTokensList();
-        for (int i = 0; i < supportingToks.size(); i++) {
-            SupportingToken suppTok = (SupportingToken) supportingToks.get(i);
+        List<SupportingToken> supportingTokens = rpd.getSupportingTokensList();
+        for (SupportingToken suppTok : supportingTokens) {
             handleSupportingTokens(results, suppTok);
         }
         SupportingToken signedSuppToken = rpd.getSignedSupportingTokens();
@@ -282,33 +303,33 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
      * @param suppTok
      * @throws RampartException
      */
-    protected void handleSupportingTokens(Vector results, SupportingToken suppTok) throws RampartException {
+    protected void handleSupportingTokens(List<WSSecurityEngineResult> results, SupportingToken suppTok) throws RampartException {
         
         if(suppTok == null) {
             return;
         }
         
         ArrayList tokens = suppTok.getTokens();
-        for (Iterator iter = tokens.iterator(); iter.hasNext();) {
-            Token token = (Token) iter.next();
-            if(token instanceof UsernameToken) {
+        for (Object objectToken : tokens) {
+            Token token = (Token) objectToken;
+            if (token instanceof UsernameToken) {
                 UsernameToken ut = (UsernameToken) token;
                 //Check presence of a UsernameToken
                 WSSecurityEngineResult utResult = WSSecurityUtil.fetchActionResult(results, WSConstants.UT);
-                if(utResult == null && !ut.isOptional()) {
+                if (utResult == null && !ut.isOptional()) {
                     throw new RampartException("usernameTokenMissing");
                 }
-                
-            } else if ( token instanceof IssuedToken ) {
+
+            } else if (token instanceof IssuedToken) {
                 //TODO is is enough to check for ST_UNSIGNED results ??
                 WSSecurityEngineResult samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_UNSIGNED);
-                if(samlResult == null) {
+                if (samlResult == null) {
                     throw new RampartException("samlTokenMissing");
                 }
-            } else if ( token instanceof X509Token) {
+            } else if (token instanceof X509Token) {
                 X509Token x509Token = (X509Token) token;
                 WSSecurityEngineResult x509Result = WSSecurityUtil.fetchActionResult(results, WSConstants.BST);
-                if(x509Result == null && !x509Token.isOptional()) {
+                if (x509Result == null && !x509Token.isOptional()) {
                     throw new RampartException("binaryTokenMissing");
                 }
             }
@@ -322,11 +343,11 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
      * @param data
      * @param results
      */
-    protected void validateProtectionOrder(ValidatorData data, Vector results) 
+    protected void validateProtectionOrder(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
         
         String protectionOrder = data.getRampartMessageData().getPolicyData().getProtectionOrder();
-        ArrayList sigEncrActions = this.getSigEncrActions(results);
+        List<Integer> sigEncrActions = this.getSigEncrActions(results);
         
         if(sigEncrActions.size() < 2) {
             //There are no results to COMPARE
@@ -335,12 +356,12 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         boolean sigNotPresent = true; 
         boolean encrNotPresent = true;
-        
-        for (Iterator iter = sigEncrActions.iterator(); iter.hasNext();) {
-            Integer act = (Integer) iter.next();
-            if(act.intValue() == WSConstants.SIGN) {
+
+        for (Object sigEncrAction : sigEncrActions) {
+            Integer act = (Integer) sigEncrAction;
+            if (act == WSConstants.SIGN) {
                 sigNotPresent = false;
-            } else if(act.intValue() == WSConstants.ENCR) {
+            } else if (act == WSConstants.ENCR) {
                 encrNotPresent = false;
             }
         }
@@ -358,11 +379,11 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             for (Iterator iter = sigEncrActions.iterator(); 
                 iter.hasNext() || !done;) {
                 Integer act = (Integer) iter.next();
-                if(act.intValue() == WSConstants.ENCR && ! sigFound ) {
+                if(act == WSConstants.ENCR && ! sigFound ) {
                     // We found ENCR and SIGN has not been found - break and fail
                     break;
                 }
-                if(act.intValue() == WSConstants.SIGN) {
+                if(act == WSConstants.SIGN) {
                     sigFound = true;
                 } else if(sigFound) {
                     //We have an ENCR action after sig
@@ -372,15 +393,15 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             
         } else {
             boolean encrFound = false;
-            for (Iterator iter = sigEncrActions.iterator(); iter.hasNext();) {
-                Integer act = (Integer) iter.next();
-                if(act.intValue() == WSConstants.SIGN && ! encrFound ) {
+            for (Object sigEncrAction : sigEncrActions) {
+                Integer act = (Integer) sigEncrAction;
+                if (act == WSConstants.SIGN && !encrFound) {
                     // We found SIGN and ENCR has not been found - break and fail
                     break;
                 }
-                if(act.intValue() == WSConstants.ENCR) {
+                if (act == WSConstants.ENCR) {
                     encrFound = true;
-                } else if(encrFound) {
+                } else if (encrFound) {
                     //We have an ENCR action after sig
                     done = true;
                 }
@@ -393,22 +414,23 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
     }
 
 
-    protected ArrayList getSigEncrActions(Vector results) {
-        ArrayList sigEncrActions = new ArrayList();
-        for (Iterator iter = results.iterator(); iter.hasNext();) {
-            Integer actInt = (Integer) ((WSSecurityEngineResult) iter.next())
+    protected List<Integer> getSigEncrActions(List<WSSecurityEngineResult> results) {
+        List<Integer> sigEncrActions = new ArrayList<Integer>();
+        for (WSSecurityEngineResult result : results) {
+            Integer action = (Integer) (result)
                     .get(WSSecurityEngineResult.TAG_ACTION);
-            int action = actInt.intValue();
-            if(WSConstants.SIGN == action || WSConstants.ENCR == action) {
-                sigEncrActions.add(Integer.valueOf(action));
+
+            if (WSConstants.SIGN == action || WSConstants.ENCR == action) {
+                sigEncrActions.add(action);
             }
-            
+
         }
         return sigEncrActions;
     }
 
-    protected void validateEncryptedParts(ValidatorData data, Vector encryptedParts, Vector results) 
-    throws RampartException {
+    protected void validateEncryptedParts(ValidatorData data,
+                                          List<WSEncryptionPart> encryptedParts, List<WSSecurityEngineResult> results)
+                                                                                throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
         
@@ -422,28 +444,23 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                                                              rpd.getDeclaredNamespaces());
 
         Map decryptedElements = new HashMap();
-        for (int i = 0; i < encrRefs.size() ; i++) {
-            WSDataRef dataRef = (WSDataRef)encrRefs.get(i);
+        for (Object encrRef : encrRefs) {
+            WSDataRef dataRef = (WSDataRef) encrRef;
 
-            if(dataRef == null || dataRef.getXpath() == null) {
+            if (dataRef == null || dataRef.getXpath() == null) {
                 continue;
             }
 
             try {
                 XPath xp = new AXIOMXPath(dataRef.getXpath());
 
-                Iterator nsIter = namespaces.iterator();
-
-                while (nsIter.hasNext())
-                {
-                    OMNamespace tmpNs = (OMNamespace)nsIter.next();
+                for (Object namespaceObject : namespaces) {
+                    OMNamespace tmpNs = (OMNamespace) namespaceObject;
                     xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
                 }
 
-                Iterator nodesIterator = xp.selectNodes(envelope).iterator();
-
-                while (nodesIterator.hasNext()) {
-                    decryptedElements.put(nodesIterator.next(), Boolean.valueOf(dataRef.isContent()));
+                for (Object o : xp.selectNodes(envelope)) {
+                    decryptedElements.put(o, dataRef.isContent());
                 }
 
 
@@ -466,44 +483,39 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             }
         }
 
-        for (int i = 0 ; i < encryptedParts.size() ; i++) {
-            
-            WSEncryptionPart encPart = (WSEncryptionPart)encryptedParts.get(i);
-            
+        for (WSEncryptionPart encryptedPart : encryptedParts) {
+
             //This is the encrypted Body and we already checked encrypted body
-            if (encPart.getType() == WSConstants.PART_TYPE_BODY) {
+            if (encryptedPart.getName().equals(WSConstants.ELEM_BODY)) {
                 continue;
             }
-            
-            if ((WSConstants.SIG_LN.equals(encPart.getName()) &&
-                    WSConstants.SIG_NS.equals(encPart.getNamespace()))
-                   || encPart.getType() == WSConstants.PART_TYPE_HEADER ) {
-                if (!isRefIdPresent(encrRefs, new QName(encPart.getNamespace(),encPart.getName()))) {
-                    throw new RampartException("encryptedPartMissing", 
-                            new String[]{encPart.getNamespace()+":"+encPart.getName()}); 
+
+            if ((WSConstants.SIG_LN.equals(encryptedPart.getName()) &&
+                    WSConstants.SIG_NS.equals(encryptedPart.getNamespace()))
+                    || encryptedPart.getEncModifier().equals(WSConstants.ELEM_HEADER)) {
+                if (!isRefIdPresent(encrRefs, new QName(encryptedPart.getNamespace(), encryptedPart.getName()))) {
+                    throw new RampartException("encryptedPartMissing",
+                            new String[]{encryptedPart.getNamespace() + ":" + encryptedPart.getName()});
                 }
                 continue;
             }
 
             // it is not a header or body part... verify encrypted xpath elements
-            String xpath = encPart.getXpath();
+            String xpath = encryptedPart.getXpath();
             boolean found = false;
             try {
                 XPath xp = new AXIOMXPath(xpath);
-                Iterator nsIter = namespaces.iterator();
 
-                while (nsIter.hasNext()) {
-                    OMNamespace tmpNs = (OMNamespace) nsIter.next();
+                for (Object namespaceObject : namespaces) {
+                    OMNamespace tmpNs = (OMNamespace) namespaceObject;
                     xp.addNamespace(tmpNs.getPrefix(), tmpNs.getNamespaceURI());
                 }
 
-                Iterator nodesIterator = xp.selectNodes(envelope).iterator();
-
-                while (nodesIterator.hasNext()) {
-                    Object result = decryptedElements.get(nodesIterator.next());
+                for (Object o : xp.selectNodes(envelope)) {
+                    Object result = decryptedElements.get(o);
                     if (result != null &&
-                            ("Element".equals(encPart.getEncModifier())
-                                    ^ ((Boolean) result).booleanValue())) {
+                            ("Element".equals(encryptedPart.getEncModifier())
+                                    ^ (Boolean) result)) {
                         found = true;
                         break;
                     }
@@ -518,8 +530,8 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             } catch (JaxenException e) {
                 // This has to be changed to propagate an instance of a RampartException up
                 throw new RampartException("An error occurred while searching for decrypted elements.", e);
-            }           
-            
+            }
+
         }
         
     }
@@ -531,21 +543,18 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         RampartPolicyData rpd = rmd.getPolicyData();
         
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
-        
-        Iterator elementsIter = rpd.getRequiredElements().iterator();
-        
-        while (elementsIter.hasNext()) {
-            
-            String expression = (String) elementsIter.next();
-            
-            if ( !RampartUtil.checkRequiredElements(envelope, rpd.getDeclaredNamespaces(), expression)) {
-                throw new RampartException("requiredElementsMissing", new String[] { expression } );
+
+        for (String expression : rpd.getRequiredElements()) {
+
+            if (!RampartUtil.checkRequiredElements(envelope, rpd.getDeclaredNamespaces(), expression)) {
+                throw new RampartException("requiredElementsMissing", new String[]{expression});
             }
         }
         
     }
 
-    protected void validateSignedPartsHeaders(ValidatorData data, Vector signatureParts, Vector results) 
+    protected void validateSignedPartsHeaders(ValidatorData data, List<WSEncryptionPart> signatureParts,
+                                              List<WSSecurityEngineResult> results)
     throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
@@ -556,14 +565,12 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         WSSecurityEngineResult[] actionResults = fetchActionResults(results, WSConstants.SIGN);
 
         // Find elements that are signed
-        Vector actuallySigned = new Vector();
+        List<QName> actuallySigned = new ArrayList<QName>();
         if (actionResults != null) {            
             
             AlgorithmSuite suite = rpd.getAlgorithmSuite();          
             
-            for (int j = 0; j < actionResults.length; j++) {
-                
-                WSSecurityEngineResult actionResult = actionResults[j];
+            for (WSSecurityEngineResult actionResult : actionResults) {
 
                 // Validate signature algorithms
                 String sigMethod = null;
@@ -587,77 +594,78 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
                             suite.getInclusiveC14n(), canonMethod });
                 }
 
-                List wsDataRefs = (List)actionResult.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
-                
+                List wsDataRefs = (List) actionResult.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
+
                 // if header was encrypted before it was signed, protected
                 // element is 'EncryptedHeader.' the actual element is
                 // first child element
 
-                for (Iterator k = wsDataRefs.iterator(); k.hasNext();) {
-                    WSDataRef wsDataRef = (WSDataRef)k.next();
+                for (Object objectDataReference : wsDataRefs) {
+                    WSDataRef wsDataRef = (WSDataRef) objectDataReference;
                     Element protectedElement = wsDataRef.getProtectedElement();
                     if (protectedElement.getLocalName().equals("EncryptedHeader")) {
                         NodeList nodeList = protectedElement.getChildNodes();
                         for (int x = 0; x < nodeList.getLength(); x++) {
                             if (nodeList.item(x).getNodeType() == Node.ELEMENT_NODE) {
-                                String ns = ((Element)nodeList.item(x)).getNamespaceURI();
-                                String ln = ((Element)nodeList.item(x)).getLocalName();
-                                actuallySigned.add(new QName(ns,ln));
+                                String ns = (nodeList.item(x)).getNamespaceURI();
+                                String ln = (nodeList.item(x)).getLocalName();
+                                actuallySigned.add(new QName(ns, ln));
                                 break;
                             }
-                        } 
+                        }
                     } else {
                         String ns = protectedElement.getNamespaceURI();
                         String ln = protectedElement.getLocalName();
-                        actuallySigned.add(new QName(ns,ln));
+                        actuallySigned.add(new QName(ns, ln));
                     }
                 }
-                
+
             }
         }
-        
-        for(int i=0; i<signatureParts.size(); i++) {
-            WSEncryptionPart wsep = (WSEncryptionPart) signatureParts.get( i );
-            
-            if (wsep.getType() == WSConstants.PART_TYPE_BODY) {
-                
+
+        for (WSEncryptionPart wsep : signatureParts) {
+            if (wsep.getName().equals(WSConstants.ELEM_BODY)) {
+
                 QName bodyQName;
-                
+
                 if (WSConstants.URI_SOAP11_ENV.equals(envelope.getNamespaceURI())) {
                     bodyQName = new SOAP11Constants().getBodyQName();
                 } else {
                     bodyQName = new SOAP12Constants().getBodyQName();
                 }
-                
+
                 if (!actuallySigned.contains(bodyQName) && !rmd.getPolicyData().isSignBodyOptional()) {
                     // soap body is not signed
                     throw new RampartException("bodyNotSigned");
                 }
-            
-            } else if (wsep.getType() == WSConstants.PART_TYPE_HEADER || 
-                    wsep.getType() == WSConstants.PART_TYPE_ELEMENT) {            
-               
-                Element element = (Element) WSSecurityUtil.findElement(
-                        envelope, wsep.getName(), wsep.getNamespace() );
-                
-                if( element == null ) {
+
+            } else if (wsep.getName().equals(WSConstants.ELEM_HEADER) ||
+                    wsep.getXpath() != null) {
+                // TODO earlier this was wsep.getType() == WSConstants.PART_TYPE_ELEMENT
+                // This means that encrypted element of an XPath expression type. Therefore we are checking
+                // now whether an XPath expression exists. - Verify
+
+                Element element = WSSecurityUtil.findElement(
+                        envelope, wsep.getName(), wsep.getNamespace());
+
+                if (element == null) {
                     // The signedpart header or element we are checking is not present in 
                     // soap envelope - this is allowed
                     continue;
                 }
-                
+
                 // header or the element present in soap envelope - verify that it is part of signature
-                if( actuallySigned.contains( new QName(element.getNamespaceURI(), element.getLocalName())) ) {
+                if (actuallySigned.contains(new QName(element.getNamespaceURI(), element.getLocalName()))) {
                     continue;
                 }
-                
-                String msg = wsep.getType() == WSConstants.PART_TYPE_HEADER ? 
-                        "signedPartHeaderNotSigned" : "signedElementNotSigned"; 
-                
+
+                String msg = wsep.getXpath() != null ?
+                        "signedPartHeaderNotSigned" : "signedElementNotSigned";
+
                 // header or the element defined in policy is present but not signed
-                throw new RampartException(msg, new String[] { wsep.getNamespace()+":"+wsep.getName() });
-            
-            } 
+                throw new RampartException(msg, new String[]{wsep.getNamespace() + ":" + wsep.getName()});
+
+            }
         }
     }
 
@@ -674,11 +682,12 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
     /*
      * Verify that ts->Created is before 'now'
      * - testing that timestamp has not expired ('now' is before ts->Expires) is handled earlier by WSS4J
+     * TODO must write unit tests
      */
     protected boolean verifyTimestamp(Timestamp timestamp, RampartMessageData rmd) throws RampartException {
 
-        Calendar cre = timestamp.getCreated();
-        if (cre != null) {
+        Date createdTime = timestamp.getCreated();
+        if (createdTime != null) {
             long now = Calendar.getInstance().getTimeInMillis();
 
             // adjust 'now' with allowed timeskew 
@@ -688,7 +697,7 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             }
             
             // fail if ts->Created is after 'now'
-            if( cre.getTimeInMillis() > now ) {
+            if( createdTime.getTime() > now ) {
                 return false;
             }
         }
@@ -707,8 +716,9 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
      * 3. Verify the trust path for those certificates found because the search for the issuer might be fooled by a phony DN (String!)
      *
      * @param cert the certificate that should be validated against the keystore
+     * @param rmd To get signature keystore information.
      * @return true if the certificate is trusted, false if not (AxisFault is thrown for exceptions during CertPathValidation)
-     * @throws WSSecurityException
+     * @throws RampartException If an error occurred during validation.
      */
     protected boolean verifyTrust(X509Certificate cert, RampartMessageData rmd) throws RampartException {
 
@@ -717,158 +727,198 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             return false;
         }
 
-        String[] aliases = null;
-        String alias = null;
-        X509Certificate[] certs;
+        Crypto crypto = RampartUtil.getSignatureCrypto(
+                    rmd.getPolicyData().getRampartConfig(),
+                    rmd.getCustomClassLoader());
 
-        String subjectString = cert.getSubjectDN().getName();
-        String issuerString = cert.getIssuerDN().getName();
+
+        // TODO removing this with WSS4J 1.6 migration. We do not have a way to get alias
+        // Therefore cannot set alias to message context. What will be affected from this ?
+        // rmd.getMsgContext().setProperty(RampartMessageData.SIGNATURE_CERT_ALIAS, alias);
+
+        // TODO this validation we are doing in SignatureProcessor.handleToken (WSS4J) So why we need to do again ?
+        // investigate
+
+        return isCertificateTrusted(cert, crypto);
+
+    }
+
+
+    /**
+     * TODO - This is directly copied from WSS4J (SignatureTrustValidator).
+     * We need to use to Validators instead of following code. REFACTOR later.
+     *
+     * Evaluate whether a given certificate should be trusted.
+     *
+     * Policy used in this implementation:
+     * 1. Search the keystore for the transmitted certificate
+     * 2. Search the keystore for a connection to the transmitted certificate
+     * (that is, search for certificate(s) of the issuer of the transmitted certificate
+     * 3. Verify the trust path for those certificates found because the search for the issuer
+     * might be fooled by a phony DN (String!)
+     *
+     * @param cert the certificate that should be validated against the keystore
+     * @param crypto A crypto instance to use for trust validation
+     * @return true if the certificate is trusted, false if not
+     * @throws RampartException  If an error occurred during validation.
+     */
+    protected boolean isCertificateTrusted(
+        X509Certificate cert,
+        Crypto crypto
+    ) throws RampartException {
+        String subjectString = cert.getSubjectX500Principal().getName();
+        String issuerString = cert.getIssuerX500Principal().getName();
         BigInteger issuerSerial = cert.getSerialNumber();
-        
-        boolean doDebug = log.isDebugEnabled();
 
-        if (doDebug) {
-            log.debug("WSHandler: Transmitted certificate has subject " + 
-                    subjectString);
-            log.debug("WSHandler: Transmitted certificate has issuer " + 
-                    issuerString + " (serial " + issuerSerial + ")");
+        if (log.isDebugEnabled()) {
+            log.debug("Transmitted certificate has subject " + subjectString);
+            log.debug(
+                "Transmitted certificate has issuer " + issuerString + " (serial "
+                + issuerSerial + ")"
+            );
         }
 
-        // FIRST step
-        // Search the keystore for the transmitted certificate
+        //
+        // FIRST step - Search the keystore for the transmitted certificate
+        //
+        if (isCertificateInKeyStore(crypto, cert)) {
+            return true;
+        }
 
-        // Search the keystore for the alias of the transmitted certificate
+        //
+        // SECOND step - Search for the issuer cert (chain) of the transmitted certificate in the
+        // keystore or the truststore
+        //
+        CryptoType cryptoType = new CryptoType(CryptoType.TYPE.SUBJECT_DN);
+        cryptoType.setSubjectDN(issuerString);
+        X509Certificate[] foundCerts = new X509Certificate[0];
         try {
-            alias = RampartUtil.getSignatureCrypto(
-                    rmd.getPolicyData().getRampartConfig(),
-                    rmd.getCustomClassLoader()).getAliasForX509Cert(
-                    issuerString, issuerSerial);
-        } catch (WSSecurityException ex) {
-            throw new RampartException("cannotFindAliasForCert", new String[]{subjectString}, ex);
+            foundCerts = crypto.getX509Certificates(cryptoType);
+        } catch (WSSecurityException e) {
+            throw new RampartException("noCertForSubject", e);
         }
 
-        if (alias != null) {
-            // Retrieve the certificate for the alias from the keystore
-            try {
-                certs = RampartUtil.getSignatureCrypto(
-                        rmd.getPolicyData().getRampartConfig(),
-                        rmd.getCustomClassLoader()).getCertificates(alias);
-            } catch (WSSecurityException ex) {
-                throw new RampartException("noCertForAlias", new String[] {alias}, ex);
-            }
-
-            // If certificates have been found, the certificates must be compared
-            // to ensure against phony DNs (compare encoded form including signature)
-            if (certs != null && certs.length > 0 && cert.equals(certs[0])) {
-                if (doDebug) {
-                    log.debug("Direct trust for certificate with " + subjectString);
-                }
-                // Set the alias of the cert used for the msg. sig. as a msg. cxt. property
-                rmd.getMsgContext().setProperty(RampartMessageData.SIGNATURE_CERT_ALIAS, alias);
-                return true;
-            }
-        } else {
-            if (doDebug) {
-                log.debug("No alias found for subject from issuer with " + issuerString + " (serial " + issuerSerial + ")");
-            }
-        }
-
-        // SECOND step
-        // Search for the issuer of the transmitted certificate in the keystore
-
-        // Search the keystore for the alias of the transmitted certificates issuer
-        try {
-            aliases = RampartUtil.getSignatureCrypto(
-                    rmd.getPolicyData().getRampartConfig(),
-                    rmd.getCustomClassLoader()).getAliasesForDN(issuerString);
-        } catch (WSSecurityException ex) {
-            throw new RampartException("cannotFindAliasForCert", new String[]{issuerString}, ex);
-        }
-
-        // If the alias has not been found, the issuer is not in the keystore
+        // If the certs have not been found, the issuer is not in the keystore/truststore
         // As a direct result, do not trust the transmitted certificate
-        if (aliases == null || aliases.length < 1) {
-            if (doDebug) {
-                log.debug("No aliases found in keystore for issuer " + issuerString + " of certificate for " + subjectString);
+        if (foundCerts == null || foundCerts.length < 1) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                    "No certs found in keystore for issuer " + issuerString
+                    + " of certificate for " + subjectString
+                );
             }
             return false;
         }
 
+        //
         // THIRD step
-        // Check the certificate trust path for every alias of the issuer found in the keystore
-        for (int i = 0; i < aliases.length; i++) {
-            alias = aliases[i];
-
-            if (doDebug) {
-                log.debug("Preparing to validate certificate path with alias " + alias + " for issuer " + issuerString);
-            }
-
-            // Retrieve the certificate(s) for the alias from the keystore
-            try {
-                certs = RampartUtil.getSignatureCrypto(
-                        rmd.getPolicyData().getRampartConfig(),
-                        rmd.getCustomClassLoader()).getCertificates(alias);
-            } catch (WSSecurityException ex) {
-                throw new RampartException("noCertForAlias", new String[] {alias}, ex);
-            }
-
-            // If no certificates have been found, there has to be an error:
-            // The keystore can find an alias but no certificate(s)
-            if (certs == null || certs.length < 1) {
-                throw new RampartException("noCertForAlias", new String[] {alias});
-            }
-
-            // Form a certificate chain from the transmitted certificate
-            // and the certificate(s) of the issuer from the keystore
-            // First, create new array
-            X509Certificate[] x509certs = new X509Certificate[certs.length + 1];
-            // Then add the first certificate ...
-            x509certs[0] = cert;
-            // ... and the other certificates
-            for (int j = 0; j < certs.length; j++) {
-                cert = certs[j];
-                x509certs[j + 1] = cert;
-            }
-            certs = x509certs;
-
-            // Use the validation method from the crypto to check whether the subjects certificate was really signed by the issuer stated in the certificate
-            try {
-                if (RampartUtil.getSignatureCrypto(
-                        rmd.getPolicyData().getRampartConfig(),
-                        rmd.getCustomClassLoader()).validateCertPath(certs)) {
-                    if (doDebug) {
-                        log.debug("WSHandler: Certificate path has been verified for certificate with subject " + subjectString);
-                    }
-                    return true;
-                }
-            } catch (WSSecurityException ex) {
-                throw new RampartException("certPathVerificationFailed", new String[]{subjectString}, ex);
-            }
+        // Check the certificate trust path for the issuer cert chain
+        //
+        if (log.isDebugEnabled()) {
+            log.debug(
+                "Preparing to validate certificate path for issuer " + issuerString
+            );
+        }
+        //
+        // Form a certificate chain from the transmitted certificate
+        // and the certificate(s) of the issuer from the keystore/truststore
+        //
+        X509Certificate[] x509certs = new X509Certificate[foundCerts.length + 1];
+        x509certs[0] = cert;
+        for (int j = 0; j < foundCerts.length; j++) {
+            x509certs[j + 1] = (X509Certificate)foundCerts[j];
         }
 
-        if (doDebug) {
-            log.debug("WSHandler: Certificate path could not be verified for certificate with subject " + subjectString);
+        //
+        // Use the validation method from the crypto to check whether the subjects'
+        // certificate was really signed by the issuer stated in the certificate
+        //
+        // TODO we need to configure enable revocation ...
+        try {
+            if (crypto.verifyTrust(x509certs, false)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                        "Certificate path has been verified for certificate with subject "
+                         + subjectString
+                    );
+                }
+                return true;
+            }
+        } catch (WSSecurityException e) {
+            throw new RampartException("certPathVerificationFailed", e);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(
+                "Certificate path could not be verified for certificate with subject "
+                + subjectString
+            );
+        }
+        return false;
+    }
+
+    /**
+     * Check to see if the certificate argument is in the keystore
+     * TODO Directly copied from WSS4J (SignatureTrustValidator) - Optimize later
+     * @param crypto A Crypto instance to use for trust validation
+     * @param cert The certificate to check
+     * @return true if cert is in the keystore
+     * @throws RampartException If certificates are not found for given issuer and serial number.
+     */
+    protected boolean isCertificateInKeyStore(
+        Crypto crypto,
+        X509Certificate cert
+    ) throws RampartException {
+        String issuerString = cert.getIssuerX500Principal().getName();
+        BigInteger issuerSerial = cert.getSerialNumber();
+
+        CryptoType cryptoType = new CryptoType(CryptoType.TYPE.ISSUER_SERIAL);
+        cryptoType.setIssuerSerial(issuerString, issuerSerial);
+        X509Certificate[] foundCerts = new X509Certificate[0];
+        try {
+            foundCerts = crypto.getX509Certificates(cryptoType);
+        } catch (WSSecurityException e) {
+            throw new RampartException("noCertificatesForIssuer", new String[]{issuerString,
+                    issuerSerial.toString()}, e);
+        }
+
+        //
+        // If a certificate has been found, the certificates must be compared
+        // to ensure against phony DNs (compare encoded form including signature)
+        //
+        if (foundCerts != null && foundCerts[0] != null && foundCerts[0].equals(cert)) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Direct trust for certificate with " + cert.getSubjectX500Principal().getName()
+                );
+            }
+            return true;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "No certificate found for subject from issuer with " + issuerString
+                            + " (serial " + issuerSerial + ")"
+            );
         }
         return false;
     }
 
     
-    protected ArrayList getEncryptedReferences(Vector results) {
+    protected ArrayList getEncryptedReferences(List<WSSecurityEngineResult> results) {
         
         //there can be multiple ref lists
-        ArrayList encrResults = getResults(results, WSConstants.ENCR);
+        List<WSSecurityEngineResult> encrResults = getResults(results, WSConstants.ENCR);
         
         ArrayList refs = new ArrayList();
-        
-        for (Iterator iter = encrResults.iterator(); iter.hasNext();) {
-            WSSecurityEngineResult engineResult = (WSSecurityEngineResult) iter.next();
+
+        for (WSSecurityEngineResult engineResult : encrResults) {
             ArrayList dataRefUris = (ArrayList) engineResult
                     .get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
-            
+
             //take only the ref list processing results
-            if(dataRefUris != null) {
+            if (dataRefUris != null) {
                 for (Iterator iterator = dataRefUris.iterator(); iterator
-                        .hasNext();) {
+                        .hasNext(); ) {
                     WSDataRef uri = (WSDataRef) iterator.next();
                     refs.add(uri);
                 }
@@ -880,16 +930,16 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
     
     
     
-    protected ArrayList getResults(Vector results, int action) {
+    protected List<WSSecurityEngineResult> getResults(List<WSSecurityEngineResult> results, int action) {
         
-        ArrayList list = new ArrayList();
-        
-        for (int i = 0; i < results.size(); i++) {
+        List<WSSecurityEngineResult> list = new ArrayList<WSSecurityEngineResult>();
+
+        for (WSSecurityEngineResult result : results) {
             // Check the result of every action whether it matches the given
             // action
-            Integer actInt = (Integer)((WSSecurityEngineResult) results.get(i)).get(WSSecurityEngineResult.TAG_ACTION); 
-            if (actInt.intValue() == action) {
-                list.add((WSSecurityEngineResult) results.get(i));
+            Integer actInt = (Integer) result.get(WSSecurityEngineResult.TAG_ACTION);
+            if (actInt == action) {
+                list.add(result);
             }
         }
         
@@ -903,9 +953,8 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
         
-        Vector supportingToks = rpd.getSupportingTokensList();
-        for (int i = 0; i < supportingToks.size(); i++) {
-            SupportingToken suppTok = (SupportingToken) supportingToks.get(i);
+        List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
+        for (SupportingToken suppTok : supportingToks) {
             if (isUsernameTokenPresent(suppTok)) {
                 return true;
             }
@@ -922,13 +971,9 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         }
         
         SupportingToken endSuppToken = rpd.getEndorsingSupportingTokens();
-        if(isUsernameTokenPresent(endSuppToken)){
-            return true;
-        }
-        
-        return false;
-        
-        
+        return isUsernameTokenPresent(endSuppToken);
+
+
     }
     
     protected boolean isUsernameTokenPresent(SupportingToken suppTok) {
@@ -952,22 +997,24 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
 
         if(id != null && id.charAt(0) == '#') {
            id = id.substring(1);
-        }               
+        }
 
-        for (int i = 0; i < refList.size() ; i++) {           
-            WSDataRef dataRef = (WSDataRef)refList.get(i); 
-            
+        for (Object aRefList : refList) {
+            WSDataRef dataRef = (WSDataRef) aRefList;
+
             //ArrayList can contain null elements
-            if(dataRef == null) {
+            if (dataRef == null) {
                 continue;
             }
             //Try to get the wsuId of the decrypted element
             String dataRefUri = dataRef.getWsuId();
             //If not found, try the reference Id of encrypted element ( we set the same Id when we
             // decrypted element in WSS4J)  
-            if (dataRefUri == null) {
-                dataRefUri = dataRef.getDataref();
-            }
+            // TODO wsu id must present. We need to find the scenario where it is not set
+            // if (dataRefUri == null) {
+            //    dataRefUri = dataRef.getProtectedElement().getAttribute("Id"); // TODO check whether this is correct
+                // earlier it was dataRefUri = dataRef.getDataref();
+            //}
             if (dataRefUri != null && dataRefUri.equals(id)) {
                 return true;
             }
@@ -977,21 +1024,20 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
         
     }
     
-    public static WSSecurityEngineResult[] fetchActionResults(Vector wsResultVector, int action) {
-        List wsResult = new ArrayList();
+    public static WSSecurityEngineResult[] fetchActionResults(List<WSSecurityEngineResult> wsSecurityEngineResults, int action) {
+        List<WSSecurityEngineResult> wsResult = new ArrayList<WSSecurityEngineResult>();
 
         // Find the part of the security result that matches the given action
-        for (int i = 0; i < wsResultVector.size(); i++) {
+        for (WSSecurityEngineResult wsSecurityEngineResult : wsSecurityEngineResults) {
             // Check the result of every action whether it matches the given action
-            WSSecurityEngineResult result = (WSSecurityEngineResult) wsResultVector.get(i);
-            int resultAction = ((java.lang.Integer) result.get(WSSecurityEngineResult.TAG_ACTION))
-                    .intValue();
+            WSSecurityEngineResult result = (WSSecurityEngineResult) wsSecurityEngineResult;
+            int resultAction = (Integer) result.get(WSSecurityEngineResult.TAG_ACTION);
             if (resultAction == action) {
-                wsResult.add((WSSecurityEngineResult) wsResultVector.get(i));
+                wsResult.add(wsSecurityEngineResult);
             }
         }
 
-        return (WSSecurityEngineResult[]) wsResult.toArray(new WSSecurityEngineResult[wsResult
+        return wsResult.toArray(new WSSecurityEngineResult[wsResult
                 .size()]);
     }
     
@@ -1012,19 +1058,19 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
     }
     
     private boolean isRefIdPresent(ArrayList refList , QName qname) {
-        
-        for (int i = 0; i < refList.size() ; i++) {           
-            WSDataRef dataRef = (WSDataRef)refList.get(i); 
-            
+
+        for (Object aRefList : refList) {
+            WSDataRef dataRef = (WSDataRef) aRefList;
+
             //ArrayList can contain null elements
-            if(dataRef == null) {
+            if (dataRef == null) {
                 continue;
             }
             //QName of the decrypted element
             QName dataRefQName = dataRef.getName();
 
-            if ( dataRefQName != null &&  dataRefQName.equals(qname)) {
-               return true;
+            if (dataRefQName != null && dataRefQName.equals(qname)) {
+                return true;
             }
 
         }

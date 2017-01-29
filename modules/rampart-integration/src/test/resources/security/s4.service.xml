@@ -10,6 +10,7 @@
         <items>Signature Encrypt Timestamp</items>
         <passwordCallbackClass>org.apache.axis2.security.PWCallback</passwordCallbackClass>
         <signaturePropFile>interop.properties</signaturePropFile>
+	<isBSPCompliant>false</isBSPCompliant>
       </action>
     </parameter>
 
@@ -22,8 +23,8 @@
         <encryptionKeyIdentifier>EmbeddedKeyName</encryptionKeyIdentifier>
         <encryptionSymAlgorithm>http://www.w3.org/2001/04/xmlenc#tripledes-cbc</encryptionSymAlgorithm>
         <signaturePropFile>interop.properties</signaturePropFile>
-        <EmbeddedKeyCallbackClass>org.apache.axis2.security.PWCallback</EmbeddedKeyCallbackClass>
-        <EmbeddedKeyName>SessionKey</EmbeddedKeyName>
+        <embeddedKeyCallbackClass>org.apache.axis2.security.PWCallback</embeddedKeyCallbackClass>
+        <embeddedKeyName>SessionKey</embeddedKeyName>
       </action>
     </parameter>
 

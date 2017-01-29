@@ -18,6 +18,7 @@ import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TokenValidator;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
+import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLUtils;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoFactory;
@@ -183,10 +184,9 @@ public class SAMLTokenValidator implements TokenValidator {
                         inMsgCtx.getAxisService().getClassLoader());
             }
 
-            X509Certificate[] issuerCerts = crypto
-                    .getCertificates(config.issuerKeyAlias);
+            X509Certificate issuerCert = CommonUtil.getCertificateByAlias(crypto,config.issuerKeyAlias);
 
-            issuerPBKey = issuerCerts[0].getPublicKey();
+            issuerPBKey = issuerCert.getPublicKey();
 
         } catch (Exception e) {
             log.error("Could not retrieve issuer public key", e);

@@ -21,8 +21,10 @@ import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.impl.util.SAMLUtils;
 import org.apache.rampart.TokenCallbackHandler;
+import org.apache.ws.security.WSDocInfo;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.handler.RequestData;
 import org.apache.ws.security.saml.SAMLKeyInfo;
 import org.apache.ws.security.saml.SAMLUtil;
 import org.opensaml.saml1.core.Assertion;
@@ -68,9 +70,15 @@ public class SAML1AssertionHandler extends SAMLAssertionHandler{
     public byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler)
             throws WSSecurityException {
 
+        RequestData requestData = new RequestData();
+        requestData.setCallbackHandler(tokenCallbackHandler);
+        requestData.setSigCrypto(signatureCrypto);
+
+        WSDocInfo docInfo = new WSDocInfo(assertion.getDOM().getOwnerDocument()); // TODO Improve ..
+
         // TODO change this to use SAMLAssertion parameter once wss4j conversion is done ....
-        SAMLKeyInfo samlKi = SAMLUtil.getSAMLKeyInfo(assertion.getDOM(),
-                signatureCrypto, tokenCallbackHandler);
+        SAMLKeyInfo samlKi = SAMLUtil.getCredentialFromSubject(assertion,
+                requestData, docInfo, true);
         return samlKi.getSecret();
     }
 
