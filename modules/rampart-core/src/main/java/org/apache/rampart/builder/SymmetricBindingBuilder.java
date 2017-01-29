@@ -17,9 +17,6 @@
 package org.apache.rampart.builder;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,8 +54,6 @@ import org.w3c.dom.Element;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-
-import javax.xml.stream.XMLStreamReader;
 
 
 public class SymmetricBindingBuilder extends BindingBuilder {
@@ -538,12 +533,6 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         
         //Encryption
         Token encrToken = rpd.getEncryptionToken();
-        
-        boolean isIssuedToken = false;
-        if (encrToken instanceof IssuedToken) {
-            isIssuedToken = true;
-        }  
-        
         Element encrTokElem = null;
         if(sigToken.equals(encrToken)) {
             //Use the same token
@@ -666,23 +655,13 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
                     // Use key identifier in the KeyInfo in server side
                     if (!rmd.isInitiator()) {
-                        if (encrTok instanceof EncryptedKeyToken) {
+                        if(encrTok instanceof EncryptedKeyToken) {
                             // TODO was encr.setUseKeyIdentifier(true); verify
                             encr.setEncKeyIdDirectId(true);
-                            encr.setCustomReferenceValue(((EncryptedKeyToken) encrTok).getSHA1());
+                            encr.setCustomReferenceValue(((EncryptedKeyToken)encrTok).getSHA1());
                             encr.setKeyIdentifierType(WSConstants.ENCRYPTED_KEY_SHA1_IDENTIFIER);
-                        }
-                    } else if (isIssuedToken) {
-                        encr.setUseKeyIdentifier(true);
-                        encr.setCustomReferenceValue(encrTokId);
-                        encr.setKeyIdentifierType(WSConstants.SAML_ASSERTION_IDENTIFIER);
-                        try {
-                            // RampartUtil.insertSiblingAfter(rmd,this.timestampElement,getLLOMfromOM(encrTok.getToken()));
-                        } catch (Exception e) {
-                            log.debug("error while converting SAML issued token to a dom element");
-                        }
+                        } 
                     }
-                    
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(rpd
                             .getRampartConfig(), rmd.getCustomClassLoader()));
                                        
@@ -714,18 +693,6 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
     }
 
-    private Element getLLOMfromOM(OMElement element) {
-        // Get the StAX reader from the created element
-        XMLStreamReader llomReader = element.getXMLStreamReader();
-        // Create the DOOM OMFactory
-        OMFactory doomFactory = DOOMAbstractFactory.getOMFactory();
-        // Create the new builder
-        StAXOMBuilder doomBuilder = new StAXOMBuilder(doomFactory, llomReader);
-        // Get the document element
-        OMElement newElem = doomBuilder.getDocumentElement();
-        return (Element) newElem;
-    }
-    
     /**
      * @param rmd
      * @param sigToken
