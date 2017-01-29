@@ -284,8 +284,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             				+", Signature tool :" + (t2 - t1) );
             }
 
-            // Check for signature protection
-            if (rpd.isSignatureProtection() && this.mainSigId != null) {
+            // Check for signature protection and encrypted supporting tokens
+            if (rpd.isSignatureProtection() && this.mainSigId != null || !encryptedTokensIdList.isEmpty()) {
             	long t3 = 0, t4 = 0;
             	if(tlog.isDebugEnabled()){
             		t3 = System.currentTimeMillis();
@@ -293,9 +293,10 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
                 List<WSEncryptionPart> secondEncrParts = new ArrayList<WSEncryptionPart>();
 
-                // Now encrypt the signature using the above token
-                secondEncrParts.add(new WSEncryptionPart(this.mainSigId,
-                        "Element"));
+				if (rpd.isSignatureProtection() && this.mainSigId != null) {
+					// Now encrypt the signature using the above token
+					secondEncrParts.add(new WSEncryptionPart(this.mainSigId, "Element"));
+				}
                 
                 if(rmd.isInitiator()) {
                     for (String anEncryptedTokensIdList : encryptedTokensIdList) {
@@ -303,38 +304,37 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     }
                 }
 
-                Element secondRefList = null;
+				if (!secondEncrParts.isEmpty()) {
 
-                if (encryptionToken.isDerivedKeys()) {
-                    try {
+					Element secondRefList = null;
 
-                        secondRefList = dkEncr.encryptForExternalRef(null,
-                                secondEncrParts);
-                        RampartUtil.insertSiblingAfter(rmd, encrDKTokenElem,
-                                secondRefList);
+					if (encryptionToken.isDerivedKeys()) {
+						try {
 
-                    } catch (WSSecurityException e) {
-                        throw new RampartException("errorCreatingEncryptedKey",
-                                e);
-                    }
-                } else {
-                    try {
-                        // Encrypt, get hold of the ref list and add it
-                        secondRefList = encr.encryptForExternalRef(null,
-                                secondEncrParts);
+							secondRefList = dkEncr.encryptForExternalRef(null, secondEncrParts);
+							RampartUtil.insertSiblingAfter(rmd, encrDKTokenElem, secondRefList);
 
-                        // Insert the ref list after the encrypted key elem
-                        this.setInsertionLocation(RampartUtil
-                                .insertSiblingAfter(rmd, encrTokenElement,
-                                        secondRefList));
-                    } catch (WSSecurityException e) {
-                        throw new RampartException("errorInEncryption", e);
-                    }
-                }
-                if(tlog.isDebugEnabled()){
-            		t4 = System.currentTimeMillis();
-            		tlog.debug("Signature protection took :" + (t4 - t3));
-            	}
+						} catch (WSSecurityException e) {
+							throw new RampartException("errorCreatingEncryptedKey", e);
+						}
+					} else {
+						try {
+							// Encrypt, get hold of the ref list and add it
+							secondRefList = encr.encryptForRef(null, secondEncrParts);
+
+							// Insert the ref list after the encrypted key elem
+							this.setInsertionLocation(RampartUtil.insertSiblingAfter(rmd,
+									encrTokenElement, secondRefList));
+						} catch (WSSecurityException e) {
+							throw new RampartException("errorInEncryption", e);
+						}
+					}
+
+					if (tlog.isDebugEnabled()) {
+						t4 = System.currentTimeMillis();
+						tlog.debug("Signature protection took :" + (t4 - t3));
+					}
+				}
             }
         }
         
