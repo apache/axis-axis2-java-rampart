@@ -205,7 +205,9 @@ public class Axis2Util {
                     			OMNamespace ns =  (OMNamespace) nsIter.next();
                     			header.declareNamespace(ns);
                     		}
-                    		Iterator children = element.getChildElements();
+                    		// retrieve all child nodes (including any text nodes)
+                    		// and re-attach to header block
+                    		Iterator children = element.getChildren();
                     		while (children.hasNext()) {
                     			OMNode child = (OMNode)children.next();
                     			child.detach();
