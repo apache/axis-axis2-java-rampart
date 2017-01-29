@@ -72,7 +72,7 @@ public class MessageBuilderTestBase extends TestCase {
      * @throws AxisFault
      */
     protected MessageContext getMsgCtx12() throws Exception {
-        return initMsgCtxFromMessage("test-resources/policy/soapmessage.xml");
+        return initMsgCtxFromMessage("test-resources/policy/soapmessage12.xml");
     }
 
     /**
