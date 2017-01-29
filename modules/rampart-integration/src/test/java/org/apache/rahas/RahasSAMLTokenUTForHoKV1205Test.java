@@ -16,22 +16,32 @@
 
 package org.apache.rahas;
 
-import static org.junit.Assert.assertNotNull;
-
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.axiom.om.util.Base64;
 import org.apache.neethi.Policy;
+import org.apache.rampart.handler.config.InflowConfiguration;
+import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.opensaml.XML;
 
 public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
 
     byte[] clientEntr;
     
+    /**
+     * @param name
+     */
+    public RahasSAMLTokenUTForHoKV1205Test(String name) {
+        super(name);
+    }
+
     public OMElement getRequest() {
         try {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_12);
@@ -49,7 +59,7 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
             byte[] nonce = WSSecurityUtil.generateNonce(16);
             clientEntr = nonce;
             OMElement entrElem = TrustUtil.createEntropyElement(RahasConstants.VERSION_05_12, rstElem);
-            TrustUtil.createBinarySecretElement(RahasConstants.VERSION_05_12, entrElem, RahasConstants.BIN_SEC_TYPE_NONCE).setText(Base64Utils.encode(nonce));
+            TrustUtil.createBinarySecretElement(RahasConstants.VERSION_05_12, entrElem, RahasConstants.BIN_SEC_TYPE_NONCE).setText(Base64.encode(nonce));
             TrustUtil.createComputedKeyAlgorithm(RahasConstants.VERSION_05_12,rstElem, RahasConstants.COMPUTED_KEY_PSHA1);
             
             return rstElem;
@@ -57,6 +67,24 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public OutflowConfiguration getClientOutflowConfiguration() {
+        OutflowConfiguration ofc = new OutflowConfiguration();
+
+        ofc.setActionItems("UsernameToken Timestamp");
+        ofc.setUser("joe");
+        ofc.setPasswordType(WSConstants.PW_TEXT);
+        ofc.setPasswordCallbackClass(PWCallback.class.getName());
+        return ofc;
+    }
+
+    public InflowConfiguration getClientInflowConfiguration() {
+        InflowConfiguration ifc = new InflowConfiguration();
+
+        ifc.setActionItems("Timestamp");
+        
+        return ifc;
     }
 
     public String getServiceRepo() {
@@ -77,7 +105,7 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
                                                                      REQUESTED_SECURITY_TOKEN));
         assertNotNull("RequestedSecurityToken missing", rst);
         
-        OMElement elem = rst.getFirstChildWithName(new QName(RahasConstants.SAML_NS, "Assertion"));
+        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
         assertNotNull("Missing SAML Assertoin", elem);
         
         //Uncomment for inteorp - START
@@ -132,11 +160,6 @@ public class RahasSAMLTokenUTForHoKV1205Test extends TestClient {
     public int getTrstVersion() {
         return RahasConstants.VERSION_05_12;
     }
-
-	@Override
-	public String getClientPolicyPath() {
-		return "/rahas/3.xml";
-	}
     
 //    private void requestService(OMElement assertion, byte[] reqEnt, byte[] respEnt) throws Exception {
 //        

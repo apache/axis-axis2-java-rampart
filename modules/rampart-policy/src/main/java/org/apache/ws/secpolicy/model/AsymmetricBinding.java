@@ -24,7 +24,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.All;
-import org.apache.neethi.Assertion;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
@@ -87,7 +86,7 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
         }
 
         AlgorithmSuite algorithmSuite = getAlgorithmSuite();
-        List<Assertion> configs = algorithmSuite.getConfigurations();
+        List configs = algorithmSuite.getConfigurations();
 
         Policy policy = new Policy();
         ExactlyOne exactlyOne = new ExactlyOne();
@@ -97,7 +96,7 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
         All wrapper;
         AsymmetricBinding asymmetricBinding;
 
-        for (Iterator<Assertion> iterator = configs.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = configs.iterator(); iterator.hasNext();) {
             wrapper = new All();
             asymmetricBinding = new AsymmetricBinding(this.version);
 
@@ -124,15 +123,29 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
+        String prefix = writer.getPrefix(namespaceURI);
+        
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+
         // <sp:AsymmetricBinding>
-        writeStartElement(writer, prefix, localname, namespaceURI);
+        writer.writeStartElement(prefix, localname, namespaceURI);
+        writer.writeNamespace(prefix, namespaceURI);
+
+        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
+        if (pPrefix == null) {
+            pPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
+        }
 
         // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
+        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(),
+                SPConstants.POLICY.getNamespaceURI());
 
         if (initiatorToken == null) {
             throw new RuntimeException("InitiatorToken is not set");
@@ -167,30 +180,40 @@ public class AsymmetricBinding extends SymmetricAsymmetricBindingBase {
         }
 
         if (isIncludeTimestamp()) {
-            // <sp:IncludeTimestamp />
-            writeEmptyElement(writer, prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
+            // <sp:IncludeTimestamp>
+            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP,
+                    namespaceURI);
+            writer.writeEndElement();
+            // </sp:IncludeTimestamp>
         }
 
         if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
             // <sp:EncryptBeforeSign />
-            writeEmptyElement(writer, prefix, SPConstants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ENCRYPT_BEFORE_SIGNING,
+                    namespaceURI);
+            writer.writeEndElement();
         }
 
         if (isSignatureProtection()) {
             // <sp:EncryptSignature />
             // FIXME move the String constants to a QName
-            writeEmptyElement(writer, prefix, SPConstants.ENCRYPT_SIGNATURE, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ENCRYPT_SIGNATURE,
+                    namespaceURI);
+            writer.writeEndElement();
         }
 
         if (isTokenProtection()) {
             // <sp:ProtectTokens />
-            writeEmptyElement(writer, prefix, SPConstants.PROTECT_TOKENS, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.PROTECT_TOKENS,
+                    namespaceURI);
+            writer.writeEndElement();
         }
 
         if (isEntireHeadersAndBodySignatures()) {
             // <sp:OnlySignEntireHeaderAndBody />
-            writeEmptyElement(writer, prefix, SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY,
-                    namespaceURI);
+            writer.writeStartElement(prefix,
+                    SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY, namespaceURI);
+            writer.writeEndElement();
         }
 
         // </wsp:Policy>

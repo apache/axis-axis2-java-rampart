@@ -32,13 +32,12 @@
 			  <wsp:Policy>
 				<sp:TransportToken>
 				  <wsp:Policy>
-				  	<!-- REMOVED TO MAKE THE SAMPLE RUN WITH THE axis2server-->
-					<!--<sp:HttpsToken RequireClientCertificate="false"/> -->
+					<sp:HttpsToken RequireClientCertificate="false"/>
 				  </wsp:Policy>
 				</sp:TransportToken>
 				<sp:AlgorithmSuite>
 				  <wsp:Policy>
-					<sp:Basic128/>
+					<sp:Basic256/>
 				  </wsp:Policy>
 				</sp:AlgorithmSuite>
 				<sp:Layout>

@@ -29,7 +29,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.ContentEncryptedElements;
 
-public class ContentEncryptedElementsBuilder implements AssertionBuilder<OMElement> {
+public class ContentEncryptedElementsBuilder implements AssertionBuilder {
 
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
@@ -56,7 +56,7 @@ public class ContentEncryptedElementsBuilder implements AssertionBuilder<OMEleme
         QName name = element.getQName();
         if (SP12Constants.XPATH.equals(name)) {
             parent.addXPathExpression(element.getText());
-            Iterator namespaces = element.getNamespacesInScope();
+            Iterator namespaces = element.getAllDeclaredNamespaces();
             while (namespaces.hasNext()) {
                 OMNamespace nm = (OMNamespace) namespaces.next();
                 parent.addDeclaredNamespaces(nm.getNamespaceURI(), nm.getPrefix());

@@ -23,6 +23,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.neethi.PolicyComponent;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.SP12Constants;
 
 /**
  * Model bean to capture Trust10 assertion info
@@ -130,40 +131,58 @@ public class Trust10 extends AbstractSecurityAssertion {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
         
-        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
         
+        String prefix = writer.getPrefix(namespaceURI);
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+        
         // <sp:Trust10>
-        writeStartElement(writer, prefix, localname, namespaceURI);
+        writer.writeStartElement(prefix, localname, namespaceURI);
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
+        
+        String wspPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
+        if (wspPrefix == null) {
+            wspPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(wspPrefix, SPConstants.POLICY.getNamespaceURI());
+        }
         
         // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
+        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
         if (isMustSupportClientChallenge()) {
             // <sp:MustSupportClientChallenge />
-            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_CLIENT_CHALLENGE, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_CLIENT_CHALLENGE, namespaceURI);
+            writer.writeEndElement();
         }
         
         if (isMustSupportServerChallenge()) {
             // <sp:MustSupportServerChallenge />
-            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_SERVER_CHALLENGE, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_SERVER_CHALLENGE, namespaceURI);
+            writer.writeEndElement();
         }
         
         if (isRequireClientEntropy()) {
             // <sp:RequireClientEntropy />
-            writeEmptyElement(writer, prefix, SPConstants.REQUIRE_CLIENT_ENTROPY, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.REQUIRE_CLIENT_ENTROPY, namespaceURI);
+            writer.writeEndElement();
         }
         
         
         if (isRequireServerEntropy()) {
             // <sp:RequireServerEntropy />
-            writeEmptyElement(writer, prefix, SPConstants.REQUIRE_SERVER_ENTROPY, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.REQUIRE_SERVER_ENTROPY, namespaceURI);
+            writer.writeEndElement();
         }
         
         if (isMustSupportIssuedTokens()) {
             // <sp:MustSupportIssuedTokens />
-            writeEmptyElement(writer, prefix, SPConstants.MUST_SUPPORT_ISSUED_TOKENS, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.MUST_SUPPORT_ISSUED_TOKENS, namespaceURI);
+            writer.writeEndElement();
         }
         
         // </wsp:Policy>

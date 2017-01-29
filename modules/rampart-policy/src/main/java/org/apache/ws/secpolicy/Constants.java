@@ -201,10 +201,6 @@ public class Constants {
     public static final String XPATH_FILTER20 = "XPathFilter20";
 
     // /////////////////////////////////////////////////////////////////////
-    
-    public final static String WSS_KERBEROS_TOKEN11 = "http://docs.oasis-open.org/wss/oasis-wss-kerberos-token-profile-1.1#GSS_Kerberosv5_AP_REQ";
-    
-    // /////////////////////////////////////////////////////////////////////
 
     public static final QName ATTR_XPATH_VERSION = new QName(SP_NS, "XPathVersion", Constants.SP_PREFIX);
     

@@ -31,7 +31,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 
-public class EncryptedPartsBuilder implements AssertionBuilder<OMElement> {
+public class EncryptedPartsBuilder implements AssertionBuilder {
         
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         
@@ -52,8 +52,8 @@ public class EncryptedPartsBuilder implements AssertionBuilder<OMElement> {
 		 OMAttribute isOptional = element
 				.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			signedEncryptedParts.setOptional(Boolean.valueOf(isOptional
-					.getAttributeValue()).booleanValue());
+			signedEncryptedParts.setOptional((new Boolean(isOptional
+					.getAttributeValue()).booleanValue()));
 		}
         
         return signedEncryptedParts;

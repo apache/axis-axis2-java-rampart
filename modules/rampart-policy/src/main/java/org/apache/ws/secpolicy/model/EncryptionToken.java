@@ -60,11 +60,49 @@ public class EncryptionToken extends AbstractSecurityAssertion implements TokenW
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
+        String localname = getName().getLocalPart();
+        String namespaceURI = getName().getNamespaceURI();
+        String prefix;
+        
+        String writerPrefix = writer.getPrefix(namespaceURI);
+        
+        if (writerPrefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        } else {
+            prefix = writerPrefix;
+        }
+        
         // <sp:EncryptionToken>
-        writeStartElement(writer, getName());
+        writer.writeStartElement(prefix, localname, namespaceURI);
+        
+        if (writerPrefix == null) {
+            // xmlns:sp=".."
+            writer.writeNamespace(prefix, namespaceURI);
+        }
+        
+        
+        String wspNamespaceURI = SPConstants.POLICY.getNamespaceURI();
+        
+        String wspPrefix;
+        
+        String wspWriterPrefix = writer.getPrefix(wspNamespaceURI);
+        
+        if (wspWriterPrefix == null) {
+            wspPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(wspPrefix, wspNamespaceURI);
+            
+        } else {
+            wspPrefix = wspWriterPrefix;
+        }
         
         // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
+        writer.writeStartElement(wspPrefix, SPConstants.POLICY.getLocalPart(), wspNamespaceURI);
+        
+        if (wspWriterPrefix == null) {
+            // xmlns:wsp=".."
+            writer.writeNamespace(wspPrefix, wspNamespaceURI);
+        }
         
         if (encryptionToken == null) {
             throw new RuntimeException("EncryptionToken is not set");

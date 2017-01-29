@@ -32,7 +32,7 @@ import javax.xml.namespace.QName;
 import java.util.Iterator;
 import java.util.List;
 
-public class IssuedTokenBuilder implements AssertionBuilder<OMElement> {
+public class IssuedTokenBuilder implements AssertionBuilder {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {
@@ -83,9 +83,9 @@ public class IssuedTokenBuilder implements AssertionBuilder<OMElement> {
             Policy policy = PolicyEngine.getPolicy(policyElement);
             policy = (Policy) policy.normalize(false);
 
-            for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator
+            for (Iterator iterator = policy.getAlternatives(); iterator
                     .hasNext();) {
-                processAlternative(iterator.next(), issuedToken);
+                processAlternative((List) iterator.next(), issuedToken);
                 break; // since there should be only one alternative ..
             }
         }
@@ -97,12 +97,12 @@ public class IssuedTokenBuilder implements AssertionBuilder<OMElement> {
         return new QName[] { SP11Constants.ISSUED_TOKEN };
     }
 
-    private void processAlternative(List<Assertion> assertions, IssuedToken parent) {
+    private void processAlternative(List assertions, IssuedToken parent) {
         Assertion assertion;
         QName name;
 
-        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
-            assertion = iterator.next();
+        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
+            assertion = (Assertion) iterator.next();
             name = assertion.getName();
 
             if (SP11Constants.REQUIRE_DERIVED_KEYS.equals(name)) {

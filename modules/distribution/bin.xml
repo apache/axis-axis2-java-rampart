@@ -1,84 +1,76 @@
 <assembly>
     <id>bin</id>
-    <baseDirectory>rampart-${version}</baseDirectory>
+    <includeBaseDirectory>false</includeBaseDirectory>
     <formats>
         <format>zip</format>
     </formats>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>modules</outputDirectory>
+            <outputDirectory>${dist.dir}/modules</outputDirectory>
             <includes>
                 <include>org.apache.rampart:rampart:mar</include>
                 <include>org.apache.rampart:rahas:mar</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>${dist.dir}/lib</outputDirectory>
             <includes>
                 <include>org.apache.santuario:xmlsec:jar</include>
+                <include>opensaml:opensaml:jar</include>
                 <include>org.apache.ws.security:wss4j:jar</include>
-                <include>org.bouncycastle:bcprov-jdk15on:jar</include>
+                <include>bouncycastle:bcprov-jdk15:jar</include>
                 <include>org.apache.rampart:rampart-core:jar</include>
                 <include>org.apache.rampart:rampart-policy:jar</include>
                 <include>org.apache.rampart:rampart-trust:jar</include>
-                <include>org.opensaml:opensaml:jar</include>
-                <include>org.opensaml:xmltooling:jar</include>
-                <include>org.owasp.esapi:esapi:jar</include>
-                <include>joda-time:joda-time:jar</include>
-                <include>org.slf4j:slf4j-api:jar</include>
-                <include>org.slf4j:slf4j-jcl:jar</include>
-                <include>velocity:velocity:jar</include>
-                <include>commons-collections:commons-collections:jar</include>
-                <include>org.opensaml:openws:jar</include>
-                <include>commons-lang:commons-lang:jar</include>
-                <include>org.apache.xerces:xercesImpl:jar</include>
-                <include>org.apache.xerces:resolver:jar</include>
-                <include>org.apache.xerces:serializer:jar</include>
-                <include>org.owasp.esapi:esapi:jar</include>
+		<include>org.opensaml:opensaml:jar</include>
+		<include>org.opensaml:xmltooling:jar</include>
+		<include>joda-time:joda-time:jar</include>
+		<include>org.slf4j:slf4j-api:jar</include>
+		<include>org.slf4j:slf4j-jdk14:jar</include>
+		<include>velocity:velocity:jar</include>
+		<include>commons-collections:commons-collections:jar</include>
+		<include>org.opensaml:openws:jar</include>
             </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>docs/apidocs</outputDirectory>
-            <includes>
-                <include>*:apidocs:zip</include>
-            </includes>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
         </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>
+            <directory>target/apidocs</directory>
+            <outputDirectory>${dist.dir}/docs/apidocs</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../documentation/target/site</directory>
+            <outputDirectory>${dist.dir}/docs</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>../rampart-samples</directory>
-            <outputDirectory>samples</outputDirectory>
-            <excludes>
-                <exclude>pom.xml</exclude>
-                <exclude>target/**</exclude>
-            </excludes>
+            <outputDirectory>${dist.dir}/samples</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../../legal</directory>
-            <outputDirectory>lib</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>src/main/files</directory>
-            <outputDirectory>.</outputDirectory>
+            <outputDirectory>${dist.dir}/lib</outputDirectory>
         </fileSet>
     </fileSets>
 
     <files>
         <file>
-            <source>../../README</source>
-            <filtered>true</filtered>
+            <source>../../release-docs/README.txt</source>
+            <outputDirectory>${dist.dir}</outputDirectory>
+            <destName>README</destName>
         </file>
         <file>
-            <source>../../LICENSE</source>
+            <source>../../release-docs/LICENSE.txt</source>
+            <outputDirectory>${dist.dir}</outputDirectory>
+            <destName>LICENSE</destName>
         </file>
         <file>
-            <source>../../NOTICE</source>
+            <source>../../release-docs/NOTICE.txt</source>
+            <outputDirectory>${dist.dir}</outputDirectory>
+            <destName>NOTICE</destName>
         </file>
         <file>
-            <source>../../src/site/markdown/release-notes/${release_version}.md</source>
-            <destName>RELEASE-NOTE</destName>
+            <source>../../release-docs/release-notes.html</source>
+            <outputDirectory>${dist.dir}</outputDirectory>
         </file>
     </files>
 

@@ -28,7 +28,7 @@ import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
 
-public class SecureConversationTokenBuilder implements AssertionBuilder<OMElement> {
+public class SecureConversationTokenBuilder implements AssertionBuilder {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {

@@ -30,7 +30,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.SignedEncryptedElements;
 
-public class EncryptedElementsBuilder implements AssertionBuilder<OMElement> {
+public class EncryptedElementsBuilder implements AssertionBuilder {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         SignedEncryptedElements signedEncryptedElements = new SignedEncryptedElements(false, SPConstants.SP_V12);
@@ -47,8 +47,8 @@ public class EncryptedElementsBuilder implements AssertionBuilder<OMElement> {
     	OMAttribute isOptional = element
 				.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			signedEncryptedElements.setOptional(Boolean.valueOf(isOptional
-					.getAttributeValue()).booleanValue());
+			signedEncryptedElements.setOptional((new Boolean(isOptional
+					.getAttributeValue()).booleanValue()));
 		}
         
         return signedEncryptedElements;
@@ -65,7 +65,7 @@ public class EncryptedElementsBuilder implements AssertionBuilder<OMElement> {
     private void processElement(OMElement element, SignedEncryptedElements parent) {
         if (SP12Constants.XPATH.equals(element.getQName())) {
             parent.addXPathExpression(element.getText());   
-            Iterator namespaces = element.getNamespacesInScope();
+            Iterator namespaces = element.getAllDeclaredNamespaces();
             while (namespaces.hasNext()) {
                 OMNamespace nm = (OMNamespace) namespaces.next();
                 parent.addDeclaredNamespaces(nm.getNamespaceURI(), nm.getPrefix());

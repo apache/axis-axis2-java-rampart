@@ -54,10 +54,10 @@
            </wsp:Policy>
          </sp:AsymmetricBinding>
          <sp:Wss10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-           <wsp:Policy>
+           <sp:Policy>
              <sp:MustSupportRefKeyIdentifier/>
              <sp:MustSupportRefIssuerSerial/>
-           </wsp:Policy>
+           </sp:Policy>
          </sp:Wss10>
          <sp:SignedSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
            <wsp:Policy/>

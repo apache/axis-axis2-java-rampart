@@ -34,19 +34,9 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
     
     private boolean attachments;
     
-    private ArrayList<Header> headers = new ArrayList<Header>();
+    private ArrayList headers = new ArrayList();
     
     private boolean signedParts;
-
-    private boolean signAllHeaders;
-
-    public boolean isSignAllHeaders() {
-        return signAllHeaders;
-    }
-
-    public void setSignAllHeaders(boolean signAllHeaders) {
-        this.signAllHeaders = signAllHeaders;
-    }
     
     public SignedEncryptedParts(boolean signedParts, int version) {
         this.signedParts = signedParts;
@@ -84,7 +74,7 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
     /**
      * @return Returns the headers.
      */
-    public ArrayList<Header> getHeaders() {
+    public ArrayList getHeaders() {
         return this.headers;
     }
 
@@ -124,23 +114,33 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
+
+        String prefix = writer.getPrefix(namespaceURI);
+
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
             
         // <sp:SignedParts> | <sp:EncryptedParts> 
-        writeStartElement(writer, prefix, localName, namespaceURI);
+        writer.writeStartElement(prefix, localName, namespaceURI);
+        
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
         
         if (isBody()) {
             // <sp:Body />
-            writeEmptyElement(writer, prefix, SPConstants.BODY, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.BODY, namespaceURI);
+            writer.writeEndElement();
         }
         
         Header header;        
-        for (Iterator<Header> iterator = headers.iterator(); iterator.hasNext();) {
-            header = iterator.next();
+        for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
+            header = (Header) iterator.next();
             // <sp:Header Name=".." Namespace=".." />
-            writeStartElement(writer, prefix, SPConstants.HEADER, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.HEADER, namespaceURI);
             // Name attribute is optional
             if (header.getName() != null) {
                 writer.writeAttribute("Name", header.getName());
@@ -152,7 +152,8 @@ public class SignedEncryptedParts extends AbstractSecurityAssertion {
         
         if (isAttachments() && version == SPConstants.SP_V12) {
             // <sp:Attachments />
-            writeEmptyElement(writer, prefix, SPConstants.ATTACHMENTS, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ATTACHMENTS, namespaceURI);
+            writer.writeEndElement();
         }
         
         // </sp:SignedParts> | </sp:EncryptedParts>

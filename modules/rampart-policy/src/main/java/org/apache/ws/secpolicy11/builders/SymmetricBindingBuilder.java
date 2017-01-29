@@ -28,15 +28,12 @@ import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
-import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
-import org.apache.ws.secpolicy.model.EncryptionToken;
 import org.apache.ws.secpolicy.model.Layout;
 import org.apache.ws.secpolicy.model.ProtectionToken;
-import org.apache.ws.secpolicy.model.SignatureToken;
 import org.apache.ws.secpolicy.model.SymmetricBinding;
 
-public class SymmetricBindingBuilder implements AssertionBuilder<OMElement> {
+public class SymmetricBindingBuilder implements AssertionBuilder {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         SymmetricBinding symmetricBinding = new SymmetricBinding(SPConstants.SP_V11); 
@@ -44,8 +41,8 @@ public class SymmetricBindingBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternatives(iterator.next(), symmetricBinding);
+        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternatives((List) iterator.next(), symmetricBinding);
             
             /*
              * since there should be only one alternative ..
@@ -59,47 +56,37 @@ public class SymmetricBindingBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP11Constants.SYMMETRIC_BINDING};
     }
     
-    private void processAlternatives(List<Assertion> assertions, SymmetricBinding symmetricBinding) {
+    private void processAlternatives(List assertions, SymmetricBinding symmetricBinding) {
         Assertion assertion;
         QName name;
-        try {
-	        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
-	            assertion = iterator.next();
-	            name = assertion.getName();
-	            
-	            if (SP11Constants.ALGORITHM_SUITE.equals(name)) {
-	                symmetricBinding.setAlgorithmSuite((AlgorithmSuite) assertion);
-	                
-	            } else if (SP11Constants.LAYOUT.equals(name)) {
-	                symmetricBinding.setLayout((Layout) assertion);
-	                
-	            } else if (SP11Constants.INCLUDE_TIMESTAMP.equals(name)) {
-	                symmetricBinding.setIncludeTimestamp(true);
-	                
-	            } else if (SP11Constants.PROTECTION_TOKEN.equals(name)) {
-	                symmetricBinding.setProtectionToken((ProtectionToken) assertion);
-	                
-	            } else if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(name.getLocalPart())) {
-	                symmetricBinding.setProtectionOrder(SPConstants.ENCRYPT_BEFORE_SIGNING);
-	                
-	            } else if (SPConstants.SIGN_BEFORE_ENCRYPTING.equals(name.getLocalPart())) {
-	                symmetricBinding.setProtectionOrder(SPConstants.SIGN_BEFORE_ENCRYPTING);
-	                
-	            } else if (SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY.equals(name.getLocalPart())) {
-	                symmetricBinding.setEntireHeadersAndBodySignatures(true);
-	                
-	            } else if (SP11Constants.ENCRYPT_SIGNATURE.equals(name)) {
-	                symmetricBinding.setSignatureProtection(true);
-	                
-	            } else if (SP11Constants.ENCRYPTION_TOKEN.equals(name)) {
-	                symmetricBinding.setEncryptionToken((EncryptionToken) assertion);
-	                
-	            } else if (SP11Constants.SIGNATURE_TOKEN.equals(name)) {
-	                symmetricBinding.setSignatureToken((SignatureToken) assertion);
-	            }
-	        }
-        } catch (WSSPolicyException e) {
-        	throw new IllegalArgumentException(e);
-        }
+        
+        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
+            assertion = (Assertion) iterator.next();
+            name = assertion.getName();
+            
+            if (SP11Constants.ALGORITHM_SUITE.equals(name)) {
+                symmetricBinding.setAlgorithmSuite((AlgorithmSuite) assertion);
+                
+            } else if (SP11Constants.LAYOUT.equals(name)) {
+                symmetricBinding.setLayout((Layout) assertion);
+                
+            } else if (SP11Constants.INCLUDE_TIMESTAMP.equals(name)) {
+                symmetricBinding.setIncludeTimestamp(true);
+                
+            } else if (SP11Constants.PROTECTION_TOKEN.equals(name)) {
+                symmetricBinding.setProtectionToken((ProtectionToken) assertion);
+                
+            } else if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(name.getLocalPart())) {
+                symmetricBinding.setProtectionOrder(SPConstants.ENCRYPT_BEFORE_SIGNING);
+                
+            } else if (SPConstants.SIGN_BEFORE_ENCRYPTING.equals(name.getLocalPart())) {
+                symmetricBinding.setProtectionOrder(SPConstants.SIGN_BEFORE_ENCRYPTING);
+                
+            } else if (SPConstants.ONLY_SIGN_ENTIRE_HEADERS_AND_BODY.equals(name.getLocalPart())) {
+                symmetricBinding.setEntireHeadersAndBodySignatures(true);
+            } else if (SP11Constants.ENCRYPT_SIGNATURE.equals(name)) {
+                symmetricBinding.setSignatureProtection(true);
+            }
+        }        
     }
 }

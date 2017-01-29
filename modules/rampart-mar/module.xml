@@ -9,6 +9,9 @@
         <handler name="PolicyBasedSecurityInHandler" class="org.apache.rampart.handler.RampartReceiver">
             <order phase="Security" phaseFirst="true"/>
         </handler>
+        <handler name="SecurityInHandler" class="org.apache.rampart.handler.WSDoAllReceiver">
+            <order phase="Security"/>
+        </handler>
         <handler name="PostDispatchVerificationHandler" class="org.apache.rampart.handler.PostDispatchVerificationHandler">
             <order phase="Dispatch" phaseLast="true"/>
         </handler>
@@ -16,6 +19,9 @@
     </InFlow>
 
     <OutFlow>
+        <handler name="SecurityOutHandler" class="org.apache.rampart.handler.WSDoAllSender">
+            <order phase="Security"/>
+        </handler>
         <handler name="PolicyBasedSecurityOutHandler" class="org.apache.rampart.handler.RampartSender">
             <order phase="Security" phaseLast="true"/>
         </handler>

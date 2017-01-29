@@ -25,7 +25,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.All;
-import org.apache.neethi.Assertion;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
@@ -37,13 +36,10 @@ public class TransportBinding extends Binding {
 
     private TransportToken transportToken;
 
-    private List<TransportBinding> transportBindings;
-    
-    private boolean tokenProtection;
+    private List transportBindings;
 
     public TransportBinding(int version) {
         super(version);
-        this.tokenProtection = false;
     }
     /**
      * @return Returns the transportToken.
@@ -59,23 +55,8 @@ public class TransportBinding extends Binding {
     public void setTransportToken(TransportToken transportToken) {
         this.transportToken = transportToken;
     }
-    
-    /**
-     * @return Returns the tokenProtection.
-     */
-    public boolean isTokenProtection() {
-        return tokenProtection;
-    }
 
-    /**
-     * @param tokenProtection The tokenProtection to set.
-     */
-    public void setTokenProtection(boolean tokenProtection) {
-        this.tokenProtection = tokenProtection;
-    }
-    
-
-    public List<TransportBinding> getConfigurations() {
+    public List getConfigurations() {
         return transportBindings;
     }
 
@@ -88,7 +69,7 @@ public class TransportBinding extends Binding {
 
     public void addConfiguration(TransportBinding transportBinding) {
         if (transportBindings == null) {
-            transportBindings = new ArrayList<TransportBinding>();
+            transportBindings = new ArrayList();
         }
         transportBindings.add(transportBinding);
     }
@@ -107,7 +88,7 @@ public class TransportBinding extends Binding {
         }
 
         AlgorithmSuite algorithmSuite = getAlgorithmSuite();
-        List<Assertion> configurations = algorithmSuite.getConfigurations();
+        List configurations = algorithmSuite.getConfigurations();
 
         if (configurations != null && configurations.size() == 1) {
             setNormalized(true);
@@ -120,7 +101,7 @@ public class TransportBinding extends Binding {
         All wrapper;
         TransportBinding transportBinding;
 
-        for (Iterator<Assertion> iterator = configurations.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = configurations.iterator(); iterator.hasNext();) {
             wrapper = new All();
             transportBinding = new TransportBinding(this.getVersion());
 
@@ -143,15 +124,28 @@ public class TransportBinding extends Binding {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
+        String prefix = writer.getPrefix(namespaceURI);
+
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+
         // <sp:TransportBinding>
-        writeStartElement(writer, prefix, localName, namespaceURI);
+        writer.writeStartElement(prefix, localName, namespaceURI);
+        writer.writeNamespace(prefix, namespaceURI);
+        
+        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
+        if (pPrefix == null) {
+            pPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
+        }
         
         // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
+        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
 
         if (transportToken == null) {
@@ -180,8 +174,10 @@ public class TransportBinding extends Binding {
         }
 
         if (isIncludeTimestamp()) {
-            // <sp:IncludeTimestamp />
-            writeEmptyElement(writer, prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
+            // <sp:IncludeTimestamp>
+            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
+            writer.writeEndElement();
+            // </sp:IncludeTimestamp>
         }
         
         // </wsp:Policy>

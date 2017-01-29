@@ -83,11 +83,5 @@ public interface TokenStorage {
      * @throws TrustException
      */
     Token getToken(String id) throws TrustException;
-
-    /**
-     * Removes the given token from token storage.
-     * @param id Token id to remove.
-     */
-    void removeToken(String id);
-
+    
 }

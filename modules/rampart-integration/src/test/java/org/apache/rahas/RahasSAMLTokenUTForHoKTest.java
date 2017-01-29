@@ -20,13 +20,20 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
+import org.apache.rampart.handler.config.InflowConfiguration;
+import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP11Constants;
-
-import static org.junit.Assert.assertNotNull;
+import org.apache.ws.secpolicy.SPConstants;
+import org.opensaml.XML;
 
 import javax.xml.namespace.QName;
 
 public class RahasSAMLTokenUTForHoKTest extends TestClient {
+
+    public RahasSAMLTokenUTForHoKTest(String name) {
+        super(name);
+    }
+
     public OMElement getRequest() {
         try {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_02);
@@ -46,6 +53,23 @@ public class RahasSAMLTokenUTForHoKTest extends TestClient {
         }
     }
 
+    public OutflowConfiguration getClientOutflowConfiguration() {
+        OutflowConfiguration ofc = new OutflowConfiguration();
+
+        ofc.setActionItems("UsernameToken Timestamp");
+        ofc.setUser("joe");
+        ofc.setPasswordCallbackClass(PWCallback.class.getName());
+        return ofc;
+    }
+
+    public InflowConfiguration getClientInflowConfiguration() {
+        InflowConfiguration ifc = new InflowConfiguration();
+
+        ifc.setActionItems("Timestamp");
+        
+        return ifc;
+    }
+
     public String getServiceRepo() {
         return "rahas_service_repo_3";
     }
@@ -59,7 +83,7 @@ public class RahasSAMLTokenUTForHoKTest extends TestClient {
                                                              RahasConstants.IssuanceBindingLocalNames.
                                                                      REQUESTED_SECURITY_TOKEN));
         assertNotNull("RequestedSecurityToken missing", rst);
-        OMElement elem = rst.getFirstChildWithName(new QName(RahasConstants.SAML_NS, "Assertion"));
+        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
         assertNotNull("Missing SAML Assertoin", elem);
     }
 
@@ -94,9 +118,4 @@ public class RahasSAMLTokenUTForHoKTest extends TestClient {
     public int getTrstVersion() {
         return RahasConstants.VERSION_05_02;
     }
-
-	@Override
-	public String getClientPolicyPath() {
-		return "/rahas/3.xml";
-	}
 }

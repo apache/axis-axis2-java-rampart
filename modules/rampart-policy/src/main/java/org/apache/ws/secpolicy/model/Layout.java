@@ -70,29 +70,38 @@ public class Layout extends AbstractSecurityAssertion {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
-        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
+        String prefix = writer.getPrefix(namespaceURI);
+
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+
         // <sp:Layout>
-        writeStartElement(writer, prefix, localName, namespaceURI);
+        writer.writeStartElement(prefix, localName, namespaceURI);
 
         // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
+        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY
+                .getLocalPart(), SPConstants.POLICY.getNamespaceURI());
 
         // .. <sp:Strict /> | <sp:Lax /> | <sp:LaxTsFirst /> | <sp:LaxTsLast /> ..
         if (SPConstants.LAYOUT_STRICT.equals(value)) {
-            writeEmptyElement(writer, prefix, SPConstants.LAYOUT_STRICT, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.LAYOUT_STRICT, namespaceURI);
             
         } else if (SPConstants.LAYOUT_LAX.equals(value)) {
-            writeEmptyElement(writer, prefix, SPConstants.LAYOUT_LAX, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.LAYOUT_LAX, namespaceURI);
             
         } else if (SPConstants.LAYOUT_LAX_TIMESTAMP_FIRST.equals(value)) {
-            writeEmptyElement(writer, prefix, SPConstants.LAYOUT_LAX_TIMESTAMP_FIRST, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.LAYOUT_LAX_TIMESTAMP_FIRST, namespaceURI);
             
         } else if (SPConstants.LAYOUT_LAX_TIMESTAMP_LAST.equals(value)) {
-            writeEmptyElement(writer, prefix, SPConstants.LAYOUT_LAX_TIMESTAMP_LAST, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.LAYOUT_LAX_TIMESTAMP_LAST, namespaceURI);
         }
+        
+        writer.writeEndElement();
         
         // </wsp:Policy>
         writer.writeEndElement();

@@ -1,41 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-<!--
-  ~ Licensed to the Apache Software Foundation (ASF) under one
-  ~ or more contributor license agreements. See the NOTICE file
-  ~ distributed with this work for additional information
-  ~ regarding copyright ownership. The ASF licenses this file
-  ~ to you under the Apache License, Version 2.0 (the
-  ~ "License"); you may not use this file except in compliance
-  ~ with the License. You may obtain a copy of the License at
-  ~
-  ~ http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing,
-  ~ software distributed under the License is distributed on an
-  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  ~ KIND, either express or implied. See the License for the
-  ~ specific language governing permissions and limitations
-  ~ under the License.
-  -->
-
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <parent>
-        <groupId>org.apache</groupId>
-        <artifactId>apache</artifactId>
-        <version>17</version>
-    </parent>
-
-    <groupId>org.apache.rampart</groupId>
     <modelVersion>4.0.0</modelVersion>
+    <groupId>org.apache.rampart</groupId>
     <artifactId>rampart-project</artifactId>
     <packaging>pom</packaging>
     <description> WS-Security, WS-Trust and WS-SecureConversation implementaion for Apache Axis2 </description>
-    <version>1.8.0-SNAPSHOT</version>
+    <version>SNAPSHOT</version>
     <name>Apache Rampart</name>
-    <url>http://axis.apache.org/axis2/java/rampart</url>
+    <url>http://ws.apache.org/rampart</url>
 
     <licenses>
         <license>
@@ -57,10 +31,10 @@
     <mailingLists>
         <mailingList>
             <name>Rampart Developers</name>
-            <subscribe>java-dev-subscribe@axis.apache.org</subscribe>
-            <unsubscribe>java-dev-unsubscribe@axis.apache.org</unsubscribe>
-            <post>java-dev@axis.apache.org</post>
-            <archive>http://mail-archives.apache.org/mod_mbox/axis-java-dev/</archive>
+            <subscribe>rampart-dev-subscribe@ws.apache.org</subscribe>
+            <unsubscribe>rampart-dev-unsubscribe@ws.apache.org</unsubscribe>
+            <post>rampart-dev@ws.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/ws-rampart-dev/</archive>
             <otherArchives>
                 <otherArchive>http://markmail.org/search/list:org.apache.ws.rampart-dev</otherArchive>
             </otherArchives>
@@ -91,515 +65,305 @@
         <developer>
             <name>Davanum Srinivas</name>
             <id>dims</id>
-            <email>dims AT apache.org</email>
-            <organization>IBM</organization>
+            <email>dims AT wso2.com</email>
+            <organization>WSO2</organization>
         </developer>
         <developer>
             <name>Nandana Mihindukulasooriya</name>
             <id>nandana</id>
-            <email>nandana AT apache.org</email>
-            <organization />
-        </developer>
-        <developer>
-            <name>Thilina Buddhika</name>
-            <id>thilinamb</id>
-            <email>thilinamb AT apache.org</email>
+            <email>nandana AT wso2.com</email>
             <organization>WSO2</organization>
         </developer>
     </developers>
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
+            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
+            scm:svn:https://svn.apache.org/repos/asf/webservices/rampart/trunk/java
         </developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/trunk</url>
+        <url>https://svn.apache.org/repos/asf/webservices/rampart/trunk/java</url>
     </scm>
 
-    <distributionManagement>
-        <site>
-            <id>site</id>
-            <url>scm:svn:https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart-staging</url>
-        </site>
-    </distributionManagement>
-    
+
+    <repositories>
+
+       <repository>
+            <releases>
+                <enabled>false</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+            <id>apache-snapshots</id>
+            <name>Apache Maven2 SNAPSHOTS</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <layout>default</layout>
+        </repository>
+
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>apache-ws-zones2</id>
+            <name>Apache ws.zones - 2</name>
+            <url>http://ws.zones.apache.org/repository2</url>
+        </repository>
+
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>open-saml</id>
+            <name>OpenSAML</name>
+            <url>http://shibboleth.internet2.edu/downloads/maven2/</url>
+        </repository>
+
+    </repositories>
+
+
+    <pluginRepositories>
+
+        <pluginRepository>
+            <id>snapshot-apache</id>
+            <name>Apache Snapshot repository</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>snapshot</id>
+            <name>Snapshot repository</name>
+            <url>http://snapshots.maven.codehaus.org/maven2</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+
+    </pluginRepositories>
+
+
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <configuration>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <preparationGoals>clean install</preparationGoals>
-                        <tagNameFormat>v@{project.version}</tagNameFormat>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.axis2</groupId>
-                    <artifactId>axis2-mar-maven-plugin</artifactId>
-                    <version>${axis2.version}</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.10</version>
-                    <configuration>
-                        <argLine>${jacoco.surefireArgLine}</argLine>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.7</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.gmavenplus</groupId>
-                    <artifactId>gmavenplus-plugin</artifactId>
-                    <version>1.5</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.codehaus.groovy</groupId>
-                            <artifactId>groovy-all</artifactId>
-                            <version>2.4.4</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.6</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.7</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.axis2</groupId>
-                    <artifactId>axis2-repo-maven-plugin</artifactId>
-                    <version>${axis2.version}</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>3.4</version>
-                    <configuration>
-                        <!-- Required by maven-scm-publish-plugin -->
-                        <skipDeploy>true</skipDeploy>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.6</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.3</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireNoRepositories>
-                                    <message>The POM must not include repository definitions since non Apache repositories threaten the build stability.</message>
-                                    <banRepositories>true</banRepositories>
-                                    <banPluginRepositories>true</banPluginRepositories>
-                                    <!-- We still need to allow the Apache snapshot repository -->
-                                    <allowSnapshotRepositories>true</allowSnapshotRepositories>
-                                    <allowSnapshotPluginRepositories>true</allowSnapshotPluginRepositories>
-                                </requireNoRepositories>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>initialize</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <scripts>
-                                <script>
-                                    <!-- Skip Jacoco if necessary -->
-                                    if (project.packaging == 'pom' || project.properties['skipTests'] == 'true') {
-                                        project.properties['skipJacoco'] = 'true'
-                                    }
-                                </script>
-                            </scripts>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>prepare-site</id>
-                        <phase>pre-site</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <scripts>
-                                <script>
-                                    import java.util.Date
-                                    import java.text.MessageFormat
-                                    project.properties['release_date'] = MessageFormat.format("{0,date,MMMMM dd, yyyy}", new Date())
-                                    project.properties['release_version'] = project.version.replaceAll("-SNAPSHOT", "")
-                                    project.properties['skipSiteSite'] = String.valueOf(!new File(project.basedir, 'src/site/site.xml').exists())
-                                </script>
-                            </scripts>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>check-site</id>
-                        <phase>post-site</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <scripts>
-                                <script>
-                                    project.properties['skipSiteStage'] = String.valueOf(!new File(project.reporting.outputDirectory).exists())
-                                </script>
-                            </scripts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent-for-surefire</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <propertyName>jacoco.surefireArgLine</propertyName>
-                            <!-- Anonymize the session ID (by default it contains the name of the host executing the build) -->
-                            <sessionId>mvn:${project.groupId}:${project.artifactId}:${project.version}:surefire</sessionId>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${skipJacoco}</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-jacoco-exec</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <skipAttach>${skipJacoco}</skipAttach>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/jacoco.exec</file>
-                                    <classifier>jacoco</classifier>
-                                    <type>exec</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!-- We need (some of) the source JARs for the code coverage analysis. -->
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>source-jars</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <attach>true</attach>
-                </configuration>
-            </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.0</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.5</source>
+                    <target>1.5</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.14</version>
-                <executions>
-                    <execution>
-                        <id>check</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <signature>
-                                <groupId>org.codehaus.mojo.signature</groupId>
-                                <artifactId>java16</artifactId>
-                                <version>1.1</version>
-                            </signature>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-site</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>site</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skipSiteSite}</skip>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>site-stage</id>
-                        <phase>site-deploy</phase>
-                        <goals>
-                            <goal>stage</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skipSiteStage}</skip>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <!-- Don't deploy; we use maven-scm-publish-plugin -->
-                    <skipDeploy>true</skipDeploy>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-scm-publish-plugin</artifactId>
-                <version>1.0-beta-2</version>
+                <version>2.0-beta-5</version>
+                <inherited>false</inherited>
             </plugin>
         </plugins>
     </build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.8.1</version>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>project-team</report>
-                            <report>dependencies</report>
-                            <report>mailing-list</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-        </plugins>
-    </reporting>
-    
-    <dependencyManagement>
-        <dependencies>
-            <!-- Axis2 dependencies -->
-            <dependency>
-                <groupId>org.apache.axis2</groupId>
-                <artifactId>axis2-kernel</artifactId>
-                <version>${axis2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.axis2</groupId>
-                <artifactId>axis2-mtompolicy</artifactId>
-                <version>${axis2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.axis2</groupId>
-                <artifactId>mex</artifactId>
-                <version>${axis2.version}</version>
-                <classifier>impl</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.axis2</groupId>
-                <artifactId>addressing</artifactId>
-                <version>${axis2.version}</version>
-                <type>mar</type>
-            </dependency>
-            
-            <!-- Since Rampart depends on DOOM, but axiom-dom is not a transitive
-                 dependency, we need to manage the Axiom version. -->
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom</groupId>
-                <artifactId>axiom-api</artifactId>
-                <version>${axiom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom</groupId>
-                <artifactId>axiom-impl</artifactId>
-                <version>${axiom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom</groupId>
-                <artifactId>axiom-dom</artifactId>
-                <version>${axiom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom</groupId>
-                <artifactId>axiom-truth</artifactId>
-                <version>${axiom.version}</version>
-            </dependency>
 
-            <!-- Other Rampart Dependencies -->
-            <dependency>
-                <groupId>org.apache.ws.security</groupId>
-                <artifactId>wss4j</artifactId>
-                <version>${wss4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>${bcprov.jdk15.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>xalan</groupId>
-                <artifactId>xalan</artifactId>
-                <version>2.7.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml</artifactId>
-                <version>${opensaml.version}</version>
-                <exclusions>
-                    <!-- Don't allow OpenSAML to impose a particular logging implementation -->
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>jcl-over-slf4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>log4j-over-slf4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.bouncycastle</groupId>
-                        <artifactId>bcprov-jdk15</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>1.6.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-jcl</artifactId>
-                <version>1.6.1</version>
-            </dependency>
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.15</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.mail</groupId>
-                        <artifactId>mail</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.jms</groupId>
-                        <artifactId>jms</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.sun.jdmk</groupId>
-                        <artifactId>jmxtools</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.sun.jmx</groupId>
-                        <artifactId>jmxri</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>oro</groupId>
-                        <artifactId>oro</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <dependencies>
+
+        <!-- Axis2 Dependencies -->
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-kernel</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>mex</artifactId>
+            <version>${axis2.version}</version>
+            <classifier>impl</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-mtompolicy</artifactId>
+            <version>${axis2.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>addressing</artifactId>
+            <type>mar</type>
+            <version>${addressing.mar.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Other Rampart Dependencies -->
+        <dependency>
+            <groupId>org.apache.ws.security</groupId>
+            <artifactId>wss4j</artifactId>
+            <version>${wss4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>${xmlsec.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>1.1</version>
+        </dependency>
+	<dependency>
+           <groupId>org.opensaml</groupId>
+           <artifactId>opensaml</artifactId>
+           <version>2.2.3</version>
+       </dependency>
+       	<dependency>
+   		<groupId>org.slf4j</groupId>
+   		<artifactId>slf4j-jdk14</artifactId>
+   		<version>1.5.2</version>
+	</dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.mail</groupId>
+                    <artifactId>mail</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.jms</groupId>
+                    <artifactId>jms</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jdmk</groupId>
+                    <artifactId>jmxtools</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jmx</groupId>
+                    <artifactId>jmxri</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>oro</groupId>
+                    <artifactId>oro</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Junit Dependency -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
 
     <profiles>
         <profile>
-            <id>apache-release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <!-- Override the execution defined in org.apache:apache
-                                     so that the source-release assembly is not built.
-                                     We define our own source distribution in modules/distribution. -->
-                                <id>source-release-assembly</id>
-                                <configuration>
-                                    <phase>package</phase>
-                                    <goals>
-                                        <goal>single</goal>
-                                    </goals>
-                                    <skipAssembly>true</skipAssembly>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <!-- Skip the execution configured in org.apache:apache. We use our own configuration. -->
-                                <id>attach-sources</id>
-                                <phase>none</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+            <id>jdk14</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <jdk>1.4</jdk>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk14</artifactId>
+                    <version>${bcprov.jdk14.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>jdk15</id>
+            <activation>
+                <jdk>1.5</jdk>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                    <version>${bcprov.jdk15.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>distribution</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <modules>
+                <module>modules/documentation</module>
+                <module>modules/distribution</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>axiom-managed</id>
+            <activation>
+                <property>
+                    <name>axiom.version</name>
+                </property>
+            </activation>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ws.commons.axiom</groupId>
+                        <artifactId>axiom-api</artifactId>
+                        <version>${axiom.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.ws.commons.axiom</groupId>
+                        <artifactId>axiom-impl</artifactId>
+                        <version>${axiom.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.ws.commons.axiom</groupId>
+                        <artifactId>axiom-dom</artifactId>
+                        <version>${axiom.version}</version>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
         </profile>
     </profiles>
 
     <modules>
-        <module>apidocs</module>
         <module>modules/rampart-policy</module>
         <module>modules/rampart-trust</module>
         <module>modules/rampart-core</module>
@@ -607,35 +371,52 @@
         <module>modules/rampart-mar</module>
         <module>modules/rampart-trust-mar</module>
         <module>modules/rampart-integration</module>
-        <module>modules/rampart-samples</module> <!-- Compile sample codes -->
-        <module>modules/distribution</module>
-        <module>code-coverage</module>
     </modules>
 
     <properties>
-        <axis2.version>1.8.0-SNAPSHOT</axis2.version>
-        <axiom.version>1.3.0-SNAPSHOT</axiom.version>
 
-        <wss4j.version>1.6.19</wss4j.version>
-        <opensaml.version>2.5.1-1</opensaml.version>
+        <rampart.version>${pom.version}</rampart.version>
+        <rampart.mar.version>SNAPSHOT</rampart.mar.version>
+        <rahas.mar.version>SNAPSHOT</rahas.mar.version>
 
-        <bcprov.jdk15.version>1.49</bcprov.jdk15.version>
+        <axis2.version>SNAPSHOT</axis2.version>
+        <axis2.transport.version>1.0-SNAPSHOT</axis2.transport.version>
+        <addressing.mar.version>1.5</addressing.mar.version>
 
+        <wss4j.version>1.5.8</wss4j.version>
+	<xmlsec.version>1.4.2</xmlsec.version>
+        <opensaml.version>1.1</opensaml.version>
+
+        <bcprov.jdk14.version>140</bcprov.jdk14.version>
+        <bcprov.jdk15.version>140</bcprov.jdk15.version>
+
+        <junit.version>3.8.2</junit.version>
+        <log4j.version>1.2.15</log4j.version>
+
+        <!-- distribution properties -->
+        <dist.dir>rampart-${pom.version}</dist.dir>
         <failIfNoTests>false</failIfNoTests>
 
-        <jacoco.version>0.7.5.201505241946</jacoco.version>
     </properties>
 
-    <pluginRepositories>
-         <pluginRepository>
-             <id>apache.snapshots</id>
-             <url>http://repository.apache.org/snapshots/</url>
-             <snapshots>
-                 <enabled>true</enabled>
-             </snapshots>
-             <releases>
-                 <enabled>false</enabled>
-             </releases>
-         </pluginRepository>
-    </pluginRepositories>
+    <distributionManagement>
+        <repository>
+            <id>apache-repo</id>
+            <name>Maven Central Repository</name>
+            <url>
+                scpexe://people.apache.org//www/people.apache.org/repo/m2-ibiblio-rsync-repository
+            </url>
+        </repository>
+        <snapshotRepository>
+            <id>apache-snapshots</id>
+            <name>Apache Development Repository</name>
+            <url>scpexe://people.apache.org//www/people.apache.org/repo/m2-snapshot-repository</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+        <site>
+            <id>website</id>
+            <url>scpexe://people.apache.org/www/ws.apache.org/rampart</url>
+        </site>
+    </distributionManagement>
+
 </project>

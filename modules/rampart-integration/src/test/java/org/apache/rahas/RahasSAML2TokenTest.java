@@ -19,14 +19,42 @@ package org.apache.rahas;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.rampart.handler.config.OutflowConfiguration;
+import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.neethi.Policy;
 import org.apache.ws.secpolicy.SP11Constants;
-
-import static org.junit.Assert.assertNotNull;
+import org.opensaml.XML;
 
 import javax.xml.namespace.QName;
-
 public class RahasSAML2TokenTest extends TestClient{
+    /**
+     * @param name
+     */
+    public RahasSAML2TokenTest(String name) {
+        super(name);
+    }
+
+
+    public OutflowConfiguration getClientOutflowConfiguration() {
+        OutflowConfiguration ofc = new OutflowConfiguration();
+
+        ofc.setActionItems("Signature Encrypt Timestamp");
+        ofc.setUser("alice");
+        ofc.setSignaturePropFile("rahas/rahas-sec.properties");
+        ofc.setPasswordCallbackClass(PWCallback.class.getName());
+        return ofc;
+    }
+
+    public InflowConfiguration getClientInflowConfiguration() {
+        InflowConfiguration ifc = new InflowConfiguration();
+
+        ifc.setActionItems("Signature Encrypt Timestamp");
+        ifc.setPasswordCallbackClass(PWCallback.class.getName());
+        ifc.setSignaturePropFile("rahas/rahas-sec.properties");
+
+        return ifc;
+    }
+
     public String getServiceRepo() {
         return "rahas_service_repo_1";
     }
@@ -98,10 +126,4 @@ public class RahasSAML2TokenTest extends TestClient{
     public int getTrstVersion() {
         return RahasConstants.VERSION_05_02;
     }
-
-
-	@Override
-	public String getClientPolicyPath() {
-		return "/rahas/1.xml";
-	}
 }

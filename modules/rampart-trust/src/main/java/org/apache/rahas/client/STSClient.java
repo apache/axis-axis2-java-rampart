@@ -16,13 +16,24 @@
 
 package org.apache.rahas.client;
 
-import org.apache.axiom.om.OMAbstractFactory;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
+import org.apache.axiom.om.util.Base64;
+import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -42,7 +53,6 @@ import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
-import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.Trust10;
@@ -54,22 +64,9 @@ import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.token.Reference;
-import org.apache.ws.security.util.UUIDGenerator;
+import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.WSSecurityUtil;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Element;
-
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.xml.namespace.QName;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 public class STSClient {
 
@@ -124,7 +121,9 @@ public class STSClient {
                                       String appliesTo) throws TrustException {
         try {
             QName rstQn = new QName("requestSecurityToken");
-
+            String requestType =
+                    TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_ISSUE;
+            
             ServiceClient client = getServiceClient(rstQn, issuerAddress);
             
             for (int i = 0; i < parameters.size(); i++) {
@@ -134,7 +133,6 @@ public class STSClient {
             
             client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
             client.getOptions().setSoapVersionURI(this.soapVersion);
-
             if(this.addressingNs != null) {
                 client.getOptions().setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.addressingNs);
             }
@@ -144,14 +142,10 @@ public class STSClient {
             //Process the STS and service policy policy
             this.processPolicy(issuerPolicy, servicePolicy);
             
-            try {
-                OMElement response = client.sendReceive(rstQn,
-                                                        createIssueRequest(appliesTo));
-    
-                return processIssueResponse(version, response, issuerAddress);
-            } finally {
-                client.cleanupTransport();
-            }
+            OMElement response = client.sendReceive(rstQn,
+                                                    createIssueRequest(requestType, appliesTo));
+
+            return processIssueResponse(version, response, issuerAddress);
         } catch (AxisFault e) {
             log.error("errorInObtainingToken", e);
             throw new TrustException("errorInObtainingToken", new String[]{issuerAddress},e);
@@ -249,120 +243,7 @@ public class STSClient {
         }
         
     }
-
-    /**
-     * Renews the token referenced by the token id, updates the token store
-     * @param tokenId
-     * @param issuerAddress
-     * @param issuerPolicy
-     * @param store
-     * @return status
-     * @throws TrustException
-     */
-    public boolean renewToken(String tokenId,
-                              String issuerAddress,
-                              Policy issuerPolicy, TokenStorage store) throws TrustException {
-
-        try {
-            QName rstQn = new QName("requestSecurityToken");
-
-            ServiceClient client = getServiceClient(rstQn, issuerAddress);
-
-            client.getServiceContext().setProperty(RAMPART_POLICY, issuerPolicy);
-            client.getOptions().setSoapVersionURI(this.soapVersion);
-            if (this.addressingNs != null) {
-                client.getOptions().setProperty(AddressingConstants.WS_ADDRESSING_VERSION, this.addressingNs);
-            }
-            client.engageModule("addressing");
-            client.engageModule("rampart");
-
-            this.processPolicy(issuerPolicy, null);
-
-            String tokenType = RahasConstants.TOK_TYPE_SAML_10;
-
-            OMElement response = client.sendReceive(rstQn,
-                    createRenewRequest(tokenType, tokenId));
-            store.update(processRenewResponse(version, response, store, tokenId));
-
-            return true;
-
-        } catch (AxisFault e) {
-            log.error("errorInRenewingToken", e);
-            throw new TrustException("errorInRenewingToken", new String[]{issuerAddress}, e);
-        }
-
-    }
-
-    /**
-     * Processes the response and update the token store
-     * @param version
-     * @param elem
-     * @param store
-     * @param id
-     * @return
-     * @throws TrustException
-     */
-    private Token processRenewResponse(int version, OMElement elem, TokenStorage store, String id) throws TrustException {
-        OMElement rstr = elem;
-        if (version == RahasConstants.VERSION_05_12) {
-            //The WS-SX result will be an RSTRC
-            rstr = elem.getFirstElement();
-        }
-        //get the corresponding WS-Trust NS
-        String ns = TrustUtil.getWSTNamespace(version);
-
-        //Get the RequestedAttachedReference
-        OMElement reqSecToken = rstr.getFirstChildWithName(new QName(
-                ns, RahasConstants.IssuanceBindingLocalNames.REQUESTED_SECURITY_TOKEN));
-
-        if (reqSecToken == null) {
-            throw new TrustException("reqestedSecTokMissing");
-        }
-
-        //Extract the life-time element
-        OMElement lifeTimeEle = rstr.getFirstChildWithName(new QName(
-                ns, RahasConstants.IssuanceBindingLocalNames.LIFETIME));
-
-        if (lifeTimeEle == null) {
-            throw new TrustException("lifeTimeElemMissing");
-        }
-
-        //update the existing token
-        OMElement tokenElem = reqSecToken.getFirstElement();
-        Token token = store.getToken(id);
-        token.setPreviousToken(token.getToken());
-        token.setToken(tokenElem);
-        token.setState(Token.RENEWED);
-        token.setExpires(extractExpiryDate(lifeTimeEle));
-
-        return token;
-    }
-
-    /**
-     * extracts the expiry date from the Lifetime element of the RSTR
-     * @param lifetimeElem
-     * @return
-     * @throws TrustException
-     */
-    private Date extractExpiryDate(OMElement lifetimeElem) throws TrustException {
-        try {
-            DateFormat zulu = new XmlSchemaDateFormat();
-
-            OMElement expiresElem =
-                    lifetimeElem.getFirstChildWithName(new QName(WSConstants.WSU_NS,
-                            WSConstants.EXPIRES_LN));
-            Date expires = zulu.parse(expiresElem.getText());
-            return expires;
-        } catch (OMException e) {
-            throw new TrustException("lifeTimeProcessingError",
-                    new String[]{lifetimeElem.toString()}, e);
-        } catch (ParseException e) {
-            throw new TrustException("lifeTimeProcessingError",
-                    new String[]{lifetimeElem.toString()}, e);
-        }
-    }
-
-
+    
     private ServiceClient getServiceClient(QName rstQn,
                                            String issuerAddress) throws AxisFault {
         AxisService axisService =
@@ -384,32 +265,12 @@ public class STSClient {
     }
 
     /**
-     * Processes the response from Token issuer.
-     * @param version The supported version.
-     * @param result Resulting token response from token issuer.
-     * @param issuerAddress The respective token applying entity (as a url)
-     * @return The issued token.
-     * @throws TrustException If an error occurred while extracting token from response.
+     * @param result
+     * @return Token
      */
-    protected Token processIssueResponse(int version, OMElement result,
+    private Token processIssueResponse(int version, OMElement result, 
             String issuerAddress) throws TrustException {
         OMElement rstr = result;
-
-        /**
-         * TODO :-
-         * There are 3 mechanisms to establish a security context token.
-         * They are,
-         * 1. Security context token created by a security token service
-         * 2. Security context token created by one of the communicating parties and propagated with a
-         * message
-         * 3. Security context token created through negotiation/exchanges
-         *
-         * As per now we are only supporting case 1. Therefore we always expect a
-         * wst:RequestSecurityTokenResponseCollection in the incoming message.
-         *
-         * This only applies when we use specification http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512
-         */
-
         if (version == RahasConstants.VERSION_05_12) {
             //The WS-SX result will be an RSTRC
             rstr = result.getFirstElement();
@@ -474,24 +335,26 @@ public class STSClient {
                                                           BINARY_SECRET))) {
                 //First check for the binary secret
                 String b64Secret = child.getText();
-                secret = Base64Utils.decode(b64Secret);
+                secret = Base64.decode(b64Secret);
             } else if (child.getQName().equals(new QName(ns, WSConstants.ENC_KEY_LN))) {
-
-                Element domChild = (Element)OMXMLBuilderFactory.createStAXOMBuilder(
-                        OMAbstractFactory.getMetaFactory(
-                                OMAbstractFactory.FEATURE_DOM).getOMFactory(),
-                        child.getXMLStreamReader()).getDocumentElement();
-
                 try {
-                    secret = CommonUtil.getDecryptedBytes(this.cbHandler, this.crypto, domChild);
+                    Element domChild = (Element) new StAXOMBuilder(
+                            DOOMAbstractFactory.getOMFactory(), child
+                            .getXMLStreamReader()).getDocumentElement();
+
+                    EncryptedKeyProcessor processor = new EncryptedKeyProcessor();
+
+                    processor.handleToken(domChild, null, this.crypto,
+                                          this.cbHandler, null, new Vector(),
+                                          null);
+
+                    secret = processor.getDecryptedBytes();
                 } catch (WSSecurityException e) {
-                    log.error("Error decrypting encrypted key element", e);
                     throw new TrustException("errorInProcessingEncryptedKey", e);
                 }
-
             } else if (child.getQName().equals(new QName(ns,
-                    RahasConstants.IssuanceBindingLocalNames.
-                            COMPUTED_KEY))) {
+                                                         RahasConstants.IssuanceBindingLocalNames.
+                                                                 COMPUTED_KEY))) {
                 //Handle the computed key
 
                 //Get service entropy
@@ -505,7 +368,7 @@ public class STSClient {
                 if (binSecElem != null && binSecElem.getText() != null
                     && !"".equals(binSecElem.getText().trim())) {
 
-                    byte[] serviceEntr = Base64Utils.decode(binSecElem.getText());
+                    byte[] serviceEntr = Base64.decode(binSecElem.getText());
 
                     //Right now we only use PSHA1 as the computed key algo                    
                     P_SHA1 p_sha1 = new P_SHA1();
@@ -566,11 +429,6 @@ public class STSClient {
         } else {
             //Return wsu:Id of the token element
             id = token.getAttributeValue(new QName(WSConstants.WSU_NS, "Id"));
-            if ( id == null )
-            {
-                // If we are dealing with a SAML Assetion, look for AssertionID.
-                id = token.getAttributeValue(new QName( "AssertionID"));
-            }
         }
         return id;
     }
@@ -620,7 +478,8 @@ public class STSClient {
                 //find the AlgorithmSuite assertion
                 if (tempAssertion instanceof Binding) {
 
-                    log.debug("Extracting algo suite from issuer policy binding");
+                    log.debug("Extracting algo suite from issuer " +
+                              "policy binding");
 
                     this.algorithmSuite = ((Binding) tempAssertion)
                             .getAlgorithmSuite();
@@ -638,10 +497,12 @@ public class STSClient {
                 Assertion tempAssertion = (Assertion) iter.next();
                 //find the Trust10 assertion
                 if (tempAssertion instanceof Trust10) {
-                    log.debug("Extracting Trust10 assertion from service policy");
+                    log.debug("Extracting Trust10 assertion from " +
+                              "service policy");
                     this.trust10 = (Trust10) tempAssertion;
                 } else if (tempAssertion instanceof Trust13) {
-                    log.debug("Extracting Trust13 assertion from service policy");
+                    log.debug("Extracting Trust13 assertion from " +
+                    "service policy");
                     this.trust13 = (Trust13) tempAssertion;
                 }
             }
@@ -649,20 +510,18 @@ public class STSClient {
     }
 
     /**
-     * This creates a request security token (RST) message.
-     * @param appliesTo The address which token is applicable to.
-     * @return The axiom object representation of RST.
-     * @throws TrustException If an error occurred while creating the RST.
+     * Create the RST request.
+     *
+     * @param requestType
+     * @param appliesTo
+     * @return OMElement
+     * @throws TrustException
      */
-    protected OMElement createIssueRequest(String appliesTo) throws TrustException {
+    private OMElement createIssueRequest(String requestType,
+                                         String appliesTo) throws TrustException {
 
-        String requestType =
-                    TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_ISSUE;
-
-        if (log.isDebugEnabled()) {
-            log.debug("Creating request with request type: " + requestType +
-                      " and applies to: " + appliesTo);
-        }
+        log.debug("Creating request with request type: " + requestType +
+                  " and applies to: " + appliesTo);
 
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
 
@@ -675,26 +534,24 @@ public class STSClient {
         //Copy over the elements from the template
         if (this.rstTemplate != null) {
 
-            if (log.isDebugEnabled()) {
-                log.debug("Using RSTTemplate: " + this.rstTemplate.toString());
-            }
+            log.debug("Using RSTTemplate: " + this.rstTemplate.toString());
 
             Iterator templateChildren = rstTemplate.getChildElements();
             while (templateChildren.hasNext()) {
-                OMElement child = (OMElement) templateChildren.next();
-                rst.addChild(child.cloneOMElement());
+                OMNode child = (OMNode) templateChildren.next();
+                rst.addChild(child);
                 //Look for the key size element
-                if (child.getQName().equals(
+                if (child instanceof OMElement
+                    && ((OMElement) child).getQName().equals(
                         new QName(TrustUtil.getWSTNamespace(this.version),
                                   RahasConstants.IssuanceBindingLocalNames.KEY_SIZE))) {
                     log.debug("Extracting key size from the RSTTemplate: ");
+                    OMElement childElem = (OMElement) child;
                     this.keySize =
-                            (child.getText() != null && !"".equals(child.getText())) ?
-                            Integer.parseInt(child.getText()) :
+                            (childElem.getText() != null && !"".equals(childElem.getText())) ?
+                            Integer.parseInt(childElem.getText()) :
                             -1;
-                    if (log.isDebugEnabled()) {
-                        log.debug("Key size from RSTTemplate: " + this.keySize);
-                    }
+                    log.debug("Key size from RSTTemplate: " + this.keySize);
                 }
             }
         }
@@ -718,11 +575,10 @@ public class STSClient {
                     this.requestorEntropy =
                             WSSecurityUtil.generateNonce(this.algorithmSuite.
                                     getMaximumSymmetricKeyLength()/8);
-                    binSec.setText(Base64Utils.encode(this.requestorEntropy));
+                    binSec.setText(Base64.encode(this.requestorEntropy));
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("Clien entropy : " + Base64Utils.encode(this.requestorEntropy));
-                    }
+                    log.debug("Clien entropy : "
+                              + Base64.encode(this.requestorEntropy));
 
                     // Add the ComputedKey element
                     TrustUtil.createComputedKeyAlgorithm(this.version, rst,
@@ -744,11 +600,10 @@ public class STSClient {
                     this.requestorEntropy =
                             WSSecurityUtil.generateNonce(this.algorithmSuite.
                                     getMaximumSymmetricKeyLength()/8);
-                    binSec.setText(Base64Utils.encode(this.requestorEntropy));
+                    binSec.setText(Base64.encode(this.requestorEntropy));
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("Clien entropy : " + Base64Utils.encode(this.requestorEntropy));
-                    }
+                    log.debug("Clien entropy : "
+                              + Base64.encode(this.requestorEntropy));
 
                     // Add the ComputedKey element
                     TrustUtil.createComputedKeyAlgorithm(this.version, rst,
@@ -770,11 +625,9 @@ public class STSClient {
     }
     
     private OMElement createValidateRequest(String requestType, String tokenId) throws TrustException {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Creating request with request type: " + requestType);
-        }
-
+        
+        log.debug("Creating request with request type: " + requestType);
+        
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
         
         TrustUtil.createRequestTypeElement(this.version, rst, requestType);
@@ -812,11 +665,9 @@ public class STSClient {
         
         String requestType =
             TrustUtil.getWSTNamespace(version) + RahasConstants.REQ_TYPE_RENEW;
-
-        if (log.isDebugEnabled()) {
-            log.debug("Creating request with request type: " + requestType);
-        }
-
+        
+        log.debug("Creating request with request type: " + requestType);
+        
         OMElement rst = TrustUtil.createRequestSecurityTokenElement(version);
         
         TrustUtil.createRequestTypeElement(this.version, rst, requestType);
@@ -943,7 +794,7 @@ public class STSClient {
         this.rstTemplate = rstTemplate;
     }
 
-    private static class CBHandler implements CallbackHandler {
+    private class CBHandler implements CallbackHandler {
 
         private String passwd;
 

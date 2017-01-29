@@ -4,61 +4,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.rahas.RahasData;
-import org.opensaml.common.SAMLObject;
+import org.opensaml.SAMLAttribute;
+import org.opensaml.saml2.core.Attribute;
 
-
-@SuppressWarnings({"UnusedDeclaration"})
 public class SAMLAttributeCallback implements SAMLCallback{
-    
-    private List<SAMLObject> attributes = null;
-    private RahasData data = null;
-    
-    public SAMLAttributeCallback(RahasData data){
-        attributes = new ArrayList<SAMLObject>();
-        this.data = data;
-    }
-    
-    public int getCallbackType(){
-        return SAMLCallback.ATTR_CALLBACK;
-    }
-
-    /**
-     * Add SAML1 attribute.
-     * @param attribute SAML1 attribute
-     */
-    public void addAttributes(org.opensaml.saml1.core.Attribute attribute){
-        attributes.add(attribute);
-    }
+	
+	private List attributes = null;
+	private RahasData data = null;
+	
+	public SAMLAttributeCallback(RahasData data){
+		attributes = new ArrayList();
+		this.data = data;
+	}
+	
+	public int getCallbackType(){
+		return SAMLCallback.ATTR_CALLBACK;
+	}
+	
+	public void addAttributes(SAMLAttribute attribute){
+		attributes.add(attribute);
+	}
 
     /**
      * Overloaded  method to support SAML2
-     * @param attribute SAML2 attribute.
+     * @param attr
      */
-    public void addAttributes(org.opensaml.saml2.core.Attribute attribute){
-        attributes.add(attribute);
+    public void addAttributes(Attribute attr){
+        attributes.add(attr);
     }
 
     /**
      * Get the array of SAML2 attributes.
-     * @return SAML2 attribute list.
+     * @return
      */
-    public org.opensaml.saml2.core.Attribute[] getSAML2Attributes(){
-        return (org.opensaml.saml2.core.Attribute[])attributes.toArray
-                (new org.opensaml.saml2.core.Attribute[attributes.size()]);
+    public Attribute[] getSAML2Attributes(){
+        return (Attribute[])attributes.toArray(new Attribute[attributes.size()]);
     }
+	
+	public SAMLAttribute[] getAttributes(){
+		return (SAMLAttribute[])attributes.toArray(new SAMLAttribute[attributes.size()]);
+		
+	}
 
-    /**
-     * Get SAML2 attribute
-     * @return SAML2 attributes.
-     */
-    public org.opensaml.saml1.core.Attribute[] getAttributes(){
-        return (org.opensaml.saml1.core.Attribute[])attributes.toArray
-                (new org.opensaml.saml1.core.Attribute[attributes.size()]);
-        
-    }
-
-    public RahasData getData() {
-        return data;
-    }
+	public RahasData getData() {
+		return data;
+	}
 
 }

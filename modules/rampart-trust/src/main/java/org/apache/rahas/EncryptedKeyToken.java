@@ -16,9 +16,6 @@
 
 package org.apache.rahas;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Date;
 
 import org.apache.axiom.om.OMElement;
@@ -33,53 +30,33 @@ import org.apache.axiom.om.OMElement;
  *
  */
 public class EncryptedKeyToken extends Token {
-    
+	
     /**
      * SHA1 value of the encrypted key
      */
     private String sha;
-
-    public EncryptedKeyToken(){
-        super();
-    }
-    
-    public EncryptedKeyToken (String id,Date created, Date expires) {
-        super(id,created,expires);
-    }
-    
-    public EncryptedKeyToken (String id, OMElement tokenElem, 
-                                Date created, Date expires)throws TrustException{
-        super(id,tokenElem,created,expires);
-    }
-    
-    /**
-     * @param sha SHA1 of the encrypted key
-     */
-    public void setSHA1(String sha) {
-        this.sha = sha;
-    }
-    
-    /** 
-     * @return SHA1 value of the encrypted key 
-     */
-    public String getSHA1() {
-        return sha;
-    }
-
-    public void writeExternal(ObjectOutput out)
-        throws IOException {
-
-        super.writeExternal(out);
-        out.writeObject(this.sha);
-    }
-
-    public void readExternal(ObjectInput in)
-        throws ClassNotFoundException, IOException {
-
-        super.readExternal(in);
-        this.sha = (String)in.readObject();
-
-    }
-
+	
+	public EncryptedKeyToken (String id,Date created, Date expires) {
+		super(id,created,expires);
+	}
+	
+	public EncryptedKeyToken (String id, OMElement tokenElem, 
+			                    Date created, Date expires)throws TrustException{
+		super(id,tokenElem,created,expires);
+	}
+	
+	/**
+	 * @param sha SHA1 of the encrypted key
+	 */
+	public void setSHA1(String sha) {
+		this.sha = sha;
+	}
+	
+	/** 
+	 * @return SHA1 value of the encrypted key 
+	 */
+	public String getSHA1() {
+		return sha;
+	}
 
 }

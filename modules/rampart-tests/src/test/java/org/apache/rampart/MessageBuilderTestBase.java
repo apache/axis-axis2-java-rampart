@@ -17,9 +17,9 @@
 package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMXMLBuilderFactory;
-import org.apache.axiom.om.OMXMLParserWrapper;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
@@ -38,7 +38,9 @@ import org.apache.ws.security.WSConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 import java.io.FileInputStream;
 import java.util.Iterator;
@@ -61,28 +63,8 @@ public class MessageBuilderTestBase extends TestCase {
      * @throws AxisFault
      */
     protected MessageContext getMsgCtx() throws Exception {
-        return initMsgCtxFromMessage("test-resources/policy/soapmessage.xml");
-    }
-
-    /**
-     * Return a message context initialized with a SOAP 1.2 message.
-     *
-     * @throws XMLStreamException
-     * @throws FactoryConfigurationError
-     * @throws AxisFault
-     */
-    protected MessageContext getMsgCtx12() throws Exception {
-        return initMsgCtxFromMessage("test-resources/policy/soapmessage12.xml");
-    }
-
-    /**
-     * @throws XMLStreamException
-     * @throws FactoryConfigurationError
-     * @throws AxisFault
-     */
-    private MessageContext initMsgCtxFromMessage(String messageResource) throws Exception {
         MessageContext ctx = new MessageContext();
-
+        
         AxisConfiguration axisConfiguration = new AxisConfiguration();
         AxisService axisService = new AxisService("TestService");
         axisConfiguration.addService(axisService);
@@ -104,17 +86,19 @@ public class MessageBuilderTestBase extends TestCase {
         options.setAction("urn:testOperation");
         ctx.setOptions(options);
 
-        ctx.setEnvelope(OMXMLBuilderFactory.createSOAPModelBuilder(
-                new FileInputStream(messageResource), null).getSOAPEnvelope());
+        XMLStreamReader reader =
+                XMLInputFactory.newInstance().
+                        createXMLStreamReader(new FileInputStream("test-resources/policy/soapmessage.xml"));
+        ctx.setEnvelope(new StAXSOAPModelBuilder(reader, null).getSOAPEnvelope());
         return ctx;
     }
 
     protected Policy loadPolicy(String xmlPath) throws Exception {
-        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(xmlPath));
+        StAXOMBuilder builder = new StAXOMBuilder(xmlPath);
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
 
-    protected void verifySecHeader(Iterator<QName> qnameList, SOAPEnvelope env) {
+    protected void verifySecHeader(Iterator qnameList, SOAPEnvelope env) {
         Iterator secHeaderChildren =
                 env.getHeader().
                         getFirstChildWithName(new QName(WSConstants.WSSE_NS,
@@ -123,8 +107,7 @@ public class MessageBuilderTestBase extends TestCase {
         while (secHeaderChildren.hasNext()) {
             OMElement element = (OMElement) secHeaderChildren.next();
             if (qnameList.hasNext()) {
-                QName elementQName = (QName)qnameList.next();
-                if (!element.getQName().equals(elementQName)) {
+                if (!element.getQName().equals(qnameList.next())) {
                     fail("Incorrect Element" + element);
                 }
             } else {
@@ -137,4 +120,5 @@ public class MessageBuilderTestBase extends TestCase {
                  "next expected element" + qnameList.next().toString());
         }
     }
+
 }

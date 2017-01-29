@@ -1,9 +1,0 @@
-<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/">
-   <env:Header/>
-   <env:Body>
-      <env:Fault>
-         <faultcode>{HATA KODU:}K060</faultcode>
-         <faultstring>...</faultstring>
-      </env:Fault>
-   </env:Body>
-</env:Envelope>

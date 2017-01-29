@@ -31,7 +31,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.RecipientToken;
 import org.apache.ws.secpolicy.model.Token;
 
-public class RecipientTokenBuilder implements AssertionBuilder<OMElement> {
+public class RecipientTokenBuilder implements AssertionBuilder {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {
@@ -40,8 +40,8 @@ public class RecipientTokenBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative(iterator.next(), recipientToken);
+        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative((List) iterator.next(), recipientToken);
             
             /* 
              * for the moment we will pick the first token specified in the policy
@@ -52,12 +52,12 @@ public class RecipientTokenBuilder implements AssertionBuilder<OMElement> {
         return recipientToken;
     }
 
-    private void processAlternative(List<Assertion> assertions, RecipientToken parent) {
+    private void processAlternative(List assertions, RecipientToken parent) {
         
         Assertion assertion;
         
-        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
-            assertion = iterator.next();
+        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
+            assertion = (Assertion) iterator.next();
             
             if (assertion instanceof Token) {
                 parent.setToken((Token) assertion);

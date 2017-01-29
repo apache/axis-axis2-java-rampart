@@ -16,31 +16,28 @@
 
 package org.apache.rahas.impl;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMXMLBuilderFactory;
-import org.apache.axiom.om.OMXMLParserWrapper;
-import org.apache.axis2.description.Parameter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.rahas.TrustException;
-import org.apache.rahas.TrustUtil;
-import org.apache.rahas.impl.util.CommonUtil;
-import org.apache.rahas.impl.util.SAMLCallbackHandler;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
-
-import javax.xml.namespace.QName;
 import java.io.FileInputStream;
-import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.security.cert.X509Certificate;
+
+import javax.xml.namespace.QName;
+
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMAttribute;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.description.Parameter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.TrustException;
+import org.apache.rahas.impl.util.SAMLCallbackHandler;
+import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.WSSecurityException;
 
 /**
  * Configuration manager for the <code>SAMLTokenIssuer</code>
@@ -49,9 +46,9 @@ import java.util.Properties;
  */
 public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
 
-    
-    Log log = LogFactory.getLog(SAMLTokenIssuerConfig.class);
-    
+	
+	Log log = LogFactory.getLog(SAMLTokenIssuerConfig.class);
+	
     /**
      * The QName of the configuration element of the SAMLTokenIssuer
      */
@@ -64,15 +61,15 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     private final static QName ISSUER_KEY_ALIAS = new QName("issuerKeyAlias");
 
     /**
-     * Element name to include the password of the private key to sign the response or the issued
-     * token
-     */
-    private final static QName ISSUER_KEY_PASSWD = new QName("issuerKeyPassword");
+	 * Element name to include the password of the private key to sign the response or the issued
+	 * token
+	 */
+	private final static QName ISSUER_KEY_PASSWD = new QName("issuerKeyPassword");
 
-    /**
-     * Element name of the attribute call-back handler
-     */
-    private final static QName ATTR_CALLBACK_HANDLER_NAME = new QName("attrCallbackHandlerName");
+	/**
+	 * Element name of the attribute call-back handler
+	 */
+	private final static QName ATTR_CALLBACK_HANDLER_NAME = new QName("attrCallbackHandlerName");
 
     /**
      * Element to specify the lifetime of the SAMLToken
@@ -95,15 +92,13 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     public final static QName ISSUER_NAME = new QName("issuerName");
     
     public final static QName SAML_CALLBACK_CLASS = new QName("dataCallbackHandlerClass");
-
+        
     protected String issuerKeyAlias;
     protected String issuerKeyPassword;
     protected String issuerName;
-
-    // TODO in next major release convert this to a typed map
     protected Map trustedServices = new HashMap();
     protected String trustStorePropFile;
-    protected SAMLCallbackHandler callbackHandler;
+    protected SAMLCallbackHandler callbackHander;
     protected String callbackHandlerName;
   
     /**
@@ -125,13 +120,13 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
      */
     public SAMLTokenIssuerConfig(String configFilePath) throws TrustException {
         FileInputStream fis;
-        OMXMLParserWrapper builder;
+        StAXOMBuilder builder;
         try {
             fis = new FileInputStream(configFilePath);
-            builder = OMXMLBuilderFactory.createOMBuilder(fis);
+            builder = new StAXOMBuilder(fis);
         } catch (Exception e) {
             throw new TrustException("errorLoadingConfigFile",
-                    new String[] { configFilePath }, e);
+                    new String[] { configFilePath });
         }
         this.load(builder.getDocumentElement());
     }
@@ -258,24 +253,24 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         }
         
         
-        OMElement attrElemet = elem.getFirstChildWithName(SAML_CALLBACK_CLASS);
-        if (attrElemet != null) {
-            try {
-                String value = attrElemet.getText();
-                Class handlerClass = Class.forName(value);
-                this.callbackHandler = (SAMLCallbackHandler)handlerClass.newInstance();
-            } catch (ClassNotFoundException e) {
-                log.error("Error loading class" , e);
-                throw new TrustException("Error loading class" , e);
-            } catch (InstantiationException e) {
-                log.error("Error instantiating class" , e);
-                throw new TrustException("Error instantiating class" , e);
-            } catch (IllegalAccessException e) {
-                log.error("Illegal Access" , e);
-                throw new TrustException("Illegal Access" , e);
-            }
-        }
-                
+       	OMElement attrElemet = elem.getFirstChildWithName(SAML_CALLBACK_CLASS);
+		if (attrElemet != null) {
+				try {
+					String value = attrElemet.getText();
+					Class handlerClass = Class.forName(value);
+					this.callbackHander = (SAMLCallbackHandler)handlerClass.newInstance();
+				} catch (ClassNotFoundException e) {
+					log.debug("Error loading class" , e);
+					throw new TrustException("Error loading class" , e);
+				} catch (InstantiationException e) {
+					log.debug("Error instantiating class" , e);
+					throw new TrustException("Error instantiating class" , e);
+				} catch (IllegalAccessException e) {
+					log.debug("Illegal Access" , e);
+					throw new TrustException("Illegal Access" , e);
+				}
+		}
+				
 
     }
 
@@ -305,9 +300,6 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         OMElement callbackHandlerName = fac.createOMElement(ATTR_CALLBACK_HANDLER_NAME, configElem);
         callbackHandlerName.setText(this.callbackHandlerName);
         
-        OMElement timeToLive = fac.createOMElement(TTL, configElem);
-        timeToLive.setText(String.valueOf(this.ttl));
-
         configElem.addChild(this.cryptoPropertiesElement);
         
         OMElement keySizeElem = fac.createOMElement(KEY_SIZE, configElem);
@@ -413,39 +405,21 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         return trustedServices;
     }
 
-    @Deprecated
-    public SAMLCallbackHandler getCallbackHander() {
-        return callbackHandler;
-    }
+	public SAMLCallbackHandler getCallbackHander() {
+		return callbackHander;
+	}
 
-    @Deprecated
-    public void setCallbackHander(SAMLCallbackHandler callbackHandler) {
-        this.callbackHandler = callbackHandler;
-    }
-    
-    public SAMLCallbackHandler getCallbackHandler() {
-        return callbackHandler;
-    }
+	public void setCallbackHander(SAMLCallbackHandler callbackHander) {
+		this.callbackHander = callbackHander;
+	}
+	
+	public String getCallbackHandlerName() {
+		return callbackHandlerName;
+	}
 
-    public String getIssuerName() {
-        return issuerName;
-    }
-
-    public String getTrustStorePropFile() {
-        return trustStorePropFile;
-    }
-
-    public void setCallbackHandler(SAMLCallbackHandler callbackHandler) {
-        this.callbackHandler = callbackHandler;
-    }
-    
-    public String getCallbackHandlerName() {
-        return callbackHandlerName;
-    }
-
-    public void setCallbackHandlerName(String callbackHandlerName) {
-        this.callbackHandlerName = callbackHandlerName;
-    }
+	public void setCallbackHandlerName(String callbackHandlerName) {
+		this.callbackHandlerName = callbackHandlerName;
+	}
 
     /**
      * Uses the <code>wst:AppliesTo</code> to figure out the certificate to
@@ -455,57 +429,21 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
      * @param serviceAddress
      *            The address of the service
      * @return
-     * @throws org.apache.rahas.TrustException If unable to find certificate by given alias.
+     * @throws org.apache.ws.security.WSSecurityException
      */
-    public X509Certificate getServiceCert(Crypto crypto, String serviceAddress) throws TrustException {
+    public X509Certificate getServiceCert(Crypto crypto, String serviceAddress) throws WSSecurityException {
 
         if (serviceAddress != null && !"".equals(serviceAddress)) {
             String alias = (String) this.trustedServices.get(serviceAddress);
             if (alias != null) {
-                return CommonUtil.getCertificateByAlias(crypto, alias);
+                return crypto.getCertificates(alias)[0];
             } else {
                 alias = (String) this.trustedServices.get("*");
-
-                if (alias == null) {
-                    throw new TrustException("aliasMissingForService", new String[]{serviceAddress});
-                }
-
-                return CommonUtil.getCertificateByAlias(crypto, alias);
+                return crypto.getCertificates(alias)[0];
             }
         } else {
             String alias = (String) this.trustedServices.get("*");
-
-            if (alias == null) {
-                throw new TrustException("aliasMissingForService", new String[]{serviceAddress});
-            }
-
-            return CommonUtil.getCertificateByAlias(crypto, alias);
-        }
-
-    }
-
-    /**
-     * This method will create a Crypto object based on property values defined in cryptoElement or
-     * cryptoPropertiesFile.
-     * @param classLoader A class loader to pass into CryptoFactory.
-     * @return A Crypto object
-     * @throws TrustException If an error occurred while creating the Crypto object.
-     */
-    public Crypto getIssuerCrypto(ClassLoader classLoader) throws TrustException {
-
-        try {
-            if (this.cryptoElement != null) {
-                // crypto props defined as elements
-                return CryptoFactory.getInstance(TrustUtil
-                        .toProperties(this.cryptoElement), classLoader);
-            } else {
-                // crypto props defined in a properties file
-                return CryptoFactory.getInstance(this.cryptoPropertiesFile,
-                        classLoader);
-            }
-
-        } catch (WSSecurityException e) {
-            throw new TrustException("errorLoadingCryptoProperties", e);
+            return crypto.getCertificates(alias)[0];
         }
 
     }

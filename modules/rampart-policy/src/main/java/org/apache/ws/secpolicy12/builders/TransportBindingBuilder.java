@@ -34,7 +34,7 @@ import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.TransportBinding;
 import org.apache.ws.secpolicy.model.TransportToken;
 
-public class TransportBindingBuilder implements AssertionBuilder<OMElement> {
+public class TransportBindingBuilder implements AssertionBuilder {
  
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         TransportBinding transportBinding = new TransportBinding(SPConstants.SP_V12);
@@ -42,8 +42,8 @@ public class TransportBindingBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative(iterator.next(), transportBinding, factory);
+        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative((List) iterator.next(), transportBinding, factory);
             
             /*
              * since there should be only one alternative
@@ -58,11 +58,11 @@ public class TransportBindingBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP12Constants.TRANSPORT_BINDING};
     }
 
-    private void processAlternative(List<Assertion> assertionList, TransportBinding parent, AssertionBuilderFactory factory) {
+    private void processAlternative(List assertionList, TransportBinding parent, AssertionBuilderFactory factory) {
         
-        for (Iterator<Assertion> iterator = assertionList.iterator(); iterator.hasNext(); ) {
+        for (Iterator iterator = assertionList.iterator(); iterator.hasNext(); ) {
             
-            Assertion primitive = iterator.next();
+            Assertion primitive = (Assertion) iterator.next();
             QName name = primitive.getName();
             
             if (name.equals(SP12Constants.ALGORITHM_SUITE)) {
@@ -76,9 +76,6 @@ public class TransportBindingBuilder implements AssertionBuilder<OMElement> {
                 
             } else if (name.equals(SP12Constants.LAYOUT)) {
                 parent.setLayout((Layout) primitive);
-                 
-            } else if (name.equals(SP12Constants.PROTECT_TOKENS)) {
-                parent.setTokenProtection(true);
                  
             } else if (name.equals(SP12Constants.SIGNED_SUPPORTING_TOKENS)) {
                 parent.setSignedSupportingToken((SupportingToken) primitive);

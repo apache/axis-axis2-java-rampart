@@ -36,6 +36,7 @@ import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.SymmetricAsymmetricBindingBase;
 import org.apache.ws.secpolicy.model.SymmetricBinding;
+import org.apache.ws.secpolicy.model.TokenWrapper;
 import org.apache.ws.secpolicy.model.TransportBinding;
 import org.apache.ws.secpolicy.model.TransportToken;
 import org.apache.ws.secpolicy.model.Trust10;
@@ -48,7 +49,7 @@ import java.util.List;
 public class RampartPolicyBuilder {
     
     private static Log log = LogFactory.getLog(RampartPolicyBuilder.class);
-
+    
     /**
      * Compile the parsed security data into one Policy data block.
      * 
@@ -64,20 +65,17 @@ public class RampartPolicyBuilder {
      * 
      * @param topLevelAssertions
      *            The iterator of the top level policy assertions
-     * @return The compile Policy data block.
+     * @return The compile Poilcy data block.
      * @throws WSSPolicyException
      */
-    public static RampartPolicyData build(List<Assertion> topLevelAssertions)
+    public static RampartPolicyData build(List topLevelAssertions)
             throws WSSPolicyException {
         
         RampartPolicyData rpd = new RampartPolicyData();
         
-        for (Iterator<Assertion> iter = topLevelAssertions.iterator(); iter.hasNext();) {
+        for (Iterator iter = topLevelAssertions.iterator(); iter.hasNext();) {
             Assertion assertion = (Assertion) iter.next();
             if (assertion instanceof Binding) {
-
-                setWebServiceSecurityPolicyNS(assertion, rpd);
-
                 if (assertion instanceof SymmetricBinding) {
                     processSymmetricPolicyBinding((SymmetricBinding) assertion, rpd);
                 } else if(assertion instanceof AsymmetricBinding) {
@@ -104,10 +102,6 @@ public class RampartPolicyBuilder {
             } else if (assertion instanceof ContentEncryptedElements) { 
                 processContentEncryptedElements((ContentEncryptedElements) assertion, rpd);
             }else if (assertion instanceof SupportingToken) {
-
-                //Set policy version. Cos a supporting token can appear along without a binding
-                setWebServiceSecurityPolicyNS(assertion, rpd);
-
                 processSupportingTokens((SupportingToken) assertion, rpd);
             } else if (assertion instanceof Trust10) {
                 processTrust10((Trust10)assertion, rpd);
@@ -116,26 +110,12 @@ public class RampartPolicyBuilder {
             } else if (assertion instanceof MTOMAssertion){
             	processMTOMSerialization((MTOMAssertion)assertion, rpd);
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Unknown top level PED found: "
-                            + assertion.getClass().getName());
-                }
+                log.debug("Unknown top level PED found: "
+                        + assertion.getClass().getName());
             }
         }
         
         return rpd;
-    }
-
-    /**
-     * Sets web service security policy version. The policy version is extracted from an assertion.
-     * But if namespace is already set this method will just return.
-     * @param assertion The assertion to get policy namespace.
-     */
-    private static void setWebServiceSecurityPolicyNS(Assertion assertion, RampartPolicyData policyData) {
-
-        if (policyData.getWebServiceSecurityPolicyNS() == null) {
-            policyData.setWebServiceSecurityPolicyNS(assertion.getName().getNamespaceURI());
-        }        
     }
 
  
@@ -147,7 +127,6 @@ public class RampartPolicyBuilder {
     private static void processTransportBinding(TransportBinding binding, RampartPolicyData rpd) {
         binding(binding, rpd);
         rpd.setTransportBinding(true);
-        rpd.setTokenProtection(binding.isTokenProtection());
         TransportToken transportToken = binding.getTransportToken();
         if ( transportToken != null ) {
             rpd.setTransportToken(transportToken.getTransportToken());
@@ -175,7 +154,7 @@ public class RampartPolicyBuilder {
     /**
      * Evaluate the symmetric policy binding data.
      * 
-     * @param symmBinding
+     * @param binding
      *            The binding data
      * @param rpd
      *            The WSS4J data to initialize
@@ -220,21 +199,21 @@ public class RampartPolicyBuilder {
     /**
      * Populate elements to sign and/or encrypt with the message tokens.
      * 
-     * @param see
+     * @param sep
      *            The data describing the elements (XPath)
      * @param rpd
      *            The WSS4J data to initialize
      */
     private static void processSignedEncryptedElements(
             SignedEncryptedElements see, RampartPolicyData rpd) {
-        Iterator<String> it = see.getXPathExpressions().iterator();
+        Iterator it = see.getXPathExpressions().iterator();
         if (see.isSignedElemets()) {
             while (it.hasNext()) {
-                rpd.setSignedElements(it.next());
+                rpd.setSignedElements((String) it.next());
             }
         } else {
             while (it.hasNext()) {
-                rpd.setEncryptedElements(it.next());
+                rpd.setEncryptedElements((String) it.next());
             }
         }
         rpd.addDeclaredNamespaces(see.getDeclaredNamespaces());
@@ -250,15 +229,14 @@ public class RampartPolicyBuilder {
      */
     private static void processSignedEncryptedParts(SignedEncryptedParts sep,
             RampartPolicyData rpd) {
-        Iterator<Header> it = sep.getHeaders().iterator();
+        Iterator it = sep.getHeaders().iterator();
         if (sep.isSignedParts()) {
             rpd.setSignBody(sep.isBody());
             rpd.setSignAttachments(sep.isAttachments());
-            rpd.setSignAllHeaders(sep.isSignAllHeaders());
            	rpd.setSignBodyOptional(sep.isOptional());
            	rpd.setSignAttachmentsOptional(sep.isOptional());
             while (it.hasNext()) {
-                Header header = it.next();
+                Header header = (Header) it.next();
                 rpd.addSignedPart(header.getNamespace(), header.getName());
             }
         } else {
@@ -267,7 +245,7 @@ public class RampartPolicyBuilder {
             rpd.setEncryptBodyOptional(sep.isOptional());
            	rpd.setEncryptAttachmentsOptional(sep.isOptional());
             while (it.hasNext()) {
-                Header header = it.next();
+                Header header = (Header) it.next();
                 rpd.setEncryptedParts(header.getNamespace(), header.getName(),"Header");
             }
         }
@@ -276,9 +254,9 @@ public class RampartPolicyBuilder {
     private static void processContentEncryptedElements(ContentEncryptedElements cee,
             RampartPolicyData rpd) {
         
-        Iterator<String> it = cee.getXPathExpressions().iterator();     
+        Iterator it = cee.getXPathExpressions().iterator();     
         while (it.hasNext()) {
-            rpd.setContentEncryptedElements(it.next());
+            rpd.setContentEncryptedElements((String) it.next());
         }
         rpd.addDeclaredNamespaces(cee.getDeclaredNamespaces());
     }
@@ -286,9 +264,9 @@ public class RampartPolicyBuilder {
     private static void processRequiredElements(RequiredElements req,
             RampartPolicyData rpd) {
         
-        Iterator<String> it = req.getXPathExpressions().iterator();     
+        Iterator it = req.getXPathExpressions().iterator();     
         while (it.hasNext()) {
-            rpd.setRequiredElements(it.next());
+            rpd.setRequiredElements((String) it.next());
         }
         rpd.addDeclaredNamespaces(req.getDeclaredNamespaces());
     }
@@ -362,14 +340,14 @@ public class RampartPolicyBuilder {
      */
     private static void asymmetricBinding(AsymmetricBinding binding,
             RampartPolicyData rpd) throws WSSPolicyException {
-    	RecipientToken rt = binding.getRecipientToken();
-    	InitiatorToken it = binding.getInitiatorToken();
-        if (rt == null || it == null) {
+        TokenWrapper tokWrapper = binding.getRecipientToken();
+        TokenWrapper tokWrapper1 = binding.getInitiatorToken();
+        if (tokWrapper == null || tokWrapper1 == null) {
             throw new WSSPolicyException("Asymmetric binding should have both Initiator and " +
             		                                                "Recipient tokens defined");
         }
-        rpd.setRecipientToken(rt.getReceipientToken());
-        rpd.setInitiatorToken(it.getInitiatorToken());
+        rpd.setRecipientToken(((RecipientToken) tokWrapper).getReceipientToken());
+        rpd.setInitiatorToken(((InitiatorToken) tokWrapper1).getInitiatorToken());
     }
 
     private static void processSupportingTokens(SupportingToken token,

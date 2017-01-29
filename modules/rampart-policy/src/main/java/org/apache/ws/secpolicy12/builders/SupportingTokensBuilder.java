@@ -36,7 +36,7 @@ import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 
-public class SupportingTokensBuilder implements AssertionBuilder<OMElement> {
+public class SupportingTokensBuilder implements AssertionBuilder {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {
@@ -71,15 +71,15 @@ public class SupportingTokensBuilder implements AssertionBuilder<OMElement> {
         
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			supportingToken.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
+			supportingToken.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
 		}
 
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
 
-        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative(iterator.next(), supportingToken);
+        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative((List) iterator.next(), supportingToken);
             /*
              * for the moment we will say there should be only one alternative 
              */
@@ -101,11 +101,11 @@ public class SupportingTokensBuilder implements AssertionBuilder<OMElement> {
                 };
     }
 
-    private void processAlternative(List<Assertion> assertions, SupportingToken supportingToken) {
+    private void processAlternative(List assertions, SupportingToken supportingToken) {
         
-        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
 
-            Assertion primitive = iterator.next();
+            Assertion primitive = (Assertion) iterator.next();
             QName qname = primitive.getName();
 
             if (SP12Constants.ALGORITHM_SUITE.equals(qname)) {

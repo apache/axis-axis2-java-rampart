@@ -29,7 +29,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.model.RequiredElements;
 
-public class RequiredElementsBuilder implements AssertionBuilder<OMElement> {
+public class RequiredElementsBuilder implements AssertionBuilder {
 
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
@@ -56,7 +56,7 @@ public class RequiredElementsBuilder implements AssertionBuilder<OMElement> {
         QName name = element.getQName();
         if (SP11Constants.XPATH.equals(name)) {
             parent.addXPathExpression(element.getText());
-            Iterator namespaces = element.getNamespacesInScope();
+            Iterator namespaces = element.getAllDeclaredNamespaces();
             while (namespaces.hasNext()) {
                 OMNamespace nm = (OMNamespace) namespaces.next();
                 parent.addDeclaredNamespaces(nm.getNamespaceURI(), nm.getPrefix());

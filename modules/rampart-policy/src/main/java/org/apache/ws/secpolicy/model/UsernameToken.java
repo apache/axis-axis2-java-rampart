@@ -91,12 +91,19 @@ public class UsernameToken extends Token {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
+        String prefix = writer.getPrefix(namespaceURI);
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+
         // <sp:UsernameToken
-        writeStartElement(writer, prefix, localname, namespaceURI);
+        writer.writeStartElement(prefix, localname, namespaceURI);
+
+        writer.writeNamespace(prefix, namespaceURI);
 
         String inclusion;
         
@@ -107,43 +114,61 @@ public class UsernameToken extends Token {
         }
 
         if (inclusion != null) {
-            writeAttribute(writer, prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
-        }
-        
-        // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
-        
-        if (version == SPConstants.SP_V12) {
-            
-            if (isNoPassword()) {
-                writeEmptyElement(writer, prefix, SPConstants.NO_PASSWORD, namespaceURI);
-            } else if (isHashPassword()){
-                writeEmptyElement(writer, prefix, SPConstants.HASH_PASSWORD, namespaceURI);
-            }
-            
-            if (isDerivedKeys()) {
-                writeEmptyElement(writer, prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
-            } else if (isExplicitDerivedKeys()) {
-                writeEmptyElement(writer, prefix, SPConstants.REQUIRE_EXPLICIT_DERIVED_KEYS, namespaceURI);
-            } else if (isImpliedDerivedKeys()) {
-                writeEmptyElement(writer, prefix, SPConstants.REQUIRE_IMPLIED_DERIVED_KEYS, namespaceURI);
-            }
-            
-        }
-        
-        if (isUseUTProfile10()) {
-            // <sp:WssUsernameToken10 />
-        	writeEmptyElement(writer, prefix, SPConstants.USERNAME_TOKEN10 , namespaceURI);
-        } else if(isUseUTProfile11()) {
-            // <sp:WssUsernameToken11 />
-        	writeEmptyElement(writer, prefix, SPConstants.USERNAME_TOKEN11 , namespaceURI);
+            writer.writeAttribute(prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
         }
 
-        // </wsp:Policy>
+        if (isUseUTProfile10() || isUseUTProfile11()) {
+            String pPrefix = writer.getPrefix(SPConstants.POLICY
+                    .getNamespaceURI());
+            if (pPrefix == null) {
+                writer.setPrefix(SPConstants.POLICY.getPrefix(), SPConstants.POLICY
+                        .getNamespaceURI());
+            }
+
+            // <wsp:Policy>
+            writer.writeStartElement(prefix, SPConstants.POLICY.getLocalPart(),
+                    SPConstants.POLICY.getNamespaceURI());
+
+            // CHECKME
+            if (isUseUTProfile10()) {
+                // <sp:WssUsernameToken10 />
+                writer.writeStartElement(prefix, SPConstants.USERNAME_TOKEN10 , namespaceURI);
+            } else {
+                // <sp:WssUsernameToken11 />
+                writer.writeStartElement(prefix, SPConstants.USERNAME_TOKEN11 , namespaceURI);
+            }
+            
+            if (version == SPConstants.SP_V12) {
+                
+                if (isNoPassword()) {
+                    writer.writeStartElement(prefix, SPConstants.NO_PASSWORD, namespaceURI);
+                    writer.writeEndElement();    
+                } else if (isHashPassword()){
+                    writer.writeStartElement(prefix, SPConstants.HASH_PASSWORD, namespaceURI);
+                    writer.writeEndElement(); 
+                }
+                
+                if (isDerivedKeys()) {
+                    writer.writeStartElement(prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
+                    writer.writeEndElement();  
+                } else if (isExplicitDerivedKeys()) {
+                    writer.writeStartElement(prefix, SPConstants.REQUIRE_EXPLICIT_DERIVED_KEYS, namespaceURI);
+                    writer.writeEndElement();  
+                } else if (isImpliedDerivedKeys()) {
+                    writer.writeStartElement(prefix, SPConstants.REQUIRE_IMPLIED_DERIVED_KEYS, namespaceURI);
+                    writer.writeEndElement();  
+                }
+                
+            }
+            writer.writeEndElement();
+
+            // </wsp:Policy>
+            writer.writeEndElement();
+
+        }
+
         writer.writeEndElement();
-
         // </sp:UsernameToken>
-        writer.writeEndElement();
 
     }
 }

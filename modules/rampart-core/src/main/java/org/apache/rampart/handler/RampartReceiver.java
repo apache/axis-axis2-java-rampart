@@ -34,7 +34,6 @@ import org.apache.rampart.RampartEngine;
 import org.apache.rampart.RampartException;
 import org.apache.ws.secpolicy.WSSPolicyException;
 import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
@@ -42,6 +41,7 @@ import org.apache.ws.security.handler.WSHandlerResult;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import javax.xml.namespace.QName;
 
@@ -87,7 +87,7 @@ public class RampartReceiver implements Handler {
         }
         
         RampartEngine engine = new RampartEngine();
-        List<WSSecurityEngineResult> wsResult = null;
+        Vector wsResult = null;
         try {
             wsResult = engine.process(msgContext);
             
@@ -103,10 +103,10 @@ public class RampartReceiver implements Handler {
           return InvocationResponse.CONTINUE;        
         }
         
-        List<WSHandlerResult> results = null;
-        if ((results = (List<WSHandlerResult>) msgContext
+        Vector results = null;
+        if ((results = (Vector) msgContext
                 .getProperty(WSHandlerConstants.RECV_RESULTS)) == null) {
-            results = new ArrayList<WSHandlerResult>();
+            results = new Vector();
             msgContext.setProperty(WSHandlerConstants.RECV_RESULTS, results);
         }
         WSHandlerResult rResult = new WSHandlerResult("", wsResult);
@@ -159,30 +159,16 @@ public class RampartReceiver implements Handler {
         
         msgContext.setProperty(RampartConstants.SEC_FAULT, Boolean.TRUE);    
         String soapVersionURI =  msgContext.getEnvelope().getNamespace().getNamespaceURI();
-        QName faultCode = null;
-        /*
-         * Get the faultCode from the thrown WSSecurity exception, if there is one
-         */
-        if (e instanceof WSSecurityException)
-        {        	
-        	faultCode = ((WSSecurityException)e).getFaultCode(); 
-        }
-        /*
-         * Otherwise default to InvalidSecurity
-         */
-        if (faultCode == null)
-        {
-        	faultCode = new QName(WSConstants.INVALID_SECURITY.getNamespaceURI(),WSConstants.INVALID_SECURITY.getLocalPart(),"wsse");
-        }
+        QName invalidSecurity = new QName(WSConstants.INVALID_SECURITY.getNamespaceURI(),WSConstants.INVALID_SECURITY.getLocalPart(),"wsse");
         
         if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI) ) {
             
-            throw new AxisFault(faultCode,e.getMessage(),e);
+            throw new AxisFault(invalidSecurity,e.getMessage(),e);
                             
         } else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
             
             List subfaultCodes = new ArrayList();
-            subfaultCodes.add(faultCode);
+            subfaultCodes.add(invalidSecurity);
             throw new AxisFault(Constants.FAULT_SOAP12_SENDER,subfaultCodes,e.getMessage(),e);
         
         }        

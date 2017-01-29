@@ -1,32 +1,30 @@
 package org.apache.rahas;
 
-import org.apache.rahas.impl.util.*;
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml1.core.Attribute;
-import org.opensaml.saml1.core.NameIdentifier;
+import java.util.Arrays;
+
+import org.apache.rahas.impl.util.SAMLAttributeCallback;
+import org.apache.rahas.impl.util.SAMLCallback;
+import org.apache.rahas.impl.util.SAMLCallbackHandler;
+import org.apache.rahas.impl.util.SAMLNameIdentifierCallback;
+import org.opensaml.SAMLAttribute;
+import org.opensaml.SAMLException;
+import org.opensaml.SAMLNameIdentifier;
 
 public class SAMLDataProvider implements SAMLCallbackHandler{
 	
-	public void handle(SAMLCallback callback) throws SAMLException {
+	public void handle(SAMLCallback callback) throws SAMLException{
 		
 		if(callback.getCallbackType() == SAMLCallback.ATTR_CALLBACK){
 			SAMLAttributeCallback cb = (SAMLAttributeCallback)callback;
-
-            try {
-                Attribute attribute = SAMLUtils.createAttribute("Name", "https://rahas.apache.org/saml/attrns", "Custom/Rahas");
-                cb.addAttributes(attribute);
-            } catch (TrustException e) {
-                throw new SAMLException("Error creating attribute", e);
-            }
-
+			SAMLAttribute attribute = new SAMLAttribute("Name",
+                     "https://rahas.apache.org/saml/attrns", null, -1, Arrays
+                             .asList(new String[] { "Custom/Rahas" }));
+			cb.addAttributes(attribute);
 		}else if(callback.getCallbackType() == SAMLCallback.NAME_IDENTIFIER_CALLBACK){
 			SAMLNameIdentifierCallback cb = (SAMLNameIdentifierCallback)callback;
-            try {
-                NameIdentifier nameId = SAMLUtils.createNamedIdentifier("David", NameIdentifier.EMAIL);
-                cb.setNameId(nameId);
-            } catch (TrustException e) {
-                throw new SAMLException("Error creating name identifier", e);
-            }
+			SAMLNameIdentifier nameId = new SAMLNameIdentifier(
+            		"David", null, SAMLNameIdentifier.FORMAT_EMAIL);
+			cb.setNameId(nameId);
 		}
 		
 	}

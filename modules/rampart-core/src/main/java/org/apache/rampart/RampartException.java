@@ -45,7 +45,7 @@ public class RampartException extends Exception {
     
     /**
      * Construct the fault properly code for the standard faults
-     * @param code code as definfed in property file under
+     * @param faultCode2
      * @return
      */
     private String getFaultCode(String code) {

@@ -22,16 +22,16 @@ import org.apache.neethi.Assertion;
 
 public abstract class AbstractConfigurableSecurityAssertion extends AbstractSecurityAssertion {
     
-    protected ArrayList<Assertion> configurations = null;
+    protected ArrayList configurations = null;
     
     public void addConfiguration(Assertion assertion) {
         if (configurations == null) {
-            configurations = new ArrayList<Assertion>();
+            configurations = new ArrayList();
         }
         configurations.add(assertion);
     }
     
-    public List<Assertion> getConfigurations() {
+    public List getConfigurations() {
         return configurations;
     }
     

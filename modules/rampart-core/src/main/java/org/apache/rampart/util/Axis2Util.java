@@ -16,28 +16,32 @@
 
 package org.apache.rampart.util;
 
-import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.OMXMLBuilderFactory;
-import org.apache.axiom.om.OMXMLParserWrapper;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
+import org.apache.axiom.soap.SOAP11Constants;
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axiom.soap.SOAPModelBuilder;
+import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
+import org.apache.axiom.soap.impl.dom.SOAPHeaderBlockImpl;
+import org.apache.axiom.soap.impl.dom.factory.DOMSOAPFactory;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.xml.security.utils.XMLUtils;
-import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 
 import java.io.ByteArrayInputStream;
@@ -85,35 +89,7 @@ public class Axis2Util {
 			throws WSSecurityException {
 		try {
             if(env instanceof Element) {
-                Element element = (Element)env;
-                Document document = element.getOwnerDocument();
-                // For outgoing messages, Axis2 only creates the SOAPEnvelope, but no document. If
-                // the Axiom implementation also supports DOM, then the envelope (seen as a DOM
-                // element) will have an owner document, but the document and the envelope have no
-                // parent-child relationship. On the other hand, the input expected by WSS4J is
-                // a document with the envelope as document element. Therefore we need to set the
-                // envelope as document element on the owner document.
-                if (element.getParentNode() != document) {
-                    document.appendChild(element);
-                }
-                // If the Axiom implementation supports DOM, then it is possible/likely that the
-                // DOM API was used to create the object model (or parts of it). In this case, the
-                // object model is not necessarily well formed with respect to namespaces because
-                // DOM doesn't generate namespace declarations automatically. This is an issue
-                // because WSS4J/Santuario expects that all namespace declarations are present.
-                // If this is not the case, then signature values or encryptions will be incorrect.
-                // To avoid this, we normalize the document. Note that if we disable the other
-                // normalizations supported by DOM, this is generally not a heavy operation.
-                // In particular, the Axiom implementation is not required to expand the object
-                // model (including OMSourcedElements) because the Axiom builder is required to
-                // perform namespace repairing, so that no modifications to unexpanded parts of
-                // the message are required.
-                DOMConfiguration domConfig = document.getDomConfig();
-                domConfig.setParameter("split-cdata-sections", Boolean.FALSE);
-                domConfig.setParameter("well-formed", Boolean.FALSE);
-                domConfig.setParameter("namespaces", Boolean.TRUE);
-                document.normalizeDocument();
-                return document;
+                return ((Element)env).getOwnerDocument();
             }
             
             if (useDoom) {
@@ -139,12 +115,23 @@ public class Axis2Util {
                     }
                 }
 
-                SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createStAXSOAPModelBuilder(
-                        OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM),
-                        env.getXMLStreamReader());
+                // Check the namespace and find SOAP version and factory
+                String nsURI = null;
+                SOAPFactory factory;
+                if (env.getNamespace().getNamespaceURI().equals(
+                        SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+                    nsURI = SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI;
+                    factory = DOOMAbstractFactory.getSOAP11Factory();
+                } else {
+                    nsURI = SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI;
+                    factory = DOOMAbstractFactory.getSOAP12Factory();
+                }
+
+                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
+                        env.getXMLStreamReader(), factory, nsURI);
                 SOAPEnvelope envelope = (stAXSOAPModelBuilder)
                         .getSOAPEnvelope();
-                envelope.getParent().build();
+                ((OMNode) envelope.getParent()).build();
                 
                 //Set the processed flag of the processed headers
                 SOAPHeader header = envelope.getHeader();
@@ -176,28 +163,10 @@ public class Axis2Util {
 		}
 	}
 
-	/**
-	 * Builds a SOAPEnvelope from DOM Document.
-	 * @param doc - The dom document that contains a SOAP message
-	 * @param useDoom
-	 * @return
-	 * @throws WSSecurityException
-	 */
+	
 	public static SOAPEnvelope getSOAPEnvelopeFromDOMDocument(Document doc, boolean useDoom)
             throws WSSecurityException {
 
-	    Element documentElement = doc.getDocumentElement();
-	    if (documentElement instanceof SOAPEnvelope) {
-	        SOAPEnvelope env = (SOAPEnvelope)documentElement;
-	        // If the DOM tree already implements the Axiom API and the corresponding
-	        // Axiom implementation is also used as default implementation, then just return
-	        // the SOAPEnvelope directly. Note that this will never be the case for DOOM,
-	        // but may be the case for a non standard Axiom implementation.
-	        if (env.getOMFactory().getMetaFactory() == OMAbstractFactory.getMetaFactory()) {
-	            return env;
-	        }
-	    }
-	    
         if(useDoom) {
             try {
                 //Get processed headers
@@ -230,16 +199,14 @@ public class Axis2Util {
                     			OMNamespace ns =  (OMNamespace) nsIter.next();
                     			header.declareNamespace(ns);
                     		}
-                    		// retrieve all child nodes (including any text nodes)
-                    		// and re-attach to header block
-                    		Iterator children = element.getChildren();
+                    		Iterator children = element.getChildElements();
                     		while (children.hasNext()) {
                     			OMNode child = (OMNode)children.next();
-                    			children.remove();
+                    			child.detach();
                     			header.addChild(child);
                     		}
                     		
-                    		headerBlocs.remove();
+                    		element.detach();
                     		
                     		soapHeader.build();
                     		
@@ -255,8 +222,8 @@ public class Axis2Util {
                 }
                 XMLStreamReader reader = ((OMElement) doc.getDocumentElement())
                         .getXMLStreamReader();
-                SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createStAXSOAPModelBuilder(
-                        reader);
+                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
+                        reader, null);
                 SOAPEnvelope envelope = stAXSOAPModelBuilder.getSOAPEnvelope();
                 
                 //Set the processed flag of the processed headers
@@ -283,7 +250,7 @@ public class Axis2Util {
                 XMLUtils.outputDOM(doc.getDocumentElement(), os, true);
                 ByteArrayInputStream bais =  new ByteArrayInputStream(os.toByteArray());
 
-                SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createSOAPModelBuilder(bais, null);
+                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(XMLInputFactory.newInstance().createXMLStreamReader(bais), null);
                 return stAXSOAPModelBuilder.getSOAPEnvelope();
             } catch (Exception e) {
                 throw new WSSecurityException(e.getMessage());
@@ -320,7 +287,7 @@ public class Axis2Util {
      * @return
      */
     public static OMElement toDOOM(OMFactory factory, OMElement element){
-        OMXMLParserWrapper builder = OMXMLBuilderFactory.createStAXOMBuilder(factory, element.getXMLStreamReader());
+        StAXOMBuilder builder = new StAXOMBuilder(factory, element.getXMLStreamReader());
         OMElement elem = builder.getDocumentElement();
         elem.build();
         return elem;

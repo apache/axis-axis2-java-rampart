@@ -106,26 +106,9 @@ public class SCTIssuer implements TokenIssuer {
             SecurityContextToken sct =
                     new SecurityContextToken(this.getWSCVersion(data.getTokenType()), doc);
 
-            OMElement rstrElem;
-            if (wstVersion == RahasConstants.VERSION_05_12) {
-                /**
-                 * If secure conversation version is http://docs.oasis-open.org/ws-sx/ws-trust/200512
-                 * We have to wrap "request security token response" in a "request security token response
-                 * collection".
-                 * See WS-SecureConversation 1.3 spec's Section 3 - Establishing Security Contexts
-                 * for more details.
-                 */
-                OMElement requestedSecurityTokenResponseCollection = TrustUtil
-                        .createRequestSecurityTokenResponseCollectionElement(wstVersion, env.getBody());
-                rstrElem =
-                        TrustUtil.createRequestSecurityTokenResponseElement(wstVersion,
-                                requestedSecurityTokenResponseCollection);
-            } else {
-                rstrElem =
-                        TrustUtil.createRequestSecurityTokenResponseElement(wstVersion,
-                                env.getBody());
-            }
-
+            OMElement rstrElem =
+                    TrustUtil.createRequestSecurityTokenResponseElement(wstVersion,
+                                                                        env.getBody());
 
             OMElement rstElem =
                     TrustUtil.createRequestedSecurityTokenElement(wstVersion, rstrElem);
@@ -136,14 +119,14 @@ public class SCTIssuer implements TokenIssuer {
 
             OMElement reqAttachedRef = null;
             OMElement reqUnattachedRef = null;
-            if (config.isAddRequestedAttachedRef()) {
+            if (config.addRequestedAttachedRef) {
                 reqAttachedRef = TrustUtil.createRequestedAttachedRef(wstVersion,
                                                          rstrElem,
                                                          "#" + sct.getID(),
                                                          tokenType);
             }
 
-            if (config.isAddRequestedUnattachedRef()) {
+            if (config.addRequestedUnattachedRef) {
                 reqUnattachedRef = TrustUtil.createRequestedUnattachedRef(wstVersion,
                                                            rstrElem,
                                                            sct.getIdentifier(),
@@ -154,7 +137,7 @@ public class SCTIssuer implements TokenIssuer {
             Date creationTime = new Date();
             Date expirationTime = new Date();
 
-            expirationTime.setTime(creationTime.getTime() + config.getTtl());
+            expirationTime.setTime(creationTime.getTime() + config.ttl);
 
             // Use GMT time in milliseconds
             DateFormat zulu = new XmlSchemaDateFormat();
@@ -171,15 +154,15 @@ public class SCTIssuer implements TokenIssuer {
                                        creationTime,
                                        expirationTime);
             
-            if(config.isAddRequestedAttachedRef()) {
+            if(config.addRequestedAttachedRef) {
                 sctToken.setAttachedReference(reqAttachedRef.getFirstElement());
             }
             
-            if(config.isAddRequestedUnattachedRef()) {
+            if(config.addRequestedUnattachedRef) {
                 sctToken.setUnattachedReference(reqUnattachedRef.getFirstElement());
             }
 
-            byte[] secret = TokenIssuerUtil.getSharedSecret(data, config.getKeyComputation(), config.getKeySize());
+            byte[] secret = TokenIssuerUtil.getSharedSecret(data, config.keyComputation, config.keySize);
             sctToken.setSecret(secret);
             
             //Add the RequestedProofToken

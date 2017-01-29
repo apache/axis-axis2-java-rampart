@@ -32,9 +32,8 @@ import org.apache.ws.secpolicy.model.Wss10;
 import org.apache.ws.secpolicy.model.Wss11;
 import org.apache.ws.security.WSEncryptionPart;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Vector;
 
 public class RampartPolicyData {
 
@@ -62,9 +61,6 @@ public class RampartPolicyData {
     private boolean tokenProtection;
 
     private boolean signatureConfirmation;
-
-    //Policy namespace
-    private String webServiceSecurityPolicyNS = null;
 
     /*
      * Message tokens for symmetrical binding
@@ -111,21 +107,19 @@ public class RampartPolicyData {
     
     private boolean encryptAttachmentsOptional;
 
-    private boolean signAllHeaders;
+    private Vector signedParts = new Vector();
 
-    private List<WSEncryptionPart> signedParts = new ArrayList<WSEncryptionPart>();
+    private Vector signedElements = new Vector();
 
-    private List<String> signedElements = new ArrayList<String>();
+    private Vector encryptedParts = new Vector();
 
-    private List<WSEncryptionPart> encryptedParts = new ArrayList<WSEncryptionPart>();
-
-    private List<String> encryptedElements = new ArrayList<String>();
+    private Vector encryptedElements = new Vector();
     
-    private List<String> requiredElements = new ArrayList<String>();
+    private Vector requiredElements = new Vector();
     
-    private List<String> contentEncryptedElements = new ArrayList<String>();
-
-    private HashMap<String, String> declaredNamespaces = new HashMap<String, String>();
+    private Vector contentEncryptedElements = new Vector();
+    
+    private HashMap declaredNamespaces = new HashMap();
 
     /*
      * Holds the supporting tokens elements
@@ -154,31 +148,21 @@ public class RampartPolicyData {
     
     private Trust10 trust10;
     
-    private HashMap<Token,String> supportingTokensIdMap;
-    private HashMap<Token,String> signedSupportingTokensIdMap;
-    private HashMap<Token,String> endorsingSupportingTokensIdMap;
-    private HashMap<Token,String> signedEndorsingSupportingTokensIdMap;
+    private HashMap supportingTokensIdMap;
+    private HashMap signedSupportingTokensIdMap;
+    private HashMap endorsingSupportingTokensIdMap;
+    private HashMap signedEndorsingSupportingTokensIdMap;
     
     private Wss10 wss10;
     private Wss11 wss11;
     
     private Policy issuerPolicy;
     
-    private List<SupportingPolicyData> supportingPolicyData = new ArrayList<SupportingPolicyData>();
+    private Vector supportingPolicyData = new Vector();
     
-    private List<SupportingToken> supportingTokens = new ArrayList<SupportingToken>();
-
-
-
-    public String getWebServiceSecurityPolicyNS() {
-        return webServiceSecurityPolicyNS;
-    }
-
-    public void setWebServiceSecurityPolicyNS(String webServiceSecurityPolicyNS) {
-        this.webServiceSecurityPolicyNS = webServiceSecurityPolicyNS;
-    }
-
-    public List<SupportingPolicyData> getSupportingPolicyData() {
+    private Vector supportingTokens = new Vector();
+    
+    public Vector getSupportingPolicyData() {
         return supportingPolicyData;
     }
 
@@ -364,7 +348,7 @@ public class RampartPolicyData {
     /**
      * @return Returns the encryptedElements.
      */
-    public List<String> getEncryptedElements() {
+    public Vector getEncryptedElements() {
         return encryptedElements;
     }
 
@@ -380,12 +364,13 @@ public class RampartPolicyData {
     /**
      * @return Returns the requiredElements.
      */
-    public List<String> getRequiredElements() {
+    public Vector getRequiredElements() {
         return requiredElements;
     }
 
     /**
-     * @param reqElement The Required Element (XPath) to set.
+     * @param requiredElements
+     *            The Required Element (XPath) to set.
      */
     public void setRequiredElements(String reqElement) {
         requiredElements.add(reqElement);
@@ -394,7 +379,7 @@ public class RampartPolicyData {
     /**
      * @return Returns the contentEncryptedElements.
      */
-    public List<String> getContentEncryptedElements() {
+    public Vector getContentEncryptedElements() {
         return contentEncryptedElements;
     }
 
@@ -410,7 +395,7 @@ public class RampartPolicyData {
     /**
      * @return Returns the encryptedParts.
      */
-    public List<WSEncryptionPart> getEncryptedParts() {
+    public Vector getEncryptedParts() {
         return encryptedParts;
     }
 
@@ -506,7 +491,7 @@ public class RampartPolicyData {
     /**
      * @return Returns the signedElements.
      */
-    public List<String> getSignedElements() {
+    public Vector getSignedElements() {
         return signedElements;
     }
 
@@ -522,15 +507,15 @@ public class RampartPolicyData {
     /**
      * @return Returns the signedParts.
      */
-    public List<WSEncryptionPart> getSignedParts() {
+    public Vector getSignedParts() {
         return signedParts;
     }
     
-    public HashMap<String, String> getDeclaredNamespaces() {
+    public HashMap getDeclaredNamespaces() {
         return declaredNamespaces;
     }
     
-    public void addDeclaredNamespaces(HashMap<String, String> namespaces) {
+    public void addDeclaredNamespaces(HashMap namespaces) {
         declaredNamespaces.putAll(namespaces);
     }
 
@@ -551,7 +536,7 @@ public class RampartPolicyData {
         signedParts.add(part);
     }
     
-    public void setSignedParts(List<WSEncryptionPart> signedParts) {
+    public void setSignedParts(Vector signedParts) {
         this.signedParts = signedParts;
     }
     
@@ -726,13 +711,13 @@ public class RampartPolicyData {
     /**
      * @return Returns the supportingTokenList.
      */
-    public List<SupportingToken> getSupportingTokensList() {
+    public Vector getSupportingTokensList() {
         return supportingTokens;
     }
     
     public SupportingToken getSupportingTokens() {
         if (supportingTokens.size() > 0) {
-            return supportingTokens.get(0);
+            return (SupportingToken) supportingTokens.get(0);
         } else {
             return null;
         }
@@ -837,32 +822,32 @@ public class RampartPolicyData {
      */
     public void setSupporttingtokenId(Token token, String id, int type) throws RampartException {
         
-        HashMap<Token,String> tokenMap = null;
+        HashMap tokenMap = null;
         switch (type) {
         case SPConstants.SUPPORTING_TOKEN_SUPPORTING:
             if(this.supportingTokensIdMap == null) {
-                this.supportingTokensIdMap = new HashMap<Token,String>();
+                this.supportingTokensIdMap = new HashMap();
             }
             tokenMap = this.supportingTokensIdMap;
             break;
 
         case SPConstants.SUPPORTING_TOKEN_SIGNED:
             if(this.signedSupportingTokensIdMap == null) {
-                this.signedSupportingTokensIdMap = new HashMap<Token,String>();
+                this.signedSupportingTokensIdMap = new HashMap();
             }
             tokenMap = this.signedSupportingTokensIdMap;
             break;
             
         case SPConstants.SUPPORTING_TOKEN_ENDORSING:
             if(this.endorsingSupportingTokensIdMap == null) {
-                this.endorsingSupportingTokensIdMap = new HashMap<Token,String>();
+                this.endorsingSupportingTokensIdMap = new HashMap();
             }
             tokenMap = this.endorsingSupportingTokensIdMap;
             break;
             
         case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
             if(this.signedEndorsingSupportingTokensIdMap == null) {
-                this.signedEndorsingSupportingTokensIdMap = new HashMap<Token,String>();
+                this.signedEndorsingSupportingTokensIdMap = new HashMap();
             }
             tokenMap = this.signedEndorsingSupportingTokensIdMap;
             break;
@@ -898,7 +883,7 @@ public class RampartPolicyData {
             
         case SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING:
             if(this.signedEndorsingSupportingTokensIdMap == null) {
-                this.signedEndorsingSupportingTokensIdMap = new HashMap<Token,String>();
+                this.signedEndorsingSupportingTokensIdMap = new HashMap();
             }
             return null;
 
@@ -940,14 +925,6 @@ public class RampartPolicyData {
     
     public MTOMAssertion getMTOMAssertion(){
     	return mtomAssertion;
-    }
-
-    public boolean isSignAllHeaders() {
-        return signAllHeaders;
-    }
-
-    public void setSignAllHeaders(boolean signAllHeaders) {
-        this.signAllHeaders = signAllHeaders;
     }
     
     public boolean isMTOMSerialize(){

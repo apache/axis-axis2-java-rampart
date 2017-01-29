@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
 
 public class STSMessageReceiver extends AbstractInOutMessageReceiver {
     
-    private static final Log log = LogFactory.getLog(STSMessageReceiver.class);
+	private static final Log log = LogFactory.getLog(STSMessageReceiver.class);
     
     public void invokeBusinessLogic(MessageContext inMessage,
             MessageContext outMessage) throws AxisFault {
@@ -39,7 +39,7 @@ public class STSMessageReceiver extends AbstractInOutMessageReceiver {
                     .getParameter(TokenRequestDispatcherConfig.CONFIG_PARAM_KEY);
             Parameter paramFile = inMessage
                     .getParameter(TokenRequestDispatcherConfig.CONFIG_FILE_KEY);
-            TokenRequestDispatcher dispatcher;
+            TokenRequestDispatcher dispatcher = null;
             if (param != null) {
                 dispatcher = new TokenRequestDispatcher(param
                         .getParameterElement().getFirstChildWithName(
@@ -53,8 +53,12 @@ public class STSMessageReceiver extends AbstractInOutMessageReceiver {
                                 .getProperty(TokenRequestDispatcherConfig.CONFIG_PARAM_KEY));
             }
             
-            SOAPEnvelope responseEnv = dispatcher.handle(inMessage, outMessage);
-			outMessage.setEnvelope(responseEnv);
+            if(dispatcher != null) {
+                SOAPEnvelope responseEnv = dispatcher.handle(inMessage, outMessage);
+                outMessage.setEnvelope(responseEnv);
+            } else {
+                throw new TrustException("missingDispatcherConfiguration");
+            }
         } catch (TrustException e) {
             e.printStackTrace();
             //Log the exception

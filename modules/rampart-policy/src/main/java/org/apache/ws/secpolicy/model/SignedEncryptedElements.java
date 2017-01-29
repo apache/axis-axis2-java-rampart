@@ -31,9 +31,9 @@ import org.apache.ws.secpolicy.SPConstants;
 
 public class SignedEncryptedElements extends AbstractSecurityAssertion {
 
-    private ArrayList<String> xPathExpressions = new ArrayList<String>();
+    private ArrayList xPathExpressions = new ArrayList();
     
-    private HashMap<String, String> declaredNamespaces = new HashMap<String, String>();
+    private HashMap declaredNamespaces = new HashMap();
 
     private String xPathVersion;
 
@@ -51,7 +51,7 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
     /**
      * @return Returns the xPathExpressions.
      */
-    public ArrayList<String> getXPathExpressions() {
+    public ArrayList getXPathExpressions() {
         return xPathExpressions;
     }
 
@@ -81,7 +81,7 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
         return signedElemets;
     }
     
-    public HashMap<String, String> getDeclaredNamespaces () {
+    public HashMap getDeclaredNamespaces () {
         return declaredNamespaces;
     }
     
@@ -91,31 +91,40 @@ public class SignedEncryptedElements extends AbstractSecurityAssertion {
         
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
-        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
+        String prefix = writer.getPrefix(namespaceURI);
+
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+
         // <sp:SignedElements> | <sp:EncryptedElements>
-        writeStartElement(writer, prefix, localName, namespaceURI);
+        writer.writeStartElement(prefix, localName, namespaceURI);
         
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
+
         if (xPathVersion != null) {
-            writeAttribute(writer, prefix, namespaceURI, SPConstants.XPATH_VERSION, xPathVersion);
+            writer.writeAttribute(prefix, namespaceURI, SPConstants.XPATH_VERSION, xPathVersion);
         }
 
         String xpathExpression;
 
-        for (Iterator<String> iterator = xPathExpressions.iterator(); iterator
+        for (Iterator iterator = xPathExpressions.iterator(); iterator
                 .hasNext();) {
-            xpathExpression = iterator.next();
+            xpathExpression = (String) iterator.next();
             // <sp:XPath ..>
-            writeStartElement(writer, prefix, SPConstants.XPATH_EXPR, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.XPATH_EXPR, namespaceURI);
 
             Iterator<String> namespaces = declaredNamespaces.keySet().iterator();
 
             while(namespaces.hasNext()) {
-            	final String declaredPrefix = namespaces.next();
-            	final String declaredNamespaceURI = (String) declaredNamespaces.get(declaredPrefix);
-                writer.writeNamespace(declaredPrefix,declaredNamespaceURI); 
+                prefix = (String) namespaces.next();
+                namespaceURI = (String) declaredNamespaces.get(prefix);
+                writer.writeNamespace(prefix,namespaceURI);
             }
 
             writer.writeCharacters(xpathExpression);

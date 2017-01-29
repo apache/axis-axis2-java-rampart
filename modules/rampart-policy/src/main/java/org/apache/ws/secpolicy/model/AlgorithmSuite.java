@@ -289,11 +289,6 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
      * @return Returns the asymmetricSignature.
      */
     public String getAsymmetricSignature() {
-    	if(this.digest == SPConstants.SHA256) {
-    		return SPConstants.RSA_SHA256;
-    	} else if(this.digest == SPConstants.SHA512) {
-    		return SPConstants.RSA_SHA512;
-    	}
         return asymmetricSignature;
     }
 
@@ -457,36 +452,53 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
-        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        writeStartElement(writer, prefix, localName, namespaceURI);
+        String prefix = writer.getPrefix(namespaceURI);
+
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+
+        writer.writeStartElement(prefix, localName, namespaceURI);
+        writer.writeNamespace(prefix, namespaceURI);
 
         // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
+        writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY
+                .getLocalPart(), SPConstants.POLICY.getNamespaceURI());
         
         //
-        writeEmptyElement(writer, prefix, getAlgoSuiteString(), namespaceURI);
+        writer.writeStartElement(prefix, getAlgoSuiteString(), namespaceURI);
+        writer.writeEndElement();
 
         if (SPConstants.C14N.equals(getInclusiveC14n())) {
-            writeEmptyElement(writer, prefix, SPConstants.INCLUSIVE_C14N, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.INCLUSIVE_C14N, namespaceURI);
+            writer.writeEndElement();
         }
 
         if (SPConstants.SNT.equals(getSoapNormalization())) {
-            writeEmptyElement(writer, prefix, SPConstants.SOAP_NORMALIZATION_10, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.SOAP_NORMALIZATION_10,
+                    namespaceURI);
+            writer.writeEndElement();
         }
 
         if (SPConstants.STRT10.equals(getStrTransform())) {
-            writeEmptyElement(writer, prefix, SPConstants.STR_TRANSFORM_10, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.STR_TRANSFORM_10,
+                    namespaceURI);
+            writer.writeEndElement();
         }
 
         if (SPConstants.XPATH.equals(getXPath())) {
-            writeEmptyElement(writer, prefix, SPConstants.XPATH10, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.XPATH10, namespaceURI);
+            writer.writeEndElement();
         }
 
         if (SPConstants.XPATH20.equals(getXPath())) {
-            writeEmptyElement(writer, prefix, SPConstants.XPATH_FILTER20, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.XPATH_FILTER20,
+                    namespaceURI);
+            writer.writeEndElement();
         }
         
         // </wsp:Policy>

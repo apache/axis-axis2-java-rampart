@@ -16,7 +16,10 @@
 
 package org.apache.rampart.policy.model;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -38,11 +41,11 @@ public class OptimizePartsConfig implements Assertion{
 	public final static String PREFIX_ATTR = "prefix";
 	
 	private Map namespaces = null;
-	private List<String> expressions = null;
+	private Vector expressions = null;
 	
 	public OptimizePartsConfig(){
 		namespaces = new HashMap();
-		expressions = new ArrayList<String>();
+		expressions = new Vector();
 	}
 	
 	public void addExpression(String expression){
@@ -53,7 +56,7 @@ public class OptimizePartsConfig implements Assertion{
 		namespaces.put(prefix, ns);
 	}
 	
-	public List<String> getExpressions() {
+	public Vector getExpressions() {
 		return expressions;
 	}
 
@@ -97,7 +100,6 @@ public class OptimizePartsConfig implements Assertion{
         	  while(ite.hasNext()){
         		  String strPrefix = (String)ite.next();
         		  String strURI = (String) namespaces.get(strPrefix);
-        		  writer.writeStartElement(RampartConfig.NS, NAMESPACE_LN);
         		  writer.writeAttribute(URI_ATTR , strURI);
         		  writer.writeAttribute(PREFIX_ATTR, strPrefix);
         		  writer.writeEndElement();
@@ -115,9 +117,7 @@ public class OptimizePartsConfig implements Assertion{
 	public boolean isOptional() {
 		throw new UnsupportedOperationException("Not relevant");
 	}
-	public boolean isIgnorable() {
-	        throw new UnsupportedOperationException("Not relevant");
-	}
+	
 	public boolean equal(PolicyComponent arg0) {
 		throw new UnsupportedOperationException("Not relevant");
 	}

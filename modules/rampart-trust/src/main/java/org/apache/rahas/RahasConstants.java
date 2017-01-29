@@ -126,23 +126,10 @@ public class RahasConstants {
     public static final String TOK_TYPE_SAML_20 = "http://docs.oasis-open.org/wss/" +
                                                   "oasis-wss-saml-token-profile-1.1#SAMLV2.0";
     //Attrs
-    public static final String ATTR_TYPE           = "Type";
-    public static final String ATTR_CLAIMS_DIALECT = "Dialect";
+    public static final String ATTR_TYPE 	        = "Type";
+    public static final String ATTR_CLAIMS_DIALECT 	= "Dialect";
 
     //Constants required for SAML2 assertion generation
     public final static String X509_CERT ="X509Certificate";
     public final static String USERNAME = "username";
-
-    //Constants required for SubjectConfirmation methods
-    public static final String SAML11_SUBJECT_CONFIRMATION_HOK = "urn:oasis:names:tc:SAML:1.0:cm:" +
-                                                          "holder-of-key";
-    public static final String SAML11_SUBJECT_CONFIRMATION_BEARER = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
-
-    public static final String SAML20_SUBJECT_CONFIRMATION_HOK = "urn:oasis:names:tc:SAML:2.0:cm:holder-of-key";
-
-    public static final String SAML20_SUBJECT_CONFIRMATION_BEARER = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
-
-    public static final String SAML_NS = "urn:oasis:names:tc:SAML:1.0:assertion";
-
-    public static final String  AUTHENTICATION_METHOD_PASSWORD = "urn:oasis:names:tc:SAML:1.0:am:password";
 }

@@ -27,6 +27,7 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.RampartUtil;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
@@ -36,7 +37,6 @@ import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.handler.WSHandlerResult;
 import org.apache.ws.security.message.WSSecDKEncrypt;
 import org.apache.ws.security.message.WSSecDKSign;
 import org.apache.ws.security.message.WSSecEncrypt;
@@ -45,13 +45,19 @@ import org.apache.ws.security.message.WSSecSignature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.crypto.dsig.Reference;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Vector;
 
 public class AsymmetricBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(AsymmetricBindingBuilder.class);
-    private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);
+    private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
+    private boolean dotDebug = false;
+    
+    private Token sigToken;
+
+    private WSSecSignature sig;
 
     private WSSecEncryptedKey encrKey;
     
@@ -59,7 +65,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
     
     private byte[] encryptedKeyValue;
 
-    private List<byte[]> signatureValues = new ArrayList<byte[]>();
+    private Vector signatureValues = new Vector();
 
     private Element encrTokenElement;
     
@@ -67,13 +73,14 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
     
     private Element encrDKTElement;
 
-    private List<WSEncryptionPart> sigParts = new ArrayList<WSEncryptionPart>();
+    private Vector sigParts = new Vector();
     
-    private Element signatureElement;
-
-    private Element refList;
-
+    private Element signatureElement; 
     
+    public AsymmetricBindingBuilder(){
+    	dotDebug = tlog.isDebugEnabled();
+    }
+
     public void build(RampartMessageData rmd) throws RampartException {
         log.debug("AsymmetricBindingBuilder build invoked");
 
@@ -82,7 +89,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             this.addTimestamp(rmd);
         }
 
-        if (RampartUtil.encryptFirst(rpd)) {
+        if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder())) {
             this.doEncryptBeforeSig(rmd);
         } else {
             this.doSignBeforeEncrypt(rmd);
@@ -95,7 +102,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             throws RampartException {
     	
     	long t0 = 0, t1 = 0, t2 = 0;
-    	if(tlog.isDebugEnabled()){
+    	if(dotDebug){
     		t0 = System.currentTimeMillis();
     	}
         RampartPolicyData rpd = rmd.getPolicyData();
@@ -108,7 +115,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
          */
         Element encrDKTokenElem = null;
         WSSecEncrypt encr = null;
-        refList = null;
+        Element refList = null;
         WSSecDKEncrypt dkEncr = null;
 
         /*
@@ -120,7 +127,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         } else {
             encryptionToken = rpd.getInitiatorToken();
         }
-        List<WSEncryptionPart> encrParts = RampartUtil.getEncryptedParts(rmd);
+        Vector encrParts = RampartUtil.getEncryptedParts(rmd);
         
         //Signed parts are determined before encryption because encrypted signed  headers
         //will not be included otherwise
@@ -168,7 +175,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     encr.setDocument(doc);
                     RampartUtil.setEncryptionUser(rmd, encr);
                     encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
-                    RampartUtil.setKeyIdentifierType(rmd, encr, encryptionToken);
+                    RampartUtil.setKeyIdentifierType(rpd,encr, encryptionToken);
                     encr.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
                     encr.prepare(doc, RampartUtil.getEncryptionCrypto(config, rmd.getCustomClassLoader()));
 
@@ -188,28 +195,26 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 }
             }
 
-            refList = RampartUtil.appendChildToSecHeader(rmd, refList);
+            RampartUtil.appendChildToSecHeader(rmd, refList);
             
-            if(tlog.isDebugEnabled()){
+            if(dotDebug){
             	t1 = System.currentTimeMillis();
             }
-
+            
             this.setInsertionLocation(encrTokenElement);
 
             RampartUtil.handleEncryptedSignedHeaders(encrParts, this.sigParts, doc);
-
-            // TODO may contain deifferent types of objects as values, therefore cannot use strongly type maps
-            // need to figure out a way
-            HashMap<Token,Object> sigSuppTokMap = null;
-            HashMap<Token,Object> endSuppTokMap = null;
-            HashMap<Token,Object> sgndEndSuppTokMap = null;
-            HashMap<Token,Object> sgndEncSuppTokMap = null;
-            HashMap<Token,Object> endEncSuppTokMap = null;
-            HashMap<Token,Object> sgndEndEncSuppTokMap = null;
+            
+            HashMap sigSuppTokMap = null;
+            HashMap endSuppTokMap = null;
+            HashMap sgndEndSuppTokMap = null;
+            HashMap sgndEncSuppTokMap = null;
+            HashMap endEncSuppTokMap = null;
+            HashMap sgndEndEncSuppTokMap = null;
             
             if(this.timestampElement != null){
-            	sigParts.add(RampartUtil.createEncryptionPart(WSConstants.TIMESTAMP_TOKEN_LN,
-                            RampartUtil.addWsuIdToElement((OMElement) this.timestampElement)));
+            	sigParts.add(new WSEncryptionPart(RampartUtil
+                    .addWsuIdToElement((OMElement) this.timestampElement)));
             }
             
             if (rmd.isInitiator()) {
@@ -233,9 +238,9 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 SupportingToken sgndEndEncSuppTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();           
                 sgndEndEncSuppTokMap = this.handleSupportingTokens(rmd, sgndEndEncSuppTokens);
                 
-                List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
-                for (SupportingToken supportingTok : supportingToks) {
-                    this.handleSupportingTokens(rmd, supportingTok);
+                Vector supportingToks = rpd.getSupportingTokensList();
+                for (int i = 0; i < supportingToks.size(); i++) {
+                    this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
                 } 
                 
                 SupportingToken encryptedSupportingToks = rpd.getEncryptedSupportingTokens();
@@ -258,27 +263,25 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
 
             if (rmd.isInitiator()) {
-
-                if (endSuppTokMap != null) {
-                    endSuppTokMap.putAll(endEncSuppTokMap);
-                }
+                
+                endSuppTokMap.putAll(endEncSuppTokMap);
                 // Do endorsed signatures
-                List<byte[]> endSigVals = this.doEndorsedSignatures(rmd,
+                Vector endSigVals = this.doEndorsedSignatures(rmd,
                         endSuppTokMap);
-                for (byte[] endSigVal : endSigVals) {
-                    signatureValues.add(endSigVal);
+                for (Iterator iter = endSigVals.iterator(); iter.hasNext();) {
+                    signatureValues.add(iter.next());
                 }
 
                 sgndEndSuppTokMap.putAll(sgndEndEncSuppTokMap);
                 // Do signed endorsing signatures
-                List<byte[]> sigEndSigVals = this.doEndorsedSignatures(rmd,
+                Vector sigEndSigVals = this.doEndorsedSignatures(rmd,
                         sgndEndSuppTokMap);
-                for (byte[] sigEndSigVal : sigEndSigVals) {
-                    signatureValues.add(sigEndSigVal);
+                for (Iterator iter = sigEndSigVals.iterator(); iter.hasNext();) {
+                    signatureValues.add(iter.next());
                 }
             }
             
-            if(tlog.isDebugEnabled()){
+            if(dotDebug){
             	t2 = System.currentTimeMillis();
             	tlog.debug("Encryption took :" + (t1 - t0)
             				+", Signature tool :" + (t2 - t1) );
@@ -287,19 +290,18 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             // Check for signature protection
             if (rpd.isSignatureProtection() && this.mainSigId != null) {
             	long t3 = 0, t4 = 0;
-            	if(tlog.isDebugEnabled()){
+            	if(dotDebug){
             		t3 = System.currentTimeMillis();
             	}
-
-                List<WSEncryptionPart> secondEncrParts = new ArrayList<WSEncryptionPart>();
+                Vector secondEncrParts = new Vector();
 
                 // Now encrypt the signature using the above token
                 secondEncrParts.add(new WSEncryptionPart(this.mainSigId,
                         "Element"));
                 
                 if(rmd.isInitiator()) {
-                    for (String anEncryptedTokensIdList : encryptedTokensIdList) {
-                        secondEncrParts.add(new WSEncryptionPart(anEncryptedTokensIdList, "Element"));
+                    for (int i = 0 ; i < encryptedTokensIdList.size(); i++) {
+                        secondEncrParts.add(new WSEncryptionPart((String)encryptedTokensIdList.get(i),"Element"));
                     }
                 }
 
@@ -331,7 +333,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                         throw new RampartException("errorInEncryption", e);
                     }
                 }
-                if(tlog.isDebugEnabled()){
+                if(dotDebug){
             		t4 = System.currentTimeMillis();
             		tlog.debug("Signature protection took :" + (t4 - t3));
             	}
@@ -367,7 +369,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         	this.setInsertionLocation(null);
         }
         
-        if(tlog.isDebugEnabled()){
+        if(dotDebug){
     		t0 = System.currentTimeMillis();
     	}
         
@@ -392,9 +394,9 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             SupportingToken sgndEndEncSuppTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();           
             sgndEndEncSuppTokMap = this.handleSupportingTokens(rmd, sgndEndEncSuppTokens);
             
-            List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
-            for (SupportingToken supportingTok : supportingToks) {
-                this.handleSupportingTokens(rmd, supportingTok);
+            Vector supportingToks = rpd.getSupportingTokensList();
+            for (int i = 0; i < supportingToks.size(); i++) {
+                this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
             } 
             
             SupportingToken encryptedSupportingToks = rpd.getEncryptedSupportingTokens();
@@ -417,17 +419,19 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             this.doSignature(rmd);
         }
         
-        List<SupportingPolicyData> supportingToks = rpd.getSupportingPolicyData();
-        for (SupportingPolicyData policyData : supportingToks) {
-            if (policyData != null) { // TODO do we need this null check ?
-                List<WSEncryptionPart> supportingSigParts = RampartUtil.getSupportingSignedParts(rmd,
+        Vector supportingToks = rpd.getSupportingPolicyData();
+        for (int i = 0; i < supportingToks.size(); i++) {
+            SupportingPolicyData policyData = null;
+            if (supportingToks.get(i) != null) {
+                policyData = (SupportingPolicyData) supportingToks.get(i);
+                Vector supportingSigParts = RampartUtil.getSupportingSignedParts(rmd,
                         policyData);
 
                 if (supportingSigParts.size() > 0
                         && ((rmd.isInitiator() && rpd.getInitiatorToken() != null) || (!rmd
-                        .isInitiator() && rpd.getRecipientToken() != null))) {
+                                .isInitiator() && rpd.getRecipientToken() != null))) {
                     // Do signature for policies defined under SupportingToken.
-                    this.doSupportingSignature(rmd, supportingSigParts, policyData);
+                    this.doSupportingSignature(rmd, supportingSigParts,policyData);
                 }
             }
         }
@@ -437,33 +441,29 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         if (rmd.isInitiator()) {
             
             // Adding the endorsing encrypted supporting tokens to endorsing supporting tokens
-            if (endSuppTokMap != null) {
-                endSuppTokMap.putAll(endEncSuppTokMap);
-            }
+            endSuppTokMap.putAll(endEncSuppTokMap);
             // Do endorsed signatures
-            List<byte[]> endSigVals = this.doEndorsedSignatures(rmd,
+            Vector endSigVals = this.doEndorsedSignatures(rmd,
                     endSuppTokMap);
-            for (byte[] endSigVal : endSigVals) {
-                signatureValues.add(endSigVal);
+            for (Iterator iter = endSigVals.iterator(); iter.hasNext();) {
+                signatureValues.add(iter.next());
             }
 
             //Adding the signed endorsed encrypted tokens to signed endorsed supporting tokens
-            if (sgndEndSuppTokMap != null) {
-                sgndEndSuppTokMap.putAll(sgndEndEncSuppTokMap);
-            }
+            sgndEndSuppTokMap.putAll(sgndEndEncSuppTokMap);
             // Do signed endorsing signatures
-            List<byte[]> sigEndSigVals = this.doEndorsedSignatures(rmd,
+            Vector sigEndSigVals = this.doEndorsedSignatures(rmd,
                     sgndEndSuppTokMap);
-            for (byte[] sigEndSigVal : sigEndSigVals) {
-                signatureValues.add(sigEndSigVal);
+            for (Iterator iter = sigEndSigVals.iterator(); iter.hasNext();) {
+                signatureValues.add(iter.next());
             }
         }
         
-        if(tlog.isDebugEnabled()){
+        if(dotDebug){
     		t1 = System.currentTimeMillis();
     	}
              
-        List<WSEncryptionPart> encrParts = RampartUtil.getEncryptedParts(rmd);
+        Vector encrParts = RampartUtil.getEncryptedParts(rmd);
         
         //Check for signature protection
         if(rpd.isSignatureProtection() && this.mainSigId != null) {
@@ -471,8 +471,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         }
         
         if(rmd.isInitiator()) {
-            for (String anEncryptedTokensIdList : encryptedTokensIdList) {
-                encrParts.add(new WSEncryptionPart(anEncryptedTokensIdList, "Element"));
+            for (int i = 0 ; i < encryptedTokensIdList.size(); i++) {
+                encrParts.add(new WSEncryptionPart((String)encryptedTokensIdList.get(i),"Element"));
             }
         }
 
@@ -528,7 +528,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     
                     WSSecEncrypt encr = new WSSecEncrypt();
                     
-                    RampartUtil.setKeyIdentifierType(rmd, encr, encrToken);
+                    RampartUtil.setKeyIdentifierType(rpd, encr, encrToken);
                     
                     encr.setWsConfig(rmd.getConfig());
                     
@@ -575,11 +575,13 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
-        List<SupportingPolicyData> supportingTokens = rpd.getSupportingPolicyData();
-        for (SupportingPolicyData policyData : supportingTokens) {
-            if (policyData != null) { // TODO do we need this null check ?
+        Vector supportingTokens = rpd.getSupportingPolicyData();
+        for (int i = 0; i < supportingTokens.size(); i++) {
+            SupportingPolicyData policyData = null;
+            if (supportingTokens.get(i) != null) {
+                policyData = (SupportingPolicyData) supportingTokens.get(i);
                 Token supportingEncrToken = policyData.getEncryptionToken();
-                List<WSEncryptionPart> supoortingEncrParts = RampartUtil.getSupportingEncryptedParts(rmd,
+                Vector supoortingEncrParts = RampartUtil.getSupportingEncryptedParts(rmd,
                         policyData);
 
                 if (supportingEncrToken != null && supoortingEncrParts.size() > 0) {
@@ -589,7 +591,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
         }
         
-        if(tlog.isDebugEnabled()){
+        if(dotDebug){
     		t2 = System.currentTimeMillis();
     		tlog.debug("Signature took :" + (t1 - t0)
     				+", Encryption took :" + (t2 - t1) );
@@ -597,7 +599,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         
     }
     
-    private void doSupportingSignature(RampartMessageData rmd, List<WSEncryptionPart> supportingSigParts,
+    private void doSupportingSignature(RampartMessageData rmd, Vector supportingSigParts,
             SupportingPolicyData supportingData) throws RampartException {
 
         Token supportingSigToken;
@@ -605,7 +607,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         Element supportingSignatureElement;
 
         long t0 = 0, t1 = 0;
-        if (tlog.isDebugEnabled()) {
+        if (dotDebug) {
             t0 = System.currentTimeMillis();
         }
 
@@ -614,7 +616,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         if (!(supportingSigToken instanceof X509Token)) {
             return;
         }
-        supportingSig = this.getSignatureBuilder(rmd, supportingSigToken,
+        supportingSig = this.getSignatureBuider(rmd, supportingSigToken,
                 ((X509Token) supportingSigToken).getUserCertAlias());
         Element bstElem = supportingSig.getBinarySecurityTokenElement();
         if (bstElem != null) {
@@ -627,19 +629,13 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         }
 
         try {
-        	supportingSig.setDigestAlgo(rmd.getPolicyData().getAlgorithmSuite().getDigest());
+            supportingSig.addReferencesToSign(supportingSigParts, rmd.getSecHeader());
+            supportingSig.computeSignature();
 
-            List<Reference> referenceList
-                    = supportingSig.addReferencesToSign(supportingSigParts, rmd.getSecHeader());
+            supportingSignatureElement = supportingSig.getSignatureElement();
 
-            /**
-             * Before migration it was - this.setInsertionLocation(RampartUtil.insertSiblingAfter(rmd, this
-             *       .getInsertionLocation(), supportingSignatureElement));
-             *
-             * In this case we need to append <Signature>..</Signature> element to
-             * current insertion location
-             */
-            supportingSig.computeSignature(referenceList, false, this.getInsertionLocation());
+            this.setInsertionLocation(RampartUtil.insertSiblingAfter(rmd, this
+                    .getInsertionLocation(), supportingSignatureElement));
 
         } catch (WSSecurityException e) {
             throw new RampartException("errorInSignatureWithX509Token", e);
@@ -647,7 +643,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
         signatureValues.add(supportingSig.getSignatureValue());
 
-        if (tlog.isDebugEnabled()) {
+        if (dotDebug) {
             t1 = System.currentTimeMillis();
             tlog.debug("Signature took :" + (t1 - t0));
         }
@@ -660,23 +656,15 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         Document doc = rmd.getDocument();
         
         long t0 = 0, t1 = 0;
-        if(tlog.isDebugEnabled()){
+        if(dotDebug){
     		t0 = System.currentTimeMillis();
     	}
-        Token sigToken;
         if(rmd.isInitiator()) {
             sigToken = rpd.getInitiatorToken();
         } else {
             sigToken = rpd.getRecipientToken();
         }
 
-        /**
-         * Note : It doesn't make sense to use Derived Keys in an Asymmetric binding environment to sign messages.
-         * In asymmetric binding environment we always sign the message using sender's private key. We do *not*
-         * use a session/ephemeral key to sign the message. We always use PKC keys to sign and verify messages.
-         * Therefore we do not need to have following code segment.
-         * TODO Confirm and remove.
-         */
         if (sigToken.isDerivedKeys()) {
             // Set up the encrypted key to use
             if(this.encrKey == null) {
@@ -684,7 +672,6 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
             
             WSSecDKSign dkSign = new WSSecDKSign();
-
             dkSign.setExternalKey(this.encryptedKeyValue, this.encryptedKeyId);
 
             // Set the algo info
@@ -703,46 +690,21 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
                 dkSign.setParts(sigParts);
 
-                List<Reference> referenceList
-                        = dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
+                dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
 
-                 /**
-                 * Add <wsc:DerivedKeyToken>..</wsc:DerivedKeyToken> to security
-                 * header. We need to add this just after Encrypted Key and just before <Signature>..</Signature>
-                 * elements. (As a convention)
-                 */
+                // Do signature
+                dkSign.computeSignature();
 
-                if (refList == null) {
-                    //dkSign.appendDKElementToHeader(rmd.getSecHeader());
-                    this.sigDKTElement = RampartUtil.insertSiblingAfter(rmd,
-                            this.getInsertionLocation(), dkSign.getdktElement());
-                    this.setInsertionLocation(this.sigDKTElement);
-                     // Do signature
-                    /**
-                     * Create and prepend signature
-                     */
-                    dkSign.computeSignature(referenceList, false, this.getInsertionLocation());
-                } else {
-                    this.sigDKTElement = RampartUtil.insertSiblingBefore(rmd, refList, dkSign.getdktElement());
-                    this.setInsertionLocation(this.sigDKTElement);
-
-                    // Do signature
-                    /**
-                     * Create and append signature
-                     */
-                    dkSign.computeSignature(referenceList, true, this.getInsertionLocation());
-                }
-
-                if (RampartUtil.encryptFirst(rpd)) {
-                    // always add encrypt elements after signature. Because we need to first verify the signature
-                    // and decrypt at receiver end.
-                    this.setInsertionLocation(dkSign.getSignatureElement());
-                } else {
-                    // append timestamp element as next insertion location. Cos in sign and encrypt case the
-                    // receiver first need to decrypt the message => The decryption keys should appear first.
-                    this.setInsertionLocation(this.timestampElement);
-                }
-
+                 ;
+                // Add elements to header
+                 this.sigDKTElement = RampartUtil.insertSiblingAfter(rmd,
+                        this.getInsertionLocation(), dkSign.getdktElement());
+                this.setInsertionLocation(this.sigDKTElement);
+                
+                this.setInsertionLocation(RampartUtil.insertSiblingAfter(rmd,
+                        this.getInsertionLocation(), dkSign
+                                .getSignatureElement()));
+                                
                 this.mainSigId = RampartUtil
                         .addWsuIdToElement((OMElement) dkSign
                                 .getSignatureElement());
@@ -757,7 +719,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
 
         } else {
-            WSSecSignature sig = this.getSignatureBuilder(rmd, sigToken);
+            sig = this.getSignatureBuider(rmd, sigToken);
             Element bstElem = sig.getBinarySecurityTokenElement();
             if(bstElem != null) {
                 bstElem = RampartUtil.insertSiblingAfter(rmd, this
@@ -771,29 +733,13 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             }
 
             try {
-            	sig.setDigestAlgo(rpd.getAlgorithmSuite().getDigest());
-
-                List<Reference> referenceList
-                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
-
-                // Do signature
-                if (this.refList == null) {
-                    /**
-                     * If <ReferenceData>..</ReferenceData> is null append <Signature>..</Signature> element
-                     * to current insertion location.
-                     */
-                    sig.computeSignature(referenceList, false, this.getInsertionLocation());
-                } else {
-                    /**
-                     * If <ReferenceData>..</ReferenceData> is not null prepend <Signature>..</Signature> element
-                     * to reference data.
-                     */
-                    sig.computeSignature(referenceList, true, this.refList);
-                }
+                sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                sig.computeSignature();
 
                 signatureElement = sig.getSignatureElement();
                 
-                this.setInsertionLocation(signatureElement);
+                this.setInsertionLocation(RampartUtil.insertSiblingAfter(
+                                rmd, this.getInsertionLocation(), signatureElement));
 
                 this.mainSigId = RampartUtil.addWsuIdToElement((OMElement) signatureElement);
             } catch (WSSecurityException e) {
@@ -802,7 +748,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             signatureValues.add(sig.getSignatureValue());
         }
         
-        if(tlog.isDebugEnabled()){
+        if(dotDebug){
     		t1 = System.currentTimeMillis();
     		tlog.debug("Signature took :" + (t1 - t0));
     	}
@@ -810,7 +756,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
     }
     
     private void doEncryptionWithSupportingToken(RampartPolicyData rpd, RampartMessageData rmd,
-            Token encrToken, Document doc, List<WSEncryptionPart> encrParts) throws RampartException {
+            Token encrToken, Document doc, Vector encrParts) throws RampartException {
         Element refList = null;
         try {
             if (!(encrToken instanceof X509Token)) {
@@ -819,7 +765,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
             WSSecEncrypt encr = new WSSecEncrypt();
 
-            RampartUtil.setKeyIdentifierType(rmd, encr, encrToken);
+            RampartUtil.setKeyIdentifierType(rpd, encr, encrToken);
 
             encr.setWsConfig(rmd.getConfig());
 
@@ -872,11 +818,10 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 }
                 
                 //Use the secret from the incoming EncryptedKey element
-                List<WSHandlerResult> resultsObj
-                        = (List<WSHandlerResult>)rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
+                Object resultsObj = rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
                 if(resultsObj != null) {
-                    encryptedKeyId = RampartUtil.getRequestEncryptedKeyId(resultsObj);
-                    encryptedKeyValue = RampartUtil.getRequestEncryptedKeyValue(resultsObj);
+                    encryptedKeyId = RampartUtil.getRequestEncryptedKeyId((Vector)resultsObj);
+                    encryptedKeyValue = RampartUtil.getRequestEncryptedKeyValue((Vector)resultsObj);
                     
                     //In the case where we don't have the EncryptedKey in the 
                     //request, for the control to have reached this state,

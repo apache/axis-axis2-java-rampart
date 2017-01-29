@@ -24,12 +24,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
+import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.SPConstants;
 
 public class RequiredParts extends AbstractSecurityAssertion {
     
-    private ArrayList<Header> headers = new ArrayList<Header>();
+    private ArrayList headers = new ArrayList();
     
     public RequiredParts(int version) {
         setVersion(version);
@@ -38,7 +39,7 @@ public class RequiredParts extends AbstractSecurityAssertion {
     /**
      * @return Returns the headers.
      */
-    public ArrayList<Header> getHeaders() {
+    public ArrayList getHeaders() {
         return this.headers;
     }
 
@@ -59,18 +60,27 @@ public class RequiredParts extends AbstractSecurityAssertion {
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
+        String prefix = writer.getPrefix(namespaceURI);
+
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+            
         // <sp:RequiredParts> 
-        writeStartElement(writer, prefix, localName, namespaceURI);
+        writer.writeStartElement(prefix, localName, namespaceURI);
+        
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
         
         Header header;        
-        for (Iterator<Header> iterator = headers.iterator(); iterator.hasNext();) {
-            header = iterator.next();
+        for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
+            header = (Header) iterator.next();
             // <sp:Header Name=".." Namespace=".." />
-            writeStartElement(writer, prefix, SPConstants.HEADER, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.HEADER, namespaceURI);
             // Name attribute is optional
             if (header.getName() != null) {
                 writer.writeAttribute("Name", header.getName());

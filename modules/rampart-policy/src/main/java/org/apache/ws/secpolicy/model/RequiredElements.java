@@ -31,9 +31,9 @@ import org.apache.ws.secpolicy.SPConstants;
 
 public class RequiredElements extends AbstractSecurityAssertion {
 
-    private ArrayList<String> xPathExpressions = new ArrayList<String>();
+    private ArrayList xPathExpressions = new ArrayList();
     
-    private HashMap<String, String> declaredNamespaces = new HashMap<String, String>();
+    private HashMap declaredNamespaces = new HashMap();
 
     private String xPathVersion;
 
@@ -44,7 +44,7 @@ public class RequiredElements extends AbstractSecurityAssertion {
     /**
      * @return Returns the xPathExpressions.
      */
-    public ArrayList<String> getXPathExpressions() {
+    public ArrayList getXPathExpressions() {
         return xPathExpressions;
     }
 
@@ -67,7 +67,7 @@ public class RequiredElements extends AbstractSecurityAssertion {
         xPathVersion = pathVersion;
     }
     
-    public HashMap<String, String> getDeclaredNamespaces () {
+    public HashMap getDeclaredNamespaces () {
         return declaredNamespaces;
     }
     
@@ -77,24 +77,41 @@ public class RequiredElements extends AbstractSecurityAssertion {
         
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
-        String prefix = getName().getPrefix();
         String localName = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
+        String prefix;
+        String writerPrefix = writer.getPrefix(namespaceURI);
+
+        if (writerPrefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        } else {
+            prefix = writerPrefix;
+        }
+
         //  <sp:RequiredElements>
-        writeStartElement(writer, prefix, localName, namespaceURI);
+        writer.writeStartElement(prefix, localName, namespaceURI);
         
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
+
+        if (writerPrefix == null) {
+            // xmlns:sp=".."
+            writer.writeNamespace(prefix, namespaceURI);
+        }
+
         if (xPathVersion != null) {
-            writeAttribute(writer, prefix, namespaceURI, SPConstants.XPATH_VERSION, xPathVersion);
+            writer.writeAttribute(prefix, namespaceURI, SPConstants.XPATH_VERSION, xPathVersion);
         }
 
         String xpathExpression;
 
-        for (Iterator<String> iterator = xPathExpressions.iterator(); iterator
+        for (Iterator iterator = xPathExpressions.iterator(); iterator
                 .hasNext();) {
             xpathExpression = (String) iterator.next();
             // <sp:XPath ..>
-            writeStartElement(writer, prefix, SPConstants.XPATH_EXPR, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.XPATH_EXPR, namespaceURI);
             writer.writeCharacters(xpathExpression);
             writer.writeEndElement();
         }

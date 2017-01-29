@@ -30,7 +30,7 @@ import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.SignedEncryptedElements;
 
-public class SignedElementsBuilder implements AssertionBuilder<OMElement> {
+public class SignedElementsBuilder implements AssertionBuilder {
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         
@@ -43,8 +43,8 @@ public class SignedElementsBuilder implements AssertionBuilder<OMElement> {
         
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			signedEncryptedElements.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
+			signedEncryptedElements.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
 		}
         
         for (Iterator iterator = element.getChildElements(); iterator.hasNext();) {
@@ -62,7 +62,7 @@ public class SignedElementsBuilder implements AssertionBuilder<OMElement> {
         QName name = element.getQName();
         if (SP11Constants.XPATH.equals(name)) {
             parent.addXPathExpression(element.getText());
-            Iterator namespaces = element.getNamespacesInScope();
+            Iterator namespaces = element.getAllDeclaredNamespaces();
             while (namespaces.hasNext()) {
                 OMNamespace nm = (OMNamespace) namespaces.next();
                 parent.addDeclaredNamespaces(nm.getNamespaceURI(), nm.getPrefix());

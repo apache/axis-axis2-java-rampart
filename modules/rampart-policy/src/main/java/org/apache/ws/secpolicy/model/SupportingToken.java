@@ -43,7 +43,7 @@ public class SupportingToken extends AbstractSecurityAssertion implements
 
     private AlgorithmSuite algorithmSuite;
 
-    private ArrayList<Token> tokens = new ArrayList<Token>();
+    private ArrayList tokens = new ArrayList();
 
     private SignedEncryptedElements signedElements;
 
@@ -84,7 +84,7 @@ public class SupportingToken extends AbstractSecurityAssertion implements
     /**
      * @return Returns the token.
      */
-    public ArrayList<Token> getTokens() {
+    public ArrayList getTokens() {
         return tokens;
     }
 
@@ -282,16 +282,35 @@ public class SupportingToken extends AbstractSecurityAssertion implements
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        // <sp:SupportingToken>
-        writeStartElement(writer, getName());
+        String namespaceURI = getName().getNamespaceURI();
 
+        String prefix = writer.getPrefix(namespaceURI);
+        if (prefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        }
+
+        String localname = getName().getLocalPart();
+
+        // <sp:SupportingToken>
+        writer.writeStartElement(prefix, localname, namespaceURI);
+        
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
+
+        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
+        if (pPrefix == null) {
+            pPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
+        }
         // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
+        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(),
+                SPConstants.POLICY.getNamespaceURI());
 
         Token token;
-        for (Iterator<Token> iterator = getTokens().iterator(); iterator.hasNext();) {
+        for (Iterator iterator = getTokens().iterator(); iterator.hasNext();) {
             // [Token Assertion] +
-            token = iterator.next();
+            token = (Token) iterator.next();
             token.serialize(writer);
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright The Apache Software Foundation.
+ * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,34 +17,32 @@
 
 package org.apache.rahas.impl.util;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.dom.DOMMetaFactory;
+import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
-import org.apache.ws.security.*;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSPasswordCallback;
+import org.apache.ws.security.WSSecurityEngine;
+import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.Base64;
-import org.apache.ws.security.util.UUIDGenerator;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.keys.KeyInfo;
 import org.apache.xml.security.keys.content.X509Data;
 import org.apache.xml.security.keys.content.x509.XMLX509Certificate;
-import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.common.SAMLVersion;
-import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.*;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.io.*;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
 import javax.security.auth.callback.Callback;
@@ -54,9 +52,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.List;
 
 public class SAML2Utils {
 
@@ -65,12 +63,45 @@ public class SAML2Utils {
     public static Element getElementFromAssertion(XMLObject xmlObj) throws TrustException {
         try {
             
+            String jaxpProperty = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
+            System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+
             MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(xmlObj);
-            Element assertionElement = marshaller.marshall(xmlObj,
-                    ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory().newDocumentBuilder().newDocument());
+            Element element = marshaller.marshall(xmlObj);
 
-            log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
+            // Reset the sys. property to its previous value.
+            if (jaxpProperty == null) {
+                System.getProperties().remove("javax.xml.parsers.DocumentBuilderFactory");
+            } else {
+                System.setProperty("javax.xml.parsers.DocumentBuilderFactory", jaxpProperty);
+            }
+
+            ByteArrayOutputStream byteArrayOutputStrm = new ByteArrayOutputStream();
+
+            DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+
+            DOMImplementationLS impl =
+                    (DOMImplementationLS) registry.getDOMImplementation("LS");
+
+            LSSerializer writer = impl.createLSSerializer();
+            LSOutput output = impl.createLSOutput();
+            output.setByteStream(byteArrayOutputStrm);
+            writer.write(element, output);
+            String elementString = byteArrayOutputStrm.toString();
+
+            DocumentBuilderFactoryImpl.setDOOMRequired(true);
+
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware(true);
+            DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = docBuilder.parse(new ByteArrayInputStream(elementString.trim().getBytes()));
+            Element assertionElement = document.getDocumentElement();
+            DocumentBuilderFactoryImpl.setDOOMRequired(false);
+
+            if (log.isDebugEnabled()) {
+                log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
+            }
             return assertionElement;
 
         } catch (Exception e) {
@@ -78,14 +109,12 @@ public class SAML2Utils {
         }
     }
 
-    /**
+     /**
      * Extract certificates or the key available in the SAMLAssertion
      *
-     * @param elem  The element to process.
-     * @param crypto The crypto properties.
-     * @param cb Callback class to get the Key
+     * @param elem
      * @return the SAML2 Key Info
-     * @throws org.apache.ws.security.WSSecurityException If an error occurred while extracting KeyInfo.
+     * @throws org.apache.ws.security.WSSecurityException
      *
      */
     public static SAML2KeyInfo getSAML2KeyInfo(Element elem, Crypto crypto,
@@ -158,43 +187,41 @@ public class SAML2Utils {
                 }
 
                 // extract the subject confirmation element from the subject
-                SubjectConfirmation subjectConf = samlSubject.getSubjectConfirmations().get(0);
+                SubjectConfirmation subjectConf = (SubjectConfirmation) samlSubject.getSubjectConfirmations().get(0);
                 if (subjectConf == null) {
                     throw new WSSecurityException(WSSecurityException.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no Subject Confirmation)"});
                 }
 
                 // Get the subject confirmation data, KeyInfoConfirmationDataType extends SubjectConfirmationData.
-                SubjectConfirmationData scData = subjectConf.getSubjectConfirmationData();
-                
+                KeyInfoConfirmationDataType scData = (KeyInfoConfirmationDataType) subjectConf.getSubjectConfirmationData();
                 if (scData == null) {
                     throw new WSSecurityException(WSSecurityException.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no Subject Confirmation Data)"});
                 }
 
                 // Get the SAML specific XML representation of the keyInfo object
-                XMLObject KIElem = null;
-                List<XMLObject> scDataElements = scData.getOrderedChildren();
-                for (XMLObject xmlObj : scDataElements) {
-                    if (xmlObj instanceof org.opensaml.xml.signature.KeyInfo) {
-                        KIElem = xmlObj;
-                        break;
-                    }
-                }
+                XMLObject KIElem = scData.getKeyInfos() != null ? (XMLObject) scData.getKeyInfos().get(0) : null;
 
                 Element keyInfoElement;
 
                 // Generate a DOM element from the XMLObject.
                 if (KIElem != null) {
 
+                    // Set the "javax.xml.parsers.DocumentBuilderFactory" system property to make sure the endorsed JAXP
+                    // implementation is picked over the default jaxp impl shipped with the JDK.
+                    String jaxpProperty = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
+                    System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+
                     MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
                     Marshaller marshaller = marshallerFactory.getMarshaller(KIElem);
-                    try {
-                        keyInfoElement = marshaller.marshall(KIElem,
-                                ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory().newDocumentBuilder().newDocument());
-                    } catch (ParserConfigurationException ex) {
-                        // We never get here
-                        throw new Error(ex);
+                    keyInfoElement = marshaller.marshall(KIElem);
+
+                    // Reset the sys. property to its previous value.
+                    if (jaxpProperty == null) {
+                        System.getProperties().remove("javax.xml.parsers.DocumentBuilderFactory");
+                    } else {
+                        System.setProperty("javax.xml.parsers.DocumentBuilderFactory", jaxpProperty);
                     }
 
                 } else {
@@ -203,9 +230,9 @@ public class SAML2Utils {
                 }
 
                 AttributeStatement attrStmt = assertion.getAttributeStatements().size() != 0 ?
-                        assertion.getAttributeStatements().get(0) : null;
+                        (AttributeStatement) assertion.getAttributeStatements().get(0) : null;
                 AuthnStatement authnStmt = assertion.getAuthnStatements().size() != 0 ?
-                        assertion.getAuthnStatements().get(0) : null;
+                        (AuthnStatement) assertion.getAuthnStatements().get(0) : null;
 
                 // if an attr stmt is present, then it has a symmetric key.
                 if (attrStmt != null) {
@@ -220,9 +247,10 @@ public class SAML2Utils {
                         QName el = new QName(child.getNamespaceURI(), child.getLocalName());
                         if (el.equals(WSSecurityEngine.ENCRYPTED_KEY)) {
 
-                            byte[] secret = CommonUtil.getDecryptedBytes(cb, crypto, child);
+                            EncryptedKeyProcessor proc = new EncryptedKeyProcessor();
+                            proc.handleEncryptedKey((Element) child, cb, crypto, null);
 
-                            return new SAML2KeyInfo(assertion, secret);
+                            return new SAML2KeyInfo(assertion, proc.getDecryptedBytes());
                         } else if (el.equals(new QName(WSConstants.WST_NS, "BinarySecret"))) {
                             Text txt = (Text) child.getFirstChild();
                             return new SAML2KeyInfo(assertion, Base64.decode(txt.getData()));
@@ -231,10 +259,10 @@ public class SAML2Utils {
 
                 }
 
-                // If an authn stmt is present then it has a public key.
-                if (authnStmt != null) {
+                // If an authn stmt is presentm then it has a public key.
+                else if (authnStmt != null) {
 
-                    X509Certificate[] certs;
+                    X509Certificate[] certs = null;
                     try {
                         KeyInfo ki = new KeyInfo(keyInfoElement, null);
 
@@ -258,6 +286,10 @@ public class SAML2Utils {
                                 new Object[]{"cannot get certificate (key holder)"}, e3);
                     }
 
+                } else {
+                    throw new WSSecurityException(WSSecurityException.FAILURE,
+                            "invalidSAMLsecurity",
+                            new Object[]{"cannot get certificate or key "});
                 }
 
 
@@ -271,73 +303,6 @@ public class SAML2Utils {
             }
         }
     }
-
-      /**
-     * Get the subject confirmation method of a SAML 2.0 assertion
-     *
-     * @param assertion SAML 2.0 assertion
-     * @return Subject Confirmation method
-     */
-    public static String getSAML2SubjectConfirmationMethod(Assertion assertion) {
-        String subjectConfirmationMethod = RahasConstants.SAML20_SUBJECT_CONFIRMATION_HOK;
-        List<SubjectConfirmation> subjectConfirmations = assertion.getSubject().getSubjectConfirmations();
-        if (subjectConfirmations.size() > 0) {
-            subjectConfirmationMethod = subjectConfirmations.get(0).getMethod();
-        }
-        return subjectConfirmationMethod;
-    }
-
-
-    public static Assertion createAssertion() throws TrustException {
-        try {
-            Assertion assertion = (Assertion)CommonUtil.buildXMLObject(Assertion.DEFAULT_ELEMENT_NAME);
-            assertion.setVersion(SAMLVersion.VERSION_20);
-
-            // Set an UUID as the ID of an assertion
-            assertion.setID(UUIDGenerator.getUUID());
-            return assertion;
-        } catch (TrustException e) {
-            throw new TrustException("Unable to create an Assertion object", e);
-        }
-    }
-
-    public static Issuer createIssuer(String issuerName) throws TrustException {
-        try {
-            Issuer issuer = (Issuer)CommonUtil.buildXMLObject(Issuer.DEFAULT_ELEMENT_NAME);
-            issuer.setValue(issuerName);
-            return issuer;
-        } catch (TrustException e) {
-            throw new TrustException("Unable to create an Issuer object", e);
-        }
-    }
-
-    public static Conditions createConditions(DateTime creationTime, DateTime expirationTime) throws TrustException {
-        try {
-            Conditions conditions = (Conditions)CommonUtil.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME);
-            conditions.setNotBefore(creationTime);
-            conditions.setNotOnOrAfter(expirationTime);
-            return conditions;
-        } catch (TrustException e) {
-            throw new TrustException("Unable to create an Conditions object");
-        }
-    }
-
-/**
-     * Create named identifier.
-     * @param principalName Name of the subject.
-     * @param format Format of the subject, whether it is an email, uid etc ...
-     * @return The NamedIdentifier object.
-     * @throws org.apache.rahas.TrustException If unable to find the builder.
-     */
-    public static NameID createNamedIdentifier(String principalName, String format) throws TrustException{
-
-        NameID nameId = (NameID)CommonUtil.buildXMLObject(NameID.DEFAULT_ELEMENT_NAME);
-        nameId.setValue(principalName);
-        nameId.setFormat(format);
-
-        return nameId;
-    }
-
 
 }
 

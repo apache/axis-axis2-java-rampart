@@ -24,14 +24,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.All;
-import org.apache.neethi.Assertion;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.SPConstants;
-import org.apache.ws.secpolicy.WSSPolicyException;
 
 public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
@@ -54,13 +52,11 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param encryptionToken The encryptionToken to set.
-     * @throws WSSPolicyException 
      */
-    public void setEncryptionToken(EncryptionToken encryptionToken) 
-    		throws WSSPolicyException  {
+    public void setEncryptionToken(EncryptionToken encryptionToken)  {
         if(this.protectionToken != null) {
-            throw new WSSPolicyException("Cannot use an EncryptionToken in a " +
-                    "SymmetricBinding when there is a ProtectionToken");
+//            throw new WSSPolicyException("Cannot use an EncryptionToken in a " +
+//                    "SymmetricBinding when there is a ProtectionToken");
         }
         this.encryptionToken = encryptionToken;
     }
@@ -74,14 +70,12 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param protectionToken The protectionToken to set.
-     * @throws WSSPolicyException 
      */
-    public void setProtectionToken(ProtectionToken protectionToken) 
-    		throws WSSPolicyException  {
+    public void setProtectionToken(ProtectionToken protectionToken)  {
         if(this.encryptionToken != null || this.signatureToken != null) {
-            throw new WSSPolicyException("Cannot use a ProtectionToken in a " +
-            "SymmetricBinding when there is a SignatureToken or an" +
-            "EncryptionToken");
+//            throw new WSSPolicyException("Cannot use a ProtectionToken in a " +
+//            "SymmetricBinding when there is a SignatureToken or an" +
+//            "EncryptionToken");
         }
         this.protectionToken = protectionToken;
     }
@@ -95,13 +89,11 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param signatureToken The signatureToken to set.
-     * @throws WSSPolicyException 
      */
-    public void setSignatureToken(SignatureToken signatureToken) 
-    		throws WSSPolicyException {
+    public void setSignatureToken(SignatureToken signatureToken) {
         if(this.protectionToken != null) {
-            throw new WSSPolicyException("Cannot use a SignatureToken in a " +
-                    "SymmetricBinding when there is a ProtectionToken");
+//            throw new WSSPolicyException("Cannot use a SignatureToken in a " +
+//                    "SymmetricBinding when there is a ProtectionToken");
         }
         this.signatureToken = signatureToken;
     }
@@ -121,7 +113,7 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         }
         
         AlgorithmSuite algorithmSuite = getAlgorithmSuite();
-        List<Assertion> configurations = algorithmSuite.getConfigurations();
+        List configurations = algorithmSuite.getConfigurations();
         
         Policy policy = new Policy();
         ExactlyOne exactlyOne = new ExactlyOne();
@@ -129,48 +121,70 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         All wrapper;
         SymmetricBinding symmetricBinding;
         
-        try {
-	        for (Iterator<Assertion> iterator = configurations.iterator(); iterator.hasNext();) {
-	            wrapper = new All();
-	            symmetricBinding = new SymmetricBinding(this.version);
-	            
-	            algorithmSuite = (AlgorithmSuite) iterator.next();
-	            symmetricBinding.setAlgorithmSuite(algorithmSuite);
-	            
-	            symmetricBinding.setEncryptionToken(getEncryptionToken());
-	            symmetricBinding.setEntireHeadersAndBodySignatures(isEntireHeadersAndBodySignatures());
-	            symmetricBinding.setIncludeTimestamp(isIncludeTimestamp());
-	            symmetricBinding.setLayout(getLayout());
-	            symmetricBinding.setProtectionOrder(getProtectionOrder());
-	            symmetricBinding.setProtectionToken(getProtectionToken());
-	            symmetricBinding.setSignatureProtection(isSignatureProtection());
-	            symmetricBinding.setSignatureToken(getSignatureToken());
-	            symmetricBinding.setSignedEndorsingSupportingTokens(getSignedEndorsingSupportingTokens());
-	            symmetricBinding.setSignedSupportingToken(getSignedSupportingToken());
-	            symmetricBinding.setTokenProtection(isTokenProtection());
-	            
-	            symmetricBinding.setNormalized(true);
-	            wrapper.addPolicyComponent(symmetricBinding);
-	            exactlyOne.addPolicyComponent(wrapper);
-	        }
-        } catch (WSSPolicyException e) {
-        	throw new IllegalArgumentException(e);
+        for (Iterator iterator = configurations.iterator(); iterator.hasNext();) {
+            wrapper = new All();
+            symmetricBinding = new SymmetricBinding(this.version);
+            
+            algorithmSuite = (AlgorithmSuite) iterator.next();
+            symmetricBinding.setAlgorithmSuite(algorithmSuite);
+            
+            symmetricBinding.setEncryptionToken(getEncryptionToken());
+            symmetricBinding.setEntireHeadersAndBodySignatures(isEntireHeadersAndBodySignatures());
+            symmetricBinding.setIncludeTimestamp(isIncludeTimestamp());
+            symmetricBinding.setLayout(getLayout());
+            symmetricBinding.setProtectionOrder(getProtectionOrder());
+            symmetricBinding.setProtectionToken(getProtectionToken());
+            symmetricBinding.setSignatureProtection(isSignatureProtection());
+            symmetricBinding.setSignatureToken(getSignatureToken());
+            symmetricBinding.setSignedEndorsingSupportingTokens(getSignedEndorsingSupportingTokens());
+            symmetricBinding.setSignedSupportingToken(getSignedSupportingToken());
+            symmetricBinding.setTokenProtection(isTokenProtection());
+            
+            symmetricBinding.setNormalized(true);
+            wrapper.addPolicyComponent(symmetricBinding);
+            exactlyOne.addPolicyComponent(wrapper);
         }
+        
         policy.addPolicyComponent(exactlyOne);
         return policy;
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
         
-        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
         
-        // <sp:SymmetricBinding>
-        writeStartElement(writer, prefix, localname, namespaceURI);
+        String prefix;
+        String writerPrefix = writer.getPrefix(namespaceURI);
         
+        if (writerPrefix == null) {
+            prefix = getName().getPrefix();
+            writer.setPrefix(prefix, namespaceURI);
+        } else {
+            prefix = writerPrefix;
+        }
+
+        // <sp:SymmetricBinding>
+        writer.writeStartElement(prefix, localname, namespaceURI);
+        
+        // xmlns:sp=".."
+        writer.writeNamespace(prefix, namespaceURI);
+               
+        String policyLocalName = SPConstants.POLICY.getLocalPart();
+        String policyNamespaceURI = SPConstants.POLICY.getNamespaceURI();
+        
+        String wspPrefix;
+        
+        String wspWriterPrefix = writer.getPrefix(policyNamespaceURI);
+        if (wspWriterPrefix == null) {
+            wspPrefix = SPConstants.POLICY.getPrefix();
+            writer.setPrefix(wspPrefix, policyNamespaceURI);
+            
+        } else {
+           wspPrefix = wspWriterPrefix;
+        }
         // <wsp:Policy>
-        writeStartElement(writer, SPConstants.POLICY);
+        writer.writeStartElement(wspPrefix, policyLocalName, policyNamespaceURI);
         
         if (encryptionToken != null) {
             encryptionToken.serialize(writer);
@@ -198,17 +212,20 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
         
         if (isIncludeTimestamp()) {
             // <sp:IncludeTimestamp />
-            writeEmptyElement(writer, prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.INCLUDE_TIMESTAMP, namespaceURI);
+            writer.writeEndElement();
         }
         
         if (SPConstants.ENCRYPT_BEFORE_SIGNING.equals(getProtectionOrder())) {
             // <sp:EncryptBeforeSigning />
-            writeEmptyElement(writer, prefix, SPConstants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ENCRYPT_BEFORE_SIGNING, namespaceURI);
+            writer.writeEndElement();
         }
         
         if (isSignatureProtection()) {
             // <sp:EncryptSignature />
-            writeEmptyElement(writer, prefix, SPConstants.ENCRYPT_SIGNATURE , namespaceURI);
+            writer.writeStartElement(prefix, SPConstants.ENCRYPT_SIGNATURE , namespaceURI);
+            writer.writeEndElement();
         }
         
         if(isEntireHeadersAndBodySignatures()) {

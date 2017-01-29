@@ -31,7 +31,7 @@ public interface TokenIssuer {
      * @param data A populated <code>RahasData</code> instance
      * @return The response <code>soap:Envelope</code> for the given issue
      *         request.
-     * @throws TrustException If an error occurred while creating the token.
+     * @throws TrustException
      */
     SOAPEnvelope issue(RahasData data) throws TrustException;
 
@@ -40,7 +40,7 @@ public interface TokenIssuer {
      *
      * @param data A populated <code>RahasData</code> instance
      * @return Returns the <code>wsa:Action</code> of the response
-     * @throws TrustException If an error occurred while during operation.
+     * @throws TrustException
      */
     String getResponseAction(RahasData data) throws TrustException;
 
@@ -50,7 +50,7 @@ public interface TokenIssuer {
      * This is the text value of the &lt;configuration-file&gt; element of the
      * token-dispatcher-configuration
      *
-     * @param configFile Sets the token issuer configuration file.
+     * @param configFile
      */
     void setConfigurationFile(String configFile);
 
@@ -71,7 +71,7 @@ public interface TokenIssuer {
      * <code>org.apache.axis2.description.Parameter</code> object available in
      * the via the messageContext when the <code>TokenIssuer</code> is called.
      *
-     * @param configParamName  The configuration parameter to be set.
+     * @param configParamName
      * @see org.apache.axis2.description.Parameter
      */
     void setConfigurationParamName(String configParamName);

@@ -30,25 +30,19 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.Header;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 
-public class SignedPartsBuilder implements AssertionBuilder<OMElement> {
+public class SignedPartsBuilder implements AssertionBuilder {
         
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         SignedEncryptedParts signedEncryptedParts = new SignedEncryptedParts(true, SPConstants.SP_V11);
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			signedEncryptedParts.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
+			signedEncryptedParts.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
 		}
         for (Iterator iterator = element.getChildElements(); iterator.hasNext();) {
             processElement((OMElement) iterator.next(), signedEncryptedParts);
         }
-
-        // Presence of <sp:SignedParts/> enforces the requirement for sign body and all the header blocks
-        if(!element.getChildren().hasNext()){
-            signedEncryptedParts.setBody(true);
-            signedEncryptedParts.setSignAllHeaders(true);
-        }
-
+        
         return signedEncryptedParts;
     }
        

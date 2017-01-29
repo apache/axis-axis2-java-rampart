@@ -19,7 +19,7 @@
 					</sp:ProtectionToken>
 					<sp:AlgorithmSuite>
 						<wsp:Policy>
-							<sp:Basic128/>
+							<sp:Basic256/>
 						</wsp:Policy>
 					</sp:AlgorithmSuite>
 					<sp:Layout>
@@ -35,7 +35,7 @@
 					<wsp:Policy>
 						<sp:IssuedToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
 							<Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-								<Address xmlns="http://www.w3.org/2005/08/addressing">http://localhost:@port@/axis2/services/STS</Address>
+								<Address xmlns="http://www.w3.org/2005/08/addressing">http://localhost:8080/axis2/services/STS</Address>
 								<Metadata xmlns="http://www.w3.org/2005/08/addressing">
                                     <mex:Metadata
                                         xmlns:mex="http://schemas.xmlsoap.org/ws/2004/09/mex"
@@ -43,7 +43,7 @@
                                         <mex:MetadataSection Dialect="http://schemas.xmlsoap.org/ws/2004/09/mex">
                                             <mex:MetadataReference>
                                                 <Address
-                                                    xmlns="http://www.w3.org/2005/08/addressing">http://localhost:@port@/axis2/services/mex</Address>
+                                                    xmlns="http://www.w3.org/2005/08/addressing">http://localhost:8080/axis2/services/mex</Address>
                                             </mex:MetadataReference>
                                         </mex:MetadataSection>
                                     </mex:Metadata>
@@ -58,6 +58,9 @@
 								<sp:RequireInternalReference/>
 							</wsp:Policy>
 						</sp:IssuedToken>
+						<sp:SignedParts>
+							<sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing"/>
+						</sp:SignedParts>
 					</wsp:Policy>
 		     </sp:SupportingTokens>
 			<sp:SignedParts>

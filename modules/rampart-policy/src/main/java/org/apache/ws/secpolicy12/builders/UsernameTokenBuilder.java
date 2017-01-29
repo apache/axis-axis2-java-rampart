@@ -32,7 +32,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.UsernameToken;
 
-public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
+public class UsernameTokenBuilder implements AssertionBuilder {
 
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
@@ -47,8 +47,8 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
         
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			usernameToken.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
+			usernameToken.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
 		}
         
         OMElement policyElement = element.getFirstElement();
@@ -58,8 +58,8 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
             policy = (Policy) policy.normalize(false);
             
-            for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
-                processAlternative(iterator.next(), usernameToken);
+            for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
+                processAlternative((List) iterator.next(), usernameToken);
                 
                 /*
                  * since there should be only one alternative
@@ -75,9 +75,9 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP12Constants.USERNAME_TOKEN};
     }
 
-    private void processAlternative(List<Assertion> assertions, UsernameToken parent) {
+    private void processAlternative(List assertions, UsernameToken parent) {
              
-        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
             Assertion assertion = (Assertion) iterator.next();
             QName qname = assertion.getName();
             

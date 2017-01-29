@@ -18,16 +18,16 @@ package org.apache.rahas.impl;
 import java.security.SecureRandom;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.axiom.om.util.Base64;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.RahasData;
 import org.apache.rahas.Token;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
-import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.apache.ws.security.message.WSSecEncryptedKey;
@@ -94,7 +94,7 @@ public class TokenIssuerUtil {
             //set the RPT to include a ComputedKey element
 
             OMElement respEntrElem = TrustUtil.createEntropyElement(wstVersion, rstrElem);
-            String entr = Base64Utils.encode(data.getResponseEntropy());
+            String entr = Base64.encode(data.getResponseEntropy());
             OMElement binSecElem = TrustUtil.createBinarySecretElement(wstVersion,
                                                             respEntrElem,
                                                             RahasConstants.BIN_SEC_TYPE_NONCE);
@@ -107,13 +107,14 @@ public class TokenIssuerUtil {
             if (TokenIssuerUtil.ENCRYPTED_KEY.equals(config.proofKeyType)) {
                 WSSecEncryptedKey encrKeyBuilder = new WSSecEncryptedKey();
                 Crypto crypto;
-
-                ClassLoader classLoader = data.getInMessageContext().getAxisService().getClassLoader();
-
                 if (config.cryptoElement != null) { // crypto props defined as elements
-                    crypto = CommonUtil.getCrypto(TrustUtil.toProperties(config.cryptoElement),classLoader);
+                    crypto = CryptoFactory.getInstance(TrustUtil.toProperties(config.cryptoElement),
+                                                       data.getInMessageContext().
+                                                               getAxisService().getClassLoader());
                 } else { // crypto props defined in a properties file
-                    crypto = CommonUtil.getCrypto(config.cryptoPropertiesFile, classLoader);
+                    crypto = CryptoFactory.getInstance(config.cryptoPropertiesFile,
+                                                       data.getInMessageContext().
+                                                               getAxisService().getClassLoader());
                 }
 
                 encrKeyBuilder.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
@@ -141,7 +142,7 @@ public class TokenIssuerUtil {
                 OMElement binSecElem = TrustUtil.createBinarySecretElement(wstVersion,
                                                                            reqProofTokElem,
                                                                            null);
-                binSecElem.setText(Base64Utils.encode(secret));
+                binSecElem.setText(Base64.encode(secret));
                 token.setSecret(secret);
             } else {
                 throw new IllegalArgumentException(config.proofKeyType);

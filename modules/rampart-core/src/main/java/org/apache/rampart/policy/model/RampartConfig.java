@@ -39,7 +39,6 @@ import javax.xml.stream.XMLStreamWriter;
  *  &lt;ramp:timestampTTL&gt;300&lt;/ramp:timestampTTL&gt;
  *  &lt;ramp:timestampMaxSkew&gt;0&lt;/ramp:timestampMaxSkew&gt;
  *  &lt;ramp:tokenStoreClass&gt;org.apache.rahas.StorageImpl&lt;/ramp:tokenStoreClass&gt;
- *  &lt;ramp:nonceLifeTime&gt;org.apache.rahas.StorageImpl&lt;/ramp:nonceLifeTime&gt;
  *  
  *  &lt;ramp:signatureCrypto&gt;
  *  &lt;ramp:crypto provider=&quot;org.apache.ws.security.components.crypto.Merlin&quot;&gt;
@@ -67,8 +66,6 @@ public class RampartConfig implements Assertion {
     public static final int DEFAULT_TIMESTAMP_TTL = 300;
 
     public static final int DEFAULT_TIMESTAMP_MAX_SKEW = 300;
-
-    public static final int DEFAULT_NONCE_LIFE_TIME = 60 * 5; // Default life time of a nonce is 5 minutes
 
     public final static String NS = "http://ws.apache.org/rampart/policy";
 
@@ -105,16 +102,10 @@ public class RampartConfig implements Assertion {
     public final static String TS_MAX_SKEW_LN = "timestampMaxSkew";
 
     public final static String TOKEN_STORE_CLASS_LN = "tokenStoreClass";
-
-    public final static String TIMESTAMP_STRICT_LN = "timestampStrict";
-
-    public final static String NONCE_LIFE_TIME = "nonceLifeTime";
     
     public final static String OPTIMISE_PARTS = "optimizeParts";
 
     public final static String SSL_CONFIG = "sslConfig";
-    
-    public final static String KERBEROS_CONFIG = "kerberosConfig";
     
     private String user;
     
@@ -139,7 +130,6 @@ public class RampartConfig implements Assertion {
     private CryptoConfig stsCryptoConfig;
 
     private String timestampPrecisionInMilliseconds = Boolean.toString(DEFAULT_TIMESTAMP_PRECISION_IN_MS);
-    private boolean isTimestampPrecisionInMs = DEFAULT_TIMESTAMP_PRECISION_IN_MS;
     
     private String timestampTTL = Integer.toString(DEFAULT_TIMESTAMP_TTL);
     
@@ -148,23 +138,8 @@ public class RampartConfig implements Assertion {
     private OptimizePartsConfig optimizeParts;
 
     private String tokenStoreClass;
-
-    private String nonceLifeTime = Integer.toString(DEFAULT_NONCE_LIFE_TIME);
     
     private SSLConfig sslConfig;
-    
-    private KerberosConfig kerberosConfig;
-    
-    public KerberosConfig getKerberosConfig() {
-        return kerberosConfig;
-    }
-
-    public void setKerberosConfig(KerberosConfig kerberosConfig) {
-        this.kerberosConfig = kerberosConfig;
-    }
-    
-    /*To set timeStampStrict in WSSConfig through rampartConfig - default value is false*/
-    private boolean timeStampStrict = false;
     
     public SSLConfig getSSLConfig() {
         return sslConfig;
@@ -188,21 +163,6 @@ public class RampartConfig implements Assertion {
      */
     public void setTokenStoreClass(String tokenStoreClass) {
         this.tokenStoreClass = tokenStoreClass;
-    }
-
-    /**
-     * @return Returns the life time of a nonce in seconds.
-     */
-    public String getNonceLifeTime() {
-        return this.nonceLifeTime;
-    }
-
-    /**
-     * @param nonceLife
-     *            The life time of a nonce to set (in seconds).
-     */
-    public void setNonceLifeTime(String nonceLife) {
-        this.nonceLifeTime = nonceLife;
     }
 
     public CryptoConfig getDecCryptoConfig() {
@@ -285,9 +245,6 @@ public class RampartConfig implements Assertion {
         // TODO TODO
         throw new UnsupportedOperationException("TODO");
     }
-    public boolean isIgnorable() {
-        throw new UnsupportedOperationException("TODO");
-    }
 
     public PolicyComponent normalize() {
         // TODO TODO
@@ -344,13 +301,15 @@ public class RampartConfig implements Assertion {
         if (getRampartConfigCbClass() != null) {
             writer.writeStartElement(NS, RAMPART_CONFIG_CB_CLASS_LN);
             writer.writeCharacters(getRampartConfigCbClass());
+            writer.writeEndElement();     
+        }
+        
+        if (getTimestampPrecisionInMilliseconds() != null) {
+            writer.writeStartElement(NS, TS_PRECISION_IN_MS_LN);
+            writer.writeCharacters(getTimestampPrecisionInMilliseconds());
             writer.writeEndElement();
         }
-
-        writer.writeStartElement(NS, TS_PRECISION_IN_MS_LN);
-        writer.writeCharacters(Boolean.toString(isDefaultTimestampPrecisionInMs()));
-        writer.writeEndElement();
-
+        
         if (getTimestampTTL() != null) {
             writer.writeStartElement(NS, TS_TTL_LN);
             writer.writeCharacters(getTimestampTTL());
@@ -363,19 +322,9 @@ public class RampartConfig implements Assertion {
             writer.writeEndElement();
         }
 
-        writer.writeStartElement(NS, TIMESTAMP_STRICT_LN);
-        writer.writeCharacters(Boolean.toString(isTimeStampStrict()));
-        writer.writeEndElement();
-
         if (getTokenStoreClass() != null) {
             writer.writeStartElement(NS, TOKEN_STORE_CLASS_LN);
             writer.writeCharacters(getTokenStoreClass());
-            writer.writeEndElement();
-        }
-
-        if (getNonceLifeTime() != null) {
-            writer.writeStartElement(NS, NONCE_LIFE_TIME);
-            writer.writeCharacters(getNonceLifeTime());
             writer.writeEndElement();
         }
         
@@ -404,12 +353,6 @@ public class RampartConfig implements Assertion {
             writer.writeEndElement();
         }
         
-        if (kerberosConfig != null) {
-            writer.writeStartElement(NS, KERBEROS_CONFIG);
-            kerberosConfig.serialize(writer);
-            writer.writeEndElement();
-        }
-        
         writer.writeEndElement();
 
     }
@@ -422,26 +365,12 @@ public class RampartConfig implements Assertion {
         return Constants.TYPE_ASSERTION;
     }
 
-    /**
-     * @deprecated  As of version 1.7.0, replaced by isDefaultTimestampPrecisionInMs
-     * @see #isDefaultTimestampPrecisionInMs()
-     * @return Returns "true" or "false".
-     */
-    @Deprecated
     public String getTimestampPrecisionInMilliseconds() {
     	return timestampPrecisionInMilliseconds;
     }
-
-    public boolean isDefaultTimestampPrecisionInMs() {
-    	return this.isTimestampPrecisionInMs;
-    }
     
     public void setTimestampPrecisionInMilliseconds(String timestampPrecisionInMilliseconds) {
-
-        if (timestampPrecisionInMilliseconds != null) {
-            this.timestampPrecisionInMilliseconds = timestampPrecisionInMilliseconds;
-            this.isTimestampPrecisionInMs = Boolean.valueOf(timestampPrecisionInMilliseconds);
-        }
+        this.timestampPrecisionInMilliseconds = timestampPrecisionInMilliseconds;
     }
     
     /**
@@ -496,14 +425,6 @@ public class RampartConfig implements Assertion {
 
     public void setStsCryptoConfig(CryptoConfig stsCryptoConfig) {
         this.stsCryptoConfig = stsCryptoConfig;
-    }
-
-    public boolean isTimeStampStrict() {
-        return timeStampStrict;
-    }
-
-    public void setTimeStampStrict(String timeStampStrict) {
-        this.timeStampStrict = Boolean.valueOf(timeStampStrict);
     }
     
 }

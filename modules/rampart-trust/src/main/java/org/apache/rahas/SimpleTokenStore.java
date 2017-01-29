@@ -21,13 +21,7 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.message.token.Reference;
 
 import javax.xml.namespace.QName;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -35,7 +29,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * In-memory implementation of the token storage
  */
-public class SimpleTokenStore implements TokenStorage, Serializable {
+public class SimpleTokenStore implements TokenStorage {
 
     protected Map tokens = new Hashtable();
     
@@ -191,21 +185,11 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         
         } finally {
             readLock.unlock();
-        }        
+        }
+      
         return token;
     }
 
-    public void removeToken(String id){
-
-        writeLock.lock();
-
-        try {
-            this.tokens.remove(id);
-        } finally {
-            writeLock.unlock();
-        }        
-    }
-    
     protected void processTokenExpiry() throws TrustException {
         
         readLock.lock();
@@ -235,12 +219,14 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         } else if(child.getQName().equals(Reference.TOKEN)) {
             String uri = child.getAttributeValue(new QName("URI"));
             if (uri.charAt(0) == '#') {
-                uri = uri.substring(1);
+	        uri = uri.substring(1);
             }
             return uri;
         } else {
             return null;
         }
     }
+    
+    
     
 }

@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.impl.dom.soap11.SOAP11HeaderBlockImpl;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
@@ -30,15 +31,16 @@ import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.util.HandlerParameterDecoder;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.handler.WSHandlerResult;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Handler to verify the message security after dispatch
@@ -121,13 +123,13 @@ public class PostDispatchVerificationHandler implements Handler {
             return InvocationResponse.CONTINUE;
         }
         
-        Iterator<List<Assertion>> alternatives = policy.getAlternatives();
+        Iterator alternatives = policy.getAlternatives();
         
         boolean securityPolicyPresent = false;
         if(alternatives.hasNext()) {
-            List<Assertion> assertions = alternatives.next();
-            for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
-                Assertion assertion = iterator.next();
+            List assertions = (List)alternatives.next();
+            for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
+                Assertion assertion = (Assertion) iterator.next();
                 //Check for any *Binding assertion
                 if (assertion instanceof Binding) {
                     securityPolicyPresent = true;
@@ -172,7 +174,7 @@ public class PostDispatchVerificationHandler implements Handler {
             if(msgContext.getProperty(WSHandlerConstants.RECV_RESULTS) == null) {
                     throw new AxisFault("InvalidSecurity");
             } else {
-                if(((List<WSHandlerResult>)msgContext.getProperty(WSHandlerConstants.RECV_RESULTS)).size() == 0) {
+                if(((Vector)msgContext.getProperty(WSHandlerConstants.RECV_RESULTS)).size() == 0) {
                     throw new AxisFault("InvalidSecurity");
                 }
             }

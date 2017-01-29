@@ -131,7 +131,6 @@ public class SPConstants {
     
     public final static String USERNAME_TOKEN11 = "WssUsernameToken11";
 
-    public final static String KERBEROS_TOKEN = "KerberosToken";
     
     public final static String TRANSPORT_TOKEN = "TransportToken";
     
@@ -241,12 +240,6 @@ public class SPConstants {
     public final static String HMAC_SHA1 = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
 
     public final static String RSA_SHA1 = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
-    
-    public final static String RSA_SHA256 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
-    
-    public final static String RSA_SHA384 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
-    
-    public final static String RSA_SHA512 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
     public final static String SHA1 = "http://www.w3.org/2000/09/xmldsig#sha1";
 
@@ -430,7 +423,7 @@ public class SPConstants {
     
     public static final String HASH_PASSWORD = "HashPassword";
     
-    public static final String REQUIRE_KERBEROS_V5_TOKEN_11 = "WssKerberosV5ApReqToken11";
+
     
-    public static final String REQUIRE_KERBEROS_GSS_V5_TOKEN_11 = "WssGssKerberosV5ApReqToken11";
+
 }

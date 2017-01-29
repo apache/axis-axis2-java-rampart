@@ -34,24 +34,20 @@ public class TokenCallbackHandler implements CallbackHandler {
 
     private TokenStorage store;
     private CallbackHandler handler;
-    private String tokenIdentifier;
-
+    
     public TokenCallbackHandler(TokenStorage store, CallbackHandler handler) {
         this.store = store;
         this.handler = handler;
-        this.tokenIdentifier = null;
     }
-
-
     
     public void handle(Callback[] callbacks) 
     throws IOException, UnsupportedCallbackException {
-
+        
         for (int i = 0; i < callbacks.length; i++) {
 
             if (callbacks[i] instanceof WSPasswordCallback) {
                 WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
-                String id = pc.getIdentifier();
+                String id = pc.getIdentifer();
                 
                 if((pc.getUsage() == WSPasswordCallback.SECURITY_CONTEXT_TOKEN || 
                         pc.getUsage() == WSPasswordCallback.CUSTOM_TOKEN) &&
@@ -69,12 +65,10 @@ public class TokenCallbackHandler implements CallbackHandler {
                         e.printStackTrace();
                         throw new IOException(e.getMessage());
                     }
-                } else if (pc.getUsage() == WSPasswordCallback.SECRET_KEY){
+                } else if (pc.getUsage() == WSPasswordCallback.ENCRYPTED_KEY_TOKEN){
                 	try {
-
-                        String[] tokenIdentifiers = this.store.getTokenIdentifiers();
+            			String[] tokenIdentifiers = this.store.getTokenIdentifiers();
             			Token tok;
-
             			for (int j = 0 ; j < tokenIdentifiers.length ; j++) {
             				
             					tok = this.store.getToken(tokenIdentifiers[j]);
@@ -83,8 +77,6 @@ public class TokenCallbackHandler implements CallbackHandler {
             							((EncryptedKeyToken)tok).getSHA1().equals(id)){            						
             					    pc.setKey(tok.getSecret());
             					    pc.setCustomToken((Element)tok.getToken());
-
-                                    tokenIdentifier = tokenIdentifiers[j];
             					}
             			}
             			
@@ -104,14 +96,6 @@ public class TokenCallbackHandler implements CallbackHandler {
                         "Unrecognized Callback");
             }
         }
-    }
-
-    public void removeEncryptedToken() {
-
-        if (tokenIdentifier != null) {
-            this.store.removeToken(tokenIdentifier);
-        }
-
     }
     
 

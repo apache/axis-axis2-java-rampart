@@ -16,8 +16,7 @@
 package org.apache.rahas.impl;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMXMLBuilderFactory;
-import org.apache.axiom.om.OMXMLParserWrapper;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.rahas.TrustException;
 
 import javax.xml.namespace.QName;
@@ -28,13 +27,13 @@ import java.io.FileInputStream;
  */
 public class TokenCancelerConfig {
 
-    /*
-    <parameter name="token-canceler-config">
-        <token-canceler-config>
-            <proofToken>EncryptedKey</proofToken>
-            <cryptoProperties>sctIssuer.properties</cryptoProperties>
-            <addRequestedAttachedRef />
-        </stoken-canceler-config>
+   /*
+   <parameter name="token-canceler-config">
+		<token-canceler-config>
+			<proofToken>EncryptedKey</proofToken>
+			<cryptoProperties>sctIssuer.properties</cryptoProperties>
+			<addRequestedAttachedRef />
+		</stoken-canceler-config>
     </parameter>
     */
     public final static QName TOKEN_CANCELER_CONFIG = new QName("token-canceler-config");
@@ -69,10 +68,10 @@ public class TokenCancelerConfig {
     public static TokenCancelerConfig load(String configFilePath)
             throws TrustException {
         FileInputStream fis;
-        OMXMLParserWrapper builder;
+        StAXOMBuilder builder;
         try {
             fis = new FileInputStream(configFilePath);
-            builder = OMXMLBuilderFactory.createOMBuilder(fis);
+            builder = new StAXOMBuilder(fis);
         } catch (Exception e) {
             throw new TrustException("errorLoadingConfigFile", new String[] { configFilePath });
         }

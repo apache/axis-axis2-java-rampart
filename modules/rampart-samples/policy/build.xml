@@ -18,32 +18,23 @@
 
 <project basedir="." default="clean">
 
-	<property name="build.dir" value="build"/>
-	<property name="service.repos.dir" value="${build.dir}/service_repositories"/>
-	<property name="client.repos.dir" value="${build.dir}/client_repositories"/>
-	<property name="temp.dir" value="${build.dir}/temp"/>
+	<property name="service.repos.dir" value="build/service_repositories"/>
+	<property name="client.repos.dir" value="build/client_repositories"/>
+	<property name="temp.dir" value="build/temp"/>
 	<property name="keys.dir" value="../keys"/>
-	<property name="temp.client.dir" value="${build.dir}/temp_client"/>
-    <property name="endorsed.dir" value="${build.dir}/endorsed"/>
+	<property name="temp.client.dir" value="build/temp_client"/>
 	
+	<property name="addressing.mar" value="addressing-SNAPSHOT.mar"/>
+	<property name="rampart.mar" value="rampart-SNAPSHOT.mar"/>
+	<property name="rahas.mar" value="rahas-SNAPSHOT.mar"/>
+
 	<property name="client.port" value="8080"/>
 	<property name="server.port" value="8080"/>
 	
 	<property name="sample.services.url" value="http://localhost:${client.port}/axis2/services"/>
 	
     <property environment="env"/>
-    
-    <property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
-    
-    <property name="vmargs" value=""/>
-    
-    <path id="runtime.classpath">
-        <fileset dir="${lib.dir}">
-            <include name="**/*.jar"/>
-        </fileset>
-        <pathelement location="${env.AXIS2_HOME}/conf"/>
-    </path>
-    
+    	
 	<target name="check.dependency" unless="env.AXIS2_HOME">
         <echo message="AXIS2_HOME must be set"/>
     </target>
@@ -118,25 +109,8 @@
         <create.and.run.client sample.number="07"/>
     </target>
 
-    <!-- Sample Service 08 -->
-    <target name="service.08" if="env.AXIS2_HOME" depends="check.dependency">
-        <create.service.repo sample.number="08"/>
-    </target>
-
-    <!-- Sample Client 08 -->
-    <target name="client.08" if="env.AXIS2_HOME" depends="check.dependency">
-        <create.and.run.client sample.number="08"/>
-    </target>
-
-    <target name="setup">
-	<mkdir dir="${endorsed.dir}"/>
-        <get src="http://repo2.maven.org/maven2/xerces/xercesImpl/2.9.1/xercesImpl-2.9.1.jar"
-             dest="${endorsed.dir}/xercesImpl-2.9.1.jar" verbose="true"/>
-    </target>
-
-
 	<target name="clean">
-		<delete dir="${build.dir}" />
+		<delete dir="build" />
 	</target>
 	
 	<!-- Macro to create a service repo for a given sample -->
@@ -145,19 +119,16 @@
 	   	<sequential>
 	   		
 	   		<property name="modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
+	   		<property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
 	   		
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}"/>
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}/services"/>
 	   		<mkdir dir="${service.repos.dir}/sample@{sample.number}/modules"/>
 	   		
 	   		<!-- copy modules -->
-	   		<copy todir="${service.repos.dir}/sample@{sample.number}/modules">
-	   		    <fileset dir="${modules.dir}">
-	   		        <include name="addressing-*.mar"/>
-	   		        <include name="rampart-*.mar"/>
-	   		        <include name="rahas-*.mar"/>
-	   		    </fileset>
-	   		</copy>
+	   		<copy file="${modules.dir}/${addressing.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${addressing.mar}" overwrite="true"/>
+	   		<copy file="${modules.dir}/${rampart.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rampart.mar}" overwrite="true"/>
+	   		<copy file="${modules.dir}/${rahas.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rahas.mar}" overwrite="true"/>
 	   		
 	   		<!-- create service -->
 	   		<mkdir dir="${temp.dir}"/>
@@ -173,11 +144,7 @@
                     <exclude name="**/Client.java"/>
             </javac>
 	   		
-            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true">
-                <filterset>
-                    <filter token="port" value="${server.port}"/>
-                </filterset>
-            </copy>
+	   		<copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true"/>
 	   		<copy file="${keys.dir}/service.jks" tofile="${temp.dir}/service.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/sts.jks" tofile="${temp.dir}/sts.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/service.properties" tofile="${temp.dir}/service.properties" overwrite="true"/>
@@ -191,8 +158,11 @@
             <java classname="org.apache.axis2.transport.http.SimpleHTTPServer" fork="true">
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
-                    <classpath refid="runtime.classpath"/>
-                    <jvmarg line="-Djava.endorsed.dirs=${endorsed.dir} ${vmargs}"/>
+                    <classpath>
+                            <fileset dir="${lib.dir}">
+                                    <include name="**/*.jar"/>
+                            </fileset>
+                    </classpath>
             </java>
 
 	   </sequential>
@@ -204,19 +174,16 @@
         <sequential>
             
             <property name="modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
+            <property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
             
             <mkdir dir="${service.repos.dir}/sample@{sample.number}"/>
             <mkdir dir="${service.repos.dir}/sample@{sample.number}/services"/>
             <mkdir dir="${service.repos.dir}/sample@{sample.number}/modules"/>
             
             <!-- copy modules -->
-	   		<copy todir="${service.repos.dir}/sample@{sample.number}/modules">
-	   		    <fileset dir="${modules.dir}">
-	   		        <include name="addressing-*.mar"/>
-	   		        <include name="rampart-*.mar"/>
-	   		        <include name="rahas-*.mar"/>
-	   		    </fileset>
-	   		</copy>
+            <copy file="${modules.dir}/${addressing.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${addressing.mar}" overwrite="true"/>
+            <copy file="${modules.dir}/${rampart.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rampart.mar}" overwrite="true"/>
+            <copy file="${modules.dir}/${rahas.mar}" tofile="${service.repos.dir}/sample@{sample.number}/modules/${rahas.mar}" overwrite="true"/>
             
             <!-- create service -->
             <mkdir dir="${temp.dir}"/>
@@ -232,16 +199,8 @@
                     <exclude name="**/Client.java"/>
             </javac>
             
-            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true">
-                <filterset>
-                    <filter token="port" value="${server.port}"/>
-                </filterset>
-            </copy>
-            <copy file="sample@{sample.number}/mex_policy.xml" tofile="${temp.dir}/mex_policy.xml" overwrite="true">
-                <filterset>
-                    <filter token="port" value="${server.port}"/>
-                </filterset>
-            </copy>
+            <copy file="sample@{sample.number}/services.xml" tofile="${temp.dir}/META-INF/services.xml" overwrite="true"/>
+            <copy file="sample@{sample.number}/mex_policy.xml" tofile="${temp.dir}/mex_policy.xml" overwrite="true"/>
             <copy file="${keys.dir}/service.jks" tofile="${temp.dir}/service.jks" overwrite="true"/>
             <copy file="${keys.dir}/sts.jks" tofile="${temp.dir}/sts.jks" overwrite="true"/>
             <copy file="${keys.dir}/service.properties" tofile="${temp.dir}/service.properties" overwrite="true"/>
@@ -255,8 +214,11 @@
             <java classname="org.apache.axis2.transport.http.SimpleHTTPServer" fork="true">
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
-                    <classpath refid="runtime.classpath"/>
-                    <jvmarg line="-Djava.endorsed.dirs=${endorsed.dir} ${vmargs}"/>
+                    <classpath>
+                            <fileset dir="${lib.dir}">
+                                    <include name="**/*.jar"/>
+                            </fileset>
+                    </classpath>
             </java>
 
        </sequential>
@@ -267,6 +229,7 @@
 	   	<sequential>
 	   		
 	   		<property name="modules.dir" value="${env.AXIS2_HOME}/repository/modules/"/>
+	   		<property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
 	   		
 	   		<!-- Create the client repo -->
 	   		<mkdir dir="${client.repos.dir}/sample@{sample.number}"/>
@@ -274,12 +237,8 @@
 	   		<mkdir dir="${client.repos.dir}/sample@{sample.number}/modules"/>
 	   		
 	   		<!-- copy modules -->
-	   		<copy todir="${client.repos.dir}/sample@{sample.number}/modules">
-	   		    <fileset dir="${modules.dir}">
-	   		        <include name="addressing-*.mar"/>
-	   		        <include name="rampart-*.mar"/>
-	   		    </fileset>
-	   		</copy>
+	   		<copy file="${modules.dir}/${addressing.mar}" tofile="${client.repos.dir}/sample@{sample.number}/modules/${addressing.mar}" overwrite="true"/>
+	   		<copy file="${modules.dir}/${rampart.mar}" tofile="${client.repos.dir}/sample@{sample.number}/modules/${rampart.mar}" overwrite="true"/>
 	   		
 	   		<mkdir dir="${temp.client.dir}"/>
 	   		
@@ -295,23 +254,19 @@
 
 	   		<copy file="${keys.dir}/client.jks" tofile="${temp.client.dir}/client.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/client.properties" tofile="${temp.client.dir}/client.properties" overwrite="true"/>
-            <copy file="sample@{sample.number}/policy.xml" tofile="${temp.client.dir}/policy.xml" overwrite="true">
-                <filterset>
-                    <filter token="port" value="${client.port}"/>
-                </filterset>
-            </copy>
 
 	   		
 	   		<!-- Run client -->
-            <java classname="org.apache.rampart.samples.policy.sample@{sample.number}.Client" fork="true" failonerror="true">
+            <java classname="org.apache.rampart.samples.policy.sample@{sample.number}.Client" fork="true">
                     <arg value="${sample.services.url}/sample@{sample.number}"/>
                     <arg value="${client.repos.dir}/sample@{sample.number}"/>
-                    <arg value="${temp.client.dir}/policy.xml"/>
+                    <arg value="sample@{sample.number}/policy.xml"/>
                     <classpath>
-                        <path refid="runtime.classpath"/>
+                        <fileset dir="${lib.dir}">
+                        	<include name="**/*.jar"/>
+                        </fileset>
                   		<dirset dir="${temp.client.dir}" />
                     </classpath>
-                    <jvmarg line="${vmargs}"/>
             </java>
 
 <!--	   		<delete dir="${temp.client.dir}"/> -->

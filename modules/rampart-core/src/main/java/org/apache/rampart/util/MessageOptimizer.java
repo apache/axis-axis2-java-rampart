@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * Utility class to handle MTOM-Optimizing Base64 Text values
@@ -39,7 +40,7 @@ public class MessageOptimizer {
 	
 	private static final String CIPHER_ELEMENT = "//xenc:EncryptedData/xenc:CipherData/xenc:CipherValue";
 
-	public static void optimize(SOAPEnvelope env, List<String> expressions, Map namespaces) throws RampartException {
+	public static void optimize(SOAPEnvelope env, Vector expressions, Map namespaces) throws RampartException {
 		
 		SimpleNamespaceContext nsCtx = new SimpleNamespaceContext();
 		nsCtx.addNamespace(WSConstants.ENC_PREFIX,WSConstants.ENC_NS);
@@ -55,16 +56,18 @@ public class MessageOptimizer {
 		}
 
 		try {
-            for (String exp : expressions) {
-                XPath xp = new AXIOMXPath(exp);
-                xp.setNamespaceContext(nsCtx);
-                List list = xp.selectNodes(env);
-                for (Object aList : list) {
-                    OMElement element = (OMElement) aList;
-                    OMText text = (OMText) element.getFirstOMChild();
-                    text.setOptimize(true);
-                }
-            }
+				for(int i=0; i<expressions.size(); i++){
+					String exp = (String)expressions.get(i);
+					XPath xp = new AXIOMXPath(exp);
+					xp.setNamespaceContext(nsCtx);
+					List list = xp.selectNodes(env);
+					Iterator elements = list.iterator();
+					while (elements.hasNext()) {
+						OMElement element = (OMElement) elements.next();
+						OMText text = (OMText)element.getFirstOMChild();
+						text.setOptimize(true);
+					}
+				}
 		} catch (JaxenException e) {
 			throw new RampartException("Error in XPath ", e);
 		}

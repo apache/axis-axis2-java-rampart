@@ -32,7 +32,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.X509Token;
 
-public class X509TokenBuilder implements AssertionBuilder<OMElement> {
+public class X509TokenBuilder implements AssertionBuilder {
 	
     public final static String USER_CERT_ALIAS_LN = "userCertAlias";
 
@@ -62,8 +62,8 @@ public class X509TokenBuilder implements AssertionBuilder<OMElement> {
         
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			x509Token.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
+			x509Token.setOptional((new Boolean(isOptional.getAttributeValue())
+					.booleanValue()));
 		}
 
         if (policyElement != null) {
@@ -79,9 +79,9 @@ public class X509TokenBuilder implements AssertionBuilder<OMElement> {
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
             policy = (Policy) policy.normalize(false);
 
-            for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator
+            for (Iterator iterator = policy.getAlternatives(); iterator
                     .hasNext();) {
-                processAlternative(iterator.next(), x509Token);
+                processAlternative((List) iterator.next(), x509Token);
                 
                 /*
                  * since there should be only one alternative
@@ -107,12 +107,12 @@ public class X509TokenBuilder implements AssertionBuilder<OMElement> {
         return x509Token;
     }
 
-    private void processAlternative(List<Assertion> assertions, X509Token parent) {
+    private void processAlternative(List assertions, X509Token parent) {
                 Assertion assertion;
         QName name;
 
-        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
-            assertion = iterator.next();
+        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
+            assertion = (Assertion) iterator.next();
             name = assertion.getName();
 
             if (SP12Constants.REQUIRE_KEY_IDENTIFIRE_REFERENCE.equals(name)) {

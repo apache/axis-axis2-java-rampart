@@ -16,10 +16,10 @@
 
 package org.apache.rahas;
 
-import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMXMLBuilderFactory;
-import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
+import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.ws.security.WSConstants;
@@ -28,15 +28,14 @@ import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
 import org.apache.ws.security.message.token.SecurityTokenReference;
-import org.opensaml.saml1.core.Assertion;
+import org.opensaml.SAMLAssertion;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.List;
+import java.util.Vector;
 
 /**
  * Common data items on WS-Trust request messages
@@ -57,7 +56,7 @@ public class RahasData {
     
     private String tokenId;
 
-    private int keySize = -1;
+    private int keysize = -1;
 
     private String computedKeyAlgo;
 
@@ -85,12 +84,7 @@ public class RahasData {
     
     private String  claimDialect;
     
-    private Assertion assertion;
-
-    private Date assertionCreatedDate;
-
-    private Date assertionExpiringDate;
-
+    private SAMLAssertion assertion;
     /**
      * Create a new RahasData instance and populate it with the information from
      * the request.
@@ -144,10 +138,6 @@ public class RahasData {
 
     }
 
-    public RahasData() {
-
-    }
-
     /**
      * Processes the authenticated user information from the WSS4J security
      * results.
@@ -163,35 +153,38 @@ public class RahasData {
          * we will not be encrypting the response
          */
 
-        List<WSHandlerResult> results;
-        if ((results = (List<WSHandlerResult>) this.inMessageContext
+        Vector results;
+        if ((results = (Vector) this.inMessageContext
                 .getProperty(WSHandlerConstants.RECV_RESULTS)) == null) {
             throw new TrustException(TrustException.REQUEST_FAILED);
         } else {
 
-            for (WSHandlerResult result : results) {
-                List<WSSecurityEngineResult> wsSecEngineResults = result.getResults();
+            for (int i = 0; i < results.size(); i++) {
+                WSHandlerResult rResult = (WSHandlerResult) results.get(i);
+                Vector wsSecEngineResults = rResult.getResults();
 
-                for (WSSecurityEngineResult wser : wsSecEngineResults) {
+                for (int j = 0; j < wsSecEngineResults.size(); j++) {
+                    WSSecurityEngineResult wser = (WSSecurityEngineResult) wsSecEngineResults
+                            .get(j);
                     Object principalObject = wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
-                    int act = (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
-
+                    int act = ((Integer)wser.get(WSSecurityEngineResult.TAG_ACTION)).
+                            intValue();
                     if (act == WSConstants.SIGN && principalObject != null) {
                         this.clientCert = (X509Certificate) wser
                                 .get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
-                        this.principal = (Principal) principalObject;
+                        this.principal = (Principal)principalObject;
                     } else if (act == WSConstants.UT && principalObject != null) {
-                        this.principal = (Principal) principalObject;
+                        this.principal = (Principal)principalObject;
                     } else if (act == WSConstants.BST) {
-                        final X509Certificate[] certificates =
-                                (X509Certificate[]) wser
-                                        .get(WSSecurityEngineResult.TAG_X509_CERTIFICATES);
+                        final X509Certificate[] certificates = 
+                            (X509Certificate[]) wser
+                                .get(WSSecurityEngineResult.TAG_X509_CERTIFICATES);
                         this.clientCert = certificates[0];
                         this.principal = this.clientCert.getSubjectDN();
                     } else if (act == WSConstants.ST_UNSIGNED) {
-                        this.assertion = (Assertion) wser
+                        this.assertion = (SAMLAssertion) wser
                                 .get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
-
+                        
                     }
                 }
             }
@@ -294,17 +287,17 @@ public class RahasData {
             if (text != null && !"".equals(text.trim())) {
                 try {
                     //Set key size
-                    this.keySize = Integer.parseInt(text.trim());
+                    this.keysize = Integer.parseInt(text.trim());
 
                     //Create an empty array to hold the key
-                    this.ephmeralKey = new byte[this.keySize/8];
+                    this.ephmeralKey = new byte[this.keysize/8];
                 } catch (NumberFormatException e) {
                     throw new TrustException(TrustException.INVALID_REQUEST,
                                              new String[]{"invalid wst:Keysize value"}, e);
                 }
             }
         }
-        this.keySize = -1;
+        this.keysize = -1;
     }
     
     /**
@@ -312,15 +305,15 @@ public class RahasData {
      *
      */
     private void processClaims() throws TrustException{
-        claimElem = this.rstElement
-                .getFirstChildWithName(new QName(this.wstNs,
-                        RahasConstants.IssuanceBindingLocalNames.CLAIMS));
-        
-        if(claimElem != null){
-            claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
-                    RahasConstants.ATTR_CLAIMS_DIALECT));
-        }
-        
+        	claimElem = this.rstElement
+        			.getFirstChildWithName(new QName(this.wstNs,
+        					RahasConstants.IssuanceBindingLocalNames.CLAIMS));
+        	
+        	if(claimElem != null){
+        		claimDialect = claimElem.getAttributeValue(new QName(this.wstNs,
+        					RahasConstants.ATTR_CLAIMS_DIALECT));
+        	}
+    	
     }
     
     private void processValidateTarget()throws TrustException{
@@ -334,16 +327,13 @@ public class RahasData {
             OMElement strElem = validateTargetElem.getFirstChildWithName(new QName(WSConstants.WSSE_NS,
                                                    "SecurityTokenReference"));
             
-            Element elem = (Element)OMXMLBuilderFactory.createStAXOMBuilder(
-                    OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM).getOMFactory(),
-                    strElem.getXMLStreamReader()).getDocumentElement();
+            Element elem = (Element)(new StAXOMBuilder(new OMDOMFactory(), 
+                    strElem.getXMLStreamReader()).getDocumentElement());
             
             try {
                 SecurityTokenReference str = new SecurityTokenReference((Element)elem);
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
-                } else if(str.containsKeyIdentifier()){
-                    tokenId = str.getKeyIdentifierValue();
                 }
             } catch (WSSecurityException e) {
                 throw new TrustException("errorExtractingTokenId",e);
@@ -361,21 +351,13 @@ public class RahasData {
             OMElement strElem = renewTargetElem.getFirstChildWithName(new QName(WSConstants.WSSE_NS,
                                                    "SecurityTokenReference"));
             
-            Element elem = (Element)OMXMLBuilderFactory.createStAXOMBuilder(
-                    OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM).getOMFactory(),
-                    strElem.getXMLStreamReader()).getDocumentElement();
+            Element elem = (Element)(new StAXOMBuilder(new OMDOMFactory(), 
+                    strElem.getXMLStreamReader()).getDocumentElement());
             
             try {
                 SecurityTokenReference str = new SecurityTokenReference((Element)elem);
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
-                } else if(str.containsKeyIdentifier()){
-                    tokenId = str.getKeyIdentifierValue();
-                }
-                if(tokenId == null){
-                    if(str.containsKeyIdentifier()){
-                        tokenId = str.getKeyIdentifierValue();
-                    }
                 }
             } catch (WSSecurityException e) {
                 throw new TrustException("errorExtractingTokenId",e);
@@ -389,13 +371,13 @@ public class RahasData {
     private void processEntropy() throws TrustException {
         OMElement entropyElem = this.rstElement
                 .getFirstChildWithName(new QName(this.wstNs,
-                        RahasConstants.IssuanceBindingLocalNames.ENTROPY));
+                                                 RahasConstants.IssuanceBindingLocalNames.ENTROPY));
 
         if (entropyElem != null) {
             OMElement binSecElem = entropyElem.getFirstElement();
             if (binSecElem != null && binSecElem.getText() != null
                 && !"".equals(binSecElem.getText())) {
-                this.requestEntropy = Base64Utils.decode(binSecElem.getText());
+                this.requestEntropy = Base64.decode(binSecElem.getText());
             } else {
                 throw new TrustException("malformedEntropyElement",
                                          new String[]{entropyElem.toString()});
@@ -440,39 +422,13 @@ public class RahasData {
     }
 
     /**
-     * Sets the given message context as in message context.
-     * @param context The message context.
-     */
-    public void setInMessageContext(MessageContext context) {
-        this.inMessageContext = context;
-    }
-
-    /**
-     * @deprecated  As of Rampart 1.7. Use {@code getKeySize}.
      * @return Returns the keysize.
      */
-    @Deprecated
     public int getKeysize() {
-        return keySize;
+        return keysize;
     }
 
     /**
-     * @return Returns the keySize.
-     */
-    public int getKeySize() {
-        return keySize;
-    }
-
-    /**
-     * Sets the key size.
-     * @param size Size of the key.
-     */
-    public void setKeySize(int size) {
-        this.keySize = size;
-    }
-
-    /**
-     * // TODO changes this keytype to an enumeration
      * @return Returns the keyType.
      */
     public String getKeyType() {
@@ -570,31 +526,17 @@ public class RahasData {
         this.ephmeralKey = ephmeralKey;
     }
 
-    public String getClaimDialect() {
-        return claimDialect;
-    }
+	public String getClaimDialect() {
+		return claimDialect;
+	}
 
-    public OMElement getClaimElem() {
-        return claimElem;
-    }
+	public OMElement getClaimElem() {
+		return claimElem;
+	}
 
     public OMElement getAppliesToEpr() {
         return appliesToEpr;
     }
 
-    public Date getAssertionCreatedDate() {
-        return assertionCreatedDate;
-    }
 
-    public void setAssertionCreatedDate(Date assertionCreatedDate) {
-        this.assertionCreatedDate = assertionCreatedDate;
-    }
-
-    public Date getAssertionExpiringDate() {
-        return assertionExpiringDate;
-    }
-
-    public void setAssertionExpiringDate(Date assertionExpiringDate) {
-        this.assertionExpiringDate = assertionExpiringDate;
-    }
 }
