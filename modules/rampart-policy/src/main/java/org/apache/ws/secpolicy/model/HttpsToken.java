@@ -93,17 +93,12 @@ public class HttpsToken extends Token {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
+        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
 
-        String prefix = writer.getPrefix(namespaceURI);
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-
         // <sp:HttpsToken
-        writer.writeStartElement(prefix, localname, namespaceURI);
+        writeStartElement(writer, prefix, localname, namespaceURI);
 
 
         if (version == SPConstants.SP_V12) {
@@ -112,7 +107,7 @@ public class HttpsToken extends Token {
                 isHttpBasicAuthentication() ||
                 isHttpDigestAuthentication()) {
                 // <wsp:Policy>
-                writer.writeStartElement(SPConstants.POLICY.getPrefix(), SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+                writeStartElement(writer, SPConstants.POLICY);
                 
                 /*
                  *  The ws policy 1.2 specification states that only one of those should be present, although
@@ -120,14 +115,11 @@ public class HttpsToken extends Token {
                  * a http user/pwd authentication. Nevertheless stick to the specification.
                  */
                 if(isHttpBasicAuthentication()) {
-                    writer.writeStartElement(prefix, SPConstants.HTTP_BASIC_AUTHENTICATION.getLocalPart(), namespaceURI);
-                    writer.writeEndElement();
+                    writeEmptyElement(writer, prefix, SPConstants.HTTP_BASIC_AUTHENTICATION.getLocalPart(), namespaceURI);
                 } else if(isHttpDigestAuthentication()) {
-                    writer.writeStartElement(prefix, SPConstants.HTTP_DIGEST_AUTHENTICATION.getLocalPart(), namespaceURI);
-                    writer.writeEndElement();
+                    writeEmptyElement(writer, prefix, SPConstants.HTTP_DIGEST_AUTHENTICATION.getLocalPart(), namespaceURI);
                 } else if(isRequireClientCertificate()) {
-                    writer.writeStartElement(prefix, SPConstants.REQUIRE_CLIENT_CERTIFICATE.getLocalPart(), namespaceURI);
-                    writer.writeEndElement();
+                    writeEmptyElement(writer, prefix, SPConstants.REQUIRE_CLIENT_CERTIFICATE.getLocalPart(), namespaceURI);
                 }
                 // </wsp:Policy>
                 writer.writeEndElement();

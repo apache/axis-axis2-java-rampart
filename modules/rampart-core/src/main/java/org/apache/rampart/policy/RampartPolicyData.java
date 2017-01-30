@@ -62,6 +62,9 @@ public class RampartPolicyData {
 
     private boolean signatureConfirmation;
 
+    //Policy namespace
+    private String webServiceSecurityPolicyNS = null;
+
     /*
      * Message tokens for symmetrical binding
      */
@@ -163,7 +166,17 @@ public class RampartPolicyData {
     private Vector supportingPolicyData = new Vector();
     
     private Vector supportingTokens = new Vector();
-    
+
+
+
+    public String getWebServiceSecurityPolicyNS() {
+        return webServiceSecurityPolicyNS;
+    }
+
+    public void setWebServiceSecurityPolicyNS(String webServiceSecurityPolicyNS) {
+        this.webServiceSecurityPolicyNS = webServiceSecurityPolicyNS;
+    }
+
     public Vector getSupportingPolicyData() {
         return supportingPolicyData;
     }

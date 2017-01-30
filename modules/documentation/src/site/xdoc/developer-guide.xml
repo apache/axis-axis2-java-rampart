@@ -36,9 +36,9 @@ Stack</em></strong></p>
   <li>Download the source code.
     <ul>
       <li>Anon Checkout <a
-        href="http://svn.apache.org/repos/asf/webservices/rampart/trunk/java/">http://svn.apache.org/repos/asf/webservices/rampart/trunk/java/</a></li>
+        href="http://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk/">http://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk/</a></li>
       <li>Committers <a
-        href="https://svn.apache.org/repos/asf/webservices/rampart/trunk/java/">https://svn.apache.org/repos/asf/webservices/rampart/trunk/java/</a></li>
+        href="https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk/">https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk/</a></li>
     </ul>
   </li>
   <li>The Rampart project has 8 modules under it. They are:

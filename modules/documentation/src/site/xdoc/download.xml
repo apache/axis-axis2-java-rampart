@@ -32,12 +32,39 @@
                 </tr>
                 <tr>
                     <td>
+                        <a href="download/1.6.1/download.cgi">
+                            <strong>1.6.1</strong>
+                        </a>
+                    </td>
+                    <td>24 Sep 2011</td>
+                    <td>1.6.1 Release (Mirrored)</td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="download/1.5.2/download.cgi">
+                            <strong>1.5.2</strong>
+                        </a>
+                    </td>
+                    <td>24 Sep 2011</td>
+                    <td>1.5.2 Release (Mirrored)</td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="download/1.6.0/download.cgi">
+                            <strong>1.6.0</strong>
+                        </a>
+                    </td>
+                    <td>06 Jun 2011</td>
+                    <td>1.6.0 Release (Archived)</td>
+                </tr>
+                <tr>
+                    <td>
                         <a href="download/1.5.1/download.cgi">
                             <strong>1.5.1</strong>
                         </a>
                     </td>
-                    <td></td>
-                    <td>1.5.1 Release (Mirrored)</td>
+                    <td>10 Jan 2011</td>
+                    <td>1.5.1 Release (Archived)</td>
                 </tr>
                 <tr>
                     <td>
@@ -87,11 +114,11 @@
             </tbody>
         </table>
         <p>
-            <strong>Apache Rampart Distributions : <a href="http://people.apache.org/~ruchithf/rampart/SNAPSHOT">Nightly builds</a>
+            <strong>Apache Rampart Distributions : <a href="https://hudson.apache.org/hudson/job/Rampart/lastStableBuild/org.apache.rampart$rampart-dist/">Nightly builds</a>
             </strong>
         </p>
         <p>
-            <strong>Maven Repository: <a href="http://people.apache.org/repo/m2-ibiblio-rsync-repository/">Released Apache Rampart jars</a> | <a href="http://people.apache.org/repo/m2-snapshot-repository/">Nightly SNAPSHOT</a>
+            <strong>Maven Repository: <a href="http://people.apache.org/repo/m2-ibiblio-rsync-repository/">Released Apache Rampart jars</a> | <a href="http://repository.apache.org/snapshots/">Nightly SNAPSHOT</a>
                 <a href=""></a>
             </strong>
         </p>

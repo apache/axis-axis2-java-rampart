@@ -23,10 +23,21 @@ import org.apache.neethi.Policy;
 import org.apache.rampart.handler.config.InflowConfiguration;
 import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP11Constants;
-import org.apache.ws.secpolicy.SPConstants;
-import org.opensaml.XML;
+import org.opensaml.Configuration;
+import org.opensaml.saml1.core.Assertion;
+import org.opensaml.saml1.core.AuthenticationStatement;
+import org.opensaml.saml1.core.ConfirmationMethod;
+import org.opensaml.saml1.core.SubjectStatement;
+import org.opensaml.xml.io.Unmarshaller;
+import org.opensaml.xml.io.UnmarshallerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.util.List;
 
 /**
  *
@@ -87,8 +98,23 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
                                                              RahasConstants.IssuanceBindingLocalNames.
                                                                      REQUESTED_SECURITY_TOKEN));
         assertNotNull("RequestedSecurityToken missing", rst);
-        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
-        assertNotNull("Missing SAML Assertoin", elem);
+
+        OMElement elem = rst.getFirstChildWithName(new QName(RahasConstants.SAML_NS, "Assertion"));
+        assertNotNull("Missing SAML Assertion", elem);
+
+        Assertion assertion = getAssertionObjectFromOMElement(elem);
+        List<AuthenticationStatement> authStmts = assertion.getAuthenticationStatements();
+        assertNotNull("At least one Authentication Statement should be present in the assertion",
+                   authStmts.get(0));
+
+        SubjectStatement authStmt = authStmts.get(0);
+        List<ConfirmationMethod> subConfirmationMethods = authStmt.getSubject().
+                getSubjectConfirmation().getConfirmationMethods();
+        assertNotNull("At least one Subject Confirmation method should be present in the SAML Subject",
+                   subConfirmationMethods.get(0));
+        assertEquals("Subject Confirmation should be BEARER : urn:oasis:names:tc:SAML:1.0:cm:bearer",
+                         RahasConstants.SAML11_SUBJECT_CONFIRMATION_BEARER,
+                         subConfirmationMethods.get(0).getConfirmationMethod());
     }
 
     /* (non-Javadoc)
@@ -120,5 +146,30 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
     
     public int getTrstVersion() {
         return RahasConstants.VERSION_05_02;
+    }
+
+    /**
+     * Build the SAML Assertion object from the OMElement for the ease of processing
+     * @param omElement OMElement containing the SAML Assertion
+     * @return Assertion object
+     */
+    private Assertion getAssertionObjectFromOMElement(OMElement omElement){
+        Assertion assertion = null;
+        try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware(true);
+            DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = docBuilder.parse(new ByteArrayInputStream(omElement.toString().getBytes()));
+            Element element = document.getDocumentElement();
+            UnmarshallerFactory unmarshallerFactory = Configuration
+                    .getUnmarshallerFactory();
+            Unmarshaller unmarshaller = unmarshallerFactory
+                    .getUnmarshaller(element);
+            assertion = (org.opensaml.saml1.core.Assertion) unmarshaller
+                    .unmarshall(element);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return  assertion;
     }
 }

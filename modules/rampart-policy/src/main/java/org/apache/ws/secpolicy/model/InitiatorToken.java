@@ -65,27 +65,11 @@ public class InitiatorToken extends AbstractSecurityAssertion implements TokenWr
     }
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
-        String localName = getName().getLocalPart();
-        String namespaceURI = getName().getNamespaceURI();
-
-        String prefix = writer.getPrefix(namespaceURI);
-
-        if (prefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        }
-        
         // <sp:InitiatorToken>
-        writer.writeStartElement(prefix, localName, namespaceURI);
-        
-        String pPrefix = writer.getPrefix(SPConstants.POLICY.getNamespaceURI());
-        if (pPrefix == null) {
-            pPrefix = SPConstants.POLICY.getPrefix();
-            writer.setPrefix(pPrefix, SPConstants.POLICY.getNamespaceURI());
-        }
+        writeStartElement(writer, getName());
         
         // <wsp:Policy>
-        writer.writeStartElement(pPrefix, SPConstants.POLICY.getLocalPart(), SPConstants.POLICY.getNamespaceURI());
+        writeStartElement(writer, SPConstants.POLICY);
 
         Token token = getInitiatorToken();
         if (token == null) {

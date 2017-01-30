@@ -191,6 +191,17 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         return token;
     }
 
+    public void removeToken(String id){
+
+        writeLock.lock();
+
+        try {
+            this.tokens.remove(id);
+        } finally {
+            writeLock.unlock();
+        }        
+    }
+    
     protected void processTokenExpiry() throws TrustException {
         
         readLock.lock();
@@ -220,14 +231,12 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         } else if(child.getQName().equals(Reference.TOKEN)) {
             String uri = child.getAttributeValue(new QName("URI"));
             if (uri.charAt(0) == '#') {
-	        uri = uri.substring(1);
+                uri = uri.substring(1);
             }
             return uri;
         } else {
             return null;
         }
     }
-    
-    
     
 }

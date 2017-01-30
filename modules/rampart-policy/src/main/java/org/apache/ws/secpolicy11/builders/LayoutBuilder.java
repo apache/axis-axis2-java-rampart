@@ -30,7 +30,7 @@ import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.Layout;
 
-public class LayoutBuilder implements AssertionBuilder {
+public class LayoutBuilder implements AssertionBuilder<OMElement> {
     
     
 

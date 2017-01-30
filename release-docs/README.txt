@@ -1,5 +1,5 @@
 ======================================================
-Apache Rampart-1.5.1 build  (Dec 23, 2010)
+Apache Rampart-${project.version} build  (${buildTimestamp})
 
 http://axis.apache.org/axis2/java/rampart
 ------------------------------------------------------
@@ -13,8 +13,8 @@ lib      - This directory contains all the libraries required by rampart
            release.
 	   
 
-rampart-1.5.1.mar   - WS-Security and WS-SecureConversation support for Axis2
-rahas-1.5.1.mar     - STS module - to be used to add STS operations to a service
+rampart-${project.version}.mar   - WS-Security and WS-SecureConversation support for Axis2
+rahas-${project.version}.mar     - STS module - to be used to add STS operations to a service
 
 samples  - This contains samples on using Apache Rampart and configuring
            different components to carryout different WS-Sec* operations.
@@ -64,13 +64,17 @@ http://www.bouncycastle.org/latest_releases.html
 lib/security directory as the last line.
 security.provider.X=org.bouncycastle.jce.provider.BouncyCastleProvider
 
-Test cases written for SAML 2.0 support requires endorsing the JDK's default JAXP 
+On older JDKs, the SAML 2.0 support requires endorsing the JDK's default JAXP 
 implementation with Xerces(http://xerces.apache.org/mirrors.cgi#binary) and 
-Xalan(http://xml.apache.org/xalan-j/downloads.html#latest-release). So before building Rampart from the
-source distribution, you need to copy resolver-x.x.x.jar, serializer-x.x.x.jar, xercesImpl-x.x.x.jar 
+Xalan(http://xml.apache.org/xalan-j/downloads.html#latest-release). To do that,
+you need to copy resolver-x.x.x.jar, serializer-x.x.x.jar, xercesImpl-x.x.x.jar 
 and xml-apis-x.x.x.jar from the Xerces binary distribution and xalan-x.x.x.jar from the xalan binary 
 distribution to the endorsed directory. If you are using Sun JDK, endorsed directory is located at 
 $JAVA_HOME/jre/lib/endorsed.
+
+Note that during the build these JARs are added automatically to the boot classpath
+of the JVM running the unit tests. Therefore this is only necessary at runtime, not
+when building Rampart. 
 
 When Rampart is deployed in a particular application server, please refer to the endorsing mechanism 
 recommended for that server and endorse the JAXP implementation using the set of jars mentioned above. 

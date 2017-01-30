@@ -15,6 +15,10 @@
  */
 package org.apache.ws.secpolicy.model;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import org.apache.neethi.Assertion;
 import org.apache.neethi.PolicyComponent;
 import org.apache.ws.secpolicy.SP12Constants;
@@ -24,6 +28,7 @@ import org.apache.ws.secpolicy.SP12Constants;
 public abstract class AbstractSecurityAssertion implements Assertion {
 
     private boolean isOptional;
+    private boolean isIgnorable;
     
     private boolean normalized = true; 
     
@@ -35,6 +40,13 @@ public abstract class AbstractSecurityAssertion implements Assertion {
     
     public void setOptional(boolean isOptional) {
         this.isOptional = isOptional;
+    }
+    public boolean isIgnorable() {
+        return isIgnorable;
+    }
+    
+    public void setIgnorable(boolean isIgnorable) {
+        this.isIgnorable = isIgnorable;
     }
 
     public short getType() {
@@ -69,5 +81,41 @@ public abstract class AbstractSecurityAssertion implements Assertion {
         return version;
     }
     
-    
+    protected static void writeStartElement(XMLStreamWriter writer, String defaultPrefix, String localPart, String uri) throws XMLStreamException {
+        String prefix = writer.getPrefix(uri);
+        if (prefix != null) {
+            writer.writeStartElement(prefix, localPart, uri);
+        } else {
+            prefix = defaultPrefix;
+            writer.writeStartElement(prefix, localPart, uri);
+            writer.writeNamespace(prefix, uri);
+            writer.setPrefix(prefix, uri);
+        }
+    }
+
+    protected static void writeStartElement(XMLStreamWriter writer, QName name) throws XMLStreamException {
+        writeStartElement(writer, name.getPrefix(), name.getLocalPart(), name.getNamespaceURI());
+    }
+
+    protected static void writeEmptyElement(XMLStreamWriter writer, String defaultPrefix, String localPart, String uri) throws XMLStreamException {
+        String prefix = writer.getPrefix(uri);
+        if (prefix != null) {
+            writer.writeEmptyElement(prefix, localPart, uri);
+        } else {
+            prefix = defaultPrefix;
+            writer.writeStartElement(prefix, localPart, uri);
+            writer.writeNamespace(prefix, uri);
+            writer.writeEndElement();
+        }
+    }
+
+    protected static void writeAttribute(XMLStreamWriter writer, String defaultPrefix, String uri, String localPart, String value) throws XMLStreamException {
+        String prefix = writer.getPrefix(uri);
+        if (prefix == null) {
+            prefix = defaultPrefix;
+            writer.writeNamespace(prefix, uri);
+            writer.setPrefix(prefix, uri);
+        }
+        writer.writeAttribute(prefix, uri, localPart, value);
+    }
 }

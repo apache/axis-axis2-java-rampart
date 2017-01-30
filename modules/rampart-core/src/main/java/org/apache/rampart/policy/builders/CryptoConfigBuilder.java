@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class CryptoConfigBuilder implements AssertionBuilder {
+public class CryptoConfigBuilder implements AssertionBuilder<OMElement> {
 
     public Assertion build(OMElement element, AssertionBuilderFactory factory)
             throws IllegalArgumentException {
@@ -46,6 +46,12 @@ public class CryptoConfigBuilder implements AssertionBuilder {
         OMAttribute cacheRefreshIntAttr = element.getAttribute(new QName(CryptoConfig.CACHE_REFRESH_INTVL));
         if(cacheRefreshIntAttr != null){
             cryptoCofig.setCacheRefreshInterval(cacheRefreshIntAttr.getAttributeValue().trim());
+        }
+
+        OMAttribute enableCryptoCacheAttr = element.getAttribute(new QName(CryptoConfig.CACHE_ENABLED));
+        if(enableCryptoCacheAttr != null){
+            cryptoCofig.setCacheEnabled(Boolean.parseBoolean(enableCryptoCacheAttr.
+                    getAttributeValue().trim().toLowerCase()));
         }
         
         Properties properties = new Properties();

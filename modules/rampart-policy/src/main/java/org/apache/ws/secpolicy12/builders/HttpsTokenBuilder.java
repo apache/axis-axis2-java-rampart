@@ -15,21 +15,19 @@
  */
 package org.apache.ws.secpolicy12.builders;
 
-import java.util.Iterator;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
-import org.apache.neethi.builders.xml.XmlPrimtiveAssertion;
-import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.HttpsToken;
+
+import javax.xml.namespace.QName;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This is a standard assertion builder implementation for the https token 
@@ -44,22 +42,24 @@ import org.apache.ws.secpolicy.model.HttpsToken;
  * alternatives in the HttpsToken considering both cases whether the policy is normalized or not.
  * 
  */
-public class HttpsTokenBuilder implements AssertionBuilder {
+public class HttpsTokenBuilder implements AssertionBuilder<OMElement> {
     
     /**
      * {@inheritDoc}
      */
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         HttpsToken httpsToken = new HttpsToken(SPConstants.SP_V12);
-        
-        Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
-        policy = (Policy) policy.normalize(false);
-        
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), httpsToken);
-            break; // since there should be only one alternative
+
+        if (element.getFirstElement()!= null) {
+            Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
+            policy = (Policy) policy.normalize(false);
+
+            for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
+                processAlternative((List) iterator.next(), httpsToken);
+                break; // since there should be only one alternative
+            }
         }
-        
+
         return httpsToken;
     }
 
@@ -85,7 +85,7 @@ public class HttpsTokenBuilder implements AssertionBuilder {
     private void processAlternative(List assertions, HttpsToken parent) {
         
         for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            XmlPrimtiveAssertion primtive = (XmlPrimtiveAssertion) iterator.next();
+            Assertion primtive = (Assertion) iterator.next();
             QName qname = primtive.getName();
             
             if (qname != null) {

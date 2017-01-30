@@ -17,11 +17,11 @@
 package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
@@ -40,9 +40,7 @@ import org.apache.ws.security.WSConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 import java.io.FileInputStream;
 import java.util.Iterator;
@@ -108,15 +106,13 @@ public class MessageBuilderTestBase extends TestCase {
         options.setAction("urn:testOperation");
         ctx.setOptions(options);
 
-        XMLStreamReader reader =
-                XMLInputFactory.newInstance().
-                        createXMLStreamReader(new FileInputStream(messageResource));
-        ctx.setEnvelope(new StAXSOAPModelBuilder(reader, null).getSOAPEnvelope());
+        ctx.setEnvelope(OMXMLBuilderFactory.createSOAPModelBuilder(
+                new FileInputStream(messageResource), null).getSOAPEnvelope());
         return ctx;
     }
 
     protected Policy loadPolicy(String xmlPath) throws Exception {
-        StAXOMBuilder builder = new StAXOMBuilder(xmlPath);
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(xmlPath));
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
 

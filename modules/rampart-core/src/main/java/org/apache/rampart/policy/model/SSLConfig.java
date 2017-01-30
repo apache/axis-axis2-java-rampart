@@ -38,6 +38,9 @@ public class SSLConfig implements Assertion{
         // TODO TODO
         throw new UnsupportedOperationException("TODO");
     }
+    public boolean isIgnorable() {
+        throw new UnsupportedOperationException("TODO");
+    }
     
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
         String prefix = writer.getPrefix(RampartConfig.NS);

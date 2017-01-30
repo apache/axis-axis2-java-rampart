@@ -30,7 +30,7 @@ import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.Layout;
 
-public class LayoutBuilder implements AssertionBuilder {
+public class LayoutBuilder implements AssertionBuilder<OMElement> {
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         Layout layout = new Layout(SPConstants.SP_V12);

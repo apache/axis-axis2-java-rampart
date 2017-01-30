@@ -830,11 +830,13 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             }
 
             // If certificates have been found, the certificates must be compared
-            // to ensure againgst phony DNs (compare encoded form including signature)
+            // to ensure against phony DNs (compare encoded form including signature)
             if (certs != null && certs.length > 0 && cert.equals(certs[0])) {
                 if (doDebug) {
                     log.debug("Direct trust for certificate with " + subjectString);
                 }
+                // Set the alias of the cert used for the msg. sig. as a msg. cxt. property
+                rmd.getMsgContext().setProperty(RampartMessageData.SIGNATURE_CERT_ALIAS, alias);
                 return true;
             }
         } else {
@@ -916,7 +918,9 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             }
         }
 
-        log.debug("WSHandler: Certificate path could not be verified for certificate with subject " + subjectString);
+        if (doDebug) {
+            log.debug("WSHandler: Certificate path could not be verified for certificate with subject " + subjectString);
+        }
         return false;
     }
 

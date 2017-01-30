@@ -1,6 +1,27 @@
 This file contains a listing of all Jira issues that have been closed
 for a given release.
 
+Release 1.6.0 - 06 Jun 2011
+===========================
+** Bug
+    * [RAMPART-327] - SVN locations mentioned in the developer guide are obsoleted
+    * [RAMPART-326] - Soap faults would not be secured if parameter based configuration is used
+    * [RAMPART-317] - Rampart Trust implementation does not properly handle SAML token with Bearer subject confirmation method
+    * [RAMPART-305] - If Rampart detects a security error a HTML page is send to the client instead of a SOAP fault
+    * [RAMPART-299] - Rampart ignores BootstrapPolicy settings in message exchange with WS-SecureConversation STS
+    * [RAMPART-398] - Client using SymmetricBinding runs slower and slower as more requests are made
+    * [RAMPART-264] - PolicyBasedResultsValidator fails on ContentEncryptedElements and EncryptedElements
+    * [RAMPART-236] - Error in service method is not properly handled for parameter based WS-Security (issue in RampartReceiver??)
+    * [RAMPART-201] - Add alias/certificate used for validating signature
+    * [RAMPART-183] - Rampart not correctly enforcing Signature validity if other security elements exist (ie - Timestamp)
+    * [RAMPART-98] -  When the request uses a BEARER keyType, The STSClient tries to retrieve the ProofToken even when the token type is Bearer.
+   
+
+** Improvement
+    * [RAMPART-297] - Add support for ContentEncryptedElements Assertion
+    * [RAMPART-321] - Possible improvements to the logging in Rampart
+   
+
 Release 1.5.1 - 23 Dec 2010
 ===========================
  

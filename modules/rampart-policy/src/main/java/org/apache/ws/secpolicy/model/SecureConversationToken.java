@@ -69,26 +69,12 @@ public class SecureConversationToken extends SecurityContextToken {
 
     public void serialize(XMLStreamWriter writer) throws XMLStreamException {
 
+        String prefix = getName().getPrefix();
         String localname = getName().getLocalPart();
         String namespaceURI = getName().getNamespaceURI();
-        String prefix;
-
-        String writerPrefix = writer.getPrefix(namespaceURI);
-
-        if (writerPrefix == null) {
-            prefix = getName().getPrefix();
-            writer.setPrefix(prefix, namespaceURI);
-        } else {
-            prefix = writerPrefix;
-        }
 
         // <sp:SecureConversationToken>
-        writer.writeStartElement(prefix, localname, namespaceURI);
-
-        if (writerPrefix == null) {
-            // xmlns:sp=".."
-            writer.writeNamespace(prefix, namespaceURI);
-        }
+        writeStartElement(writer, prefix, localname, namespaceURI);
 
         String inclusion;
         
@@ -99,12 +85,12 @@ public class SecureConversationToken extends SecurityContextToken {
         }
 
         if (inclusion != null) {
-            writer.writeAttribute(prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
+            writeAttribute(writer, prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
         }
 
         if (issuerEpr != null) {
             // <sp:Issuer>
-            writer.writeStartElement(prefix, SPConstants.ISSUER , namespaceURI);
+            writeStartElement(writer, prefix, SPConstants.ISSUER , namespaceURI);
 
             issuerEpr.serialize(writer);
 
@@ -114,47 +100,27 @@ public class SecureConversationToken extends SecurityContextToken {
         if (isDerivedKeys() || isRequireExternalUriRef()
                 || isSc10SecurityContextToken() || (bootstrapPolicy != null)) {
 
-            String wspNamespaceURI = SPConstants.POLICY.getNamespaceURI();
-
-            String wspPrefix;
-
-            String wspWriterPrefix = writer.getPrefix(wspNamespaceURI);
-
-            if (wspWriterPrefix == null) {
-                wspPrefix = SPConstants.POLICY.getPrefix();
-                writer.setPrefix(wspPrefix, wspNamespaceURI);
-
-            } else {
-                wspPrefix = wspWriterPrefix;
-            }
-
             // <wsp:Policy>
-            writer.writeStartElement(wspPrefix,
-                    SPConstants.POLICY.getLocalPart(), wspNamespaceURI);
+            writeStartElement(writer, SPConstants.POLICY);
 
-            if (wspWriterPrefix == null) {
-                // xmlns:wsp=".."
-                writer.writeNamespace(wspPrefix, wspNamespaceURI);
-            }
-            
             if (isDerivedKeys()) {
                 // <sp:RequireDerivedKeys />
-                writer.writeEmptyElement(prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
+                writeEmptyElement(writer, prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
             }
             
             if (isRequireExternalUriRef()) {
                 // <sp:RequireExternalUriReference />
-                writer.writeEmptyElement(prefix, SPConstants.REQUIRE_EXTERNAL_URI_REFERNCE, namespaceURI);
+                writeEmptyElement(writer, prefix, SPConstants.REQUIRE_EXTERNAL_URI_REFERNCE, namespaceURI);
             }
             
             if (isSc10SecurityContextToken()) {
                 // <sp:SC10SecurityContextToken />
-                writer.writeEmptyElement(prefix, SPConstants.SC10_SECURITY_CONTEXT_TOKEN, namespaceURI);
+                writeEmptyElement(writer, prefix, SPConstants.SC10_SECURITY_CONTEXT_TOKEN, namespaceURI);
             }
             
             if (bootstrapPolicy != null) {
                 // <sp:BootstrapPolicy ..>
-                writer.writeStartElement(prefix, SPConstants.BOOTSTRAP_POLICY, namespaceURI);
+                writeStartElement(writer, prefix, SPConstants.BOOTSTRAP_POLICY, namespaceURI);
                 bootstrapPolicy.serialize(writer);
                 writer.writeEndElement();
             }

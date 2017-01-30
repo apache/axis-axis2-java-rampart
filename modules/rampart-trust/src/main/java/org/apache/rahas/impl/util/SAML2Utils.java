@@ -20,6 +20,7 @@ package org.apache.rahas.impl.util;
 import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSPasswordCallback;
@@ -66,7 +67,7 @@ public class SAML2Utils {
         try {
             
             String jaxpProperty = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-            System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+            //System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
 
             MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(xmlObj);
@@ -101,9 +102,7 @@ public class SAML2Utils {
             Element assertionElement = document.getDocumentElement();
             DocumentBuilderFactoryImpl.setDOOMRequired(false);
 
-            if (log.isDebugEnabled()) {
-                log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
-            }
+            log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
             return assertionElement;
 
         } catch (Exception e) {
@@ -223,7 +222,7 @@ public class SAML2Utils {
                     // Set the "javax.xml.parsers.DocumentBuilderFactory" system property to make sure the endorsed JAXP
                     // implementation is picked over the default jaxp impl shipped with the JDK.
                     String jaxpProperty = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-                    System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+                    //System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
 
                     MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
                     Marshaller marshaller = marshallerFactory.getMarshaller(KIElem);
@@ -310,6 +309,21 @@ public class SAML2Utils {
                         "Failed marshalling the SAML Assertion", null, e);
             }
         }
+    }
+
+      /**
+     * Get the subject confirmation method of a SAML 2.0 assertion
+     *
+     * @param assertion SAML 2.0 assertion
+     * @return Subject Confirmation method
+     */
+    public static String getSAML2SubjectConfirmationMethod(Assertion assertion) {
+        String subjectConfirmationMethod = RahasConstants.SAML20_SUBJECT_CONFIRMATION_HOK;
+        List<SubjectConfirmation> subjectConfirmations = assertion.getSubject().getSubjectConfirmations();
+        if (subjectConfirmations.size() > 0) {
+            subjectConfirmationMethod = subjectConfirmations.get(0).getMethod();
+        }
+        return subjectConfirmationMethod;
     }
 
 }

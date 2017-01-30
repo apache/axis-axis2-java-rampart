@@ -20,7 +20,6 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.rahas.impl.SAMLTokenValidator;
 
 public class TokenRequestDispatcher {
 
@@ -50,16 +49,16 @@ public class TokenRequestDispatcher {
     public SOAPEnvelope handle(MessageContext inMsgCtx,
                                MessageContext outMsgCtx) throws TrustException {
         
-    	if(mlog.isDebugEnabled()){
-    		mlog.debug("*********************** TokenRequestDispatcher received \n"+inMsgCtx.getEnvelope());
-    	}
+        if(mlog.isDebugEnabled()){
+            mlog.debug("*********************** TokenRequestDispatcher received \n"+inMsgCtx.getEnvelope());
+        }
         RahasData data = new RahasData(inMsgCtx);
         
         String reqType = data.getRequestType();
         String tokenType = data.getTokenType();
         if ((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_ISSUE).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_ISSUE).equals(reqType)) {
-        	log.debug("issue");
+            log.debug("issue");
             TokenIssuer issuer;
             if (tokenType == null ||  tokenType.trim().length() == 0) {
                 issuer = config.getDefaultIssuerInstace();
@@ -73,15 +72,15 @@ public class TokenRequestDispatcher {
             outMsgCtx.getOptions().setAction(issuer.getResponseAction(data));
             
             if(mlog.isDebugEnabled()){
-        		mlog.debug("*********************** TokenRequestDispatcher sent out \n"+response);
-        	}
+                mlog.debug("*********************** TokenRequestDispatcher sent out \n"+response);
+            }
             
             return response;
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_VALIDATE).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_VALIDATE).equals(reqType)) {
-        	log.debug("validate");
-                
-                TokenValidator validator;
+            log.debug("validate");
+
+            TokenValidator validator;
                 if (tokenType == null ||  tokenType.trim().length() == 0) {
                     validator = config.getDefaultValidatorInstance();
                 } else {
@@ -95,14 +94,14 @@ public class TokenRequestDispatcher {
                                 RahasConstants.RSTR_ACTION_VALIDATE));
 
                 return response;
-        	
-        	
-        	
+            
+            
+            
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_RENEW).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_RENEW).equals(reqType)) {
-        	log.debug("renew");
-        	
-                TokenRenewer renewer;
+            log.debug("renew");
+
+            TokenRenewer renewer;
                 if (tokenType == null ||  tokenType.trim().length() == 0) {
                     renewer = config.getDefaultRenewerInstance();
                 } else {
@@ -115,11 +114,11 @@ public class TokenRequestDispatcher {
                         TrustUtil.getActionValue(data.getVersion(),
                                 RahasConstants.RSTR_ACTION_RENEW));
 
-                return response;    	
-        	         
+                return response;        
+                     
         } else if((RahasConstants.WST_NS_05_02 + RahasConstants.REQ_TYPE_CANCEL).equals(reqType) ||
                 (RahasConstants.WST_NS_05_12 + RahasConstants.REQ_TYPE_CANCEL).equals(reqType)) {
-        	log.debug("cancel");
+            log.debug("cancel");
             TokenCanceler canceler = config.getDefaultCancelerInstance();
             SOAPEnvelope response = canceler.cancel(data);
 

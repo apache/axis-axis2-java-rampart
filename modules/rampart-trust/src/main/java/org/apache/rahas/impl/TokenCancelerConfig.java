@@ -27,13 +27,13 @@ import java.io.FileInputStream;
  */
 public class TokenCancelerConfig {
 
-   /*
-   <parameter name="token-canceler-config">
-		<token-canceler-config>
-			<proofToken>EncryptedKey</proofToken>
-			<cryptoProperties>sctIssuer.properties</cryptoProperties>
-			<addRequestedAttachedRef />
-		</stoken-canceler-config>
+    /*
+    <parameter name="token-canceler-config">
+        <token-canceler-config>
+            <proofToken>EncryptedKey</proofToken>
+            <cryptoProperties>sctIssuer.properties</cryptoProperties>
+            <addRequestedAttachedRef />
+        </stoken-canceler-config>
     </parameter>
     */
     public final static QName TOKEN_CANCELER_CONFIG = new QName("token-canceler-config");

@@ -16,37 +16,37 @@
 
 package org.apache.rampart;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.*;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAP12Constants;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFault;
+import org.apache.axiom.soap.SOAPFaultCode;
+import org.apache.axiom.soap.SOAPFaultSubCode;
+import org.apache.axiom.soap.SOAPFaultValue;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
-import org.apache.rahas.impl.util.SAML2KeyInfo;
-import org.apache.rahas.impl.util.SAML2Utils;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.saml.SAMLAssertionHandler;
+import org.apache.rampart.saml.SAMLAssertionHandlerFactory;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.*;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSSecurityEngine;
+import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.WSUsernameTokenPrincipal;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.saml.SAMLKeyInfo;
-import org.apache.ws.security.saml.SAMLUtil;
-import org.opensaml.SAMLAssertion;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Subject;
-import org.opensaml.saml2.core.SubjectConfirmationData;
-import org.opensaml.saml2.core.Conditions;
 
 import javax.xml.namespace.QName;
-import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -59,12 +59,9 @@ public class RampartEngine {
 	public Vector process(MessageContext msgCtx) throws WSSPolicyException,
 	RampartException, WSSecurityException, AxisFault {
 
-		boolean doDebug = log.isDebugEnabled();
 		boolean dotDebug = tlog.isDebugEnabled();
 		
-		if(doDebug){
-			log.debug("Enter process(MessageContext msgCtx)");
-		}
+		log.debug("Enter process(MessageContext msgCtx)");
 
 		RampartMessageData rmd = new RampartMessageData(msgCtx, false);
 
@@ -89,14 +86,12 @@ public class RampartEngine {
 			//Convert back to llom since the inflow cannot use llom
 			msgCtx.setEnvelope(env);
 			Axis2Util.useDOOM(false);
-			if(doDebug){
-				log.debug("Return process MessageContext msgCtx)");
-			}
-			return null;
+            log.debug("Return process MessageContext msgCtx)");
+            return null;
 		}
 
 
-		Vector results = null;
+		Vector results;
 
 		WSSecurityEngine engine = new WSSecurityEngine();
 
@@ -139,19 +134,23 @@ public class RampartEngine {
         if(rpd.isSymmetricBinding()) {
 			//Here we have to create the CB handler to get the tokens from the 
 			//token storage
-			if(doDebug){
-				log.debug("Processing security header using SymetricBinding");
-			}
-			results = engine.processSecurityHeader(rmd.getDocument(), 
+			log.debug("Processing security header using SymetricBinding");
+			results = engine.processSecurityHeader(rmd.getDocument(),
 					actorValue, 
 					tokenCallbackHandler,
 					signatureCrypto, 
 					        RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), 
 					                msgCtx.getAxisService().getClassLoader()));
+
+            // Remove encryption tokens if this is the initiator and if initiator is receiving a message
+
+            if (rmd.isInitiator() && (msgCtx.getFLOW() == MessageContext.IN_FLOW ||
+                    msgCtx.getFLOW() == MessageContext.IN_FAULT_FLOW)) {
+                tokenCallbackHandler.removeEncryptedToken();
+            }
+
 		} else {
-			if(doDebug){
-				log.debug("Processing security header in normal path");
-			}
+			log.debug("Processing security header in normal path");
 			results = engine.processSecurityHeader(rmd.getDocument(),
 					actorValue, 
 					tokenCallbackHandler,
@@ -177,77 +176,30 @@ public class RampartEngine {
                     (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
             if (WSConstants.ST_UNSIGNED == actInt.intValue()) {
 
-                // If this is a SAML2.0 assertion
-                if (wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION) instanceof Assertion) {
+                Object samlAssertion = wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
 
-                    final Assertion assertion = (Assertion) wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
-                    String id = assertion.getID();
-                    Subject subject = assertion.getSubject();
+                SAMLAssertionHandler samlAssertionHandler
+                        = SAMLAssertionHandlerFactory.createAssertionHandler(samlAssertion);
 
-                    Date dateOfCreation = null;
-                    Date dateOfExpiration = null;
-
-                    //Read the validity period from the 'Conditions' element, else read it from SC Data
-                    if (assertion.getConditions() != null) {
-                        Conditions conditions = assertion.getConditions();
-                        if (conditions.getNotBefore() != null) {
-                            dateOfCreation = conditions.getNotBefore().toDate();
-                        }
-                        if (conditions.getNotOnOrAfter() != null) {
-                            dateOfExpiration = conditions.getNotOnOrAfter().toDate();
-                        }
-                    } else {
-                        SubjectConfirmationData scData = subject.getSubjectConfirmations()
-                                .get(0).getSubjectConfirmationData();
-                        if (scData.getNotBefore() != null) {
-                            dateOfCreation = scData.getNotBefore().toDate();
-                        }
-                        if (scData.getNotOnOrAfter() != null) {
-                            dateOfExpiration = scData.getNotOnOrAfter().toDate();
-                        }
-                    }
-
-                    // TODO : SAML2KeyInfo element needs to be moved to WSS4J.
-                    SAML2KeyInfo saml2KeyInfo = SAML2Utils.
-                            getSAML2KeyInfo(assertion, signatureCrypto, tokenCallbackHandler);
-
-                    //Store the token
-                    try {
-                        TokenStorage store = rmd.getTokenStorage();
-                        if (store.getToken(id) == null) {
-                            Token token = new Token(id, (OMElement) SAML2Utils.getElementFromAssertion(assertion), dateOfCreation, dateOfExpiration);
-                            token.setSecret(saml2KeyInfo.getSecret());
-                            store.add(token);
-                        }
-                    } catch (Exception e) {
-                        throw new RampartException(
-                                "errorInAddingTokenIntoStore", e);
-                    }
-
+                if (samlAssertionHandler.isBearerAssertion()) {
+                    break;
                 }
-                //if this is a SAML1.1 assertion
-                else {
-                    final SAMLAssertion assertion =
+                //Store the token
+                try {
+                    TokenStorage store = rmd.getTokenStorage();
+                    if (store.getToken(samlAssertionHandler.getAssertionId()) == null) {
+                        Token token = new Token(samlAssertionHandler.getAssertionId(),
+                                samlAssertionHandler.getAssertionElement(),
+                                samlAssertionHandler.getDateNotBefore(),
+                                samlAssertionHandler.getDateNotOnOrAfter());
 
-                            ((SAMLAssertion) wser
-                                    .get(WSSecurityEngineResult.TAG_SAML_ASSERTION));
-                    String id = assertion.getId();
-                    Date created = assertion.getNotBefore();
-                    Date expires = assertion.getNotOnOrAfter();
-                    SAMLKeyInfo samlKi = SAMLUtil.getSAMLKeyInfo(assertion,
-                            signatureCrypto, tokenCallbackHandler);
-                    try {
-                        TokenStorage store = rmd.getTokenStorage();
-                        if (store.getToken(id) == null) {
-                            Token token = new Token(id, (OMElement) assertion.toDOM(), created, expires);
-                            token.setSecret(samlKi.getSecret());
-                            store.add(token);
-                        }
-                    } catch (Exception e) {
-                        throw new RampartException(
-                                "errorInAddingTokenIntoStore", e);
+                        token.setSecret(samlAssertionHandler.
+                                getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler));
+                        store.add(token);
                     }
-
+                } catch (Exception e) {
+                    throw new RampartException(
+                            "errorInAddingTokenIntoStore", e);
                 }
             } else if (WSConstants.UT == actInt.intValue()) {
 
@@ -288,6 +240,16 @@ public class RampartEngine {
                 }
             } else if (WSConstants.SIGN == actInt.intValue()) {
                 X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+
+                if (rpd.isAsymmetricBinding() && cert == null && rpd.getInitiatorToken() != null
+                        && !rpd.getInitiatorToken().isDerivedKeys()) {
+
+                    // If symmetric binding is used, the certificate should be null.
+                    // If certificate is not null then probably initiator and
+                    // recipient are using 2 different bindings.
+                    throw new RampartException("invalidSignatureAlgo");
+                }
+
                 msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
             }
 
@@ -314,9 +276,7 @@ public class RampartEngine {
 					", PolicyBasedResultsValidattor took " + (t3 - t2));
 		}
 
-		if(doDebug){
-			log.debug("Return process(MessageContext msgCtx)");
-		}
+		log.debug("Return process(MessageContext msgCtx)");
 		return results;
 	}
 	

@@ -125,6 +125,20 @@ configuration properties used by the implementation class
             &lt;/ramp:encryptionCypto&gt;
           &lt;/ramp:RampartConfig&gt;
       </pre>
+      <p>Crypto caching is enabled by default when Merlin is used as the crypto provider. So Rampart will cache the crypto objects
+      with an infinite cache refresh interval. This crypto refresh interval can be overridden by setting the cacheRefreshInterval parameter
+          as described above. If it is required to disable crypto caching when Merlin is used, set the 'enableCryptoCaching' parameter
+          value to 'false'. Please refer to the following example.
+      </p>
+      <pre xmlns="http://www.w3.org/1999/xhtml" xml:space="preserve">
+            &lt;ramp:signatureCrypto&gt;
+                &lt;ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin" enableCryptoCaching="false"&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;JKS&lt;/ramp:property&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.file"&gt;service.jks&lt;/ramp:property&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;servicePW&lt;/ramp:property&gt;
+                &lt;/ramp:crypto&gt;
+            &lt;/ramp:signatureCrypto&gt;
+      </pre>
       <br></br>
       <h3>References</h3>1.
       <a href="http://ws.apache.org/wss4j">Apache WSS4J -Home</a>

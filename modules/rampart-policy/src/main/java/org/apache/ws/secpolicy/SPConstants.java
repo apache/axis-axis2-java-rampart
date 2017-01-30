@@ -240,6 +240,12 @@ public class SPConstants {
     public final static String HMAC_SHA1 = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
 
     public final static String RSA_SHA1 = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+    
+    public final static String RSA_SHA256 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+    
+    public final static String RSA_SHA384 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
+    
+    public final static String RSA_SHA512 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
     public final static String SHA1 = "http://www.w3.org/2000/09/xmldsig#sha1";
 

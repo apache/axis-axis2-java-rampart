@@ -106,9 +106,26 @@ public class SCTIssuer implements TokenIssuer {
             SecurityContextToken sct =
                     new SecurityContextToken(this.getWSCVersion(data.getTokenType()), doc);
 
-            OMElement rstrElem =
-                    TrustUtil.createRequestSecurityTokenResponseElement(wstVersion,
-                                                                        env.getBody());
+            OMElement rstrElem;
+            if (wstVersion == RahasConstants.VERSION_05_12) {
+                /**
+                 * If secure conversation version is http://docs.oasis-open.org/ws-sx/ws-trust/200512
+                 * We have to wrap "request security token response" in a "request security token response
+                 * collection".
+                 * See WS-SecureConversation 1.3 spec's Section 3 - Establishing Security Contexts
+                 * for more details.
+                 */
+                OMElement requestedSecurityTokenResponseCollection = TrustUtil
+                        .createRequestSecurityTokenResponseCollectionElement(wstVersion, env.getBody());
+                rstrElem =
+                        TrustUtil.createRequestSecurityTokenResponseElement(wstVersion,
+                                requestedSecurityTokenResponseCollection);
+            } else {
+                rstrElem =
+                        TrustUtil.createRequestSecurityTokenResponseElement(wstVersion,
+                                env.getBody());
+            }
+
 
             OMElement rstElem =
                     TrustUtil.createRequestedSecurityTokenElement(wstVersion, rstrElem);

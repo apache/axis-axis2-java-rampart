@@ -16,16 +16,24 @@
 
 package org.apache.rahas;
 
+import java.security.SecureRandom;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Properties;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMMetaFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.addressing.AddressingConstants;
-import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.MessageContext;
 import org.apache.rahas.impl.AbstractIssuerConfig;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.message.token.Reference;
@@ -33,14 +41,6 @@ import org.apache.ws.security.message.token.SecurityTokenReference;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
-
-import java.security.SecureRandom;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Iterator;
 
 public class TrustUtil {
 
@@ -241,63 +241,63 @@ public class TrustUtil {
     }
     
     /**
-	 * Create and add wst:AttachedReference element
-	 * 
-	 * @param rstrElem
-	 *            wst:RequestSecurityToken element
-	 * @param id
-	 *            Token identifier
-	 * @throws TrustException
-	 */
+     * Create and add wst:AttachedReference element
+     * 
+     * @param rstrElem
+     *            wst:RequestSecurityToken element
+     * @param id
+     *            Token identifier
+     * @throws TrustException
+     */
     public static void createRequestedAttachedRef(OMElement rstrElem, String id, int version)
-			throws TrustException {
-		OMFactory fac = null;
-		OMElement rar = null;
-		OMElement str = null;
-		OMElement ki = null;
+            throws TrustException {
+        OMFactory fac = null;
+        OMElement rar = null;
+        OMElement str = null;
+        OMElement ki = null;
 
-		String ns = TrustUtil.getWSTNamespace(version);
-		fac = rstrElem.getOMFactory();
-		rar = fac.createOMElement(new QName(ns,
-				RahasConstants.IssuanceBindingLocalNames.REQUESTED_ATTACHED_REFERENCE,
-				RahasConstants.WST_PREFIX), rstrElem);
-		str = fac.createOMElement(new QName(WSConstants.WSSE_NS,
-				SecurityTokenReference.SECURITY_TOKEN_REFERENCE, WSConstants.WSSE_PREFIX), rar);
-		ki = fac.createOMElement(new QName(WSConstants.WSSE_NS, "KeyIdentifier",
-				WSConstants.WSSE_PREFIX), str);
-		ki.addAttribute("ValueType", WSConstants.WSS_SAML_KI_VALUE_TYPE, null);
-		ki.setText(id);
-	}
+        String ns = TrustUtil.getWSTNamespace(version);
+        fac = rstrElem.getOMFactory();
+        rar = fac.createOMElement(new QName(ns,
+                RahasConstants.IssuanceBindingLocalNames.REQUESTED_ATTACHED_REFERENCE,
+                RahasConstants.WST_PREFIX), rstrElem);
+        str = fac.createOMElement(new QName(WSConstants.WSSE_NS,
+                SecurityTokenReference.SECURITY_TOKEN_REFERENCE, WSConstants.WSSE_PREFIX), rar);
+        ki = fac.createOMElement(new QName(WSConstants.WSSE_NS, "KeyIdentifier",
+                WSConstants.WSSE_PREFIX), str);
+        ki.addAttribute("ValueType", WSConstants.WSS_SAML_KI_VALUE_TYPE, null);
+        ki.setText(id);
+    }
 
-	/**
-	 * Create and add wst:UnattachedReference element
-	 * 
-	 * @param rstrElem
-	 *            wst:RequestSecurityToken element
-	 * @param id
-	 *            Token identifier
-	 * @throws TrustException
-	 */
-	public static void createRequestedUnattachedRef(OMElement rstrElem, String id, int version)
-			throws TrustException {
-		OMFactory fac = null;
-		OMElement rar = null;
-		OMElement str = null;
-		OMElement ki = null;
+    /**
+     * Create and add wst:UnattachedReference element
+     * 
+     * @param rstrElem
+     *            wst:RequestSecurityToken element
+     * @param id
+     *            Token identifier
+     * @throws TrustException
+     */
+    public static void createRequestedUnattachedRef(OMElement rstrElem, String id, int version)
+            throws TrustException {
+        OMFactory fac = null;
+        OMElement rar = null;
+        OMElement str = null;
+        OMElement ki = null;
 
-		String ns = TrustUtil.getWSTNamespace(version);
-		fac = rstrElem.getOMFactory();
-		rar = fac.createOMElement(new QName(ns,
-				RahasConstants.IssuanceBindingLocalNames.REQUESTED_UNATTACHED_REFERENCE,
-				RahasConstants.WST_PREFIX), rstrElem);
-		str = fac.createOMElement(new QName(WSConstants.WSSE_NS,
-				SecurityTokenReference.SECURITY_TOKEN_REFERENCE, WSConstants.WSSE_PREFIX), rar);
-		ki = fac.createOMElement(new QName(WSConstants.WSSE_NS, "KeyIdentifier",
-				WSConstants.WSSE_PREFIX), str);
+        String ns = TrustUtil.getWSTNamespace(version);
+        fac = rstrElem.getOMFactory();
+        rar = fac.createOMElement(new QName(ns,
+                RahasConstants.IssuanceBindingLocalNames.REQUESTED_UNATTACHED_REFERENCE,
+                RahasConstants.WST_PREFIX), rstrElem);
+        str = fac.createOMElement(new QName(WSConstants.WSSE_NS,
+                SecurityTokenReference.SECURITY_TOKEN_REFERENCE, WSConstants.WSSE_PREFIX), rar);
+        ki = fac.createOMElement(new QName(WSConstants.WSSE_NS, "KeyIdentifier",
+                WSConstants.WSSE_PREFIX), str);
 
-		ki.addAttribute("ValueType", WSConstants.WSS_SAML_KI_VALUE_TYPE, null);
-		ki.setText(id);
-	}
+        ki.addAttribute("ValueType", WSConstants.WSS_SAML_KI_VALUE_TYPE, null);
+        ki.setText(id);
+    }
 
     public static OMElement createKeySizeElement(int version,
                                                  OMElement parent,
@@ -421,11 +421,12 @@ public class TrustUtil {
      * @return SOAPEnvelope
      */
     public static SOAPEnvelope createSOAPEnvelope(String nsUri) {
+    	OMMetaFactory domFac = OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM);
         if (nsUri != null
             && SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI.equals(nsUri)) {
-            return DOOMAbstractFactory.getSOAP11Factory().getDefaultEnvelope();
+			return domFac.getSOAP11Factory().getDefaultEnvelope();
         } else {
-            return DOOMAbstractFactory.getSOAP12Factory().getDefaultEnvelope();
+            return domFac.getSOAP12Factory().getDefaultEnvelope();
         }
     }
 
@@ -539,14 +540,14 @@ public class TrustUtil {
     }
     
     public static OMElement createClaims(int version, 
-    											OMElement parent, String dialect) throws TrustException{
+                OMElement parent, String dialect) throws TrustException{
         OMElement omElem = createOMElement(parent,
                 getWSTNamespace(version),
                 RahasConstants.IssuanceBindingLocalNames.CLAIMS,
-                RahasConstants.WST_PREFIX);    	
+                RahasConstants.WST_PREFIX);
         
         OMNamespace ns = omElem.getOMFactory().createOMNamespace(getWSTNamespace(version), 
-        		RahasConstants.WSP_PREFIX);
+                RahasConstants.WSP_PREFIX);
         omElem.addAttribute(RahasConstants.ATTR_CLAIMS_DIALECT , dialect, ns);
        
         
@@ -612,6 +613,4 @@ public class TrustUtil {
                         .getAttributeValue().trim());
         return properties;
     }
-    
-    
 }
