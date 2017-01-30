@@ -116,7 +116,7 @@ public class PWCallback implements CallbackHandler {
 
                 if (pc.getUsage() == WSPasswordCallback.USERNAME_TOKEN_UNKNOWN) {
 
-                	if(pc.getIdentifer().equals("Ron") && pc.getPassword().equals("noR")) {
+                	if(pc.getIdentifier().equals("Ron") && pc.getPassword().equals("noR")) {
 
                         return;
 
@@ -150,15 +150,15 @@ public class PWCallback implements CallbackHandler {
 
                     pc.setKey(key);
 
-                } else if(pc.getIdentifer().equals("alice")) {
+                } else if(pc.getIdentifier().equals("alice")) {
 
                     pc.setPassword("password");
 
-                } else if(pc.getIdentifer().equals("bob")) {
+                } else if(pc.getIdentifier().equals("bob")) {
 
                     pc.setPassword("password");
 
-                } else if(pc.getIdentifer().equals("Ron")) {
+                } else if(pc.getIdentifier().equals("Ron")) {
 
                     pc.setPassword("noR");
 

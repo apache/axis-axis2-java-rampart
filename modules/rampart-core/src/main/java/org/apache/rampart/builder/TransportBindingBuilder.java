@@ -43,16 +43,14 @@ import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.message.WSSecDKSign;
-import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.message.WSSecSignature;
-import org.apache.ws.security.message.WSSecUsernameToken;
+import org.apache.ws.security.message.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.xml.crypto.dsig.Reference;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 public class TransportBindingBuilder extends BindingBuilder {
 
@@ -78,7 +76,7 @@ public class TransportBindingBuilder extends BindingBuilder {
          * Process Supporting tokens
          */
         if(rmd.isInitiator()) {
-            Vector signatureValues = new Vector();
+            List<byte[]> signatureValues = new ArrayList<byte[]>();
             
             SupportingToken sgndSuppTokens = rpd.getSignedSupportingTokens();
             
@@ -88,21 +86,21 @@ public class TransportBindingBuilder extends BindingBuilder {
                 log.debug("Processing signed supporting tokens");
 
                 ArrayList tokens = sgndSuppTokens.getTokens();
-                for (Iterator iter = tokens.iterator(); iter.hasNext();) {
-                    
-                    Token token = (Token) iter.next();
-                    if(token instanceof UsernameToken) {
-                        WSSecUsernameToken utBuilder = addUsernameToken(rmd,(UsernameToken)token);
-                        
+                for (Object signedSupportingToken : tokens) {
+
+                    Token token = (Token) signedSupportingToken;
+                    if (token instanceof UsernameToken) {
+                        WSSecUsernameToken utBuilder = addUsernameToken(rmd, (UsernameToken) token);
+
                         utBuilder.prepare(rmd.getDocument());
-                        
+
                         //Add the UT
                         utBuilder.appendToHeader(rmd.getSecHeader());
-                        
+
                     } else {
-                        throw new RampartException("unsupportedSignedSupportingToken", 
-                                new String[]{"{" +token.getName().getNamespaceURI() 
-                                + "}" + token.getName().getLocalPart()});
+                        throw new RampartException("unsupportedSignedSupportingToken",
+                                new String[]{"{" + token.getName().getNamespaceURI()
+                                        + "}" + token.getName().getLocalPart()});
                     }
                 }
             }
@@ -115,11 +113,11 @@ public class TransportBindingBuilder extends BindingBuilder {
 
                 ArrayList tokens = sgndEndSuppTokens.getTokens();
                 SignedEncryptedParts signdParts = sgndEndSuppTokens.getSignedParts();
-                for (Iterator iter = tokens.iterator(); iter.hasNext();) {
-                    Token token = (Token) iter.next();
-                    if(token instanceof IssuedToken && rmd.isInitiator()) {
+                for (Object objectToken : tokens) {
+                    Token token = (Token) objectToken;
+                    if (token instanceof IssuedToken && rmd.isInitiator()) {
                         signatureValues.add(doIssuedTokenSignature(rmd, token, signdParts));
-                    } else if(token instanceof X509Token) {
+                    } else if (token instanceof X509Token) {
                         signatureValues.add(doX509TokenSignature(rmd, token, signdParts));
                     }
                 }
@@ -131,27 +129,27 @@ public class TransportBindingBuilder extends BindingBuilder {
                 log.debug("Processing endorsing supporting tokens");
                 ArrayList tokens = endSupptokens.getTokens();
                 SignedEncryptedParts signdParts = endSupptokens.getSignedParts();
-                for (Iterator iter = tokens.iterator(); iter.hasNext();) {
-                    Token token = (Token) iter.next();
-                    if(token instanceof IssuedToken && rmd.isInitiator()){
+                for (Object objectToken : tokens) {
+                    Token token = (Token) objectToken;
+                    if (token instanceof IssuedToken && rmd.isInitiator()) {
                         signatureValues.add(doIssuedTokenSignature(rmd, token, signdParts));
-                    } else if(token instanceof X509Token) {
+                    } else if (token instanceof X509Token) {
                         signatureValues.add(doX509TokenSignature(rmd, token, signdParts));
                     } else if (token instanceof SecureConversationToken) {
-                        handleSecureConversationTokens(rmd, (SecureConversationToken)token);
-                        signatureValues.add(doSecureConversationSignature(rmd, token, signdParts));                                               
+                        handleSecureConversationTokens(rmd, (SecureConversationToken) token);
+                        signatureValues.add(doSecureConversationSignature(rmd, token, signdParts));
                     }
                 }
             }
             
             
-            Vector supportingToks = rpd.getSupportingTokensList();
-            for (int i = 0; i < supportingToks.size(); i++) {
-                this.handleSupportingTokens(rmd, (SupportingToken)supportingToks.get(i));
+            List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
+            for (SupportingToken supportingTok : supportingToks) {
+                this.handleSupportingTokens(rmd, supportingTok);
             } 
             
             
-            //Store the signature values vector
+            //Store the signature values list
             rmd.getMsgContext().setProperty(WSHandlerConstants.SEND_SIGV, signatureValues);
         } else {
             addSignatureConfirmation(rmd, null);
@@ -176,7 +174,7 @@ public class TransportBindingBuilder extends BindingBuilder {
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
         
-        Vector sigParts = new Vector();
+        List<WSEncryptionPart> sigParts = new ArrayList<WSEncryptionPart>();
         
         if(this.timestampElement != null){
             sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
@@ -209,7 +207,9 @@ public class TransportBindingBuilder extends BindingBuilder {
                 if(bstElem != null) {
                    RampartUtil.appendChildToSecHeader(rmd, bstElem); 
                 }
-                
+
+                // Add <xenc:EncryptedKey Id="EncKeyId-E67B75302ACB3BEDF313277587471272">..</xenc:EncryptedKey>
+                // to security header.
                 encrKey.appendToHeader(rmd.getSecHeader());
                 
                 WSSecDKSign dkSig = new WSSecDKSign();
@@ -219,7 +219,10 @@ public class TransportBindingBuilder extends BindingBuilder {
                 dkSig.setSigCanonicalization(rpd.getAlgorithmSuite().getInclusiveC14n());
                 dkSig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
                 dkSig.setDerivedKeyLength(rpd.getAlgorithmSuite().getSignatureDerivedKeyLength()/8);
-                
+
+                /**
+                 * Add a reference to encrypted key in the derived key
+                 */
                 dkSig.setExternalKey(encrKey.getEphemeralKey(), encrKey.getId());
                 
                 dkSig.prepare(doc, rmd.getSecHeader());
@@ -231,15 +234,26 @@ public class TransportBindingBuilder extends BindingBuilder {
                 
                 dkSig.setParts(sigParts);
                 
-                dkSig.addReferencesToSign(sigParts, rmd.getSecHeader());
-                
-                //Do signature
-                dkSig.computeSignature();
-                
+                List<Reference> referenceList
+                        = dkSig.addReferencesToSign(sigParts, rmd.getSecHeader());
+
+
+                /**
+                 * Add <wsc:DerivedKeyToken>..</wsc:DerivedKeyToken> to security
+                 * header. We need to add this just after Encrypted Key and just before <Signature>..</Signature>
+                 * elements. (As a convention)
+                 */
                 dkSig.appendDKElementToHeader(rmd.getSecHeader());
 
-                dkSig.appendSigToHeader(rmd.getSecHeader());
+                //Do signature and append to the security header
+                dkSig.computeSignature(referenceList, false, null);
                 
+
+
+                // TODO this is bit dubious, before migration code was like "dkSig.appendSigToHeader(rmd.getSecHeader())"
+                // but WSS4J has remove append methods. Need to find why ?
+                //this.appendToHeader(rmd.getSecHeader(), dkSig.getSignatureElement());
+
                 return dkSig.getSignatureValue();
                 
             } catch (WSSecurityException e) {
@@ -261,13 +275,14 @@ public class TransportBindingBuilder extends BindingBuilder {
                     sigParts.add(new WSEncryptionPart(sig.getBSTTokenId()));
                 }
                 
-                sig.addReferencesToSign(sigParts, rmd.getSecHeader());
-                
-                sig.appendToHeader(rmd.getSecHeader());
-                
-                sig.computeSignature();
-                
-                return sig.getSignatureValue();    
+                List<Reference> referenceList
+                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+
+                // TODO changed the order - verify
+                // Compute signature and append to the header
+                sig.computeSignature(referenceList, false, null);
+
+                return sig.getSignatureValue();
             } catch (WSSecurityException e) {
                 throw new RampartException("errorInSignatureWithX509Token", e);
             }
@@ -275,6 +290,15 @@ public class TransportBindingBuilder extends BindingBuilder {
             
         }
         
+    }
+
+    private void appendToHeader(WSSecHeader secHeader, Element appendingChild) {
+
+        // TODO this is bit dubious, before migration code was like "dkSig.appendSigToHeader(rmd.getSecHeader())"
+        // but WSS4J has remove append methods. Need to find why ?
+        Element secHeaderElement = secHeader.getSecurityHeader();
+        secHeaderElement.appendChild(appendingChild);
+
     }
 
 
@@ -316,7 +340,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             tokenIncluded = true;
         }
 
-        Vector sigParts = new Vector();
+        List<WSEncryptionPart> sigParts = new ArrayList<WSEncryptionPart>();
         
         if(this.timestampElement != null){
             sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
@@ -334,9 +358,9 @@ public class TransportBindingBuilder extends BindingBuilder {
             }
     
             ArrayList headers = signdParts.getHeaders();
-            for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
-                Header header = (Header) iterator.next();
-                WSEncryptionPart wep = new WSEncryptionPart(header.getName(), 
+            for (Object signedHeader : headers) {
+                Header header = (Header) signedHeader;
+                WSEncryptionPart wep = new WSEncryptionPart(header.getName(),
                         header.getNamespace(),
                         "Content");
                 sigParts.add(wep);
@@ -354,7 +378,7 @@ public class TransportBindingBuilder extends BindingBuilder {
               
               // Setting the AttachedReference or the UnattachedReference according to the flag
               OMElement ref;
-              if (tokenIncluded == true) {
+              if (tokenIncluded) {
                   ref = tok.getAttachedReference();
               } else {
                   ref = tok.getUnattachedReference();
@@ -372,17 +396,24 @@ public class TransportBindingBuilder extends BindingBuilder {
               dkSign.setDerivedKeyLength(algorithmSuite.getSignatureDerivedKeyLength());
               
               dkSign.prepare(doc);
-              
+
+              /**
+               * Add <wsc:DerivedKeyToken>..</wsc:DerivedKeyToken> to security
+               * header. We need to add this just after Encrypted Key and just before <Signature>..</Signature>
+               * elements. (As a convention)
+               */
               dkSign.appendDKElementToHeader(rmd.getSecHeader());
               
               dkSign.setParts(sigParts);
               
-              dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
+              List<Reference> referenceList
+                      = dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
               
               //Do signature
-              dkSign.computeSignature();
-              
-              dkSign.appendSigToHeader(rmd.getSecHeader());
+              dkSign.computeSignature(referenceList, false, null);
+
+              // TODO verify before migration - dkSign.appendSigToHeader(rmd.getSecHeader())
+              // this.appendToHeader(rmd.getSecHeader(), dkSign.getSignatureElement());
               
               return dkSign.getSignatureValue();
               
@@ -403,8 +434,7 @@ public class TransportBindingBuilder extends BindingBuilder {
 		    tokId = tokId.substring(1);
                 }
                 sig.setCustomTokenId(tokId);
-                sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
-                        WSConstants.SAML_ASSERTION_ID);
+                sig.setCustomTokenValueType(RampartUtil.getSAML10AssertionNamespace());
                 sig.setSecretKey(tok.getSecret());
                 sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
                 sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
@@ -414,10 +444,11 @@ public class TransportBindingBuilder extends BindingBuilder {
                         rmd.getSecHeader());
 
                 sig.setParts(sigParts);
-                sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                List<javax.xml.crypto.dsig.Reference> referenceList
+                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
 
                 //Do signature
-                sig.computeSignature();
+                sig.computeSignature(referenceList);
 
                 //Add elements to header
                 this.setInsertionLocation(RampartUtil.insertSiblingAfter(
@@ -464,7 +495,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             tokenIncluded = true;
         }
 
-        Vector sigParts = new Vector();
+        List<WSEncryptionPart> sigParts = new ArrayList<WSEncryptionPart>();
         
         if(this.timestampElement != null){
             sigParts.add(new WSEncryptionPart(rmd.getTimestampId()));                          
@@ -482,9 +513,9 @@ public class TransportBindingBuilder extends BindingBuilder {
             }
     
             ArrayList headers = signdParts.getHeaders();
-            for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
-                Header header = (Header) iterator.next();
-                WSEncryptionPart wep = new WSEncryptionPart(header.getName(), 
+            for (Object objectHeader : headers) {
+                Header header = (Header) objectHeader;
+                WSEncryptionPart wep = new WSEncryptionPart(header.getName(),
                         header.getNamespace(),
                         "Content");
                 sigParts.add(wep);
@@ -502,7 +533,7 @@ public class TransportBindingBuilder extends BindingBuilder {
               
               // Setting the AttachedReference or the UnattachedReference according to the flag
               OMElement ref;
-              if (tokenIncluded == true) {
+              if (tokenIncluded) {
                   ref = tok.getAttachedReference();
               } else {
                   ref = tok.getUnattachedReference();
@@ -520,18 +551,24 @@ public class TransportBindingBuilder extends BindingBuilder {
               dkSign.setDerivedKeyLength(algorithmSuite.getSignatureDerivedKeyLength());
               
               dkSign.prepare(doc);
-              
+
+              /**
+               * Add <wsc:DerivedKeyToken>..</wsc:DerivedKeyToken> to security
+               * header. We need to add this just after Encrypted Key and just before <Signature>..</Signature>
+               * elements. (As a convention)
+               */
               dkSign.appendDKElementToHeader(rmd.getSecHeader());
               
               dkSign.setParts(sigParts);
               
-              dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
+              List<Reference> referenceList
+                      = dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
               
               //Do signature
-              dkSign.computeSignature();
-              
-              dkSign.appendSigToHeader(rmd.getSecHeader());
-              
+              dkSign.computeSignature(referenceList, false, null);
+
+              //this.appendToHeader(rmd.getSecHeader(), dkSign.getSignatureElement());
+
               return dkSign.getSignatureValue();
               
           } catch (ConversationException e) {
@@ -547,8 +584,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 WSSecSignature sig = new WSSecSignature();
                 sig.setWsConfig(rmd.getConfig());
                 sig.setCustomTokenId(tok.getId().substring(1));
-                sig.setCustomTokenValueType(WSConstants.WSS_SAML_NS +
-                        WSConstants.SAML_ASSERTION_ID);
+                sig.setCustomTokenValueType(RampartUtil.getSAML10AssertionNamespace());
                 sig.setSecretKey(tok.getSecret());
                 sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
                 sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
@@ -558,16 +594,14 @@ public class TransportBindingBuilder extends BindingBuilder {
                         rmd.getSecHeader());
 
                 sig.setParts(sigParts);
-                sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                List<Reference> referenceList
+                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
 
                 //Do signature
-                sig.computeSignature();
+                sig.computeSignature(referenceList, false, this.getInsertionLocation());
 
                 //Add elements to header
-                this.setInsertionLocation(RampartUtil.insertSiblingAfter(
-                        rmd,
-                        this.getInsertionLocation(),
-                        sig.getSignatureElement()));
+                this.setInsertionLocation(sig.getSignatureElement());
 
                 return sig.getSignatureValue();
 

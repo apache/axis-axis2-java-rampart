@@ -27,6 +27,8 @@ import org.apache.rahas.Rahas;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.impl.AbstractIssuerConfig;
+import org.apache.rahas.test.util.TestUtil;
+import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.message.WSSecEncryptedKey;
@@ -131,7 +133,7 @@ public class SAMLUtilsTest extends TestCase{
 
         Assertion assertion = getAssertion();
 
-        SAMLUtils.signAssertion(assertion,getCrypto(), "apache", "password");
+        SAMLUtils.signAssertion(assertion, TestUtil.getCrypto(), "apache", "password");
 
         //marshallerFactory.getMarshaller(assertion).marshall(assertion);
 
@@ -272,13 +274,12 @@ public class SAMLUtilsTest extends TestCase{
         Document doc = ((Element) env).getOwnerDocument();
 
         int keySize = 256;
-        int keyComputation = AbstractIssuerConfig.KeyComputation.KEY_COMP_PROVIDE_ENT;
 
         byte [] ephemeralKey = generateEphemeralKey(256);
 
         WSSecEncryptedKey encryptedKey
                 = SAMLUtils.getSymmetricKeyBasedKeyInfoContent(doc,
-                                            ephemeralKey, getTestCertificate(), keySize, getCrypto());
+                                            ephemeralKey, getTestCertificate(), keySize, TestUtil.getCrypto());
 
         Assert.assertNotNull(encryptedKey.getEncryptedKeyElement());
         printElement(encryptedKey.getEncryptedKeyElement());
@@ -297,27 +298,7 @@ public class SAMLUtilsTest extends TestCase{
         }
     }
 
-    private static Crypto getCrypto() throws IOException {
 
-        File file = new File("src/test/resources/crypto.config");
-        Assert.assertTrue(file.exists());
-
-        Properties properties = new Properties();
-        try {
-            properties.load(new FileInputStream(file));
-        } catch (IOException e) {
-            log.error("Unable to open crypto configuration file");
-            throw e;
-        }
-
-        Crypto crypto = CryptoFactory.getInstance(properties);
-
-        X509Certificate[] certificates = crypto.getCertificates("apache");
-        Assert.assertEquals(certificates.length, 1);
-
-        return crypto;
-
-    }
 
     private static void printElement(Element element) throws TransformerException {
 
@@ -327,15 +308,11 @@ public class SAMLUtilsTest extends TestCase{
         }
     }
 
-    private static X509Certificate getTestCertificate() throws IOException {
+    private static X509Certificate getTestCertificate() throws IOException, WSSecurityException, TrustException {
 
-        Crypto crypto = getCrypto();
+        Crypto crypto =  TestUtil.getCrypto();
 
-        X509Certificate[] certificates = crypto.getCertificates("apache");
-        Assert.assertEquals(certificates.length, 1);
-
-        return certificates[0];
-
+        return CommonUtil.getCertificateByAlias(crypto, "apache");
     }
 
     private static String getXMLString(Element element) throws TransformerException {

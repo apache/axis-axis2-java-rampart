@@ -36,10 +36,10 @@ import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.handler.WSHandlerConstants;
+import org.apache.ws.security.handler.WSHandlerResult;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Handler to verify the message security after dispatch
@@ -173,7 +173,7 @@ public class PostDispatchVerificationHandler implements Handler {
             if(msgContext.getProperty(WSHandlerConstants.RECV_RESULTS) == null) {
                     throw new AxisFault("InvalidSecurity");
             } else {
-                if(((Vector)msgContext.getProperty(WSHandlerConstants.RECV_RESULTS)).size() == 0) {
+                if(((List<WSHandlerResult>)msgContext.getProperty(WSHandlerConstants.RECV_RESULTS)).size() == 0) {
                     throw new AxisFault("InvalidSecurity");
                 }
             }

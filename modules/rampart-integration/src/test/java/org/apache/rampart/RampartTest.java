@@ -95,7 +95,8 @@ public class RampartTest extends TestCase {
                 System.out.println("\nWARNING: We are using key sizes from JCE " +
                         "Unlimited Strength Jurisdiction Policy !!!");
             }
-            
+
+            //for (int i = 34; i <= 34; i++) { //<-The number of tests we have
             for (int i = 1; i <= 34; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
@@ -165,6 +166,7 @@ public class RampartTest extends TestCase {
                     }
                 }
                 else{
+
                     //Blocking invocation
                     serviceClient.sendReceive(getEchoElement());
                 }

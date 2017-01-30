@@ -177,5 +177,26 @@ public class InflowConfiguration {
 		return (String) this.action
 				.get(WSHandlerConstants.ENABLE_SIGNATURE_CONFIRMATION);
 	}
+
+     /**
+     * This will set whether request or response evaluation should adhere to "Basic Security Profile"
+     * @param value true if evaluation should adhere to "Basic Security Profile" else false. Default is true.
+     */
+	public void setBSPCompliant(boolean value) {
+		this.action.put(
+				WSHandlerConstants.IS_BSP_COMPLIANT, value?"true":"false");
+	}
+
+
+    /**
+     * Gets whether security processing is configured to handle BSP compliant manner.
+     * "true" or "false"
+     * @return Returns "true" or "false".
+     */
+	public String getBSPCompliant() {
+		return (String) this.action
+				.get(WSHandlerConstants.IS_BSP_COMPLIANT);
+	}
+
     
 }

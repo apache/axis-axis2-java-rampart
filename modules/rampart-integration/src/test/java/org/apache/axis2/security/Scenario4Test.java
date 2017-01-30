@@ -42,7 +42,7 @@ public class Scenario4Test extends InteropTestBase {
 		ofc.setEmbeddedKeyName("SessionKey");
 		ofc.setSignatureKeyIdentifier(WSSHandlerConstants.BST_DIRECT_REFERENCE);
 		ofc.setEmbeddedKeyCallbackClass("org.apache.axis2.security.PWCallback");
-		
+
 		return ofc;
 	}
 
@@ -52,6 +52,12 @@ public class Scenario4Test extends InteropTestBase {
 		ifc.setActionItems("Signature Encrypt Timestamp");
 		ifc.setPasswordCallbackClass("org.apache.axis2.security.PWCallback");
 		ifc.setSignaturePropFile("interop.properties");
+
+        /**
+         * This test is not "Basic Security Profile(BSP)" compatible. Cos we use
+         * KeyInfo/KeyName. Therefore setting this test as not BSP compatible.
+         */
+        ifc.setBSPCompliant(false);
 		
 		return ifc;
 	}
@@ -92,6 +98,7 @@ public class Scenario4Test extends InteropTestBase {
         ifc.setPasswordCallbackClass("org.apache.axis2.security.PWCallback");
         
         ifc.setSignaturePropRefId("key2");
+        ifc.setBSPCompliant(false);
         
         return ifc;
     }

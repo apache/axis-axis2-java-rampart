@@ -25,6 +25,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.*;
+import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLAttributeCallback;
 import org.apache.rahas.impl.util.SAMLCallbackHandler;
 import org.apache.rahas.impl.util.SignKeyHolder;
@@ -84,8 +85,6 @@ import java.util.Date;
 import java.util.List;
 
 public class SAML2TokenIssuer implements TokenIssuer {
-
-    private Assertion SAMLAssertion;
 
     private String configParamName;
 
@@ -355,11 +354,13 @@ public class SAML2TokenIssuer implements TokenIssuer {
      * @return Subject
      * @throws Exception
      */
-    private Subject createSubjectWithHolderOfKeySC(SAMLTokenIssuerConfig config,
+    Subject createSubjectWithHolderOfKeySC(SAMLTokenIssuerConfig config,
                                                    Document doc, Crypto crypto,
                                                    DateTime creationTime,
                                                    DateTime expirationTime, RahasData data) throws Exception {
 
+
+        // TODO modify these to use proper SAML apis
 
         XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
         SAMLObjectBuilder<Subject> subjectBuilder =
@@ -392,10 +393,12 @@ public class SAML2TokenIssuer implements TokenIssuer {
                 // set keysize
                 int keysize = data.getKeysize();
                 keysize = (keysize != -1) ? keysize : config.keySize;
-                encrKeyBuilder.setKeySize(keysize);
+
+                // TODO setting keysize is removed with wss4j 1.6 migration - do we actually need this ?
 
                 encrKeyBuilder.setEphemeralKey(TokenIssuerUtil.getSharedSecret(
                         data, config.keyComputation, keysize));
+
 
                 // Set key encryption algo
                 encrKeyBuilder
@@ -448,9 +451,8 @@ public class SAML2TokenIssuer implements TokenIssuer {
                 X509Certificate clientCert = data.getClientCert();
 
                 if (clientCert == null) {
-                    X509Certificate[] certs = crypto.getCertificates(
-                            data.getPrincipal().getName());
-                    clientCert = certs[0];
+                    // TODO are we always looking up by alias ? Dont we need to lookup by any other attribute ?
+                    clientCert = CommonUtil.getCertificateByAlias(crypto, data.getPrincipal().getName());
                 }
 
                 byte[] clientCertBytes = clientCert.getEncoded();
@@ -642,8 +644,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         SignKeyHolder signKeyHolder = new SignKeyHolder();
 
         try {
-            X509Certificate[] issuerCerts = crypto
-                    .getCertificates(config.issuerKeyAlias);
+            X509Certificate[] issuerCerts = CommonUtil.getCertificatesByAlias(crypto,config.issuerKeyAlias);
 
             String sigAlgo = XMLSignature.ALGO_ID_SIGNATURE_RSA;
             String pubKeyAlgo = issuerCerts[0].getPublicKey().getAlgorithm();

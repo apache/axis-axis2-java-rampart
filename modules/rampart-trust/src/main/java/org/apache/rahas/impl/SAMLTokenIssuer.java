@@ -29,36 +29,23 @@ import org.apache.rahas.Token;
 import org.apache.rahas.TokenIssuer;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
-import org.apache.rahas.impl.util.SAMLAttributeCallback;
-import org.apache.rahas.impl.util.SAMLCallbackHandler;
-import org.apache.rahas.impl.util.SAMLNameIdentifierCallback;
-import org.apache.rahas.impl.util.SAMLUtils;
+import org.apache.rahas.impl.util.*;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.WSUsernameTokenPrincipal;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoFactory;
-import org.apache.ws.security.util.Base64;
 import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
-import org.apache.xml.security.signature.XMLSignature;
 
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLException;
 import org.opensaml.saml1.core.*;
-import org.opensaml.xml.security.*;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureException;
-import org.opensaml.xml.signature.Signer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.security.Principal;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
@@ -118,15 +105,14 @@ public class SAMLTokenIssuer implements TokenIssuer {
                 .getEnvelope().getNamespace().getNamespaceURI());
 
         Crypto crypto;
-        if (config.cryptoElement != null) { // crypto props
-                                                        // defined as
-                                                        // elements
-            crypto = CryptoFactory.getInstance(TrustUtil
+        if (config.cryptoElement != null) { // crypto props defined as elements
+            crypto = CommonUtil.getCrypto(TrustUtil
                     .toProperties(config.cryptoElement), inMsgCtx
                     .getAxisService().getClassLoader());
+
         } else { // crypto props defined in a properties file
-            crypto = CryptoFactory.getInstance(config.cryptoPropertiesFile,
-                    inMsgCtx.getAxisService().getClassLoader());
+            crypto = CommonUtil.getCrypto(config.cryptoPropertiesFile, inMsgCtx
+                    .getAxisService().getClassLoader());
         }
 
         // Creation and expiration times
@@ -361,9 +347,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
                 X509Certificate clientCert = data.getClientCert();
 
                 if(clientCert == null) {
-                    X509Certificate[] certs = crypto.getCertificates(
-                            data.getPrincipal().getName());
-                    clientCert = certs[0];
+                    clientCert = CommonUtil.getCertificateByAlias(crypto,data.getPrincipal().getName());;
                 }
 
                 KeyInfo keyInfo = SAMLUtils.getCertificateBasedKeyInfo(clientCert);
@@ -380,27 +364,28 @@ public class SAMLTokenIssuer implements TokenIssuer {
      * Uses the <code>wst:AppliesTo</code> to figure out the certificate to
      * encrypt the secret in the SAML token
      * 
-     * @param config
-     * @param crypto
+     * @param config Token issuer configuration.
+     * @param crypto Crypto properties.
      * @param serviceAddress
      *            The address of the service
-     * @return
-     * @throws WSSecurityException
+     * @return The X509 certificate.
+     * @throws org.apache.rahas.TrustException If an error occurred while retrieving certificate from crypto.
      */
     private X509Certificate getServiceCert(SAMLTokenIssuerConfig config,
-            Crypto crypto, String serviceAddress) throws WSSecurityException {
-        
+            Crypto crypto, String serviceAddress) throws TrustException {
+
+        // TODO a duplicate method !!
         if (serviceAddress != null && !"".equals(serviceAddress)) {
             String alias = (String) config.trustedServices.get(serviceAddress);
             if (alias != null) {
-                return crypto.getCertificates(alias)[0];
+                return CommonUtil.getCertificateByAlias(crypto,alias);
             } else {
                 alias = (String) config.trustedServices.get("*");
-                return crypto.getCertificates(alias)[0];
+                return CommonUtil.getCertificateByAlias(crypto,alias);
             }
         } else {
             String alias = (String) config.trustedServices.get("*");
-            return crypto.getCertificates(alias)[0];
+            return CommonUtil.getCertificateByAlias(crypto,alias);
         }
 
     }

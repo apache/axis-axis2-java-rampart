@@ -32,10 +32,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.RampartConstants;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.HandlerParameterDecoder;
-import org.apache.ws.security.SOAPConstants;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
+import org.apache.rampart.util.RampartUtil;
+import org.apache.ws.security.*;
 import org.apache.ws.security.handler.RequestData;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.handler.WSHandlerResult;
@@ -47,8 +45,9 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.xml.namespace.QName;
 
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * @deprecated
@@ -114,6 +113,9 @@ public class WSDoAllReceiver extends WSDoAllHandler {
             throw new AxisFault("Configuration error", e);
         }
 
+        // Retrieves signature crypto and set it to decryption crypto
+        RampartUtil.setDecryptionCrypto(msgContext);
+
         reqData.setMsgContext(msgContext);
 
         if (((getOption(WSSHandlerConstants.INFLOW_SECURITY)) == null) &&
@@ -131,7 +133,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
             }
         }
         
-        Vector actions = new Vector();
+        List<java.lang.Integer> actions = new ArrayList<Integer>();
         String action = null;
         if ((action = (String) getOption(WSSHandlerConstants.ACTION_ITEMS)) == null) {
             action = (String) getProperty(msgContext,
@@ -172,7 +174,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
          */
         CallbackHandler cbHandler = null;
         if ((doAction & (WSConstants.ENCR | WSConstants.UT)) != 0) {
-            cbHandler = getPasswordCB(reqData);
+            cbHandler = getPasswordCallbackHandler(reqData);
         }
 
         // Copy the WSHandlerConstants.SEND_SIGV over to the new message
@@ -206,7 +208,7 @@ public class WSDoAllReceiver extends WSDoAllHandler {
 
         doReceiverAction(doAction, reqData);
 
-        Vector wsResult = null;
+        List<WSSecurityEngineResult> wsResult = null;
         try {
             wsResult = secEngine.processSecurityHeader(doc, actor, cbHandler,
                     reqData.getSigCrypto(), reqData.getDecCrypto());
@@ -280,15 +282,17 @@ public class WSDoAllReceiver extends WSDoAllHandler {
          * implementations with other validation algorithms for subclasses.
          */
 
-        // Extract the signature action result from the action vector
+        // Extract the signature action result from the action list
         WSSecurityEngineResult actionResult = WSSecurityUtil.fetchActionResult(
                 wsResult, WSConstants.SIGN);
 
         if (actionResult != null) {
-            X509Certificate returnCert = actionResult.getCertificate();
+            X509Certificate returnCert = (X509Certificate)actionResult.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
 
             if (returnCert != null) {
-                if (!verifyTrust(returnCert, reqData)) {
+                CertificateValidator certificateValidator = new CertificateValidator();
+
+                if (!certificateValidator.validateCertificate(returnCert, reqData.getSigCrypto())) {
                     throw new AxisFault(
                             "WSDoAllReceiver: The certificate used for the signature is not trusted");
                 }
@@ -305,12 +309,12 @@ public class WSDoAllReceiver extends WSDoAllHandler {
          * implementations with other validation algorithms for subclasses.
          */
 
-        // Extract the timestamp action result from the action vector
+        // Extract the timestamp action result from the action list
         actionResult = WSSecurityUtil.fetchActionResult(wsResult,
                 WSConstants.TS);
 
         if (actionResult != null) {
-            Timestamp timestamp = actionResult.getTimestamp();
+            Timestamp timestamp = (Timestamp)actionResult.get(WSSecurityEngineResult.TAG_TIMESTAMP);
 
             if (timestamp != null) {
                 String ttl = null;
@@ -330,7 +334,8 @@ public class WSDoAllReceiver extends WSDoAllHandler {
                     ttl_i = reqData.getTimeToLive();
                 }
 
-                if (!verifyTimestamp(timestamp, ttl_i)) {
+                // TODO configure future time to live
+                if (!timestamp.verifyCreated(ttl_i, 60)) {
                     throw new AxisFault(
                             "WSDoAllReceiver: The timestamp could not be validated");
                 }
@@ -351,10 +356,10 @@ public class WSDoAllReceiver extends WSDoAllHandler {
          * DoAllSender will use this in certain situations such as:
          * USE_REQ_SIG_CERT to encrypt
          */
-        Vector results = null;
-        if ((results = (Vector) getProperty(msgContext,
+        List<WSHandlerResult> results = null;
+        if ((results = (List<WSHandlerResult>) getProperty(msgContext,
                 WSHandlerConstants.RECV_RESULTS)) == null) {
-            results = new Vector();
+            results = new ArrayList<WSHandlerResult>();
             msgContext.setProperty(WSHandlerConstants.RECV_RESULTS, results);
         }
         WSHandlerResult rResult = new WSHandlerResult(actor, wsResult);
