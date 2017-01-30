@@ -55,6 +55,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Iterator;
+import java.util.List;
 
 public class SAML2Utils {
 
@@ -194,14 +196,24 @@ public class SAML2Utils {
                 }
 
                 // Get the subject confirmation data, KeyInfoConfirmationDataType extends SubjectConfirmationData.
-                KeyInfoConfirmationDataType scData = (KeyInfoConfirmationDataType) subjectConf.getSubjectConfirmationData();
+                SubjectConfirmationData scData = subjectConf.getSubjectConfirmationData();
+                
                 if (scData == null) {
                     throw new WSSecurityException(WSSecurityException.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no Subject Confirmation Data)"});
                 }
 
                 // Get the SAML specific XML representation of the keyInfo object
-                XMLObject KIElem = scData.getKeyInfos() != null ? (XMLObject) scData.getKeyInfos().get(0) : null;
+                XMLObject KIElem = null;
+                List<XMLObject> scDataElements = scData.getOrderedChildren();
+                Iterator<XMLObject> iterator = scDataElements.iterator();
+                while (iterator.hasNext()) {
+                    XMLObject xmlObj = iterator.next();
+                    if (xmlObj instanceof org.opensaml.xml.signature.KeyInfo) {
+                        KIElem = xmlObj;
+                        break;
+                    }
+                }
 
                 Element keyInfoElement;
 
@@ -259,8 +271,8 @@ public class SAML2Utils {
 
                 }
 
-                // If an authn stmt is presentm then it has a public key.
-                else if (authnStmt != null) {
+                // If an authn stmt is present then it has a public key.
+                if (authnStmt != null) {
 
                     X509Certificate[] certs = null;
                     try {
@@ -286,10 +298,6 @@ public class SAML2Utils {
                                 new Object[]{"cannot get certificate (key holder)"}, e3);
                     }
 
-                } else {
-                    throw new WSSecurityException(WSSecurityException.FAILURE,
-                            "invalidSAMLsecurity",
-                            new Object[]{"cannot get certificate or key "});
                 }
 
 

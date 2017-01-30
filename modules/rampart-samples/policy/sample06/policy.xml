@@ -19,7 +19,7 @@
 					</sp:ProtectionToken>
 					<sp:AlgorithmSuite>
 						<wsp:Policy>
-							<sp:Basic256/>
+							<sp:Basic128/>
 						</wsp:Policy>
 					</sp:AlgorithmSuite>
 					<sp:Layout>
@@ -58,9 +58,6 @@
 								<sp:RequireInternalReference/>
 							</wsp:Policy>
 						</sp:IssuedToken>
-						<sp:SignedParts>
-							<sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing"/>
-						</sp:SignedParts>
 					</wsp:Policy>
 		     </sp:SupportingTokens>
 			<sp:SignedParts>

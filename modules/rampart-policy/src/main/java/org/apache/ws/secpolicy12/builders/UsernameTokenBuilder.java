@@ -47,8 +47,8 @@ public class UsernameTokenBuilder implements AssertionBuilder {
         
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			usernameToken.setOptional((new Boolean(isOptional.getAttributeValue())
-					.booleanValue()));
+			usernameToken.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
+					.booleanValue());
 		}
         
         OMElement policyElement = element.getFirstElement();

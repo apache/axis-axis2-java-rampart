@@ -63,8 +63,8 @@ public class X509TokenBuilder implements AssertionBuilder {
         
         OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
 		if (isOptional != null) {
-			x509Token.setOptional((new Boolean(isOptional.getAttributeValue())
-					.booleanValue()));
+			x509Token.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
+					.booleanValue());
 		}
    
 

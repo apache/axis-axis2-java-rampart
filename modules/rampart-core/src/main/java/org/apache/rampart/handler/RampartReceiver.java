@@ -159,16 +159,30 @@ public class RampartReceiver implements Handler {
         
         msgContext.setProperty(RampartConstants.SEC_FAULT, Boolean.TRUE);    
         String soapVersionURI =  msgContext.getEnvelope().getNamespace().getNamespaceURI();
-        QName invalidSecurity = new QName(WSConstants.INVALID_SECURITY.getNamespaceURI(),WSConstants.INVALID_SECURITY.getLocalPart(),"wsse");
+        QName faultCode = null;
+        /*
+         * Get the faultCode from the thrown WSSecurity exception, if there is one
+         */
+        if (e instanceof WSSecurityException)
+        {        	
+        	faultCode = ((WSSecurityException)e).getFaultCode(); 
+        }
+        /*
+         * Otherwise default to InvalidSecurity
+         */
+        if (faultCode == null)
+        {
+        	faultCode = new QName(WSConstants.INVALID_SECURITY.getNamespaceURI(),WSConstants.INVALID_SECURITY.getLocalPart(),"wsse");
+        }
         
         if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI) ) {
             
-            throw new AxisFault(invalidSecurity,e.getMessage(),e);
+            throw new AxisFault(faultCode,e.getMessage(),e);
                             
         } else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
             
             List subfaultCodes = new ArrayList();
-            subfaultCodes.add(invalidSecurity);
+            subfaultCodes.add(faultCode);
             throw new AxisFault(Constants.FAULT_SOAP12_SENDER,subfaultCodes,e.getMessage(),e);
         
         }        

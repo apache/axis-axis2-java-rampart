@@ -18,6 +18,8 @@ package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.*;
+import org.apache.axiom.soap.SOAP11Constants;
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
@@ -30,10 +32,7 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityEngine;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.saml.SAMLKeyInfo;
 import org.apache.ws.security.saml.SAMLUtil;
@@ -41,6 +40,7 @@ import org.opensaml.SAMLAssertion;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.SubjectConfirmationData;
+import org.opensaml.saml2.core.Conditions;
 
 import javax.xml.namespace.QName;
 import java.security.Principal;
@@ -53,7 +53,8 @@ import java.util.Vector;
 public class RampartEngine {
 
 	private static Log log = LogFactory.getLog(RampartEngine.class);
-	private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
+	private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);
+    private static ServiceNonceCache serviceNonceCache = new ServiceNonceCache();
 
 	public Vector process(MessageContext msgCtx) throws WSSPolicyException,
 	RampartException, WSSecurityException, AxisFault {
@@ -182,10 +183,29 @@ public class RampartEngine {
                     final Assertion assertion = (Assertion) wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
                     String id = assertion.getID();
                     Subject subject = assertion.getSubject();
-                    SubjectConfirmationData scData = subject.getSubjectConfirmations()
-                            .get(0).getSubjectConfirmationData();
-                    Date dateOfCreation = scData.getNotBefore().toDate();
-                    Date dateOfExpiration = scData.getNotOnOrAfter().toDate();
+
+                    Date dateOfCreation = null;
+                    Date dateOfExpiration = null;
+
+                    //Read the validity period from the 'Conditions' element, else read it from SC Data
+                    if (assertion.getConditions() != null) {
+                        Conditions conditions = assertion.getConditions();
+                        if (conditions.getNotBefore() != null) {
+                            dateOfCreation = conditions.getNotBefore().toDate();
+                        }
+                        if (conditions.getNotOnOrAfter() != null) {
+                            dateOfExpiration = conditions.getNotOnOrAfter().toDate();
+                        }
+                    } else {
+                        SubjectConfirmationData scData = subject.getSubjectConfirmations()
+                                .get(0).getSubjectConfirmationData();
+                        if (scData.getNotBefore() != null) {
+                            dateOfCreation = scData.getNotBefore().toDate();
+                        }
+                        if (scData.getNotOnOrAfter() != null) {
+                            dateOfExpiration = scData.getNotOnOrAfter().toDate();
+                        }
+                    }
 
                     // TODO : SAML2KeyInfo element needs to be moved to WSS4J.
                     SAML2KeyInfo saml2KeyInfo = SAML2Utils.
@@ -230,9 +250,42 @@ public class RampartEngine {
 
                 }
             } else if (WSConstants.UT == actInt.intValue()) {
-                String username = ((Principal) wser.get(WSSecurityEngineResult.TAG_PRINCIPAL))
-                        .getName();
+
+		        WSUsernameTokenPrincipal userNameTokenPrincipal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
+
+                String username = userNameTokenPrincipal.getName();
                 msgCtx.setProperty(RampartMessageData.USERNAME, username);
+                
+                if (userNameTokenPrincipal.getNonce() != null) {
+                    // Check whether this is a replay attack. To verify that we need to check whether nonce value
+                    // is a repeating one
+                    int nonceLifeTimeInSeconds = 0;
+
+                    if (rpd.getRampartConfig() != null) {
+                        
+                        String stringLifeTime = rpd.getRampartConfig().getNonceLifeTime();
+
+                        try {
+                            nonceLifeTimeInSeconds = Integer.parseInt(stringLifeTime);
+
+                        } catch (NumberFormatException e) {
+                            log.error("Invalid value for nonceLifeTime in rampart configuration file.", e);
+                            throw new RampartException(
+                                        "invalidNonceLifeTime", e);
+
+                        }
+                    }
+
+                    String serviceEndpointName = msgCtx.getAxisService().getEndpointName();
+
+                    boolean valueRepeating = serviceNonceCache.isNonceRepeatingForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce());
+
+                    if (valueRepeating){
+                        throw new RampartException("repeatingNonceValue", new Object[]{ userNameTokenPrincipal.getNonce(), username} );
+                    }
+
+                    serviceNonceCache.addNonceForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce(), nonceLifeTimeInSeconds);
+                }
             } else if (WSConstants.SIGN == actInt.intValue()) {
                 X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
@@ -274,46 +327,41 @@ public class RampartEngine {
 
 	
 	private boolean isSecurityFault(RampartMessageData rmd) {
-	    
-	    SOAPEnvelope soapEnvelope = rmd.getMsgContext().getEnvelope();    
-	    
-	    SOAPFault soapFault = soapEnvelope.getBody().getFault();
-            
-            // This is not a soap fault
-            if (soapFault == null) {
-                return false;
-            }
-            
-            String soapVersionURI =  rmd.getMsgContext().getEnvelope().getNamespace().getNamespaceURI();
-	   	    
-	    if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI) ) {
-	        
-	        SOAPFaultCode faultCode = soapFault.getCode();
-	        
-	        // This is a fault processing the security header 
-                if (faultCode.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-                   return true;
-                }
-	        
-	        	        
-	    } else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-	        
-	        //TODO AXIOM API returns only one fault sub code, there can be many
-	        SOAPFaultSubCode faultSubCode = soapFault.getCode().getSubCode();
-	        
-	        if (faultSubCode != null) {
-        	        SOAPFaultValue faultSubCodeValue = faultSubCode.getValue();
-        	        
-        	        // This is a fault processing the security header 
-        	        if (faultSubCodeValue != null &&
-        	                faultSubCodeValue.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-        	           return true;
-        	        }
-	        }
-	        
-	    }
-	    
-	    return false;
-	}
 
+		SOAPEnvelope soapEnvelope = rmd.getMsgContext().getEnvelope();
+		SOAPFault soapFault = soapEnvelope.getBody().getFault();
+
+		// This is not a soap fault
+		if (soapFault == null) {
+			return false;
+		}
+
+		String soapVersionURI = rmd.getMsgContext().getEnvelope().getNamespace().getNamespaceURI();
+		SOAPFaultCode faultCode = soapFault.getCode();
+		if(faultCode == null){
+			//If no fault code is given, then it can't be security fault
+			return false;
+		}
+		
+		if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+			// This is a fault processing the security header
+			if (faultCode.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
+				return true;
+			}
+		} else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+			// TODO AXIOM API returns only one fault sub code, there can be many
+			SOAPFaultSubCode faultSubCode = faultCode.getSubCode();
+			if (faultSubCode != null) {
+				SOAPFaultValue faultSubCodeValue = faultSubCode.getValue();
+
+				// This is a fault processing the security header
+				if (faultSubCodeValue != null && faultSubCodeValue.getTextAsQName().
+						getNamespaceURI().equals(WSConstants.WSSE_NS)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 }

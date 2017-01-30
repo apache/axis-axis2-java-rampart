@@ -16,72 +16,72 @@
 
 package org.apache.rahas.impl;
 
-import org.apache.rahas.*;
-import org.apache.rahas.TrustException;
-import org.apache.rahas.impl.util.SignKeyHolder;
-import org.apache.rahas.impl.util.SAMLAttributeCallback;
-import org.apache.rahas.impl.util.SAMLCallbackHandler;
-import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.axiom.om.util.UUIDGenerator;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.*;
+import org.apache.rahas.impl.util.SAMLAttributeCallback;
+import org.apache.rahas.impl.util.SAMLCallbackHandler;
+import org.apache.rahas.impl.util.SignKeyHolder;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.Base64;
+import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
-import org.apache.xml.security.utils.EncryptionConstants;
 import org.apache.xml.security.c14n.Canonicalizer;
 import org.apache.xml.security.signature.XMLSignature;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opensaml.*;
+import org.apache.xml.security.utils.EncryptionConstants;
+import org.joda.time.DateTime;
 import org.opensaml.Configuration;
-import org.opensaml.saml1.core.NameIdentifier;
-import org.opensaml.xml.*;
-import org.opensaml.xml.schema.impl.XSStringBuilder;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.signature.*;
-import org.opensaml.xml.io.*;
-import org.opensaml.common.SAMLVersion;
+import org.opensaml.DefaultBootstrap;
+import org.opensaml.SAMLException;
 import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.common.SAMLVersion;
+import org.opensaml.saml1.core.NameIdentifier;
+import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.core.impl.AssertionBuilder;
+import org.opensaml.saml2.core.impl.ConditionsBuilder;
 import org.opensaml.saml2.core.impl.IssuerBuilder;
 import org.opensaml.saml2.core.impl.NameIDBuilder;
-import org.opensaml.saml2.core.impl.SubjectBuilder;
-import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.metadata.EntitiesDescriptor;
-import org.joda.time.DateTime;
+import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.XMLObjectBuilder;
+import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.xml.io.*;
+import org.opensaml.xml.schema.XSString;
+import org.opensaml.xml.schema.impl.XSStringBuilder;
+import org.opensaml.xml.signature.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Text;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.PrivateKey;
-import java.text.DateFormat;
-import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 public class SAML2TokenIssuer implements TokenIssuer {
 
@@ -97,8 +97,24 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
     private boolean isSymmetricKeyBasedHoK = false;
 
-    private Log log = LogFactory.getLog(SAML2TokenIssuer.class);
+    private static Log log = LogFactory.getLog(SAML2TokenIssuer.class);
 
+    static {
+            try {
+                // Set the "javax.xml.parsers.DocumentBuilderFactory" system property
+                // to the endorsed JAXP impl.
+                System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
+                        "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+                DefaultBootstrap.bootstrap();
+            } catch (ConfigurationException e) {
+                log.error("SAML2TokenIssuerBootstrapError", e);
+                throw new RuntimeException(e);
+            } finally {
+                // Unset the DOM impl to default
+                DocumentBuilderFactoryImpl.setDOOMRequired(false);
+            }
+        }
+    
     public SOAPEnvelope issue(RahasData data) throws TrustException {
         MessageContext inMsgCtx = data.getInMessageContext();
 
@@ -158,14 +174,6 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
             keySize = (keySize == -1) ? config.keySize : keySize;
 
-            // Set the "javax.xml.parsers.DocumentBuilderFactory" sys. property to the endorsed JAMP impl.
-            String property = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-            System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-
-
-            //start building SAML 2.0 token
-            DefaultBootstrap.bootstrap();
-
             //Build the assertion
             AssertionBuilder assertionBuilder = new AssertionBuilder();
             Assertion assertion = assertionBuilder.buildObject();
@@ -190,6 +198,11 @@ public class SAML2TokenIssuer implements TokenIssuer {
             // These variables are used to build the trust assertion
             Date creationTime = creationDate.toDate();
             Date expirationTime = expirationDate.toDate();
+
+            Conditions conditions = new ConditionsBuilder().buildObject();
+            conditions.setNotBefore(creationDate);
+            conditions.setNotOnOrAfter(expirationDate);
+            assertion.setConditions(conditions);
 
             // Create the subject
             Subject subject = createSubject(config, doc, crypto, creationDate, expirationDate, data);
@@ -443,10 +456,9 @@ public class SAML2TokenIssuer implements TokenIssuer {
                 x509CertElem.appendChild(base64CertText);
                 Element x509DataElem = doc.createElementNS(WSConstants.SIG_NS,
                         "ds:X509Data");
-                x509DataElem.appendChild(x509CertElem);
-
-
+                
                 if (x509DataElem != null) {
+                	x509DataElem.appendChild(x509CertElem);
                     keyInfoElem = doc.createElementNS(WSConstants.SIG_NS, "ds:KeyInfo");
                     ((OMElement) x509DataElem).declareNamespace(
                             WSConstants.SIG_NS, WSConstants.SIG_PREFIX);
@@ -596,7 +608,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
      * @return
      * @throws TrustException
      */
-    public SignKeyHolder createSignKeyHolder(SAMLTokenIssuerConfig config, Crypto crypto) throws TrustException {
+    private SignKeyHolder createSignKeyHolder(SAMLTokenIssuerConfig config, Crypto crypto) throws TrustException {
 
         SignKeyHolder signKeyHolder = new SignKeyHolder();
 
@@ -634,28 +646,52 @@ public class SAML2TokenIssuer implements TokenIssuer {
      * @return
      * @throws SAMLException
      */
-    public AttributeStatement createAttributeStatement(RahasData data, SAMLTokenIssuerConfig config) throws SAMLException {
+    private AttributeStatement createAttributeStatement(RahasData data, SAMLTokenIssuerConfig config) throws SAMLException, TrustException {
 
         XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
         SAMLObjectBuilder<AttributeStatement> attrStmtBuilder =
                 (SAMLObjectBuilder<AttributeStatement>) builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
+
+        SAMLObjectBuilder<Attribute> attrBuilder =
+                    (SAMLObjectBuilder<Attribute>) builderFactory.getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
 
         AttributeStatement attrstmt = attrStmtBuilder.buildObject();
 
         Attribute[] attributes = null;
 
         //Call the attribute callback handlers to get any attributes if exists
-        if (config.getCallbackHander() != null) {
+        if (config.getCallbackHandler() != null) {
             SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-            SAMLCallbackHandler handler = config.getCallbackHander();
+            SAMLCallbackHandler handler = config.getCallbackHandler();
             handler.handle(cb);
             attributes = cb.getSAML2Attributes();
         }
+        else if (config.getCallbackHandlerName() != null
+                && config.getCallbackHandlerName().trim().length() > 0) {
+            SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
+            SAMLCallbackHandler handler = null;
+            MessageContext msgContext = data.getInMessageContext();
+            ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
+            Class cbClass = null;
+            try {
+                cbClass = Loader.loadClass(classLoader, config.getCallbackHandlerName());
+            } catch (ClassNotFoundException e) {
+                throw new TrustException("cannotLoadPWCBClass", new String[]{config
+                        .getCallbackHandlerName()}, e);
+            }
+            try {
+                handler = (SAMLCallbackHandler) cbClass.newInstance();
+            } catch (java.lang.Exception e) {
+                throw new TrustException("cannotCreatePWCBInstance", new String[]{config
+                        .getCallbackHandlerName()}, e);
+            }
+            handler.handle(cb);
+            attributes = cb.getSAML2Attributes();
+            // else add the attribute with a default value
+        } 
 
         //else add the attribute with a default value
         else {
-            SAMLObjectBuilder<Attribute> attrBuilder =
-                    (SAMLObjectBuilder<Attribute>) builderFactory.getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
             Attribute attribute = attrBuilder.buildObject();
             attribute.setName("Name");
             attribute.setNameFormat("urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified");
@@ -685,7 +721,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
      * @param data
      * @return
      */
-    public AuthnStatement createAuthnStatement(RahasData data) {
+    private AuthnStatement createAuthnStatement(RahasData data) {
         XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
         MessageContext inMsgCtx = data.getInMessageContext();
 

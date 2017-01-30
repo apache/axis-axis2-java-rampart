@@ -16,11 +16,19 @@
 
 package org.apache.rahas;
 
-import junit.framework.TestCase;
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.dom.DOOMAbstractFactory;
 
+import junit.framework.TestCase;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Date;
 
 public class SimpleTokenStoreTest extends TestCase {
@@ -30,8 +38,7 @@ public class SimpleTokenStoreTest extends TestCase {
         try {
             store.add(getTestToken("id-1"));
         } catch (TrustException e) {
-            fail("Adding a new token to an empty store should not fail, " +
-                 "message : " + e.getMessage());
+            fail("Adding a new token to an empty store should not fail, " + "message : " + e.getMessage());
         }
         Token token = null;
         try {
@@ -40,8 +47,7 @@ public class SimpleTokenStoreTest extends TestCase {
             fail("Adding an existing token must throw an exception");
         } catch (TrustException e) {
             assertEquals("Incorrect exception message",
-                         TrustException.getMessage("tokenAlreadyExists",
-                                                   new String[]{token.getId()}), e.getMessage());
+                         TrustException.getMessage("tokenAlreadyExists", new String[]{token.getId()}), e.getMessage());
         }
     }
 
@@ -76,9 +82,8 @@ public class SimpleTokenStoreTest extends TestCase {
             store.update(token1);
             fail("An exception must be thrown at this point : noTokenToUpdate");
         } catch (TrustException e) {
-            assertEquals("Incorrect exception message", TrustException
-                    .getMessage("noTokenToUpdate", new String[]{token1
-                    .getId()}), e.getMessage());
+            assertEquals("Incorrect exception message",
+                         TrustException.getMessage("noTokenToUpdate", new String[]{token1.getId()}), e.getMessage());
         }
         try {
             store.add(token1);
@@ -133,11 +138,13 @@ public class SimpleTokenStoreTest extends TestCase {
         }
     }
 
-    private Token getTestToken(String tokenId) throws TrustException {
+    private Token getTestToken(String tokenId)
+        throws TrustException {
         return getTestToken(tokenId, new Date());
     }
 
-    private Token getTestToken(String tokenId, Date expiry) throws TrustException {
+    private Token getTestToken(String tokenId, Date expiry)
+        throws TrustException {
         OMFactory factory = DOOMAbstractFactory.getOMFactory();
         OMElement tokenEle = factory.createOMElement("testToken", "", "");
         Token token = new Token(tokenId, tokenEle, new Date(), expiry);
@@ -147,4 +154,48 @@ public class SimpleTokenStoreTest extends TestCase {
         token.setSecret("Top secret!".getBytes());
         return token;
     }
+
+    public void testSerialize()
+        throws Exception {
+        String fileName = "test.ser";
+
+        OMFactory factory = OMAbstractFactory.getOMFactory();
+        OMNamespace ns1 = factory.createOMNamespace("bar", "x");
+        OMElement elt11 = factory.createOMElement("foo1", ns1);
+
+        Token t = new Token("#1232122", elt11, new Date(), new Date());
+
+        SimpleTokenStore store = new SimpleTokenStore();
+        store.add(t);
+
+        FileOutputStream fos = null;
+        ObjectOutputStream out = null;
+
+        try {
+            fos = new FileOutputStream(fileName);
+            out = new ObjectOutputStream(fos);
+            out.writeObject(store);
+        } finally {
+            out.close();
+        }
+
+        SimpleTokenStore store2 = null;
+        FileInputStream fis = null;
+        ObjectInputStream in = null;
+        try {
+            fis = new FileInputStream(fileName);
+            in = new ObjectInputStream(fis);
+            store2 = (SimpleTokenStore)in.readObject();
+            in.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
+
+        assertEquals(store.getToken("#1232122").getId(), store2.getToken("#1232122").getId());
+        assertEquals(store.getToken("#1232122").getCreated(), store2.getToken("#1232122").getCreated());
+
+    }
+
 }

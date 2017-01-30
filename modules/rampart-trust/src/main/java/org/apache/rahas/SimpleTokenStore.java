@@ -21,6 +21,8 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.message.token.Reference;
 
 import javax.xml.namespace.QName;
+
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -29,7 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * In-memory implementation of the token storage
  */
-public class SimpleTokenStore implements TokenStorage {
+public class SimpleTokenStore implements TokenStorage, Serializable {
 
     protected Map tokens = new Hashtable();
     
@@ -185,8 +187,7 @@ public class SimpleTokenStore implements TokenStorage {
         
         } finally {
             readLock.unlock();
-        }
-      
+        }        
         return token;
     }
 
