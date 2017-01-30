@@ -44,6 +44,7 @@ public class SampleTest extends TestCase {
         suite.addTest(new SampleTest("policy", "06"));
         suite.addTest(new SampleTest("policy", "07"));
         suite.addTest(new SampleTest("policy", "08"));
+        suite.addTest(new SampleTest("policy", "09"));
         return suite;
     }
 }

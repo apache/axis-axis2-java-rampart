@@ -26,74 +26,41 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.neethi.Policy;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityEngineResult;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public class RampartEngineTest extends MessageBuilderTestBase {
-
-    public RampartEngineTest(String name) {
-        super(name);
-    }
-
+    /**
+     * Tests that Rampart complains about missing security header in request.
+     * 
+     * @throws Exception
+     */
+    @Test(expected=RampartException.class)
     public void testEmptySOAPMessage() throws Exception {
-
-        try {
-            MessageContext ctx = getMsgCtx();
-
-            String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml";
-            Policy policy = this.loadPolicy(policyXml);
-
-            ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
-
-            RampartEngine engine = new RampartEngine();
-            engine.process(ctx);
-        }
-        catch (RampartException e) {
-            assertEquals("Expected rampart to complain about missing security header",
-                         "Missing wsse:Security header in request", e.getMessage());
-        }
-    }
-
-    public void testValidSOAPMessage() throws Exception {
-
         MessageContext ctx = getMsgCtx();
 
         String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml";
-        Policy policy = loadPolicy(policyXml);
+        Policy policy = this.loadPolicy(policyXml);
 
         ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
 
-        MessageBuilder builder = new MessageBuilder();
-        builder.build(ctx);
-
-        // Building the SOAP envelope from the OMElement
-        buildSOAPEnvelope(ctx);
-
         RampartEngine engine = new RampartEngine();
-        List<WSSecurityEngineResult> results = engine.process(ctx);
-
-        /*
-        The principle purpose of the test case is to verify that the above processes
-        without throwing an exception. However, perform a minimal amount of validation on the
-        results.
-        */
-        assertNotNull("RampartEngine returned null result", results);
-        //verify cert was stored
-        X509Certificate usedCert = null;
-        for (WSSecurityEngineResult result : results) {
-            Integer action = (Integer) result.get(WSSecurityEngineResult.TAG_ACTION);
-            if (action == WSConstants.SIGN) {
-                //the result is for the signature, which contains the used certificate
-                usedCert = (X509Certificate) result.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
-                break;
-            }
-        }
-        assertNotNull("Result of processing did not include a certificate", usedCert);
+        engine.process(ctx);
     }
 
+    @Test
+    public void testValidSOAPMessage() throws Exception {
+        runRampartEngine(getMsgCtx(), "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml");
+    }
+
+    @Test
     public void testValidSOAP12Message() throws Exception {
+        runRampartEngine(getMsgCtx12(), "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml");
+    }
 
-        MessageContext ctx = getMsgCtx12();
-
-        String policyXml = "test-resources/policy/rampart-asymm-binding-6-3des-r15.xml";
+    private void runRampartEngine(MessageContext ctx, String policyXml) throws Exception {
         Policy policy = loadPolicy(policyXml);
 
         ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
@@ -130,7 +97,7 @@ public class RampartEngineTest extends MessageBuilderTestBase {
         SOAPBuilder soapBuilder = new SOAPBuilder();
         SOAPEnvelope env = ctx.getEnvelope();
         ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
-        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, getContentTypeForEnvelope(env), ctx);
+        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, env.getVersion().getMediaType().toString(), ctx);
         ctx.setEnvelope(env);
     }
 }
