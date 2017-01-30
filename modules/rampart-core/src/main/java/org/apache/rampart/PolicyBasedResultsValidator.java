@@ -433,7 +433,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
      * @param data
      * @param results
      */
-    protected void validateProtectionOrder(ValidatorData data, List<WSSecurityEngineResult> results), Vector encryptedParts)
+    protected void validateProtectionOrder(ValidatorData data, List<WSSecurityEngineResult> results, List<WSEncryptionPart> encryptedParts)
     throws RampartException {
         
         String protectionOrder = data.getRampartMessageData().getPolicyData().getProtectionOrder();
@@ -600,7 +600,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
 
             // ignore place holders for encrypted supporting
             // tokens
-            if (encPart.getId() != null && encPart.getId().equals("EncryptedSupportingToken")) {
+            if (encryptedPart.getId() != null && encryptedPart.getId().equals("EncryptedSupportingToken")) {
                 continue;
             }
             
