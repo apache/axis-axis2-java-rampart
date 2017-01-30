@@ -128,19 +128,20 @@
         <create.and.run.client sample.number="08"/>
     </target>
 
-    <target name="setup">
-	<mkdir dir="${endorsed.dir}"/>
-        <get src="http://repo2.maven.org/maven2/xerces/xercesImpl/2.9.1/xercesImpl-2.9.1.jar"
-             dest="${endorsed.dir}/xercesImpl-2.9.1.jar" verbose="true"/>
-    </target>
-
     <!--Sample Service 09-->
     <target name="service.09" if="env.AXIS2_HOME" depends="check.dependency">
         <create.service.repo sample.number="09"/>
     </target>
+
     <!--Sample Client 09-->
     <target  name="client.09" if="env.AXIS2_HOME" depends="check.dependency">
         <create.and.run.client sample.number="09"/>
+    </target>
+
+    <target name="setup">
+	<mkdir dir="${endorsed.dir}"/>
+        <get src="http://repo2.maven.org/maven2/xerces/xercesImpl/2.9.1/xercesImpl-2.9.1.jar"
+             dest="${endorsed.dir}/xercesImpl-2.9.1.jar" verbose="true"/>
     </target>
 
 	<target name="clean">
