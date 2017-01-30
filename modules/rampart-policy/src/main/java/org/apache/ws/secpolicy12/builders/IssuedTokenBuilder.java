@@ -84,9 +84,9 @@ public class IssuedTokenBuilder implements AssertionBuilder<OMElement> {
             Policy policy = PolicyEngine.getPolicy(policyElement);
             policy = (Policy) policy.normalize(false);
 
-            for (Iterator iterator = policy.getAlternatives(); iterator
+            for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator
                     .hasNext();) {
-                processAlternative((List) iterator.next(), issuedToken);
+                processAlternative(iterator.next(), issuedToken);
                 break; // since there should be only one alternative ..
             }
         }
@@ -98,12 +98,12 @@ public class IssuedTokenBuilder implements AssertionBuilder<OMElement> {
         return new QName[] { SP12Constants.ISSUED_TOKEN };
     }
 
-    private void processAlternative(List assertions, IssuedToken parent) {
+    private void processAlternative(List<Assertion> assertions, IssuedToken parent) {
         Assertion assertion;
         QName name;
 
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            assertion = (Assertion) iterator.next();
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+            assertion = iterator.next();
             name = assertion.getName();
 
             if (SP12Constants.REQUIRE_DERIVED_KEYS.equals(name)) {

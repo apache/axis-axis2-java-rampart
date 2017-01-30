@@ -20,9 +20,8 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axis2.addressing.AddressingConstants;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -33,13 +32,14 @@ import org.apache.neethi.PolicyEngine;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
-import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.client.STSClient;
 import org.apache.rampart.RampartMessageData;
 import org.apache.ws.secpolicy.SP11Constants;
-import org.apache.ws.secpolicy.SPConstants;
-import org.opensaml.XML;
+import org.opensaml.common.xml.SAMLConstants;
+
+import java.io.FileInputStream;
+import java.net.URL;
 
 import javax.xml.namespace.QName;
 
@@ -59,7 +59,7 @@ public class Client {
 		String action = TrustUtil.getActionValue(RahasConstants.VERSION_05_02, RahasConstants.RST_ACTION_ISSUE);
 		stsClient.setAction(action);
 		
-		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample05/policy.xml"), "http://localhost:8080/axis2/services/STS", loadPolicy("sample05/sts_policy.xml"), null);
+		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample05/policy.xml"), new URL(new URL(args[0]), "/axis2/services/STS").toString(), loadPolicy("sample05/sts_policy.xml"), null);
 		
 	        System.out.println("\n############################# Requested Token ###################################\n");
 	        System.out.println(responseToken.getToken().toString());
@@ -87,7 +87,7 @@ public class Client {
 	}
 
 	private static Policy loadPolicy(String xmlPath) throws Exception {
-		StAXOMBuilder builder = new StAXOMBuilder(xmlPath);
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(xmlPath));
 		return PolicyEngine.getPolicy(builder.getDocumentElement());
 	}
 	
@@ -95,7 +95,7 @@ public class Client {
         OMElement rst = resp.getFirstChildWithName(new QName(RahasConstants.WST_NS_05_02,
                                                              RahasConstants.IssuanceBindingLocalNames.
                                                                      REQUESTED_SECURITY_TOKEN));
-        OMElement elem = rst.getFirstChildWithName(new QName(XML.SAML_NS, "Assertion"));
+        OMElement elem = rst.getFirstChildWithName(new QName( SAMLConstants.SAML20_NS , "Assertion"));
         return elem;
     }
 

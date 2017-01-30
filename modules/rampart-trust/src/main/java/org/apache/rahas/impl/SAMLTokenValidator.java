@@ -184,7 +184,7 @@ public class SAMLTokenValidator implements TokenValidator {
                         inMsgCtx.getAxisService().getClassLoader());
             }
 
-            X509Certificate issuerCert = CommonUtil.getCertificateByAlias(crypto,config.issuerKeyAlias);
+            X509Certificate issuerCert = CommonUtil.getCertificateByAlias(crypto,config.getIssuerKeyAlias());
 
             issuerPBKey = issuerCert.getPublicKey();
 

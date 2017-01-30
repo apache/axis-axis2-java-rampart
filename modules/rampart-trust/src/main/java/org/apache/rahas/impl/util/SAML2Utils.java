@@ -1,5 +1,5 @@
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
+ * Copyright The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,31 +17,34 @@
 
 package org.apache.rahas.impl.util;
 
-import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.dom.DOMMetaFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.ws.security.*;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.handler.RequestData;
-import org.apache.ws.security.processor.EncryptedKeyProcessor;
 import org.apache.ws.security.util.Base64;
+import org.apache.ws.security.util.UUIDGenerator;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.keys.KeyInfo;
 import org.apache.xml.security.keys.content.X509Data;
 import org.apache.xml.security.keys.content.x509.XMLX509Certificate;
+import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
+import org.opensaml.common.SAMLVersion;
+import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.*;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.io.*;
-import org.w3c.dom.*;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSOutput;
-import org.w3c.dom.ls.LSSerializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 import javax.security.auth.callback.Callback;
@@ -51,10 +54,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.Iterator;
 import java.util.List;
 
 public class SAML2Utils {
@@ -64,41 +65,10 @@ public class SAML2Utils {
     public static Element getElementFromAssertion(XMLObject xmlObj) throws TrustException {
         try {
             
-            String jaxpProperty = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-            //System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-
             MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(xmlObj);
-            Element element = marshaller.marshall(xmlObj);
-
-            // Reset the sys. property to its previous value.
-            if (jaxpProperty == null) {
-                System.getProperties().remove("javax.xml.parsers.DocumentBuilderFactory");
-            } else {
-                System.setProperty("javax.xml.parsers.DocumentBuilderFactory", jaxpProperty);
-            }
-
-            ByteArrayOutputStream byteArrayOutputStrm = new ByteArrayOutputStream();
-
-            DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
-
-            DOMImplementationLS impl =
-                    (DOMImplementationLS) registry.getDOMImplementation("LS");
-
-            LSSerializer writer = impl.createLSSerializer();
-            LSOutput output = impl.createLSOutput();
-            output.setByteStream(byteArrayOutputStrm);
-            writer.write(element, output);
-            String elementString = byteArrayOutputStrm.toString();
-
-            DocumentBuilderFactoryImpl.setDOOMRequired(true);
-
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setNamespaceAware(true);
-            DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = docBuilder.parse(new ByteArrayInputStream(elementString.trim().getBytes()));
-            Element assertionElement = document.getDocumentElement();
-            DocumentBuilderFactoryImpl.setDOOMRequired(false);
+            Element assertionElement = marshaller.marshall(xmlObj,
+                    ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory().newDocumentBuilder().newDocument());
 
             log.debug("DOM element is created successfully from the OpenSAML2 XMLObject");
             return assertionElement;
@@ -108,16 +78,18 @@ public class SAML2Utils {
         }
     }
 
-     /**
+    /**
      * Extract certificates or the key available in the SAMLAssertion
      *
-     * @param elem
+     * @param elem  The element to process.
+     * @param crypto The crypto properties.
+     * @param cb Callback class to get the Key
      * @return the SAML2 Key Info
-     * @throws org.apache.ws.security.WSSecurityException
+     * @throws org.apache.ws.security.WSSecurityException If an error occurred while extracting KeyInfo.
      *
      */
     public static SAML2KeyInfo getSAML2KeyInfo(Element elem, Crypto crypto,
-                                              CallbackHandler cb) throws WSSecurityException, TrustException {
+                                              CallbackHandler cb) throws WSSecurityException {
         Assertion assertion;
 
         //build the assertion by unmarhalling the DOM element.
@@ -186,7 +158,7 @@ public class SAML2Utils {
                 }
 
                 // extract the subject confirmation element from the subject
-                SubjectConfirmation subjectConf = (SubjectConfirmation) samlSubject.getSubjectConfirmations().get(0);
+                SubjectConfirmation subjectConf = samlSubject.getSubjectConfirmations().get(0);
                 if (subjectConf == null) {
                     throw new WSSecurityException(WSSecurityException.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no Subject Confirmation)"});
@@ -203,9 +175,7 @@ public class SAML2Utils {
                 // Get the SAML specific XML representation of the keyInfo object
                 XMLObject KIElem = null;
                 List<XMLObject> scDataElements = scData.getOrderedChildren();
-                Iterator<XMLObject> iterator = scDataElements.iterator();
-                while (iterator.hasNext()) {
-                    XMLObject xmlObj = iterator.next();
+                for (XMLObject xmlObj : scDataElements) {
                     if (xmlObj instanceof org.opensaml.xml.signature.KeyInfo) {
                         KIElem = xmlObj;
                         break;
@@ -217,20 +187,14 @@ public class SAML2Utils {
                 // Generate a DOM element from the XMLObject.
                 if (KIElem != null) {
 
-                    // Set the "javax.xml.parsers.DocumentBuilderFactory" system property to make sure the endorsed JAXP
-                    // implementation is picked over the default jaxp impl shipped with the JDK.
-                    String jaxpProperty = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-                    //System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-
                     MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
                     Marshaller marshaller = marshallerFactory.getMarshaller(KIElem);
-                    keyInfoElement = marshaller.marshall(KIElem);
-
-                    // Reset the sys. property to its previous value.
-                    if (jaxpProperty == null) {
-                        System.getProperties().remove("javax.xml.parsers.DocumentBuilderFactory");
-                    } else {
-                        System.setProperty("javax.xml.parsers.DocumentBuilderFactory", jaxpProperty);
+                    try {
+                        keyInfoElement = marshaller.marshall(KIElem,
+                                ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory().newDocumentBuilder().newDocument());
+                    } catch (ParserConfigurationException ex) {
+                        // We never get here
+                        throw new Error(ex);
                     }
 
                 } else {
@@ -239,9 +203,9 @@ public class SAML2Utils {
                 }
 
                 AttributeStatement attrStmt = assertion.getAttributeStatements().size() != 0 ?
-                        (AttributeStatement) assertion.getAttributeStatements().get(0) : null;
+                        assertion.getAttributeStatements().get(0) : null;
                 AuthnStatement authnStmt = assertion.getAuthnStatements().size() != 0 ?
-                        (AuthnStatement) assertion.getAuthnStatements().get(0) : null;
+                        assertion.getAuthnStatements().get(0) : null;
 
                 // if an attr stmt is present, then it has a symmetric key.
                 if (attrStmt != null) {
@@ -270,7 +234,7 @@ public class SAML2Utils {
                 // If an authn stmt is present then it has a public key.
                 if (authnStmt != null) {
 
-                    X509Certificate[] certs = null;
+                    X509Certificate[] certs;
                     try {
                         KeyInfo ki = new KeyInfo(keyInfoElement, null);
 
@@ -322,6 +286,58 @@ public class SAML2Utils {
         }
         return subjectConfirmationMethod;
     }
+
+
+    public static Assertion createAssertion() throws TrustException {
+        try {
+            Assertion assertion = (Assertion)CommonUtil.buildXMLObject(Assertion.DEFAULT_ELEMENT_NAME);
+            assertion.setVersion(SAMLVersion.VERSION_20);
+
+            // Set an UUID as the ID of an assertion
+            assertion.setID(UUIDGenerator.getUUID());
+            return assertion;
+        } catch (TrustException e) {
+            throw new TrustException("Unable to create an Assertion object", e);
+        }
+    }
+
+    public static Issuer createIssuer(String issuerName) throws TrustException {
+        try {
+            Issuer issuer = (Issuer)CommonUtil.buildXMLObject(Issuer.DEFAULT_ELEMENT_NAME);
+            issuer.setValue(issuerName);
+            return issuer;
+        } catch (TrustException e) {
+            throw new TrustException("Unable to create an Issuer object", e);
+        }
+    }
+
+    public static Conditions createConditions(DateTime creationTime, DateTime expirationTime) throws TrustException {
+        try {
+            Conditions conditions = (Conditions)CommonUtil.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME);
+            conditions.setNotBefore(creationTime);
+            conditions.setNotOnOrAfter(expirationTime);
+            return conditions;
+        } catch (TrustException e) {
+            throw new TrustException("Unable to create an Conditions object");
+        }
+    }
+
+/**
+     * Create named identifier.
+     * @param principalName Name of the subject.
+     * @param format Format of the subject, whether it is an email, uid etc ...
+     * @return The NamedIdentifier object.
+     * @throws org.apache.rahas.TrustException If unable to find the builder.
+     */
+    public static NameID createNamedIdentifier(String principalName, String format) throws TrustException{
+
+        NameID nameId = (NameID)CommonUtil.buildXMLObject(NameID.DEFAULT_ELEMENT_NAME);
+        nameId.setValue(principalName);
+        nameId.setFormat(format);
+
+        return nameId;
+    }
+
 
 }
 

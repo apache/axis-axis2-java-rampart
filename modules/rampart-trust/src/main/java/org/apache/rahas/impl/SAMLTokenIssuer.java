@@ -20,7 +20,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
@@ -33,7 +32,6 @@ import org.apache.rahas.impl.util.*;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.WSUsernameTokenPrincipal;
 import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
 import org.apache.ws.security.util.Loader;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 
@@ -64,60 +62,43 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
     private String configFile;
 
-
-    //TODO move this to TrustUtil
-    private static final String  AUTHENTICATION_METHOD_PASSWORD = "urn:oasis:names:tc:SAML:1.0:am:password";
-
     private static final Log log = LogFactory.getLog(SAMLTokenIssuer.class);
 
     public SOAPEnvelope issue(RahasData data) throws TrustException {
         MessageContext inMsgCtx = data.getInMessageContext();
 
-        SAMLTokenIssuerConfig config = null;
-        if (this.configElement != null) {
-            config = new SAMLTokenIssuerConfig(configElement
-                            .getFirstChildWithName(SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
-        }
+        SAMLTokenIssuerConfig tokenIssuerConfiguration = CommonUtil.getTokenIssuerConfiguration(this.configElement,
+                    this.configFile, inMsgCtx.getParameter(this.configParamName));
 
-        // Look for the file
-        if (config == null && this.configFile != null) {
-            config = new SAMLTokenIssuerConfig(this.configFile);
-        }
+        if (tokenIssuerConfiguration == null) {
 
-        // Look for the param
-        if (config == null && this.configParamName != null) {
-            Parameter param = inMsgCtx.getParameter(this.configParamName);
-            if (param != null && param.getParameterElement() != null) {
-                config = new SAMLTokenIssuerConfig(param
-                        .getParameterElement().getFirstChildWithName(
-                                SAMLTokenIssuerConfig.SAML_ISSUER_CONFIG));
-            } else {
-                throw new TrustException("expectedParameterMissing",
-                        new String[] { this.configParamName });
+            if (log.isDebugEnabled()) {
+                String parameterName;
+                if (this.configElement != null) {
+                    parameterName = "OMElement - " + this.configElement.toString();
+                } else if (this.configFile != null) {
+                    parameterName = "File - " + this.configFile;
+                } else if (this.configParamName != null) {
+                    parameterName = "With message context parameter name - " + this.configParamName;
+                } else {
+                    parameterName = "No method to build configurations";
+                }
+
+                log.debug("Unable to build token configurations, " + parameterName);
             }
-        }
 
-        if (config == null) {
             throw new TrustException("configurationIsNull");
         }
 
         SOAPEnvelope env = TrustUtil.createSOAPEnvelope(inMsgCtx
                 .getEnvelope().getNamespace().getNamespaceURI());
 
-        Crypto crypto;
-        if (config.cryptoElement != null) { // crypto props defined as elements
-            crypto = CommonUtil.getCrypto(TrustUtil
-                    .toProperties(config.cryptoElement), inMsgCtx
+        Crypto crypto = tokenIssuerConfiguration.getIssuerCrypto(inMsgCtx
                     .getAxisService().getClassLoader());
-
-        } else { // crypto props defined in a properties file
-            crypto = CommonUtil.getCrypto(config.cryptoPropertiesFile, inMsgCtx
-                    .getAxisService().getClassLoader());
-        }
 
         // Creation and expiration times
         DateTime creationTime = new DateTime();
-        DateTime expirationTime = new DateTime(creationTime.getMillis() + config.ttl);
+        DateTime expirationTime = new DateTime(creationTime.getMillis() + tokenIssuerConfiguration.getTtl());
 
         // Get the document
         Document doc = ((Element) env).getOwnerDocument();
@@ -125,7 +106,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
         // Get the key size and create a new byte array of that size
         int keySize = data.getKeysize();
 
-        keySize = (keySize == -1) ? config.keySize : keySize;
+        keySize = (keySize == -1) ? tokenIssuerConfiguration.getKeySize() : keySize;
 
         /*
          * Find the KeyType If the KeyType is SymmetricKey or PublicKey,
@@ -147,10 +128,10 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
         if (keyType.endsWith(RahasConstants.KEY_TYPE_SYMM_KEY)
                 || keyType.endsWith(RahasConstants.KEY_TYPE_PUBLIC_KEY)) {
-            assertion = createHoKAssertion(config, doc, crypto,
+            assertion = createHoKAssertion(tokenIssuerConfiguration, doc, crypto,
                     creationTime, expirationTime, data);
         } else if (keyType.endsWith(RahasConstants.KEY_TYPE_BEARER)) {
-            assertion = createBearerAssertion(config, doc, crypto,
+            assertion = createBearerAssertion(tokenIssuerConfiguration, doc, crypto,
                     creationTime, expirationTime, data);
         } else {
             throw new TrustException("unsupportedKeyType");
@@ -176,11 +157,11 @@ public class SAMLTokenIssuer implements TokenIssuer {
             TrustUtil.createKeySizeElement(wstVersion, rstrElem, keySize);
         }
 
-        if (config.addRequestedAttachedRef) {
+        if (tokenIssuerConfiguration.isAddRequestedAttachedRef()) {
             TrustUtil.createRequestedAttachedRef(rstrElem, assertion.getID(),wstVersion);
         }
 
-        if (config.addRequestedUnattachedRef) {
+        if (tokenIssuerConfiguration.isAddRequestedUnattachedRef()) {
             TrustUtil.createRequestedUnattachedRef(rstrElem, assertion.getID(),wstVersion);
         }
 
@@ -221,11 +202,11 @@ public class SAMLTokenIssuer implements TokenIssuer {
         }*/
 
         if (keyType.endsWith(RahasConstants.KEY_TYPE_SYMM_KEY)
-                && config.keyComputation != SAMLTokenIssuerConfig.KeyComputation.KEY_COMP_USE_REQ_ENT) {
+                && tokenIssuerConfiguration.getKeyComputation() != SAMLTokenIssuerConfig.KeyComputation.KEY_COMP_USE_REQ_ENT) {
 
             // Add the RequestedProofToken
             TokenIssuerUtil.handleRequestedProofToken(data, wstVersion,
-                    config, rstrElem, assertionToken, doc);
+                    tokenIssuerConfiguration, rstrElem, assertionToken, doc);
         }
 
         return env;
@@ -298,12 +279,12 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
                 // set keySize
                 int keySize = data.getKeysize();
-                keySize = (keySize != -1) ? keySize : config.keySize;
+                keySize = (keySize != -1) ? keySize : config.getKeySize();
 
                 // Create the encrypted key
                 KeyInfo encryptedKeyInfoElement
-                        = SAMLUtils.getSymmetricKeyBasedKeyInfo(doc, data, serviceCert, keySize,
-                        crypto, config.keyComputation);
+                        = CommonUtil.getSymmetricKeyBasedKeyInfo(doc, data, serviceCert, keySize,
+                        crypto, config.getKeyComputation());
 
                 return this.createAttributeAssertion(data, encryptedKeyInfoElement, nameIdentifier, config,
                     crypto, creationTime, expirationTime);
@@ -350,7 +331,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
                     clientCert = CommonUtil.getCertificateByAlias(crypto,data.getPrincipal().getName());;
                 }
 
-                KeyInfo keyInfo = SAMLUtils.getCertificateBasedKeyInfo(clientCert);
+                KeyInfo keyInfo = CommonUtil.getCertificateBasedKeyInfo(clientCert);
 
                 return this.createAuthAssertion(RahasConstants.SAML11_SUBJECT_CONFIRMATION_HOK, nameId, keyInfo,
                         config, crypto, creationTime, expirationTime, data);
@@ -376,15 +357,15 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
         // TODO a duplicate method !!
         if (serviceAddress != null && !"".equals(serviceAddress)) {
-            String alias = (String) config.trustedServices.get(serviceAddress);
+            String alias = (String) config.getTrustedServices().get(serviceAddress);
             if (alias != null) {
                 return CommonUtil.getCertificateByAlias(crypto,alias);
             } else {
-                alias = (String) config.trustedServices.get("*");
+                alias = (String) config.getTrustedServices().get("*");
                 return CommonUtil.getCertificateByAlias(crypto,alias);
             }
         } else {
-            String alias = (String) config.trustedServices.get("*");
+            String alias = (String) config.getTrustedServices().get("*");
             return CommonUtil.getCertificateByAlias(crypto,alias);
         }
 
@@ -412,47 +393,28 @@ public class SAMLTokenIssuer implements TokenIssuer {
             Subject subject
                     = SAMLUtils.createSubject(subjectNameId, RahasConstants.SAML11_SUBJECT_CONFIRMATION_HOK, keyInfo);
 
-            Attribute[] attrs;
-            if (config.getCallbackHandler() != null) {
-                SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-                SAMLCallbackHandler handler = config.getCallbackHandler();
+            Attribute[] attributes;
+
+            SAMLCallbackHandler handler = CommonUtil.getSAMLCallbackHandler(config, data);
+
+            SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
+            if (handler != null) {
                 handler.handle(cb);
-                attrs = cb.getAttributes();
-            } else if (config.getCallbackHandlerName() != null
-                    && config.getCallbackHandlerName().trim().length() > 0) {
-                SAMLAttributeCallback cb = new SAMLAttributeCallback(data);
-                SAMLCallbackHandler handler = null;
-                MessageContext msgContext = data.getInMessageContext();
-                ClassLoader classLoader = msgContext.getAxisService().getClassLoader();
-                Class cbClass;
-                try {
-                    cbClass = Loader.loadClass(classLoader, config.getCallbackHandlerName());
-                } catch (ClassNotFoundException e) {
-                    throw new TrustException("cannotLoadPWCBClass", new String[]{config
-                            .getCallbackHandlerName()}, e);
-                }
-                try {
-                    handler = (SAMLCallbackHandler) cbClass.newInstance();
-                } catch (java.lang.Exception e) {
-                    throw new TrustException("cannotCreatePWCBInstance", new String[]{config
-                            .getCallbackHandlerName()}, e);
-                }
-                handler.handle(cb);
-                attrs = cb.getAttributes();
+                attributes = cb.getAttributes();
             } else {
                 //TODO Remove this after discussing
                 Attribute attribute = SAMLUtils.createAttribute("Name", "https://rahas.apache.org/saml/attrns",
                         "Colombo/Rahas");
-                attrs = new Attribute[]{attribute};
+                attributes = new Attribute[]{attribute};
             }
 
-            AttributeStatement attributeStatement = SAMLUtils.createAttributeStatement(subject, Arrays.asList(attrs));
+            AttributeStatement attributeStatement = SAMLUtils.createAttributeStatement(subject, Arrays.asList(attributes));
 
 
             List<Statement> attributeStatements = new ArrayList<Statement>();
             attributeStatements.add(attributeStatement);
 
-            Assertion assertion = SAMLUtils.createAssertion(config.issuerName, notBefore,
+            Assertion assertion = SAMLUtils.createAssertion(config.getIssuerName(), notBefore,
                     notAfter, attributeStatements);
 
             SAMLUtils.signAssertion(assertion, crypto, config.getIssuerKeyAlias(), config.getIssuerKeyPassword());
@@ -485,7 +447,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
             Subject subject = SAMLUtils.createSubject(subjectNameId,confirmationMethod, keyInfo);
 
             AuthenticationStatement authenticationStatement
-                    = SAMLUtils.createAuthenticationStatement(subject, AUTHENTICATION_METHOD_PASSWORD,
+                    = SAMLUtils.createAuthenticationStatement(subject, RahasConstants.AUTHENTICATION_METHOD_PASSWORD,
                     notBefore);
 
             List<Statement> statements = new ArrayList<Statement>();
@@ -498,7 +460,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
             statements.add(authenticationStatement);
 
-            Assertion assertion = SAMLUtils.createAssertion(config.issuerName,
+            Assertion assertion = SAMLUtils.createAssertion(config.getIssuerName(),
                     notBefore, notAfter, statements);
 
             // Signing the assertion

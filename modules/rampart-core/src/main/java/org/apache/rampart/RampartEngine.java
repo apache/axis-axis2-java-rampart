@@ -16,13 +16,8 @@
 
 package org.apache.rampart;
 
-import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFault;
-import org.apache.axiom.soap.SOAPFaultCode;
-import org.apache.axiom.soap.SOAPFaultSubCode;
-import org.apache.axiom.soap.SOAPFaultValue;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
@@ -32,17 +27,39 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
 import org.apache.rampart.policy.RampartPolicyData;
+import org.apache.rampart.policy.model.KerberosConfig;
+import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.saml.SAMLAssertionHandler;
 import org.apache.rampart.saml.SAMLAssertionHandlerFactory;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.*;
+import org.apache.ws.secpolicy.model.KerberosToken;
+import org.apache.ws.secpolicy.model.SupportingToken;
+import org.apache.ws.secpolicy.model.UsernameToken;
+import org.apache.ws.security.NamePasswordCallbackHandler;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSPasswordCallback;
+import org.apache.ws.security.WSSConfig;
+import org.apache.ws.security.WSSecurityEngine;
+import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.WSUsernameTokenPrincipal;
 import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.validate.KerberosTokenDecoder;
+import org.apache.ws.security.validate.KerberosTokenValidator;
 
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.xml.namespace.QName;
+
+import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 public class RampartEngine {
 
@@ -88,8 +105,93 @@ public class RampartEngine {
 		List<WSSecurityEngineResult> results;
 
 		WSSecurityEngine engine = new WSSecurityEngine();
+		
+		//Set rampart's configuration of WSS4J
+		engine.setWssConfig(rmd.getConfig());
 
-		ValidatorData data = new ValidatorData(rmd);
+        RampartConfig rampartConfig = rpd.getRampartConfig();
+        if (rampartConfig != null) {
+            WSSConfig config = engine.getWssConfig();
+
+            // Inbound Kerberos authentication for web services
+            // Check the service policy for Kerberos token and add KerberosTokenValidator for BINARY_TOKEN validation
+            SupportingToken endSupptokens = rpd.getEndorsingSupportingTokens();
+            if (endSupptokens != null && endSupptokens.getTokens() != null &&
+                endSupptokens.getTokens().size() > 0) {
+                
+                log.debug("Processing endorsing supporting tokens");
+                
+                for (org.apache.ws.secpolicy.model.Token token : endSupptokens.getTokens()) {
+                    if (token instanceof KerberosToken) {
+                        log.debug("KerberosToken is found as part of the endorsing supporting tokens.Check for KerberosConfig.");
+                        KerberosConfig kerberosConfig = rampartConfig.getKerberosConfig();
+                        
+                        if (null != kerberosConfig){
+                            log.debug("KerberosConfig is found.");
+                            log.debug("Creating KerberosTokenValidor with the available KerberosConfig.");
+                            KerberosTokenValidator kerberosValidator = new KerberosTokenValidator();
+                            
+                            KerberosTokenDecoder kerberosTokenDecoder = RampartUtil.getKerberosTokenDecoder(msgCtx, kerberosConfig);
+                            if (kerberosTokenDecoder != null) {
+                                kerberosValidator.setKerberosTokenDecoder(kerberosTokenDecoder);
+                            }
+                            kerberosValidator.setContextName(kerberosConfig.getJaasContext());
+                            kerberosValidator.setServiceName(kerberosConfig.getServicePrincipalName());
+                            String serviceNameForm = kerberosConfig.getServicePrincipalNameForm();
+                            
+                            if (KerberosConfig.USERNAME_NAME_FORM.equals(serviceNameForm)) {
+                                kerberosValidator.setUsernameServiceNameForm(true);    
+                            }
+                            
+                            String principalName = kerberosConfig.getPrincipalName();
+                            if (null == principalName){
+                                log.debug("Principal name is not available in the KerberosConfig.Using the Rampart configuration's user.");
+                                principalName = rampartConfig.getUser();
+                            }
+                            
+                            String password = kerberosConfig.getPrincipalPassword();
+                            if (password == null) {
+                                log.debug("Principal password is not available in the KerberosConfig.Trying with the configured Rampart password callback.");
+                                CallbackHandler handler = RampartUtil.getPasswordCB(rmd);
+
+                                if (handler != null) {
+                                    WSPasswordCallback[] cb = { 
+                                            new WSPasswordCallback(principalName, WSPasswordCallback.CUSTOM_TOKEN) 
+                                    };
+                                    
+                                    try {
+                                        handler.handle(cb);
+                                        if (cb[0].getPassword() != null && !"".equals(cb[0].getPassword())) {
+                                            password = cb[0].getPassword();
+                                        }
+                                    } catch (IOException e) {
+                                        throw new RampartException("errorInGettingPasswordForUser", new String[] { principalName }, e);
+                                    } catch (UnsupportedCallbackException e) {
+                                        throw new RampartException("errorInGettingPasswordForUser", new String[] { principalName }, e);
+                                    }
+                                } else{
+                                    log.debug("No Rampart password handler is configured.");
+                                }
+                            }
+                            
+                            if (principalName != null && password != null) {
+                                NamePasswordCallbackHandler cb = new NamePasswordCallbackHandler(principalName, password);                            
+                                kerberosValidator.setCallbackHandler(cb);
+                            }
+                            
+                            config.setValidator(WSSecurityEngine.BINARY_TOKEN, kerberosValidator);
+                            log.debug("KerberosTokenValidator is configured and set for BINARY_TOKEN.");
+                        } else {
+                            log.debug("KerberosConfig is not found.Skipping configurating and setting of a Kerberos validator.");
+                        }
+                    }
+                }
+            }
+            
+            engine.setWssConfig(config);
+        }
+
+        ValidatorData data = new ValidatorData(rmd);
 
 		SOAPHeader header = rmd.getMsgContext().getEnvelope().getHeader();
 		if(header == null) {
@@ -119,8 +221,20 @@ public class RampartEngine {
 			t0 = System.currentTimeMillis();
 		}
 
-		String actorValue = secHeader.getAttributeValue(new QName(rmd
-				.getSoapConstants().getEnvelopeURI(), "actor"));
+		//wss4j does not allow username tokens with no password per default, see https://issues.apache.org/jira/browse/WSS-420
+		//configure it to allow them explicitly if at least one username token assertion with no password requirement is found
+		if (!rmd.isInitiator()) {
+		    Collection<UsernameToken> usernameTokens = RampartUtil.getUsernameTokens(rpd);
+		    for (UsernameToken usernameTok : usernameTokens) {
+		        if (usernameTok.isNoPassword()) {
+		            log.debug("Found UsernameToken with no password assertion in policy, configuring ws security processing to allow username tokens without password." );
+		            engine.getWssConfig().setAllowUsernameTokenNoPassword(true);
+		            break;
+		        }
+		    }
+		}
+		
+		String actorValue = secHeader.getRole();
 
 		Crypto signatureCrypto = RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
         		msgCtx.getAxisService().getClassLoader());
@@ -165,89 +279,90 @@ public class RampartEngine {
 		
 		//Store username in MessageContext property
 
-        for (int j = 0; j < results.size(); j++) {
-            WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
-            final Integer actInt =
-                    (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
-            if (WSConstants.ST_UNSIGNED == actInt.intValue()) {
+        if (results != null) {
+            for (int j = 0; j < results.size(); j++) {
+                WSSecurityEngineResult wser = (WSSecurityEngineResult) results.get(j);
+                final Integer actInt =
+                        (Integer) wser.get(WSSecurityEngineResult.TAG_ACTION);
+                if (WSConstants.ST_UNSIGNED == actInt.intValue()) {
 
-                Object samlAssertion = wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
+                    Object samlAssertion = wser.get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
 
-                SAMLAssertionHandler samlAssertionHandler
-                        = SAMLAssertionHandlerFactory.createAssertionHandler(samlAssertion);
+                    SAMLAssertionHandler samlAssertionHandler
+                            = SAMLAssertionHandlerFactory.createAssertionHandler(samlAssertion);
 
-                if (samlAssertionHandler.isBearerAssertion()) {
-                    break;
-                }
-                //Store the token
-                try {
-                    TokenStorage store = rmd.getTokenStorage();
-                    if (store.getToken(samlAssertionHandler.getAssertionId()) == null) {
-                        Token token = new Token(samlAssertionHandler.getAssertionId(),
-                                samlAssertionHandler.getAssertionElement(),
-                                samlAssertionHandler.getDateNotBefore(),
-                                samlAssertionHandler.getDateNotOnOrAfter());
-
-                        token.setSecret(samlAssertionHandler.
-                                getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler));
-                        store.add(token);
+                    if (samlAssertionHandler.isBearerAssertion()) {
+                        break;
                     }
-                } catch (Exception e) {
-                    throw new RampartException(
-                            "errorInAddingTokenIntoStore", e);
-                }
-            } else if (WSConstants.UT == actInt) {
+                    //Store the token
+                    try {
+                        TokenStorage store = rmd.getTokenStorage();
+                        if (store.getToken(samlAssertionHandler.getAssertionId()) == null) {
+                            Token token = new Token(samlAssertionHandler.getAssertionId(),
+                                    samlAssertionHandler.getAssertionElement(),
+                                    samlAssertionHandler.getDateNotBefore(),
+                                    samlAssertionHandler.getDateNotOnOrAfter());
 
-		        WSUsernameTokenPrincipal userNameTokenPrincipal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
-
-                String username = userNameTokenPrincipal.getName();
-                msgCtx.setProperty(RampartMessageData.USERNAME, username);
-                
-                if (userNameTokenPrincipal.getNonce() != null) {
-                    // Check whether this is a replay attack. To verify that we need to check whether nonce value
-                    // is a repeating one
-                    int nonceLifeTimeInSeconds = 0;
-
-                    if (rpd.getRampartConfig() != null) {
-                        
-                        String stringLifeTime = rpd.getRampartConfig().getNonceLifeTime();
-
-                        try {
-                            nonceLifeTimeInSeconds = Integer.parseInt(stringLifeTime);
-
-                        } catch (NumberFormatException e) {
-                            log.error("Invalid value for nonceLifeTime in rampart configuration file.", e);
-                            throw new RampartException(
-                                        "invalidNonceLifeTime", e);
-
+                            token.setSecret(samlAssertionHandler.
+                                    getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler));
+                            store.add(token);
                         }
+                    } catch (Exception e) {
+                        throw new RampartException(
+                                "errorInAddingTokenIntoStore", e);
+                    }
+                } else if (WSConstants.UT == actInt) {
+
+                    WSUsernameTokenPrincipal userNameTokenPrincipal = (WSUsernameTokenPrincipal)wser.get(WSSecurityEngineResult.TAG_PRINCIPAL);
+
+                    String username = userNameTokenPrincipal.getName();
+                    msgCtx.setProperty(RampartMessageData.USERNAME, username);
+                    
+                    if (userNameTokenPrincipal.getNonce() != null) {
+                        // Check whether this is a replay attack. To verify that we need to check whether nonce value
+                        // is a repeating one
+                        int nonceLifeTimeInSeconds = 0;
+
+                        if (rpd.getRampartConfig() != null) {
+                            
+                            String stringLifeTime = rpd.getRampartConfig().getNonceLifeTime();
+
+                            try {
+                                nonceLifeTimeInSeconds = Integer.parseInt(stringLifeTime);
+
+                            } catch (NumberFormatException e) {
+                                log.error("Invalid value for nonceLifeTime in rampart configuration file.", e);
+                                throw new RampartException(
+                                            "invalidNonceLifeTime", e);
+
+                            }
+                        }
+
+                        String serviceEndpointName = msgCtx.getAxisService().getEndpointName();
+
+                        boolean valueRepeating = serviceNonceCache.isNonceRepeatingForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce());
+
+                        if (valueRepeating){
+                            throw new RampartException("repeatingNonceValue", new Object[]{ userNameTokenPrincipal.getNonce(), username} );
+                        }
+
+                        serviceNonceCache.addNonceForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce(), nonceLifeTimeInSeconds);
+                    }
+                } else if (WSConstants.SIGN == actInt) {
+                    X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+
+                    if (rpd.isAsymmetricBinding() && cert == null && rpd.getInitiatorToken() != null
+                            && !rpd.getInitiatorToken().isDerivedKeys()) {
+
+                        // If symmetric binding is used, the certificate should be null.
+                        // If certificate is not null then probably initiator and
+                        // recipient are using 2 different bindings.
+                        throw new RampartException("invalidSignatureAlgo");
                     }
 
-                    String serviceEndpointName = msgCtx.getAxisService().getEndpointName();
-
-                    boolean valueRepeating = serviceNonceCache.isNonceRepeatingForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce());
-
-                    if (valueRepeating){
-                        throw new RampartException("repeatingNonceValue", new Object[]{ userNameTokenPrincipal.getNonce(), username} );
-                    }
-
-                    serviceNonceCache.addNonceForService(serviceEndpointName, username, userNameTokenPrincipal.getNonce(), nonceLifeTimeInSeconds);
+                    msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
                 }
-            } else if (WSConstants.SIGN == actInt) {
-                X509Certificate cert = (X509Certificate) wser.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
-
-                if (rpd.isAsymmetricBinding() && cert == null && rpd.getInitiatorToken() != null
-                        && !rpd.getInitiatorToken().isDerivedKeys()) {
-
-                    // If symmetric binding is used, the certificate should be null.
-                    // If certificate is not null then probably initiator and
-                    // recipient are using 2 different bindings.
-                    throw new RampartException("invalidSignatureAlgo");
-                }
-
-                msgCtx.setProperty(RampartMessageData.X509_CERT, cert);
             }
-
         }
 
 		SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
@@ -290,41 +405,7 @@ public class RampartEngine {
 
 	
 	private boolean isSecurityFault(RampartMessageData rmd) {
-
-		SOAPEnvelope soapEnvelope = rmd.getMsgContext().getEnvelope();
-		SOAPFault soapFault = soapEnvelope.getBody().getFault();
-
-		// This is not a soap fault
-		if (soapFault == null) {
-			return false;
-		}
-
-		String soapVersionURI = rmd.getMsgContext().getEnvelope().getNamespace().getNamespaceURI();
-		SOAPFaultCode faultCode = soapFault.getCode();
-		if(faultCode == null){
-			//If no fault code is given, then it can't be security fault
-			return false;
-		}
-		
-		if (soapVersionURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-			// This is a fault processing the security header
-			if (faultCode.getTextAsQName().getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-				return true;
-			}
-		} else if (soapVersionURI.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-			// TODO AXIOM API returns only one fault sub code, there can be many
-			SOAPFaultSubCode faultSubCode = faultCode.getSubCode();
-			if (faultSubCode != null) {
-				SOAPFaultValue faultSubCodeValue = faultSubCode.getValue();
-
-				// This is a fault processing the security header
-				if (faultSubCodeValue != null && faultSubCodeValue.getTextAsQName().
-						getNamespaceURI().equals(WSConstants.WSSE_NS)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+		SOAPFault soapFault = rmd.getMsgContext().getEnvelope().getBody().getFault();
+		return soapFault == null ? false : RampartUtil.isSecurityFault(soapFault);
 	}
 }

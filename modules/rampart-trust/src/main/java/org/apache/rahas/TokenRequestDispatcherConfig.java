@@ -17,7 +17,8 @@
 package org.apache.rahas;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.ws.security.util.Loader;
 
 import javax.xml.namespace.QName;
@@ -261,12 +262,12 @@ public class TokenRequestDispatcherConfig {
 
     public static TokenRequestDispatcherConfig load(String configFilePath) throws TrustException {
         FileInputStream fis;
-        StAXOMBuilder builder;
+        OMXMLParserWrapper builder;
         try {
             fis = new FileInputStream(configFilePath);
-            builder = new StAXOMBuilder(fis);
+            builder = OMXMLBuilderFactory.createOMBuilder(fis);
         } catch (Exception e) {
-            throw new TrustException("errorLoadingConfigFile", new String[]{configFilePath});
+            throw new TrustException("errorLoadingConfigFile", new String[]{configFilePath}, e);
         }
         return load(builder.getDocumentElement());
     }

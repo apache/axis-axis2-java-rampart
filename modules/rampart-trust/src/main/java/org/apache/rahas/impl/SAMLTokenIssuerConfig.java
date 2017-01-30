@@ -20,15 +20,18 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
+import org.apache.rahas.TrustUtil;
 import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLCallbackHandler;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.components.crypto.CryptoFactory;
 
 import javax.xml.namespace.QName;
 import java.io.FileInputStream;
@@ -92,10 +95,12 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
     public final static QName ISSUER_NAME = new QName("issuerName");
     
     public final static QName SAML_CALLBACK_CLASS = new QName("dataCallbackHandlerClass");
-        
+
     protected String issuerKeyAlias;
     protected String issuerKeyPassword;
     protected String issuerName;
+
+    // TODO in next major release convert this to a typed map
     protected Map trustedServices = new HashMap();
     protected String trustStorePropFile;
     protected SAMLCallbackHandler callbackHandler;
@@ -120,13 +125,13 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
      */
     public SAMLTokenIssuerConfig(String configFilePath) throws TrustException {
         FileInputStream fis;
-        StAXOMBuilder builder;
+        OMXMLParserWrapper builder;
         try {
             fis = new FileInputStream(configFilePath);
-            builder = new StAXOMBuilder(fis);
+            builder = OMXMLBuilderFactory.createOMBuilder(fis);
         } catch (Exception e) {
             throw new TrustException("errorLoadingConfigFile",
-                    new String[] { configFilePath });
+                    new String[] { configFilePath }, e);
         }
         this.load(builder.getDocumentElement());
     }
@@ -422,6 +427,14 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         return callbackHandler;
     }
 
+    public String getIssuerName() {
+        return issuerName;
+    }
+
+    public String getTrustStorePropFile() {
+        return trustStorePropFile;
+    }
+
     public void setCallbackHandler(SAMLCallbackHandler callbackHandler) {
         this.callbackHandler = callbackHandler;
     }
@@ -449,14 +462,50 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         if (serviceAddress != null && !"".equals(serviceAddress)) {
             String alias = (String) this.trustedServices.get(serviceAddress);
             if (alias != null) {
-                return CommonUtil.getCertificateByAlias(crypto,alias);
+                return CommonUtil.getCertificateByAlias(crypto, alias);
             } else {
                 alias = (String) this.trustedServices.get("*");
-                return CommonUtil.getCertificateByAlias(crypto,alias);
+
+                if (alias == null) {
+                    throw new TrustException("aliasMissingForService", new String[]{serviceAddress});
+                }
+
+                return CommonUtil.getCertificateByAlias(crypto, alias);
             }
         } else {
             String alias = (String) this.trustedServices.get("*");
-            return CommonUtil.getCertificateByAlias(crypto,alias);
+
+            if (alias == null) {
+                throw new TrustException("aliasMissingForService", new String[]{serviceAddress});
+            }
+
+            return CommonUtil.getCertificateByAlias(crypto, alias);
+        }
+
+    }
+
+    /**
+     * This method will create a Crypto object based on property values defined in cryptoElement or
+     * cryptoPropertiesFile.
+     * @param classLoader A class loader to pass into CryptoFactory.
+     * @return A Crypto object
+     * @throws TrustException If an error occurred while creating the Crypto object.
+     */
+    public Crypto getIssuerCrypto(ClassLoader classLoader) throws TrustException {
+
+        try {
+            if (this.cryptoElement != null) {
+                // crypto props defined as elements
+                return CryptoFactory.getInstance(TrustUtil
+                        .toProperties(this.cryptoElement), classLoader);
+            } else {
+                // crypto props defined in a properties file
+                return CryptoFactory.getInstance(this.cryptoPropertiesFile,
+                        classLoader);
+            }
+
+        } catch (WSSecurityException e) {
+            throw new TrustException("errorLoadingCryptoProperties", e);
         }
 
     }

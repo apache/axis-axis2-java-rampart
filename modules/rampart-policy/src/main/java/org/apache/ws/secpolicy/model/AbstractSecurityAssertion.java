@@ -21,9 +21,6 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.Assertion;
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.SP12Constants;
-import org.apache.ws.secpolicy.SPConstants;
-import org.apache.ws.secpolicy.SP12Constants;
 
 public abstract class AbstractSecurityAssertion implements Assertion {
 

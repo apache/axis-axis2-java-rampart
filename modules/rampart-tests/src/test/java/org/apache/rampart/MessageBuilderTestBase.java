@@ -20,8 +20,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
@@ -74,7 +72,7 @@ public class MessageBuilderTestBase extends TestCase {
      * @throws AxisFault
      */
     protected MessageContext getMsgCtx12() throws Exception {
-        return initMsgCtxFromMessage("test-resources/policy/soapmessage.xml");
+        return initMsgCtxFromMessage("test-resources/policy/soapmessage12.xml");
     }
 
     /**
@@ -116,7 +114,7 @@ public class MessageBuilderTestBase extends TestCase {
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
 
-    protected void verifySecHeader(Iterator qnameList, SOAPEnvelope env) {
+    protected void verifySecHeader(Iterator<QName> qnameList, SOAPEnvelope env) {
         Iterator secHeaderChildren =
                 env.getHeader().
                         getFirstChildWithName(new QName(WSConstants.WSSE_NS,
@@ -139,16 +137,4 @@ public class MessageBuilderTestBase extends TestCase {
                  "next expected element" + qnameList.next().toString());
         }
     }
-
-    public String getContentTypeForEnvelope(SOAPEnvelope env) {
-        String contentType = SOAP11Constants.SOAP_11_CONTENT_TYPE;  //default
-        if (SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI.equals(env.getNamespace().getNamespaceURI())) {
-            contentType = SOAP11Constants.SOAP_11_CONTENT_TYPE;
-        }
-        else if (SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI.equals(env.getNamespace().getNamespaceURI())) {
-            contentType = SOAP12Constants.SOAP_12_CONTENT_TYPE;
-        }
-        return contentType;
-    }
-
 }

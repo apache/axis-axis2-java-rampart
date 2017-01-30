@@ -1,13 +1,10 @@
 package org.apache.rahas.impl.util;
 
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
-import org.apache.rahas.RahasData;
 import org.apache.rahas.TrustException;
-import org.apache.rahas.impl.TokenIssuerUtil;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.message.WSSecEncryptedKey;
 import org.apache.ws.security.util.Base64;
@@ -19,8 +16,6 @@ import org.opensaml.saml1.core.*;
 import org.opensaml.ws.wssecurity.KeyIdentifier;
 import org.opensaml.ws.wssecurity.SecurityTokenReference;
 import org.opensaml.ws.wssecurity.WSSecurityConstants;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.encryption.CipherData;
 import org.opensaml.xml.encryption.CipherValue;
 import org.opensaml.xml.encryption.EncryptedKey;
@@ -31,12 +26,9 @@ import org.opensaml.xml.schema.impl.XSStringBuilder;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.signature.*;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.X509Data;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.namespace.QName;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -53,6 +45,7 @@ public class SAMLUtils {
 
     private static final Log log = LogFactory.getLog(SAMLUtils.class);
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public static Collection<X509Certificate> getCertChainCollection(X509Certificate[] issuerCerts) {
         ArrayList<X509Certificate> certCollection = new ArrayList<X509Certificate>();
 
@@ -63,22 +56,6 @@ public class SAMLUtils {
         }
 
         return certCollection;
-    }
-
-    /**
-     * Builds the requested XMLObject.
-     *
-     * @param objectQName name of the XMLObject
-     * @return the build XMLObject
-     * @throws org.apache.rahas.TrustException If unable to find the appropriate builder.
-     */
-    public static XMLObject buildXMLObject(QName objectQName) throws TrustException {
-        XMLObjectBuilder builder = Configuration.getBuilderFactory().getBuilder(objectQName);
-        if (builder == null) {
-            log.debug("Unable to find OpenSAML builder for object " + objectQName);
-            throw new TrustException("builderNotFound",new Object[]{objectQName});
-        }
-        return builder.buildObject(objectQName.getNamespaceURI(), objectQName.getLocalPart(), objectQName.getPrefix());
     }
 
     /**
@@ -136,12 +113,12 @@ public class SAMLUtils {
 
         Credential signingCredential = SecurityHelper.getSimpleCredential(issuerPublicKey, issuerPrivateKey);
 
-        Signature signature = (Signature) SAMLUtils.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
+        Signature signature = (Signature) CommonUtil.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
         signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
         signature.setSigningCredential(signingCredential);
         signature.setSignatureAlgorithm(signatureAlgorithm);
 
-        X509Data x509Data = createX509Data(issuerCerts);
+        X509Data x509Data = CommonUtil.createX509Data(issuerCerts);
         KeyInfo keyInfo = createKeyInfo(x509Data);
 
         signature.setKeyInfo(keyInfo);
@@ -199,7 +176,7 @@ public class SAMLUtils {
         return subjectConfirmationMethod;
     }
 
-      /**
+    /**
      * Create named identifier.
      * @param principalName Name of the subject.
      * @param format Format of the subject, whether it is an email, uid etc ...
@@ -208,7 +185,7 @@ public class SAMLUtils {
      */
     public static NameIdentifier createNamedIdentifier(String principalName, String format) throws TrustException{
 
-        NameIdentifier nameId = (NameIdentifier)SAMLUtils.buildXMLObject(NameIdentifier.DEFAULT_ELEMENT_NAME);
+        NameIdentifier nameId = (NameIdentifier)CommonUtil.buildXMLObject(NameIdentifier.DEFAULT_ELEMENT_NAME);
         nameId.setNameIdentifier(principalName);
         nameId.setFormat(format);
 
@@ -232,7 +209,7 @@ public class SAMLUtils {
             throws TrustException {
 
         ConfirmationMethod confirmationMethodObject
-                = (ConfirmationMethod)SAMLUtils.buildXMLObject(ConfirmationMethod.DEFAULT_ELEMENT_NAME);
+                = (ConfirmationMethod)CommonUtil.buildXMLObject(ConfirmationMethod.DEFAULT_ELEMENT_NAME);
         confirmationMethodObject.setConfirmationMethod(confirmationMethod);
 
         return confirmationMethodObject;
@@ -254,7 +231,7 @@ public class SAMLUtils {
                                                           KeyInfo keyInfoContent) throws TrustException {
 
         SubjectConfirmation subjectConfirmation
-                = (SubjectConfirmation)SAMLUtils.buildXMLObject(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
+                = (SubjectConfirmation)CommonUtil.buildXMLObject(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
 
         ConfirmationMethod method = SAMLUtils.createSubjectConfirmationMethod(confirmationMethod);
         subjectConfirmation.getConfirmationMethods().add(method);
@@ -292,7 +269,7 @@ public class SAMLUtils {
     public static Subject createSubject(final NameIdentifier nameIdentifier, final String confirmationMethod,
                                                           KeyInfo keyInfoContent) throws TrustException {
 
-        Subject subject = (Subject)SAMLUtils.buildXMLObject(Subject.DEFAULT_ELEMENT_NAME);
+        Subject subject = (Subject)CommonUtil.buildXMLObject(Subject.DEFAULT_ELEMENT_NAME);
         subject.setNameIdentifier(nameIdentifier);
 
         SubjectConfirmation subjectConfirmation
@@ -329,7 +306,7 @@ public class SAMLUtils {
                                                                     throws TrustException {
 
         AuthenticationStatement authenticationStatement
-                = (AuthenticationStatement)SAMLUtils.buildXMLObject(AuthenticationStatement.DEFAULT_ELEMENT_NAME);
+                = (AuthenticationStatement)CommonUtil.buildXMLObject(AuthenticationStatement.DEFAULT_ELEMENT_NAME);
 
         authenticationStatement.setSubject(subject);
         authenticationStatement.setAuthenticationMethod(authenticationMethod);
@@ -376,7 +353,7 @@ public class SAMLUtils {
             throws TrustException {
 
         AttributeStatement attributeStatement
-                = (AttributeStatement)SAMLUtils.buildXMLObject(AttributeStatement.DEFAULT_ELEMENT_NAME);
+                = (AttributeStatement)CommonUtil.buildXMLObject(AttributeStatement.DEFAULT_ELEMENT_NAME);
 
         attributeStatement.setSubject(subject);
         attributeStatement.getAttributes().addAll(attributeList);
@@ -396,7 +373,7 @@ public class SAMLUtils {
      */
     public static Conditions createConditions(DateTime notBefore, DateTime notOnOrAfter) throws TrustException {
 
-        Conditions conditions = (Conditions)SAMLUtils.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME);
+        Conditions conditions = (Conditions)CommonUtil.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME);
 
         conditions.setNotBefore(notBefore);
         conditions.setNotOnOrAfter(notOnOrAfter);
@@ -408,7 +385,7 @@ public class SAMLUtils {
      * This method creates the final SAML assertion. The final SAML assertion would looks like as follows,
      *  <saml:Assertion  AssertionID="_a75adf55-01d7-40cc-929f-dbd8372ebdfc"
      *                   IssueInstant="2003-04-17T00:46:02Z"
-     *                   Issuer=”www.opensaml.org”
+     *                   Issuer="www.opensaml.org"
      *                   MajorVersion="1"
      *                   MinorVersion="1"
      *                   xmlns="urn:oasis:names:tc:SAML:1.0:assertion">
@@ -453,12 +430,13 @@ public class SAMLUtils {
     public static Assertion createAssertion(String issuerName, DateTime notBefore, DateTime notOnOrAfter,
                                         List<Statement> statements) throws TrustException {
 
-        Assertion assertion = (Assertion)SAMLUtils.buildXMLObject(Assertion.DEFAULT_ELEMENT_NAME);
+        Assertion assertion = (Assertion)CommonUtil.buildXMLObject(Assertion.DEFAULT_ELEMENT_NAME);
 
         assertion.setIssuer(issuerName);
         assertion.setConditions(SAMLUtils.createConditions(notBefore, notOnOrAfter));
         assertion.getStatements().addAll(statements);
-
+        assertion.setID(UIDGenerator.generateUID());
+        assertion.setIssueInstant(new DateTime());
         return assertion;
     }
 
@@ -477,7 +455,7 @@ public class SAMLUtils {
      */
     public static Attribute createAttribute(String name, String namespace, String value) throws TrustException {
 
-        Attribute attribute = (Attribute)SAMLUtils.buildXMLObject(Attribute.DEFAULT_ELEMENT_NAME);
+        Attribute attribute = (Attribute)CommonUtil.buildXMLObject(Attribute.DEFAULT_ELEMENT_NAME);
 
         attribute.setAttributeName(name);
         attribute.setAttributeNamespace(namespace);
@@ -502,7 +480,7 @@ public class SAMLUtils {
      */
     public static KeyInfo createKeyInfo() throws TrustException {
 
-        return (KeyInfo)SAMLUtils.buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
+        return (KeyInfo)CommonUtil.buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
     }
 
      /**
@@ -543,126 +521,7 @@ public class SAMLUtils {
         return keyInfo;
     }
 
-    /**
-     * Creates the certificate based KeyInfo object.
-     * @param certificate The public key certificate used to create the KeyInfo object.
-     * @return OpenSAML representation of KeyInfo object.
-     * @throws TrustException If an error occurred while creating the KeyInfo
-     */
-    public static KeyInfo getCertificateBasedKeyInfo(X509Certificate certificate) throws TrustException {
-        X509Data x509Data = SAMLUtils.createX509Data(certificate);
-        return SAMLUtils.createKeyInfo(x509Data);
-    }
 
-
-    /**
-     * This method creates KeyInfo element of an assertion. This is a facade, in which it calls
-     * to other helper methods to create KeyInfo. The TokenIssuer will call this method to
-     * create the KeyInfo.
-     * @param doc An Axiom based DOM Document.
-     * @param data The ephemeral key which we use here need in encrypting the message also. Therefore
-     *              we need to save the ephemeral key in RahasData passed here.
-     * @param serviceCert Public key used to encrypt the assertion is extracted from this certificate.
-     * @param keySize Size of the key to be used
-     * @param crypto The relevant private key
-     * @param keyComputation Key computation mechanism.
-     * @return OpenSAML KeyInfo representation.
-     * @throws WSSecurityException We use WSS4J to generate encrypted key. This exception will trigger if an
-     *                      error occurs while generating the encrypted key.
-     * @throws TrustException If an error occurred while creating KeyInfo object.
-     */
-    public static KeyInfo getSymmetricKeyBasedKeyInfo(Document doc,
-                                                      RahasData data,
-                                                      X509Certificate serviceCert,
-                                                      int keySize,
-                                                      Crypto crypto,
-                                                      int keyComputation) throws WSSecurityException, TrustException {
-
-        byte[] ephemeralKey = TokenIssuerUtil.getSharedSecret(
-                data, keyComputation, keySize);
-
-        WSSecEncryptedKey encryptedKey = getSymmetricKeyBasedKeyInfoContent(doc, ephemeralKey, serviceCert,
-                keySize, crypto);
-
-        // Extract the base64 encoded secret value
-        byte[] tempKey = new byte[keySize / 8];
-        System.arraycopy(encryptedKey.getEphemeralKey(), 0, tempKey,
-                0, keySize / 8);
-
-
-        data.setEphmeralKey(tempKey);
-
-        EncryptedKey samlEncryptedKey = SAMLUtils.createEncryptedKey(serviceCert, encryptedKey);
-        return SAMLUtils.createKeyInfo(samlEncryptedKey);
-    }
-
-
-
-    // TODO remove keySize parameter
-    static WSSecEncryptedKey getSymmetricKeyBasedKeyInfoContent(Document doc,
-                                                                       byte[] ephemeralKey,
-                                                                       X509Certificate serviceCert,
-                                                                       int keySize,
-                                                                       Crypto crypto) throws WSSecurityException,
-            TrustException {
-        // Create the encrypted key
-        WSSecEncryptedKey encryptedKeyBuilder = new WSSecEncryptedKey();
-
-        // Use thumbprint id
-        encryptedKeyBuilder
-                .setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
-
-        // SEt the encryption cert
-        encryptedKeyBuilder.setUseThisCert(serviceCert);
-
-        // TODO setting keysize is removed with wss4j 1.6 migration - do we actually need this ?
-
-        encryptedKeyBuilder.setEphemeralKey(ephemeralKey);
-
-        // Set key encryption algo
-        encryptedKeyBuilder
-                .setKeyEncAlgo(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15);
-
-        // Build
-        encryptedKeyBuilder.prepare(doc, crypto);
-
-        return encryptedKeyBuilder;
-    }
-
-    /**
-     * Creates the X509 data element in a SAML issuer token. Should create an element similar to following,
-     * <X509Data xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
-     *                         xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
-     *   <X509Certificate>
-     *       MIICNTCCAZ6gAwIB...
-     *   </X509Certificate>
-     * </X509Data>
-     * @param clientCert Client certificate to be used when generating X509 data
-     * @return  SAML X509Data representation.
-     * @throws TrustException If an error occurred while creating X509Data and X509Certificate.
-     */
-    static X509Data createX509Data(X509Certificate clientCert) throws TrustException {
-
-        byte[] clientCertBytes;
-        try {
-            clientCertBytes = clientCert.getEncoded();
-        } catch (CertificateEncodingException e) {
-            log.error("An error occurred while encoding certificate.", e);
-            throw new TrustException("An error occurred while encoding certificate.", e);
-        }
-        String base64Cert = Base64.encode(clientCertBytes);
-
-        org.opensaml.xml.signature.X509Certificate x509Certificate
-                = (org.opensaml.xml.signature.X509Certificate)SAMLUtils.buildXMLObject
-                (org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
-
-        x509Certificate.setValue(base64Cert);
-
-        X509Data x509Data = (X509Data)SAMLUtils.buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
-        x509Data.getX509Certificates().add(x509Certificate);
-
-        return x509Data;
-    }
 
     /**
      * This method will created the "EncryptedKey" of a SAML assertion.
@@ -699,14 +558,14 @@ public class SAMLUtils {
             throws TrustException {
 
         SecurityTokenReference securityTokenReference
-                = (SecurityTokenReference)SAMLUtils.buildXMLObject(SecurityTokenReference.ELEMENT_NAME);
+                = (SecurityTokenReference)CommonUtil.buildXMLObject(SecurityTokenReference.ELEMENT_NAME);
 
-        KeyIdentifier keyIdentifier = (KeyIdentifier)SAMLUtils.buildXMLObject(KeyIdentifier.ELEMENT_NAME);
+        KeyIdentifier keyIdentifier = (KeyIdentifier)CommonUtil.buildXMLObject(KeyIdentifier.ELEMENT_NAME);
 
         // Encoding type set to http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0
         // #Base64Binary
         keyIdentifier.setEncodingType(KeyIdentifier.ENCODING_TYPE_BASE64_BINARY);
-        keyIdentifier.setValueType(WSSecurityConstants.THUMB_PRINT_SHA1);
+        keyIdentifier.setValueType(WSSecurityConstants.WS_SECURITY11_NS+"#ThumbprintSHA1");
         keyIdentifier.setValue(getThumbprintSha1(certificate));
 
         securityTokenReference.getUnknownXMLObjects().add(keyIdentifier);
@@ -714,16 +573,16 @@ public class SAMLUtils {
         KeyInfo keyInfo = SAMLUtils.createKeyInfo();
         keyInfo.getXMLObjects().add(securityTokenReference);
 
-        CipherValue cipherValue = (CipherValue)buildXMLObject(CipherValue.DEFAULT_ELEMENT_NAME);
+        CipherValue cipherValue = (CipherValue)CommonUtil.buildXMLObject(CipherValue.DEFAULT_ELEMENT_NAME);
         cipherValue.setValue(Base64.encode(wsSecEncryptedKey.getEncryptedEphemeralKey()));
 
-        CipherData cipherData = (CipherData)buildXMLObject(CipherData.DEFAULT_ELEMENT_NAME);
+        CipherData cipherData = (CipherData)CommonUtil.buildXMLObject(CipherData.DEFAULT_ELEMENT_NAME);
         cipherData.setCipherValue(cipherValue);
 
-        EncryptionMethod encryptionMethod = (EncryptionMethod)buildXMLObject(EncryptionMethod.DEFAULT_ELEMENT_NAME);
+        EncryptionMethod encryptionMethod = (EncryptionMethod)CommonUtil.buildXMLObject(EncryptionMethod.DEFAULT_ELEMENT_NAME);
         encryptionMethod.setAlgorithm(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15);
 
-        EncryptedKey encryptedKey = (EncryptedKey)SAMLUtils.buildXMLObject(EncryptedKey.DEFAULT_ELEMENT_NAME);
+        EncryptedKey encryptedKey = (EncryptedKey)CommonUtil.buildXMLObject(EncryptedKey.DEFAULT_ELEMENT_NAME);
 
         encryptedKey.setID(wsSecEncryptedKey.getId());
         encryptedKey.setEncryptionMethod(encryptionMethod);
@@ -751,15 +610,6 @@ public class SAMLUtils {
         byte[] data = sha.digest();
 
         return Base64.encode(data);
-    }
-
-    /**
-     * Converts java.util.Date to opensaml DateTime object.
-     * @param date Java util date
-     * @return opensaml specific DateTime object.
-     */
-    public static DateTime convertToDateTime(Date date) {
-        return  new DateTime(date);
     }
 
 }

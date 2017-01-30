@@ -1,0 +1,8 @@
+[libdefaults]
+	default_realm = EXAMPLE.COM
+	forwardable = true	
+
+[realms]
+	EXAMPLE.COM = {
+		kdc = localhost:KDC_PORT
+	}

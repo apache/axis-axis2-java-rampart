@@ -40,8 +40,8 @@ public class RecipientTokenBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), recipientToken);
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative(iterator.next(), recipientToken);
             
             /* 
              * for the moment we will pick the first token specified in the policy
@@ -52,11 +52,11 @@ public class RecipientTokenBuilder implements AssertionBuilder<OMElement> {
         return recipientToken;
     }
 
-    private void processAlternative(List assertions, RecipientToken parent) {
+    private void processAlternative(List<Assertion> assertions, RecipientToken parent) {
         
         Assertion assertion;
         
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
             assertion = (Assertion) iterator.next();
             
             if (assertion instanceof Token) {

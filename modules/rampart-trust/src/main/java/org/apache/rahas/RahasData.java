@@ -16,10 +16,10 @@
 
 package org.apache.rahas;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
-import org.apache.axiom.om.util.Base64;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.ws.security.WSConstants;
@@ -35,6 +35,7 @@ import javax.xml.namespace.QName;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -56,7 +57,7 @@ public class RahasData {
     
     private String tokenId;
 
-    private int keysize = -1;
+    private int keySize = -1;
 
     private String computedKeyAlgo;
 
@@ -85,6 +86,11 @@ public class RahasData {
     private String  claimDialect;
     
     private Assertion assertion;
+
+    private Date assertionCreatedDate;
+
+    private Date assertionExpiringDate;
+
     /**
      * Create a new RahasData instance and populate it with the information from
      * the request.
@@ -135,6 +141,10 @@ public class RahasData {
         this.processValidateTarget();
         
         this.processRenewTarget();
+
+    }
+
+    public RahasData() {
 
     }
 
@@ -284,17 +294,17 @@ public class RahasData {
             if (text != null && !"".equals(text.trim())) {
                 try {
                     //Set key size
-                    this.keysize = Integer.parseInt(text.trim());
+                    this.keySize = Integer.parseInt(text.trim());
 
                     //Create an empty array to hold the key
-                    this.ephmeralKey = new byte[this.keysize/8];
+                    this.ephmeralKey = new byte[this.keySize/8];
                 } catch (NumberFormatException e) {
                     throw new TrustException(TrustException.INVALID_REQUEST,
                                              new String[]{"invalid wst:Keysize value"}, e);
                 }
             }
         }
-        this.keysize = -1;
+        this.keySize = -1;
     }
     
     /**
@@ -324,8 +334,9 @@ public class RahasData {
             OMElement strElem = validateTargetElem.getFirstChildWithName(new QName(WSConstants.WSSE_NS,
                                                    "SecurityTokenReference"));
             
-            Element elem = (Element)(new StAXOMBuilder(new OMDOMFactory(), 
-                    strElem.getXMLStreamReader()).getDocumentElement());
+            Element elem = (Element)OMXMLBuilderFactory.createStAXOMBuilder(
+                    OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM).getOMFactory(),
+                    strElem.getXMLStreamReader()).getDocumentElement();
             
             try {
                 SecurityTokenReference str = new SecurityTokenReference((Element)elem);
@@ -350,8 +361,9 @@ public class RahasData {
             OMElement strElem = renewTargetElem.getFirstChildWithName(new QName(WSConstants.WSSE_NS,
                                                    "SecurityTokenReference"));
             
-            Element elem = (Element)(new StAXOMBuilder(new OMDOMFactory(), 
-                    strElem.getXMLStreamReader()).getDocumentElement());
+            Element elem = (Element)OMXMLBuilderFactory.createStAXOMBuilder(
+                    OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM).getOMFactory(),
+                    strElem.getXMLStreamReader()).getDocumentElement();
             
             try {
                 SecurityTokenReference str = new SecurityTokenReference((Element)elem);
@@ -377,13 +389,13 @@ public class RahasData {
     private void processEntropy() throws TrustException {
         OMElement entropyElem = this.rstElement
                 .getFirstChildWithName(new QName(this.wstNs,
-                                                 RahasConstants.IssuanceBindingLocalNames.ENTROPY));
+                        RahasConstants.IssuanceBindingLocalNames.ENTROPY));
 
         if (entropyElem != null) {
             OMElement binSecElem = entropyElem.getFirstElement();
             if (binSecElem != null && binSecElem.getText() != null
                 && !"".equals(binSecElem.getText())) {
-                this.requestEntropy = Base64.decode(binSecElem.getText());
+                this.requestEntropy = Base64Utils.decode(binSecElem.getText());
             } else {
                 throw new TrustException("malformedEntropyElement",
                                          new String[]{entropyElem.toString()});
@@ -428,13 +440,39 @@ public class RahasData {
     }
 
     /**
-     * @return Returns the keysize.
+     * Sets the given message context as in message context.
+     * @param context The message context.
      */
-    public int getKeysize() {
-        return keysize;
+    public void setInMessageContext(MessageContext context) {
+        this.inMessageContext = context;
     }
 
     /**
+     * @deprecated  As of Rampart 1.7. Use {@code getKeySize}.
+     * @return Returns the keysize.
+     */
+    @Deprecated
+    public int getKeysize() {
+        return keySize;
+    }
+
+    /**
+     * @return Returns the keySize.
+     */
+    public int getKeySize() {
+        return keySize;
+    }
+
+    /**
+     * Sets the key size.
+     * @param size Size of the key.
+     */
+    public void setKeySize(int size) {
+        this.keySize = size;
+    }
+
+    /**
+     * // TODO changes this keytype to an enumeration
      * @return Returns the keyType.
      */
     public String getKeyType() {
@@ -544,5 +582,19 @@ public class RahasData {
         return appliesToEpr;
     }
 
+    public Date getAssertionCreatedDate() {
+        return assertionCreatedDate;
+    }
 
+    public void setAssertionCreatedDate(Date assertionCreatedDate) {
+        this.assertionCreatedDate = assertionCreatedDate;
+    }
+
+    public Date getAssertionExpiringDate() {
+        return assertionExpiringDate;
+    }
+
+    public void setAssertionExpiringDate(Date assertionExpiringDate) {
+        this.assertionExpiringDate = assertionExpiringDate;
+    }
 }

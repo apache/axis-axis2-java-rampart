@@ -88,16 +88,8 @@ public class SAMLTokenRenewer implements TokenRenewer {
                     wstVersion, rstrcElem);
         }
 
-        Crypto crypto;
         ClassLoader classLoader = inMsgCtx.getAxisService().getClassLoader();
-        if (config.cryptoElement != null) {
-            // crypto props defined as elements
-            crypto = CommonUtil.getCrypto(TrustUtil
-                    .toProperties(config.cryptoElement), classLoader);
-        } else {
-            // crypto props defined in a properties file
-            crypto = CommonUtil.getCrypto(config.cryptoPropertiesFile, classLoader);
-        }
+        Crypto crypto = config.getIssuerCrypto(classLoader);
 
         // Create TokenType element
         TrustUtil.createTokenTypeElement(wstVersion, rstrElem).setText(
@@ -106,7 +98,7 @@ public class SAMLTokenRenewer implements TokenRenewer {
         // Creation and expiration times
         Date creationTime = new Date();
         Date expirationTime = new Date();
-        expirationTime.setTime(creationTime.getTime() + config.ttl);
+        expirationTime.setTime(creationTime.getTime() + config.getTtl());
 
         // Use GMT time in milliseconds
         DateFormat zulu = new XmlSchemaDateFormat();
@@ -124,7 +116,7 @@ public class SAMLTokenRenewer implements TokenRenewer {
         samlAssertion = SAMLUtils.buildAssertion((Element) assertionOMElement);
 
         if (samlAssertion.getConditions() == null) {
-            samlAssertion.setConditions((Conditions) SAMLUtils.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME));
+            samlAssertion.setConditions((Conditions) CommonUtil.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME));
 
         }
 

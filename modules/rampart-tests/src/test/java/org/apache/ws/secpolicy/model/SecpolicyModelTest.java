@@ -35,12 +35,12 @@ public class SecpolicyModelTest extends TestCase {
     
     public void testSymmBinding() throws Exception {
         Policy p = this.getPolicy("test-resources/policy-symm-binding.xml");
-        List assertions = (List)p.getAlternatives().next();
+        List<Assertion> assertions = (List<Assertion>)p.getAlternatives().next();
         
         boolean symmBindingFound = false;
         
-        for (Iterator iter = assertions.iterator(); iter.hasNext();) {
-            Assertion assertion = (Assertion) iter.next();
+        for (Iterator<Assertion> iter = assertions.iterator(); iter.hasNext();) {
+            Assertion assertion = iter.next();
             if(assertion instanceof SymmetricBinding) {
                 symmBindingFound = true;
                 SymmetricBinding binding = (SymmetricBinding)assertion;
@@ -67,9 +67,20 @@ public class SecpolicyModelTest extends TestCase {
     public void testAsymmBinding() throws Exception {
         this.getPolicy("test-resources/policy-asymm-binding.xml");
     }
-    
+
     public void testTransportBinding() throws Exception {
         this.getPolicy("test-resources/policy-transport-binding.xml");
+    }
+    
+    public void testSymmBindingWithBothProtectionTokenAndEncryptionToken() throws Exception {
+    	boolean exceptionThrown = false;
+    	try {
+    		this.getPolicy("test-resources/policy-symm-binding-fault1.xml");
+    	} catch (IllegalArgumentException e) {
+    		exceptionThrown = true;
+    	}
+    	assertTrue("Policy cannot contain both ProtectionToken and EncryptionToken",
+    			exceptionThrown);
     }
     
     private Policy getPolicy(String filePath) throws Exception {

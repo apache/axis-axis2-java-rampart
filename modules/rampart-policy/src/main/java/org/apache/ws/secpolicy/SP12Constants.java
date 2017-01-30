@@ -317,6 +317,15 @@ public class SP12Constants {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////
     
+    public static final QName KERBEROS_TOKEN = new QName(SP12Constants.SP_NS,
+            SPConstants.KERBEROS_TOKEN, SP12Constants.SP_PREFIX);
+
+    public static final QName REQUIRE_KERBEROS_GSS_V5_TOKEN_11 = new QName(SP12Constants.SP_NS,
+            SPConstants.REQUIRE_KERBEROS_GSS_V5_TOKEN_11, SP12Constants.SP_PREFIX);
+
+    public static final QName REQUIRE_KERBEROS_V5_TOKEN_11 = new QName(SP12Constants.SP_NS,
+            SPConstants.REQUIRE_KERBEROS_V5_TOKEN_11, SP12Constants.SP_PREFIX);
+    
     public static int getInclusionFromAttributeValue(String value ) {
         
         if (INCLUDE_ALWAYS.equals(value)) {
