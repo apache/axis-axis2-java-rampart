@@ -31,6 +31,7 @@ import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
 
+import java.io.File;
 import java.io.FileInputStream;
 
 public class Client {
@@ -48,9 +49,9 @@ public class Client {
         options.setAction("urn:echo");
         options.setTo(new EndpointReference(args[0]));
         //load and attach in/out sec policies
-        String policyPath= args[2].split("/")[0];
-        options.setProperty(RampartMessageData.KEY_RAMPART_IN_POLICY, loadPolicy(policyPath + "/client_in_policy.xml"));
-        options.setProperty(RampartMessageData.KEY_RAMPART_OUT_POLICY, loadPolicy(policyPath + "/client_out_policy.xml"));
+        File policyPath= new File(args[2]).getParentFile();
+        options.setProperty(RampartMessageData.KEY_RAMPART_IN_POLICY, loadPolicy(new File(policyPath, "client_in_policy.xml")));
+        options.setProperty(RampartMessageData.KEY_RAMPART_OUT_POLICY, loadPolicy(new File(policyPath, "/client_out_policy.xml")));
         client.setOptions(options);
         
         client.engageModule("addressing");
@@ -62,7 +63,7 @@ public class Client {
         
     }
     
-    private static Policy loadPolicy(String xmlPath) throws Exception {
+    private static Policy loadPolicy(File xmlPath) throws Exception {
         OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(xmlPath));
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
