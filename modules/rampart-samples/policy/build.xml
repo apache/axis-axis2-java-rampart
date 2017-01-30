@@ -304,7 +304,10 @@
 
 	   		<copy file="${keys.dir}/client.jks" tofile="${temp.client.dir}/client.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/client.properties" tofile="${temp.client.dir}/client.properties" overwrite="true"/>
-            <copy file="sample@{sample.number}/policy.xml" tofile="${temp.client.dir}/policy.xml" overwrite="true">
+            <copy todir="${temp.client.dir}" overwrite="true">
+                <fileset dir="sample@{sample.number}">
+                    <include name="*policy*.xml"/>
+                </fileset>
                 <filterset>
                     <filter token="port" value="${client.port}"/>
                 </filterset>
