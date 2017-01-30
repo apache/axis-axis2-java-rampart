@@ -1,0 +1,8 @@
+<sp:UsernameToken
+	xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702"
+	sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient">
+	<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+		<sp:HashPassword />
+		<sp:WssUsernameToken11 />
+	</wsp:Policy>
+</sp:UsernameToken>

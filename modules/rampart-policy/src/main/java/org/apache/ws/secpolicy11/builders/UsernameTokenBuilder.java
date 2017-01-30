@@ -22,6 +22,8 @@ import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.Constants;
@@ -34,6 +36,7 @@ import org.apache.ws.secpolicy.model.UsernameToken;
 
 public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
 
+    private static Log log = LogFactory.getLog(UsernameTokenBuilder.class);
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         UsernameToken usernameToken = new UsernameToken(SPConstants.SP_V11);
@@ -53,7 +56,7 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
         
         OMElement policyElement = element.getFirstElement();
         
-        if (policyElement != null && !policyElement.getQName().equals(org.apache.neethi.Constants.Q_ELEM_POLICY)) {
+        if (policyElement != null && policyElement.getQName().equals(org.apache.neethi.Constants.Q_ELEM_POLICY)) {
         
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
             policy = (Policy) policy.normalize(false);
@@ -76,6 +79,10 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
     }
 
     private void processAlternative(List assertions, UsernameToken parent) {
+        
+     // UT profile version
+        boolean usernameToken10Set = false;
+        boolean usernameToken11Set = false;
                 
         for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
             Assertion assertion = (Assertion) iterator.next();
@@ -83,10 +90,17 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
             
             if (SP11Constants.WSS_USERNAME_TOKEN10.equals(qname)) {
                 parent.setUseUTProfile10(true);
+                usernameToken10Set = true;
                 
             } else if (SP11Constants.WSS_USERNAME_TOKEN11.equals(qname)) {
                 parent.setUseUTProfile11(true);
+                usernameToken11Set = true;
             }
+        }
+        
+        // doing a policy validation
+        if(usernameToken10Set && usernameToken11Set) {
+            log.warn("Invalid UsernameToken Assertion in the policy. This may result an unexpected behaviour!");
         }
     }
 }

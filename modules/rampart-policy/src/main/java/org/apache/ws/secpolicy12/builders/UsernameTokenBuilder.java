@@ -22,6 +22,8 @@ import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
 import org.apache.neethi.Constants;
@@ -33,7 +35,8 @@ import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.UsernameToken;
 
 public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
-
+    
+    private static Log log = LogFactory.getLog(UsernameTokenBuilder.class);
     
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         UsernameToken usernameToken = new UsernameToken(SPConstants.SP_V12);
@@ -76,26 +79,51 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
     }
 
     private void processAlternative(List assertions, UsernameToken parent) {
+       
+        // UT profile version
+        boolean usernameToken10Set = false;
+        boolean usernameToken11Set = false;
+        // password options
+        boolean noPasswordSet = false;
+        boolean hasPasswordSet = false;
+        // derived keys conf
+        boolean derivedKeysSet = false;
+        boolean expDerivedKeysSet = false;
+        boolean impDerivedKeysSet = false;
              
         for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
             Assertion assertion = (Assertion) iterator.next();
             QName qname = assertion.getName();
             
             if (SP12Constants.WSS_USERNAME_TOKEN10.equals(qname)) {
-                parent.setUseUTProfile10(true);               
+                parent.setUseUTProfile10(true);  
+                usernameToken10Set = true;
             } else if (SP12Constants.WSS_USERNAME_TOKEN11.equals(qname)) {
                 parent.setUseUTProfile11(true);
+                usernameToken11Set = true;
             } else if (SP12Constants.NO_PASSWORD.equals(qname)) {
                 parent.setNoPassword(true);
+                noPasswordSet = true;
             } else if (SP12Constants.HASH_PASSWORD.equals(qname)) {
                 parent.setHashPassword(true);
+                hasPasswordSet = true;
             } else if (SP12Constants.REQUIRE_DERIVED_KEYS.equals(qname)) {
                 parent.setDerivedKeys(true);
+                derivedKeysSet = true;
             } else if (SP12Constants.REQUIRE_EXPLICIT_DERIVED_KEYS.equals(qname)) {
                 parent.setExplicitDerivedKeys(true);
+                expDerivedKeysSet = true;
             } else if (SP12Constants.REQUIRE_IMPLIED_DERIVED_KEYS.equals(qname)) {
                 parent.setImpliedDerivedKeys(true);
+                impDerivedKeysSet = true;
             }
+        }
+        
+        // doing a policy validation
+        if(usernameToken10Set && usernameToken11Set || noPasswordSet && hasPasswordSet ||
+                derivedKeysSet && expDerivedKeysSet || derivedKeysSet && impDerivedKeysSet ||
+                impDerivedKeysSet && expDerivedKeysSet) {
+            log.warn("Invalid UsernameToken Assertion in the policy. This may result an unexpected behaviour!");
         }
     }
 }
