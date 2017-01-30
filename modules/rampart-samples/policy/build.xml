@@ -144,6 +144,7 @@
              dest="${endorsed.dir}/xercesImpl-2.9.1.jar" verbose="true"/>
     </target>
 
+
 	<target name="clean">
 		<delete dir="${build.dir}" />
 	</target>
