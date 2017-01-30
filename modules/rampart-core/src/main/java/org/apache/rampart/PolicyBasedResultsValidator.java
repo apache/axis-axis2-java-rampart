@@ -693,15 +693,15 @@ public class PolicyBasedResultsValidator implements PolicyValidatorCallbackHandl
             
             if (wsep.getType() == WSConstants.PART_TYPE_BODY) {
                 
-                QName body;
+                QName bodyQName;
                 
                 if (WSConstants.URI_SOAP11_ENV.equals(envelope.getNamespaceURI())) {
-                    body = new SOAP11Constants().getBodyQName();
+                    bodyQName = new SOAP11Constants().getBodyQName();
                 } else {
-                    body = new SOAP12Constants().getBodyQName();
+                    bodyQName = new SOAP12Constants().getBodyQName();
                 }
                 
-                if (!actuallySigned.contains(body) && !rmd.getPolicyData().isSignBodyOptional()) {
+                if (!actuallySigned.contains(bodyQName) && !rmd.getPolicyData().isSignBodyOptional()) {
                     // soap body is not signed
                     throw new RampartException("bodyNotSigned");
                 }
