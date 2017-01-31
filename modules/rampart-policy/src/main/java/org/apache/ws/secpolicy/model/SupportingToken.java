@@ -298,16 +298,20 @@ public class SupportingToken extends AbstractSecurityAssertion implements
         
         if (signedParts != null) {
             signedParts.serialize(writer);
-            
-        } else if (signedElements != null) {
+        }
+        
+        if (signedElements != null) {
             signedElements.serialize(writer);
-            
-        } else if (encryptedParts != null) {
+        }
+        
+        if (encryptedParts != null) {
             encryptedParts.serialize(writer);
-            
-        } else if (encryptedElements != null) {
+        }
+        
+        if (encryptedElements != null) {
             encryptedElements.serialize(writer);
         }
+        
         // </wsp:Policy>
         writer.writeEndElement();
 
