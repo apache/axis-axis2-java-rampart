@@ -16,6 +16,12 @@
 
 package org.apache.rahas;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.message.token.Reference;
+
+import javax.xml.namespace.QName;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -26,12 +32,6 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.xml.namespace.QName;
-
-import org.apache.axiom.om.OMElement;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.message.token.Reference;
 
 /**
  * In-memory implementation of the token storage
@@ -91,17 +91,13 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
     }
 
     public String[] getTokenIdentifiers() throws TrustException {       
-        
-        String [] tokenIdentifiers = null;
-        
         readLock.lock();
-        
-        Set identifiers = tokens.keySet();
-        tokenIdentifiers = (String[]) identifiers.toArray(new String[identifiers.size()]); 
-        
-        readLock.unlock();
-        
-        return tokenIdentifiers;
+        try {
+            Set identifiers = tokens.keySet();
+            return (String[]) identifiers.toArray(new String[identifiers.size()]);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public Token[] getValidTokens() throws TrustException {
@@ -121,7 +117,7 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         return getTokens(Token.EXPIRED);
     }
 
-    private Token[] getTokens(int[] states) throws TrustException {
+    private Token[] getTokens(int... states) throws TrustException {
         List tokens = new ArrayList();
         
         readLock.lock();
@@ -143,22 +139,16 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         return (Token[]) tokens.toArray(new Token[tokens.size()]);
     }
 
-    private Token[] getTokens(int state) throws TrustException {
-        int[] states = new int[]{state};        
-        return getTokens(states);
-    }
-
     public Token getToken(String id) throws TrustException {
         readLock.lock();
         
         Token token;
         
         try {
-
+            
             token = (Token) this.tokens.get(id);
-            if(token != null) {
-                processTokenExpiry(token);
-            }else{
+            
+            if(token == null) {
                 //Try to find the token using attached refs & unattached refs
                 for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
                     Token tempToken = (Token) iterator.next();
@@ -171,9 +161,12 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
                     if(elem != null && id.equals(this.getIdFromSTR(elem))) {
                         token = tempToken;
                     }
+                    
                 }
+            } else {
+                processTokenExpiry(token);
             }
-
+        
         } finally {
             readLock.unlock();
         }        
