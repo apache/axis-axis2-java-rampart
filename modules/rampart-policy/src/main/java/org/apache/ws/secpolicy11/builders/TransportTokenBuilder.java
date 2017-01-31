@@ -20,7 +20,6 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
@@ -43,8 +42,8 @@ public class TransportTokenBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), transportToken);
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative(iterator.next(), transportToken);
             break; // since there should be only one alternative
         }
         
@@ -55,10 +54,10 @@ public class TransportTokenBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP11Constants.TRANSPORT_TOKEN};
     }
     
-    private void processAlternative(List assertions, TransportToken parent) {
+    private void processAlternative(List<Assertion> assertions, TransportToken parent) {
         
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            Assertion primtive = (Assertion) iterator.next();
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+            Assertion primtive = iterator.next();
             QName qname = primtive.getName();
             
             if (SP11Constants.HTTPS_TOKEN.equals(qname)) {

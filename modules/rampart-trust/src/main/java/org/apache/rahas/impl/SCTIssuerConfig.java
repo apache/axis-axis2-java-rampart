@@ -17,7 +17,8 @@
 package org.apache.rahas.impl;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.rahas.TrustException;
 
 import javax.xml.namespace.QName;
@@ -68,10 +69,10 @@ public class SCTIssuerConfig extends AbstractIssuerConfig{
     public static SCTIssuerConfig load(String configFilePath)
             throws TrustException {
         FileInputStream fis;
-        StAXOMBuilder builder;
+        OMXMLParserWrapper builder;
         try {
             fis = new FileInputStream(configFilePath);
-            builder = new StAXOMBuilder(fis);
+            builder = OMXMLBuilderFactory.createOMBuilder(fis);
         } catch (Exception e) {
             throw new TrustException("errorLoadingConfigFile",
                     new String[] { configFilePath });

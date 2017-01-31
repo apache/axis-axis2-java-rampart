@@ -23,7 +23,12 @@ import org.apache.ws.security.message.token.Reference;
 import javax.xml.namespace.QName;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -86,17 +91,13 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
     }
 
     public String[] getTokenIdentifiers() throws TrustException {       
-        List identifiers = new ArrayList();
-        
         readLock.lock();
         try {
-            for (Iterator iterator = tokens.keySet().iterator(); iterator.hasNext();) {
-                identifiers.add(iterator.next());
-            }
+            Set identifiers = tokens.keySet();
+            return (String[]) identifiers.toArray(new String[identifiers.size()]);
         } finally {
             readLock.unlock();
         }
-        return (String[]) identifiers.toArray(new String[identifiers.size()]);
     }
 
     public Token[] getValidTokens() throws TrustException {
@@ -116,8 +117,7 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         return getTokens(Token.EXPIRED);
     }
 
-    private Token[] getTokens(int[] states) throws TrustException {
-        processTokenExpiry();
+    private Token[] getTokens(int... states) throws TrustException {
         List tokens = new ArrayList();
         
         readLock.lock();
@@ -125,6 +125,7 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         try {
             for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
                 Token token = (Token) iterator.next();
+                processTokenExpiry(token);
                 for (int i = 0; i < states.length; i++) {
                     if (token.getState() == states[i]) {
                         tokens.add(token);
@@ -138,28 +139,7 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         return (Token[]) tokens.toArray(new Token[tokens.size()]);
     }
 
-    private Token[] getTokens(int state) throws TrustException {
-        processTokenExpiry();
-        List tokens = new ArrayList();
-        
-        readLock.lock();
-        
-        try {
-            for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
-                Token token = (Token) iterator.next();
-                if (token.getState() == state) {
-                    tokens.add(token);
-                }
-            }
-        } finally {
-            readLock.unlock();
-        }
-        return (Token[]) tokens.toArray(new Token[tokens.size()]);
-    }
-
     public Token getToken(String id) throws TrustException {
-        processTokenExpiry();
-        
         readLock.lock();
         
         Token token;
@@ -172,6 +152,7 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
                 //Try to find the token using attached refs & unattached refs
                 for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
                     Token tempToken = (Token) iterator.next();
+                    processTokenExpiry(tempToken);
                     OMElement elem = tempToken.getAttachedReference();
                     if(elem != null && id.equals(this.getIdFromSTR(elem))) {
                         token = tempToken;
@@ -182,7 +163,8 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
                     }
                     
                 }
-                
+            } else {
+                processTokenExpiry(token);
             }
         
         } finally {
@@ -202,20 +184,10 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
         }        
     }
     
-    protected void processTokenExpiry() throws TrustException {
-        
-        readLock.lock();
-        
-        try {
-            for (Iterator iterator = tokens.values().iterator(); iterator.hasNext();) {
-                Token token = (Token) iterator.next();
-                if (token.getExpires() != null &&
-                    token.getExpires().getTime() < System.currentTimeMillis()) {
-                    token.setState(Token.EXPIRED);
-                }
-            }
-        } finally {
-            readLock.unlock();
+    protected void processTokenExpiry(Token token) throws TrustException {
+        if (token.getExpires() != null &&
+            token.getExpires().getTime() < System.currentTimeMillis()) {
+            token.setState(Token.EXPIRED);
         }
     }
     

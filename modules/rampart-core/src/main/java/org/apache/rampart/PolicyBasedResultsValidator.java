@@ -39,7 +39,6 @@ import org.jaxen.JaxenException;
 
 import javax.xml.namespace.QName;
 import java.math.BigInteger;
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -317,13 +316,34 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 UsernameToken ut = (UsernameToken) token;
                 //Check presence of a UsernameToken
                 WSSecurityEngineResult utResult = WSSecurityUtil.fetchActionResult(results, WSConstants.UT);
+                
                 if (utResult == null && !ut.isOptional()) {
                     throw new RampartException("usernameTokenMissing");
                 }
+                
+                org.apache.ws.security.message.token.UsernameToken wssUt = 
+                		(org.apache.ws.security.message.token.UsernameToken) utResult.get(WSSecurityEngineResult.TAG_USERNAME_TOKEN);
+                
+                if(ut.isNoPassword() && wssUt.getPassword() != null) {
+                	throw new RampartException("invalidUsernameTokenType");
+                }
+                
+            	if(ut.isHashPassword() && !wssUt.isHashed()) {
+                	throw new RampartException("invalidUsernameTokenType");
+                } else if (!ut.isHashPassword() && (wssUt.getPassword() == null ||
+                        !wssUt.getPasswordType().equals(WSConstants.PASSWORD_TEXT))) {
+                	throw new RampartException("invalidUsernameTokenType");
+                }
+                
+                
 
             } else if (token instanceof IssuedToken) {
-                //TODO is is enough to check for ST_UNSIGNED results ??
-                WSSecurityEngineResult samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_UNSIGNED);
+                WSSecurityEngineResult samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_SIGNED);
+                // Then check for unsigned saml tokens
+                if (samlResult == null) {
+                    log.debug("No signed SAMLToken found. Looking for unsigned SAMLTokens");
+                    samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_UNSIGNED);
+                }
                 if (samlResult == null) {
                     throw new RampartException("samlTokenMissing");
                 }

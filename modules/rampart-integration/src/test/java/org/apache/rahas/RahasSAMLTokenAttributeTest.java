@@ -1,21 +1,16 @@
 package org.apache.rahas;
 
+import static org.junit.Assert.assertNotNull;
+
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
-import org.apache.rampart.handler.config.InflowConfiguration;
-import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP11Constants;
 
 public class RahasSAMLTokenAttributeTest  extends TestClient{
-    
-	public RahasSAMLTokenAttributeTest(String name) {
-        super(name);
-    }
-    
     public OMElement getRequest() {
         try {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_02);
@@ -33,23 +28,6 @@ public class RahasSAMLTokenAttributeTest  extends TestClient{
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public OutflowConfiguration getClientOutflowConfiguration() {
-        OutflowConfiguration ofc = new OutflowConfiguration();
-
-        ofc.setActionItems("UsernameToken Timestamp");
-        ofc.setUser("joe");
-        ofc.setPasswordCallbackClass(PWCallback.class.getName());
-        return ofc;
-    }
-
-    public InflowConfiguration getClientInflowConfiguration() {
-        InflowConfiguration ifc = new InflowConfiguration();
-
-        ifc.setActionItems("Timestamp");
-        
-        return ifc;
     }
 
     public String getServiceRepo() {
@@ -99,4 +77,9 @@ public class RahasSAMLTokenAttributeTest  extends TestClient{
     public int getTrstVersion() {
         return RahasConstants.VERSION_05_02;
     }
+
+	@Override
+	public String getClientPolicyPath() {
+		return "/rahas/3.xml";
+	}
 }

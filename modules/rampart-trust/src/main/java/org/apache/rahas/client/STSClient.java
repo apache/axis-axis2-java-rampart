@@ -20,7 +20,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.AxisFault;
@@ -477,7 +477,7 @@ public class STSClient {
                 secret = Base64Utils.decode(b64Secret);
             } else if (child.getQName().equals(new QName(ns, WSConstants.ENC_KEY_LN))) {
 
-                Element domChild = (Element) new StAXOMBuilder(
+                Element domChild = (Element)OMXMLBuilderFactory.createStAXOMBuilder(
                         OMAbstractFactory.getMetaFactory(
                                 OMAbstractFactory.FEATURE_DOM).getOMFactory(),
                         child.getXMLStreamReader()).getDocumentElement();

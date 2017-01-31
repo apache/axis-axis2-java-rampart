@@ -24,13 +24,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.PolicyComponent;
-import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.SPConstants;
 
 public class RequiredParts extends AbstractSecurityAssertion {
     
-    private ArrayList headers = new ArrayList();
+    private ArrayList<Header> headers = new ArrayList<Header>();
     
     public RequiredParts(int version) {
         setVersion(version);
@@ -39,7 +38,7 @@ public class RequiredParts extends AbstractSecurityAssertion {
     /**
      * @return Returns the headers.
      */
-    public ArrayList getHeaders() {
+    public ArrayList<Header> getHeaders() {
         return this.headers;
     }
 
@@ -68,8 +67,8 @@ public class RequiredParts extends AbstractSecurityAssertion {
         writeStartElement(writer, prefix, localName, namespaceURI);
         
         Header header;        
-        for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
-            header = (Header) iterator.next();
+        for (Iterator<Header> iterator = headers.iterator(); iterator.hasNext();) {
+            header = iterator.next();
             // <sp:Header Name=".." Namespace=".." />
             writeStartElement(writer, prefix, SPConstants.HEADER, namespaceURI);
             // Name attribute is optional

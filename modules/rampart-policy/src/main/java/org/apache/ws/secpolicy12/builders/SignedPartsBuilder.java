@@ -45,7 +45,7 @@ public class SignedPartsBuilder implements AssertionBuilder<OMElement> {
 					.booleanValue());
 		}
 
-        //presense of <sp:SignedParts/> enforces the requirement for sign body and all the header blocks
+        //Presence of <sp:SignedParts/> enforces the requirement for sign body and all the header blocks
         if(!element.getChildren().hasNext()){
             signedEncryptedParts.setBody(true);
             signedEncryptedParts.setSignAllHeaders(true);

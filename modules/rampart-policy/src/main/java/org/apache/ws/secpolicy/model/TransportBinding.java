@@ -25,6 +25,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.neethi.All;
+import org.apache.neethi.Assertion;
 import org.apache.neethi.ExactlyOne;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
@@ -36,7 +37,7 @@ public class TransportBinding extends Binding {
 
     private TransportToken transportToken;
 
-    private List transportBindings;
+    private List<TransportBinding> transportBindings;
     
     private boolean tokenProtection;
 
@@ -74,7 +75,7 @@ public class TransportBinding extends Binding {
     }
     
 
-    public List getConfigurations() {
+    public List<TransportBinding> getConfigurations() {
         return transportBindings;
     }
 
@@ -87,7 +88,7 @@ public class TransportBinding extends Binding {
 
     public void addConfiguration(TransportBinding transportBinding) {
         if (transportBindings == null) {
-            transportBindings = new ArrayList();
+            transportBindings = new ArrayList<TransportBinding>();
         }
         transportBindings.add(transportBinding);
     }
@@ -106,7 +107,7 @@ public class TransportBinding extends Binding {
         }
 
         AlgorithmSuite algorithmSuite = getAlgorithmSuite();
-        List configurations = algorithmSuite.getConfigurations();
+        List<Assertion> configurations = algorithmSuite.getConfigurations();
 
         if (configurations != null && configurations.size() == 1) {
             setNormalized(true);
@@ -119,7 +120,7 @@ public class TransportBinding extends Binding {
         All wrapper;
         TransportBinding transportBinding;
 
-        for (Iterator iterator = configurations.iterator(); iterator.hasNext();) {
+        for (Iterator<Assertion> iterator = configurations.iterator(); iterator.hasNext();) {
             wrapper = new All();
             transportBinding = new TransportBinding(this.getVersion());
 
