@@ -149,6 +149,13 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                     }
                 }
             }
+        } else {
+            if (rpd.isSignatureConfirmation()) {
+                WSEncryptionPart part = new WSEncryptionPart(WSConstants.SIGNATURE_CONFIRMATION_LN,
+                                                             WSConstants.WSSE11_NS,
+                                                             "Element");
+                signatureParts.add(part);
+            }
         }
         
         validateEncrSig(data,encryptedParts, signatureParts, results);
