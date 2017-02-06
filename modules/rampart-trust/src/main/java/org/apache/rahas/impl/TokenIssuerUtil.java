@@ -18,7 +18,7 @@ package org.apache.rahas.impl;
 import java.security.SecureRandom;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.Base64;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.RahasData;
 import org.apache.rahas.Token;
@@ -94,7 +94,7 @@ public class TokenIssuerUtil {
             //set the RPT to include a ComputedKey element
 
             OMElement respEntrElem = TrustUtil.createEntropyElement(wstVersion, rstrElem);
-            String entr = Base64.encode(data.getResponseEntropy());
+            String entr = Base64Utils.encode(data.getResponseEntropy());
             OMElement binSecElem = TrustUtil.createBinarySecretElement(wstVersion,
                                                             respEntrElem,
                                                             RahasConstants.BIN_SEC_TYPE_NONCE);
@@ -141,7 +141,7 @@ public class TokenIssuerUtil {
                 OMElement binSecElem = TrustUtil.createBinarySecretElement(wstVersion,
                                                                            reqProofTokElem,
                                                                            null);
-                binSecElem.setText(Base64.encode(secret));
+                binSecElem.setText(Base64Utils.encode(secret));
                 token.setSecret(secret);
             } else {
                 throw new IllegalArgumentException(config.proofKeyType);

@@ -16,7 +16,10 @@
 
 package org.apache.rampart;
 
-import junit.framework.TestCase;
+import static org.apache.axis2.integration.TestConstants.TESTING_PATH;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -25,26 +28,47 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.integration.UtilServer;
+import org.apache.axis2.testutils.ClientHelper;
+import org.apache.axis2.testutils.JettyServer;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
+import org.junit.Rule;
+import org.junit.Test;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-
-public class RampartTest extends TestCase {
-
-    public final static int PORT = UtilServer.TESTING_PORT;
+public class RampartTest {
 
     private static ResourceBundle resources;
-
+    
+    @Rule
+    public final JettyServer server = new JettyServer(TESTING_PATH + "rampart_service_repo", false);
+    
+    @Rule
+    public final ClientHelper clientHelper = new ClientHelper(server, TESTING_PATH + "rampart_client_repo") {
+        @Override
+        protected void configureServiceClient(ServiceClient serviceClient) throws Exception {
+            serviceClient.engageModule("addressing");
+            serviceClient.engageModule("rampart");
+        }
+    };
+    
+    @Rule
+    public final JettyServer secureServer = new JettyServer(TESTING_PATH + "rampart_service_repo", true);
+    
+    @Rule
+    public final ClientHelper secureClientHelper = new ClientHelper(secureServer, TESTING_PATH + "rampart_client_repo") {
+        @Override
+        protected void configureServiceClient(ServiceClient serviceClient) throws Exception {
+            serviceClient.engageModule("addressing");
+            serviceClient.engageModule("rampart");
+        }
+    };
+    
     static {
         try {
             resources = ResourceBundle.getBundle("org.apache.rampart.errors");
@@ -53,40 +77,9 @@ public class RampartTest extends TestCase {
         }
     }
 
-    public RampartTest(String name) {
-        super(name);
-    }
-
-    protected void setUp() throws Exception {
-        UtilServer.start(Constants.TESTING_PATH + "rampart_service_repo" ,null);
-    }
-    
-
-    protected void tearDown() throws Exception {
-        UtilServer.stop();
-    }
-
-    private ServiceClient getServiceClientInstance() throws AxisFault {
-
-        String repository = Constants.TESTING_PATH + "rampart_client_repo";
-
-        ConfigurationContext configContext = ConfigurationContextFactory.
-                createConfigurationContextFromFileSystem(repository, null);
-        ServiceClient serviceClient = new ServiceClient(configContext, null);
-
-
-        serviceClient.engageModule("addressing");
-        serviceClient.engageModule("rampart");
-
-        return serviceClient;
-
-    }
-
+    @Test
     public void testWithPolicy() {
         try {
-
-            ServiceClient serviceClient = getServiceClientInstance();
-
             //TODO : figure this out !!
             boolean basic256Supported = false;
             
@@ -96,7 +89,7 @@ public class RampartTest extends TestCase {
             }
 
             //for (int i = 34; i <= 34; i++) { //<-The number of tests we have
-            for (int i = 1; i <= 34; i++) { //<-The number of tests we have
+            for (int i = 1; i <= 35; i++) { //<-The number of tests we have
                 if(!basic256Supported && (i == 3 || i == 4 || i == 5)) {
                     //Skip the Basic256 tests
                     continue;
@@ -106,25 +99,22 @@ public class RampartTest extends TestCase {
                     // Testcase - 25 is failing, for the moment skipping it.
                     continue;
                 }
-                Options options = new Options();
+                
+                ServiceClient serviceClient = (i == 13 ? secureClientHelper : clientHelper).createServiceClient("SecureService" + i);
+                Options options = serviceClient.getOptions();
                 
                 if( i == 13 ) {
-                    continue; // Can't test Transport binding with Simple HTTP Server
                     //Username token created with user/pass from options
-                    //options.setUserName("alice");
-                    //options.setPassword("password");
+                    options.setUserName("alice");
+                    options.setPassword("password");
                 }
                 
                 System.out.println("Testing WS-Sec: custom scenario " + i);
                 options.setAction("urn:echo");
-                options.setTo(new EndpointReference("http://127.0.0.1:" +
-                                        PORT +  
-                                        "/axis2/services/SecureService" + i));
-                
+
                 ServiceContext context = serviceClient.getServiceContext();
                 context.setProperty(RampartMessageData.KEY_RAMPART_POLICY, 
                         loadPolicy("/rampart/policy/" + i + ".xml"));
-                serviceClient.setOptions(options);
                 
                 if (i == 31) {
                     OMNamespace omNamespace = OMAbstractFactory.getOMFactory().createOMNamespace(
@@ -178,22 +168,21 @@ public class RampartTest extends TestCase {
                     //Skip the Basic256 tests
                     continue;
                 }
-                Options options = new Options();
+                
+                ServiceClient serviceClient = (i == 13 ? secureClientHelper : clientHelper).createServiceClient("SecureService" + i);
+                Options options = serviceClient.getOptions();
 
                 if (i == 13) {
-                    continue;
+                    //Username token created with user/pass from options
+                    options.setUserName("alice");
+                    options.setPassword("password");
                 }
-
                 System.out.println("Testing WS-Sec: negative scenario " + i);
                 options.setAction("urn:returnError");
-                options.setTo(new EndpointReference("http://127.0.0.1:" +
-                        PORT +
-                        "/axis2/services/SecureService" + i));
 
                 ServiceContext context = serviceClient.getServiceContext();
                 context.setProperty(RampartMessageData.KEY_RAMPART_POLICY,
                         loadPolicy("/rampart/policy/" + i + ".xml"));
-                serviceClient.setOptions(options);
 
                 try {
                     //Blocking invocation
@@ -207,21 +196,19 @@ public class RampartTest extends TestCase {
 
             
             for (int i = 1; i <= 6; i++) { //<-The number of tests we have
-                
+                ServiceClient serviceClient;
                 if (i == 3 || i == 6) {
-                    continue; // Can't test Transport binding scenarios with Simple HTTP Server
+                    serviceClient = secureClientHelper.createServiceClient("SecureServiceSC" + i);
                 }
+                else {
+                    serviceClient = clientHelper.createServiceClient("SecureServiceSC" + i);
+                }
+                Options options = serviceClient.getOptions();
 
-                Options options = new Options();
                 System.out.println("Testing WS-SecConv: custom scenario " + i);
                 options.setAction("urn:echo");
-                options.setTo(new EndpointReference("http://127.0.0.1:" + PORT + "/axis2/services/SecureServiceSC" + i));
-
-                //Create a new service client instance for each secure conversation scenario
-                serviceClient = getServiceClientInstance();
 
                 serviceClient.getServiceContext().setProperty(RampartMessageData.KEY_RAMPART_POLICY, loadPolicy("/rampart/policy/sc-" + i + ".xml"));
-                serviceClient.setOptions(options);
 
                 //Blocking invocation
                 serviceClient.sendReceive(getEchoElement());

@@ -22,10 +22,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.mex.MexConstants;
 import org.apache.axis2.mex.om.Metadata;
@@ -56,12 +55,10 @@ public class MexService {
             
             File file = new File("sample06/mex_policy.xml");
             System.out.println(file.getAbsolutePath());
-            StAXOMBuilder builder = new StAXOMBuilder(new FileInputStream(file));
+            OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(file));
             return builder.getDocumentElement();
         } catch (FileNotFoundException e) {
             throw new AxisFault("Error reading the file",e);
-        } catch (XMLStreamException e) {
-            throw new AxisFault("Error parsing the file",e);
         }
     }
 

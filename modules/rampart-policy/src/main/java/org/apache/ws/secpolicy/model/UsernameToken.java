@@ -109,46 +109,41 @@ public class UsernameToken extends Token {
         if (inclusion != null) {
             writeAttribute(writer, prefix, namespaceURI, SPConstants.ATTR_INCLUDE_TOKEN, inclusion);
         }
-
-        if (isUseUTProfile10() || isUseUTProfile11()) {
-            // <wsp:Policy>
-            writeStartElement(writer, SPConstants.POLICY);
-
-            // CHECKME
-            if (isUseUTProfile10()) {
-                // <sp:WssUsernameToken10 />
-                writeStartElement(writer, prefix, SPConstants.USERNAME_TOKEN10 , namespaceURI);
-            } else {
-                // <sp:WssUsernameToken11 />
-                writeStartElement(writer, prefix, SPConstants.USERNAME_TOKEN11 , namespaceURI);
+        
+        // <wsp:Policy>
+        writeStartElement(writer, SPConstants.POLICY);
+        
+        if (version == SPConstants.SP_V12) {
+            
+            if (isNoPassword()) {
+                writeEmptyElement(writer, prefix, SPConstants.NO_PASSWORD, namespaceURI);
+            } else if (isHashPassword()){
+                writeEmptyElement(writer, prefix, SPConstants.HASH_PASSWORD, namespaceURI);
             }
             
-            if (version == SPConstants.SP_V12) {
-                
-                if (isNoPassword()) {
-                    writeEmptyElement(writer, prefix, SPConstants.NO_PASSWORD, namespaceURI);
-                } else if (isHashPassword()){
-                    writeEmptyElement(writer, prefix, SPConstants.HASH_PASSWORD, namespaceURI);
-                }
-                
-                if (isDerivedKeys()) {
-                    writeEmptyElement(writer, prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
-                } else if (isExplicitDerivedKeys()) {
-                    writeEmptyElement(writer, prefix, SPConstants.REQUIRE_EXPLICIT_DERIVED_KEYS, namespaceURI);
-                } else if (isImpliedDerivedKeys()) {
-                    writeEmptyElement(writer, prefix, SPConstants.REQUIRE_IMPLIED_DERIVED_KEYS, namespaceURI);
-                }
-                
+            if (isDerivedKeys()) {
+                writeEmptyElement(writer, prefix, SPConstants.REQUIRE_DERIVED_KEYS, namespaceURI);
+            } else if (isExplicitDerivedKeys()) {
+                writeEmptyElement(writer, prefix, SPConstants.REQUIRE_EXPLICIT_DERIVED_KEYS, namespaceURI);
+            } else if (isImpliedDerivedKeys()) {
+                writeEmptyElement(writer, prefix, SPConstants.REQUIRE_IMPLIED_DERIVED_KEYS, namespaceURI);
             }
-            writer.writeEndElement();
-
-            // </wsp:Policy>
-            writer.writeEndElement();
-
+            
+        }
+        
+        if (isUseUTProfile10()) {
+            // <sp:WssUsernameToken10 />
+        	writeEmptyElement(writer, prefix, SPConstants.USERNAME_TOKEN10 , namespaceURI);
+        } else if(isUseUTProfile11()) {
+            // <sp:WssUsernameToken11 />
+        	writeEmptyElement(writer, prefix, SPConstants.USERNAME_TOKEN11 , namespaceURI);
         }
 
+        // </wsp:Policy>
         writer.writeEndElement();
+
         // </sp:UsernameToken>
+        writer.writeEndElement();
 
     }
 }

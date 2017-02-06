@@ -39,8 +39,8 @@ public class ProtectionTokenBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), protectionToken);
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative(iterator.next(), protectionToken);
             break; // since there should be only one alternative ..
         }
         
@@ -51,7 +51,7 @@ public class ProtectionTokenBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP11Constants.PROTECTION_TOKEN};
     }
 
-    private void processAlternative(List assertions, ProtectionToken parent) {
+    private void processAlternative(List<Assertion> assertions, ProtectionToken parent) {
         Object token = assertions.get(0);
         
         if (token instanceof Token) {

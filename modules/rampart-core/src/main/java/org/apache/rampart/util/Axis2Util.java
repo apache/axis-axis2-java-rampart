@@ -20,19 +20,14 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMMetaFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMXMLBuilderFactory;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.axiom.soap.SOAP12Constants;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axiom.soap.SOAPModelBuilder;
-import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.xml.security.utils.XMLUtils;
@@ -144,21 +139,9 @@ public class Axis2Util {
                     }
                 }
 
-                // Check the namespace and find SOAP version and factory
-                String nsURI = null;
-                OMMetaFactory metaFactory = OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM);
-                SOAPFactory factory;
-                if (env.getNamespace().getNamespaceURI().equals(
-                        SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-                    nsURI = SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI;
-                    factory = metaFactory.getSOAP11Factory();
-                } else {
-                    nsURI = SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI;
-                    factory = metaFactory.getSOAP12Factory();
-                }
-
-                StAXSOAPModelBuilder stAXSOAPModelBuilder = new StAXSOAPModelBuilder(
-                        env.getXMLStreamReader(), factory, nsURI);
+                SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createStAXSOAPModelBuilder(
+                        OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM),
+                        env.getXMLStreamReader());
                 SOAPEnvelope envelope = (stAXSOAPModelBuilder)
                         .getSOAPEnvelope();
                 envelope.getParent().build();
@@ -337,7 +320,7 @@ public class Axis2Util {
      * @return
      */
     public static OMElement toDOOM(OMFactory factory, OMElement element){
-        StAXOMBuilder builder = new StAXOMBuilder(factory, element.getXMLStreamReader());
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createStAXOMBuilder(factory, element.getXMLStreamReader());
         OMElement elem = builder.getDocumentElement();
         elem.build();
         return elem;

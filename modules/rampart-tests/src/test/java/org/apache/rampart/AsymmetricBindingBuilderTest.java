@@ -38,7 +38,7 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
 
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.WSSE_NS, WSConstants.BINARY_TOKEN_LN));
@@ -59,7 +59,7 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
@@ -79,7 +79,7 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.WSSE_NS, WSConstants.BINARY_TOKEN_LN));
@@ -102,7 +102,7 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.WSSE_NS, WSConstants.BINARY_TOKEN_LN));
@@ -124,7 +124,7 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
@@ -148,7 +148,7 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
@@ -170,7 +170,7 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
@@ -191,7 +191,7 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         MessageBuilder builder = new MessageBuilder();
         builder.build(ctx);
         
-        ArrayList list = new ArrayList();
+        ArrayList<QName> list = new ArrayList<QName>();
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.WSSE_NS,WSConstants.BINARY_TOKEN_LN));

@@ -36,7 +36,6 @@ import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.SymmetricAsymmetricBindingBase;
 import org.apache.ws.secpolicy.model.SymmetricBinding;
-import org.apache.ws.secpolicy.model.TokenWrapper;
 import org.apache.ws.secpolicy.model.TransportBinding;
 import org.apache.ws.secpolicy.model.TransportToken;
 import org.apache.ws.secpolicy.model.Trust10;
@@ -65,15 +64,15 @@ public class RampartPolicyBuilder {
      * 
      * @param topLevelAssertions
      *            The iterator of the top level policy assertions
-     * @return The compile Poilcy data block.
+     * @return The compile Policy data block.
      * @throws WSSPolicyException
      */
-    public static RampartPolicyData build(List topLevelAssertions)
+    public static RampartPolicyData build(List<Assertion> topLevelAssertions)
             throws WSSPolicyException {
         
         RampartPolicyData rpd = new RampartPolicyData();
         
-        for (Iterator iter = topLevelAssertions.iterator(); iter.hasNext();) {
+        for (Iterator<Assertion> iter = topLevelAssertions.iterator(); iter.hasNext();) {
             Assertion assertion = (Assertion) iter.next();
             if (assertion instanceof Binding) {
 
@@ -228,14 +227,14 @@ public class RampartPolicyBuilder {
      */
     private static void processSignedEncryptedElements(
             SignedEncryptedElements see, RampartPolicyData rpd) {
-        Iterator it = see.getXPathExpressions().iterator();
+        Iterator<String> it = see.getXPathExpressions().iterator();
         if (see.isSignedElemets()) {
             while (it.hasNext()) {
-                rpd.setSignedElements((String) it.next());
+                rpd.setSignedElements(it.next());
             }
         } else {
             while (it.hasNext()) {
-                rpd.setEncryptedElements((String) it.next());
+                rpd.setEncryptedElements(it.next());
             }
         }
         rpd.addDeclaredNamespaces(see.getDeclaredNamespaces());
@@ -251,7 +250,7 @@ public class RampartPolicyBuilder {
      */
     private static void processSignedEncryptedParts(SignedEncryptedParts sep,
             RampartPolicyData rpd) {
-        Iterator it = sep.getHeaders().iterator();
+        Iterator<Header> it = sep.getHeaders().iterator();
         if (sep.isSignedParts()) {
             rpd.setSignBody(sep.isBody());
             rpd.setSignAttachments(sep.isAttachments());
@@ -259,7 +258,7 @@ public class RampartPolicyBuilder {
            	rpd.setSignBodyOptional(sep.isOptional());
            	rpd.setSignAttachmentsOptional(sep.isOptional());
             while (it.hasNext()) {
-                Header header = (Header) it.next();
+                Header header = it.next();
                 rpd.addSignedPart(header.getNamespace(), header.getName());
             }
         } else {
@@ -268,7 +267,7 @@ public class RampartPolicyBuilder {
             rpd.setEncryptBodyOptional(sep.isOptional());
            	rpd.setEncryptAttachmentsOptional(sep.isOptional());
             while (it.hasNext()) {
-                Header header = (Header) it.next();
+                Header header = it.next();
                 rpd.setEncryptedParts(header.getNamespace(), header.getName(),"Header");
             }
         }
@@ -277,9 +276,9 @@ public class RampartPolicyBuilder {
     private static void processContentEncryptedElements(ContentEncryptedElements cee,
             RampartPolicyData rpd) {
         
-        Iterator it = cee.getXPathExpressions().iterator();     
+        Iterator<String> it = cee.getXPathExpressions().iterator();     
         while (it.hasNext()) {
-            rpd.setContentEncryptedElements((String) it.next());
+            rpd.setContentEncryptedElements(it.next());
         }
         rpd.addDeclaredNamespaces(cee.getDeclaredNamespaces());
     }
@@ -287,9 +286,9 @@ public class RampartPolicyBuilder {
     private static void processRequiredElements(RequiredElements req,
             RampartPolicyData rpd) {
         
-        Iterator it = req.getXPathExpressions().iterator();     
+        Iterator<String> it = req.getXPathExpressions().iterator();     
         while (it.hasNext()) {
-            rpd.setRequiredElements((String) it.next());
+            rpd.setRequiredElements(it.next());
         }
         rpd.addDeclaredNamespaces(req.getDeclaredNamespaces());
     }
@@ -363,14 +362,14 @@ public class RampartPolicyBuilder {
      */
     private static void asymmetricBinding(AsymmetricBinding binding,
             RampartPolicyData rpd) throws WSSPolicyException {
-        TokenWrapper tokWrapper = binding.getRecipientToken();
-        TokenWrapper tokWrapper1 = binding.getInitiatorToken();
-        if (tokWrapper == null || tokWrapper1 == null) {
+    	RecipientToken rt = binding.getRecipientToken();
+    	InitiatorToken it = binding.getInitiatorToken();
+        if (rt == null || it == null) {
             throw new WSSPolicyException("Asymmetric binding should have both Initiator and " +
             		                                                "Recipient tokens defined");
         }
-        rpd.setRecipientToken(((RecipientToken) tokWrapper).getReceipientToken());
-        rpd.setInitiatorToken(((InitiatorToken) tokWrapper1).getInitiatorToken());
+        rpd.setRecipientToken(rt.getReceipientToken());
+        rpd.setInitiatorToken(it.getInitiatorToken());
     }
 
     private static void processSupportingTokens(SupportingToken token,

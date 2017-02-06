@@ -32,7 +32,8 @@
 			  <wsp:Policy>
 				<sp:TransportToken>
 				  <wsp:Policy>
-					<sp:HttpsToken RequireClientCertificate="false"/>
+				  	<!-- REMOVED TO MAKE THE SAMPLE RUN WITH THE axis2server-->
+					<!--<sp:HttpsToken RequireClientCertificate="false"/> -->
 				  </wsp:Policy>
 				</sp:TransportToken>
 				<sp:AlgorithmSuite>

@@ -40,8 +40,8 @@ public class LayoutBuilder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext(); ) {
-            processAlternative((List) iterator.next(), layout);         
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext(); ) {
+            processAlternative(iterator.next(), layout);         
             break; // there should be only one alternative
         }
                         
@@ -52,10 +52,10 @@ public class LayoutBuilder implements AssertionBuilder<OMElement> {
         return new QName[] {SP11Constants.LAYOUT};
     }
 
-    public void processAlternative(List assertions, Layout parent) {
+    public void processAlternative(List<Assertion> assertions, Layout parent) {
         
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            Assertion assertion = (Assertion) iterator.next();
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+            Assertion assertion = iterator.next();
             QName qname = assertion.getName();
             
             if (SP11Constants.STRICT.equals(qname)) {

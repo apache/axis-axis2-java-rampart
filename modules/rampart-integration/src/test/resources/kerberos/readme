@@ -1,0 +1,9 @@
+In order to create alice.keytab and bob.keytab, in src/test/resources/kerberos directory, execute the following commands depending on the underlying OS:
+
+Windows:
+<java_home>/bin/ktab.exe -a alice@EXAMPLE.COM password -k alice.keytab
+<java_home>/bin/ktab.exe -a bob@EXAMPLE.COM password -k bob.keytab
+
+Unix (requires ktutil)
+ktutil add_entry -password -p alice@EXAMPLE.COM -k 1 -e aes128-cts-hmac-sha1-96\npassword\n write_kt alice.keytab\n quit
+ktutil add_entry -password -p bob@EXAMPLE.COM -k 1 -e aes128-cts-hmac-sha1-96\npassword\n write_kt bob.keytab\n quit 

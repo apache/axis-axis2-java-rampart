@@ -43,7 +43,7 @@ public class SupportingToken extends AbstractSecurityAssertion implements
 
     private AlgorithmSuite algorithmSuite;
 
-    private ArrayList tokens = new ArrayList();
+    private ArrayList<Token> tokens = new ArrayList<Token>();
 
     private SignedEncryptedElements signedElements;
 
@@ -84,7 +84,7 @@ public class SupportingToken extends AbstractSecurityAssertion implements
     /**
      * @return Returns the token.
      */
-    public ArrayList getTokens() {
+    public ArrayList<Token> getTokens() {
         return tokens;
     }
 
@@ -289,9 +289,9 @@ public class SupportingToken extends AbstractSecurityAssertion implements
         writeStartElement(writer, SPConstants.POLICY);
 
         Token token;
-        for (Iterator iterator = getTokens().iterator(); iterator.hasNext();) {
+        for (Iterator<Token> iterator = getTokens().iterator(); iterator.hasNext();) {
             // [Token Assertion] +
-            token = (Token) iterator.next();
+            token = iterator.next();
             token.serialize(writer);
         }
 

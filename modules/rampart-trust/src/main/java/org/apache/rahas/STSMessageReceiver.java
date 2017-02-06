@@ -39,7 +39,7 @@ public class STSMessageReceiver extends AbstractInOutMessageReceiver {
                     .getParameter(TokenRequestDispatcherConfig.CONFIG_PARAM_KEY);
             Parameter paramFile = inMessage
                     .getParameter(TokenRequestDispatcherConfig.CONFIG_FILE_KEY);
-            TokenRequestDispatcher dispatcher = null;
+            TokenRequestDispatcher dispatcher;
             if (param != null) {
                 dispatcher = new TokenRequestDispatcher(param
                         .getParameterElement().getFirstChildWithName(
@@ -53,12 +53,8 @@ public class STSMessageReceiver extends AbstractInOutMessageReceiver {
                                 .getProperty(TokenRequestDispatcherConfig.CONFIG_PARAM_KEY));
             }
             
-            if(dispatcher != null) {
-                SOAPEnvelope responseEnv = dispatcher.handle(inMessage, outMessage);
-                outMessage.setEnvelope(responseEnv);
-            } else {
-                throw new TrustException("missingDispatcherConfiguration");
-            }
+            SOAPEnvelope responseEnv = dispatcher.handle(inMessage, outMessage);
+			outMessage.setEnvelope(responseEnv);
         } catch (TrustException e) {
             e.printStackTrace();
             //Log the exception
