@@ -627,11 +627,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                     throw new RampartException("bodyNotSigned");
                 }
 
-            } else if (wsep.getName().equals(WSConstants.ELEM_HEADER) ||
-                    wsep.getXpath() != null) {
-                // TODO earlier this was wsep.getType() == WSConstants.PART_TYPE_ELEMENT
-                // This means that encrypted element of an XPath expression type. Therefore we are checking
-                // now whether an XPath expression exists. - Verify
+            } else {
 
                 Element element = WSSecurityUtil.findElement(
                         envelope, wsep.getName(), wsep.getNamespace());

@@ -83,6 +83,70 @@ public class PolicyAssertionsTest extends MessageBuilderTestBase {
 
     }
 
+    public void testSignedPartsValid() throws Exception {
+
+        MessageContext ctx = getMsgCtx();
+
+        String policyXml = "test-resources/policy/rampart-asymm-signed-parts.xml";
+        Policy policy = loadPolicy(policyXml);
+
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+
+        MessageBuilder builder = new MessageBuilder();
+        builder.build(ctx);
+
+        // Building the SOAP envelope from the OMElement
+        SOAPBuilder soapBuilder = new SOAPBuilder();
+        SOAPEnvelope env = ctx.getEnvelope();
+        ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
+        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, "text/xml", ctx);
+        ctx.setEnvelope(env);
+
+        RampartEngine engine = new RampartEngine();
+        engine.process(ctx);
+
+    }
+
+    public void testSignedPartsInvalid() throws Exception {
+
+        MessageContext ctx = getMsgCtx();
+
+        String policyXml = "test-resources/policy/rampart-asymm-signed-parts.xml";
+        Policy policy = loadPolicy(policyXml);
+
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+
+        MessageBuilder builder = new MessageBuilder();
+        builder.build(ctx);
+
+        // Building the SOAP envelope from the OMElement
+        SOAPBuilder soapBuilder = new SOAPBuilder();
+        SOAPEnvelope env = ctx.getEnvelope();
+        ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
+        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, "text/xml", ctx);
+        ctx.setEnvelope(env);
+
+        ctx.setServerSide(true);
+        AxisService axisService = ctx.getAxisService();            
+        axisService.removeParameter(axisService.getParameter(RampartMessageData.PARAM_CLIENT_SIDE));
+
+        policyXml = "test-resources/policy/rampart-asymm-signed-parts-2.xml";
+        policy = loadPolicy(policyXml);
+
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+
+        RampartEngine engine = new RampartEngine();
+
+        try {
+            engine.process(ctx);
+            fail(" This should have thrown RampartException: " +
+                    "Element must be signed : http://schemas.xmlsoap.org/ws/2004/08/addressing:From");
+        } catch (RampartException expected) {
+            // Ignore intentionally as the test is supposed to throw an exception
+        }
+
+    }
+
     public void testHashedPasswordRequiredValid() throws Exception {
 
         MessageContext ctx = getMsgCtx();
