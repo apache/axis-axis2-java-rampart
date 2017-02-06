@@ -31,6 +31,7 @@ import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.CryptoType;
 import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -39,7 +40,10 @@ import org.jaxen.JaxenException;
 
 import javax.xml.namespace.QName;
 import java.math.BigInteger;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.*;
 
 public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallbackHandler {
@@ -285,17 +289,18 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     throws RampartException {
         
         //Check for UsernameToken
-        RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
+        RampartMessageData rmd = data.getRampartMessageData();
+        RampartPolicyData rpd = rmd.getPolicyData();
         List<SupportingToken> supportingTokens = rpd.getSupportingTokensList();
         for (SupportingToken suppTok : supportingTokens) {
-            handleSupportingTokens(results, suppTok);
+            handleSupportingTokens(results, suppTok, rmd);
         }
         SupportingToken signedSuppToken = rpd.getSignedSupportingTokens();
-        handleSupportingTokens(results, signedSuppToken);
+        handleSupportingTokens(results, signedSuppToken, rmd);
         SupportingToken signedEndSuppToken = rpd.getSignedEndorsingSupportingTokens();
-        handleSupportingTokens(results, signedEndSuppToken);
+        handleSupportingTokens(results, signedEndSuppToken, rmd);
         SupportingToken endSuppToken = rpd.getEndorsingSupportingTokens();
-        handleSupportingTokens(results, endSuppToken);
+        handleSupportingTokens(results, endSuppToken, rmd);
     }
 
     /**
@@ -303,7 +308,10 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
      * @param suppTok
      * @throws RampartException
      */
-    protected void handleSupportingTokens(List<WSSecurityEngineResult> results, SupportingToken suppTok) throws RampartException {
+    protected void handleSupportingTokens(List<WSSecurityEngineResult> results, 
+                                          SupportingToken suppTok,
+                                          RampartMessageData rmd)
+            throws RampartException {
         
         if(suppTok == null) {
             return;
@@ -335,7 +343,9 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 	throw new RampartException("invalidUsernameTokenType");
                 }
                 
-                
+                if (!verifyUsernameTokenTimestamp(wssUt, rmd)) {
+                    throw new RampartException("cannotValidateTimestamp");
+                }
 
             } else if (token instanceof IssuedToken) {
                 //TODO is is enough to check for ST_UNSIGNED results ??
@@ -710,7 +720,37 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
 
         return true;
     }
+
+    /*
+     * Verify that ut->Created is not before or after 'now' (accounting for clock skew)
+     */
+    protected boolean verifyUsernameTokenTimestamp(
+            org.apache.ws.security.message.token.UsernameToken token, RampartMessageData rmd) throws RampartException {
+
+        String createdString = token.getCreated();
+        if (createdString != null && createdString.length() > 0) { 
+            try {
+                DateFormat zulu = new XmlSchemaDateFormat();
+                Date createdTime = zulu.parse(createdString);
+
+                long now = Calendar.getInstance().getTimeInMillis();
     
+                // adjust 'now' with allowed timeskew 
+                long maxSkew = RampartUtil.getTimestampMaxSkew(rmd);
+                maxSkew = maxSkew < 0 ? 0 : maxSkew;
+                maxSkew *= 1000;
+                
+                // fail if ts->Created is after or before 'now' (accounting for clock skew)
+                if (createdTime.getTime() > now + maxSkew || createdTime.getTime() < now - maxSkew) {
+                    return false;
+                }
+            } catch (ParseException e) {
+                throw new RampartException("invalidDateTime", new Object[] {createdString});
+            }
+        }
+        return true;
+    }
+
     /**
      * Evaluate whether a given certificate should be trusted.
      * Hook to allow subclasses to implement custom validation methods however they see fit.

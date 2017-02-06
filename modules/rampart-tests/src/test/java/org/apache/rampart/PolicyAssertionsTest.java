@@ -19,6 +19,8 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.neethi.Policy;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 public class PolicyAssertionsTest extends MessageBuilderTestBase {
 
@@ -75,6 +77,41 @@ public class PolicyAssertionsTest extends MessageBuilderTestBase {
             engine.process(ctx);
             fail(" This should have thrown RampartException: " +
                     "Required Elements not found in the incoming message : wsrm:Sequence");
+        } catch (RampartException expected) {
+            // Ignore intentionally as the test is supposed to throw an exception
+        }
+
+    }
+
+    public void testStaleUsernameToken() throws Exception {
+
+        MessageContext ctx = getMsgCtx();
+
+        String policyXml = "test-resources/policy/rampart-hashed-password.xml";
+        Policy policy = loadPolicy(policyXml);
+
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+
+        ctx.getOptions().setUserName( "Ron" );
+        ctx.getOptions().setPassword( "noR" );
+        
+        // Building the SOAP envelope from the OMElement
+        SOAPBuilder soapBuilder = new SOAPBuilder();
+        InputStream inStream = 
+            new FileInputStream("test-resources/policy/soapmessage-stale-username-token.xml");
+        SOAPEnvelope env = (SOAPEnvelope) soapBuilder.processDocument(inStream, "text/xml", ctx);
+        ctx.setEnvelope(env);
+
+        ctx.setServerSide(true);
+
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+        ctx.setProperty(WSHandlerConstants.PW_CALLBACK_REF, new TestCBHandler());
+
+        RampartEngine engine = new RampartEngine();
+
+        try {
+            engine.process(ctx);
+            fail(" This should have thrown RampartException: The timestamp could not be validated.");
         } catch (RampartException expected) {
             // Ignore intentionally as the test is supposed to throw an exception
         }
