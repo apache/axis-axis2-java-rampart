@@ -54,8 +54,8 @@ public class HttpsTokenBuilder implements AssertionBuilder<OMElement> {
             Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
             policy = (Policy) policy.normalize(false);
 
-            for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-                processAlternative((List) iterator.next(), httpsToken);
+            for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+                processAlternative(iterator.next(), httpsToken);
                 break; // since there should be only one alternative
             }
         }
@@ -82,10 +82,10 @@ public class HttpsTokenBuilder implements AssertionBuilder<OMElement> {
      * @param assertions the list of assertions to be searched through.
      * @param parent the https token, that is to be populated with retrieved data.
      */
-    private void processAlternative(List assertions, HttpsToken parent) {
+    private void processAlternative(List<Assertion> assertions, HttpsToken parent) {
         
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext();) {
-            Assertion primtive = (Assertion) iterator.next();
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext();) {
+            Assertion primtive = iterator.next();
             QName qname = primtive.getName();
             
             if (qname != null) {

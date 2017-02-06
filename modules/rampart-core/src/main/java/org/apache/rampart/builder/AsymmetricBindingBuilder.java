@@ -27,14 +27,12 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.rampart.util.RampartUtil;
-import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
-import org.apache.ws.security.WSSConfig;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.handler.WSHandlerConstants;
@@ -202,12 +200,12 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
 
             // TODO may contain deifferent types of objects as values, therefore cannot use strongly type maps
             // need to figure out a way
-            HashMap sigSuppTokMap = null;
-            HashMap endSuppTokMap = null;
-            HashMap sgndEndSuppTokMap = null;
-            HashMap sgndEncSuppTokMap = null;
-            HashMap endEncSuppTokMap = null;
-            HashMap sgndEndEncSuppTokMap = null;
+            HashMap<Token,Object> sigSuppTokMap = null;
+            HashMap<Token,Object> endSuppTokMap = null;
+            HashMap<Token,Object> sgndEndSuppTokMap = null;
+            HashMap<Token,Object> sgndEncSuppTokMap = null;
+            HashMap<Token,Object> endEncSuppTokMap = null;
+            HashMap<Token,Object> sgndEndEncSuppTokMap = null;
             
             if(this.timestampElement != null){
             	sigParts.add(RampartUtil.createEncryptionPart(WSConstants.TIMESTAMP_TOKEN_LN,

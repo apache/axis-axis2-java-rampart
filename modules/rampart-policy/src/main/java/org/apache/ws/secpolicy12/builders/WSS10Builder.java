@@ -40,8 +40,8 @@ public class WSS10Builder implements AssertionBuilder<OMElement> {
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);
         
-        for (Iterator iterator = policy.getAlternatives(); iterator.hasNext();) {
-            processAlternative((List) iterator.next(), wss10);
+        for (Iterator<List<Assertion>> iterator = policy.getAlternatives(); iterator.hasNext();) {
+            processAlternative(iterator.next(), wss10);
             /*
              * since there should be only one alternative
              */
@@ -55,13 +55,13 @@ public class WSS10Builder implements AssertionBuilder<OMElement> {
         return new QName[] {SP12Constants.WSS10};
     }
     
-    private void processAlternative(List assertions, Wss10 parent) {
+    private void processAlternative(List<Assertion> assertions, Wss10 parent) {
         
         Assertion assertion;
         QName name;
         
-        for (Iterator iterator = assertions.iterator(); iterator.hasNext(); ) {
-            assertion = (Assertion) iterator.next();
+        for (Iterator<Assertion> iterator = assertions.iterator(); iterator.hasNext(); ) {
+            assertion = iterator.next();
             name = assertion.getName();
             
             if (SP12Constants.MUST_SUPPORT_REF_KEY_IDENTIFIER.equals(name)) {

@@ -20,7 +20,8 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -36,6 +37,9 @@ import org.apache.rahas.client.STSClient;
 import org.apache.rampart.RampartMessageData;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.opensaml.common.xml.SAMLConstants;
+
+import java.io.FileInputStream;
+import java.net.URL;
 
 import javax.xml.namespace.QName;
 
@@ -55,7 +59,7 @@ public class Client {
 		String action = TrustUtil.getActionValue(RahasConstants.VERSION_05_02, RahasConstants.RST_ACTION_ISSUE);
 		stsClient.setAction(action);
 		
-		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample05/policy.xml"), "http://localhost:8080/axis2/services/STS", loadPolicy("sample05/sts_policy.xml"), null);
+		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample05/policy.xml"), new URL(new URL(args[0]), "/axis2/services/STS").toString(), loadPolicy("sample05/sts_policy.xml"), null);
 		
 	        System.out.println("\n############################# Requested Token ###################################\n");
 	        System.out.println(responseToken.getToken().toString());
@@ -83,7 +87,7 @@ public class Client {
 	}
 
 	private static Policy loadPolicy(String xmlPath) throws Exception {
-		StAXOMBuilder builder = new StAXOMBuilder(xmlPath);
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(xmlPath));
 		return PolicyEngine.getPolicy(builder.getDocumentElement());
 	}
 	

@@ -20,8 +20,6 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
-import org.apache.rampart.handler.config.InflowConfiguration;
-import org.apache.rampart.handler.config.OutflowConfiguration;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.opensaml.Configuration;
 import org.opensaml.saml2.core.Assertion;
@@ -35,6 +33,10 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
@@ -43,11 +45,6 @@ import java.util.List;
  * @author Ruchith Fernando (ruchith.fernando@gmail.com)
  */
 public class RahasSAML2TokenUTForBearerTest extends TestClient {
-
-    public RahasSAML2TokenUTForBearerTest(String name) {
-        super(name);
-    }
-
     public OMElement getRequest() {
         try {
             OMElement rstElem = TrustUtil.createRequestSecurityTokenElement(RahasConstants.VERSION_05_02);
@@ -65,23 +62,6 @@ public class RahasSAML2TokenUTForBearerTest extends TestClient {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public OutflowConfiguration getClientOutflowConfiguration() {
-        OutflowConfiguration ofc = new OutflowConfiguration();
-
-        ofc.setActionItems("UsernameToken Timestamp");
-        ofc.setUser("joe");
-        ofc.setPasswordCallbackClass(PWCallback.class.getName());
-        return ofc;
-    }
-
-    public InflowConfiguration getClientInflowConfiguration() {
-        InflowConfiguration ifc = new InflowConfiguration();
-
-        ifc.setActionItems("Timestamp");
-
-        return ifc;
     }
 
     public String getServiceRepo() {
@@ -171,4 +151,9 @@ public class RahasSAML2TokenUTForBearerTest extends TestClient {
         }
         return  assertion;
     }
+
+	@Override
+	public String getClientPolicyPath() {
+		return "/rahas/3.xml";
+	}
 }

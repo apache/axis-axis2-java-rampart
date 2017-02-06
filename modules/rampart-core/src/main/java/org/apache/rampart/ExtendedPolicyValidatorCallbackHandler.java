@@ -3,7 +3,6 @@ package org.apache.rampart;
 import org.apache.ws.security.WSSecurityEngineResult;
 
 import java.util.List;
-import java.util.Vector;
 
 /**
  * This is an extension of the PolicyValidatorCallbackHandler. PolicyValidatorCallbackHandler uses Vector
