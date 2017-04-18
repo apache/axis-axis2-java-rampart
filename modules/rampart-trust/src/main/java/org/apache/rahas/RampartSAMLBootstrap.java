@@ -30,43 +30,6 @@ import org.opensaml.xml.parse.XMLParserException;
  * axiom specific one.
  */
 public class RampartSAMLBootstrap extends DefaultBootstrap {
-
-     /** List of default XMLTooling configuration files. */
-    private static String[] xmlToolingConfigs = {
-        "/default-config.xml",
-        "/schema-config.xml",
-        "/signature-config.xml",
-        "/signature-validation-config.xml",
-        "/encryption-config.xml",
-        "/encryption-validation-config.xml",
-        "/soap11-config.xml",
-        "/wsfed11-protocol-config.xml",
-        "/saml1-assertion-config.xml",
-        "/saml1-protocol-config.xml",
-        "/saml1-core-validation-config.xml",
-        "/saml2-assertion-config.xml",
-        "/saml2-protocol-config.xml",
-        "/saml2-core-validation-config.xml",
-        "/saml1-metadata-config.xml",
-        "/saml2-metadata-config.xml",
-        "/saml2-metadata-validation-config.xml",
-        "/saml2-metadata-attr-config.xml",
-        "/saml2-metadata-idp-discovery-config.xml",
-        "/saml2-metadata-ui-config.xml",
-        "/saml2-protocol-thirdparty-config.xml",
-        "/saml2-metadata-query-config.xml",
-        "/saml2-assertion-delegation-restriction-config.xml",
-        "/saml2-ecp-config.xml",
-        "/xacml10-saml2-profile-config.xml",
-        "/xacml11-saml2-profile-config.xml",
-        "/xacml20-context-config.xml",
-        "/xacml20-policy-config.xml",
-        "/xacml2-saml2-profile-config.xml",
-        "/xacml3-saml2-profile-config.xml",
-        "/wsaddressing-config.xml",
-        "/wssecurity-config.xml",
-    };
-
     protected RampartSAMLBootstrap() {
         super();
     }
@@ -74,9 +37,7 @@ public class RampartSAMLBootstrap extends DefaultBootstrap {
     public static synchronized void bootstrap() throws ConfigurationException {
         initializeXMLSecurity();
 
-        initializeVelocity();
-
-        initializeXMLTooling(xmlToolingConfigs);
+        initializeXMLTooling();
 
         initializeArtifactBuilderFactories();
 
@@ -85,6 +46,8 @@ public class RampartSAMLBootstrap extends DefaultBootstrap {
         initializeParserPool();
 
         initializeESAPI();
+
+        initializeHttpClient();
     }
 
     protected static void initializeParserPool() throws ConfigurationException {

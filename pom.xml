@@ -617,7 +617,7 @@
         <axiom.version>1.3.0-SNAPSHOT</axiom.version>
 
         <wss4j.version>1.6.19</wss4j.version>
-        <opensaml.version>2.5.1-1</opensaml.version>
+        <opensaml.version>2.6.4</opensaml.version>
 
         <bcprov.jdk15.version>1.49</bcprov.jdk15.version>
 
