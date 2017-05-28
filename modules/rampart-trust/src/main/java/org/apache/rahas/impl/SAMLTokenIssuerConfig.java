@@ -235,9 +235,9 @@ public class SAMLTokenIssuerConfig extends AbstractIssuerConfig {
         */
         if (trustedServices != null) {
             //Now process the trusted services
-            Iterator servicesIter = trustedServices.getChildrenWithName(SERVICE);
+            Iterator<OMElement> servicesIter = trustedServices.getChildrenWithName(SERVICE);
             while (servicesIter.hasNext()) {
-                OMElement service = (OMElement) servicesIter.next();
+                OMElement service = servicesIter.next();
                 OMAttribute aliasAttr = service.getAttribute(ALIAS);
                 if (aliasAttr == null) {
                     //The certificate alias is a must

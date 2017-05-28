@@ -151,9 +151,9 @@ public class Axis2Util {
                 for (Iterator iter = processedHeaderQNames.iterator(); iter
                         .hasNext();) {
                     QName name = (QName) iter.next();
-                    Iterator omKids = header.getChildrenWithName(name);
+                    Iterator<SOAPHeaderBlock> omKids = header.getHeaderBlocksWithName(name);
                     if(omKids.hasNext()) {
-                        ((SOAPHeaderBlock)omKids.next()).setProcessed();
+                        omKids.next().setProcessed();
                     }
                 }
                 
@@ -264,9 +264,9 @@ public class Axis2Util {
                 for (Iterator iter = processedHeaderQNames.iterator(); iter
                         .hasNext();) {
                     QName name = (QName) iter.next();
-                    Iterator omKids = header.getChildrenWithName(name);
+                    Iterator<SOAPHeaderBlock> omKids = header.getHeaderBlocksWithName(name);
                     if(omKids.hasNext()) {
-                        ((SOAPHeaderBlock)omKids.next()).setProcessed();
+                        omKids.next().setProcessed();
                     }
                 }
                 

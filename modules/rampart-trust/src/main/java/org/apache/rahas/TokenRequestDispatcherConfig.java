@@ -101,10 +101,10 @@ public class TokenRequestDispatcherConfig {
 
     private static void handleIssuers(OMElement configElem,
                                       TokenRequestDispatcherConfig conf) throws TrustException {
-        for (Iterator issuerElems = configElem.getChildrenWithName(ISSUER);
+        for (Iterator<OMElement> issuerElems = configElem.getChildrenWithName(ISSUER);
              issuerElems.hasNext();) {
 
-            OMElement element = (OMElement) issuerElems.next();
+            OMElement element = issuerElems.next();
 
             //get the class attr
             String issuerClass = element.getAttributeValue(CLASS_ATTR);
@@ -124,9 +124,9 @@ public class TokenRequestDispatcherConfig {
             processConfiguration(element, conf, issuerClass);
 
             //Process token types
-            for (Iterator tokenTypes = element.getChildrenWithName(TOKEN_TYPE);
+            for (Iterator<OMElement> tokenTypes = element.getChildrenWithName(TOKEN_TYPE);
                  tokenTypes.hasNext();) {
-                OMElement type = (OMElement) tokenTypes.next();
+                OMElement type = tokenTypes.next();
                 String value = type.getText();
                 if (value == null || value.trim().length() == 0) {
                     throw new TrustException("invalidTokenTypeDefinition",
@@ -147,10 +147,10 @@ public class TokenRequestDispatcherConfig {
     private static void handleValidators(OMElement configElem,
             TokenRequestDispatcherConfig conf) throws TrustException {
         
-        for (Iterator validatorElems = configElem.getChildrenWithName(VALIDATOR);
+        for (Iterator<OMElement> validatorElems = configElem.getChildrenWithName(VALIDATOR);
         validatorElems.hasNext();) {
 
-            OMElement element = (OMElement) validatorElems.next();
+            OMElement element = validatorElems.next();
 
            //get the class attr
            String validatorClass = element.getAttributeValue(CLASS_ATTR);
@@ -170,9 +170,9 @@ public class TokenRequestDispatcherConfig {
            processConfiguration(element, conf, validatorClass);
     
            //Process token types
-           for (Iterator tokenTypes = element.getChildrenWithName(TOKEN_TYPE);
+           for (Iterator<OMElement> tokenTypes = element.getChildrenWithName(TOKEN_TYPE);
                 tokenTypes.hasNext();) {
-               OMElement type = (OMElement) tokenTypes.next();
+               OMElement type = tokenTypes.next();
                String value = type.getText();
                if (value == null || value.trim().length() == 0) {
                    throw new TrustException("invalidTokenTypeDefinition",
@@ -193,10 +193,10 @@ public class TokenRequestDispatcherConfig {
     private static void handleRenewers(OMElement configElem,
             TokenRequestDispatcherConfig conf) throws TrustException {
         
-        for (Iterator renewerElems = configElem.getChildrenWithName(RENEWER);
+        for (Iterator<OMElement> renewerElems = configElem.getChildrenWithName(RENEWER);
         renewerElems.hasNext();) {
 
-            OMElement element = (OMElement) renewerElems.next();
+            OMElement element = renewerElems.next();
 
            //get the class attr
            String renewerClass = element.getAttributeValue(CLASS_ATTR);
@@ -216,9 +216,9 @@ public class TokenRequestDispatcherConfig {
            processConfiguration(element, conf, renewerClass);
     
            //Process token types
-           for (Iterator tokenTypes = element.getChildrenWithName(TOKEN_TYPE);
+           for (Iterator<OMElement> tokenTypes = element.getChildrenWithName(TOKEN_TYPE);
                 tokenTypes.hasNext();) {
-               OMElement type = (OMElement) tokenTypes.next();
+               OMElement type = tokenTypes.next();
                String value = type.getText();
                if (value == null || value.trim().length() == 0) {
                    throw new TrustException("invalidTokenTypeDefinition",
@@ -240,9 +240,9 @@ public class TokenRequestDispatcherConfig {
                                              TokenRequestDispatcherConfig conf,
                                              String implClass) {
 
-        for (Iterator configs = element.getChildrenWithName(CONFIGURATION_ELEMENT);
+        for (Iterator<OMElement> configs = element.getChildrenWithName(CONFIGURATION_ELEMENT);
              configs.hasNext();) {
-            OMElement configEle = (OMElement) configs.next();
+            OMElement configEle = configs.next();
             String configType =
                     configEle.getAttribute(new QName("type")).getAttributeValue().trim();
             if (configType.equalsIgnoreCase("file")) { //Process configuration file information
