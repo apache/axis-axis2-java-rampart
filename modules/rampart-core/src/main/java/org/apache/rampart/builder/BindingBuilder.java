@@ -212,7 +212,6 @@ public abstract class BindingBuilder {
      * @param rmd
      * @param token
      * @return
-     * @throws WSSecurityException
      * @throws RampartException
      */
     protected WSSecEncryptedKey getEncryptedKeyBuilder(RampartMessageData rmd, Token token) throws RampartException {

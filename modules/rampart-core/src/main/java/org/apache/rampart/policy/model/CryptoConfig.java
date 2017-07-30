@@ -32,11 +32,11 @@ import java.util.Properties;
  * 
  * Example:
 <pre>
-<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
-    <ramp:property name="keystoreType">JKS</ramp:property>
-    <ramp:property name="keystoreFile">/path/to/file.jks</ramp:property>
-    <ramp:property name="keystorePassword">password</ramp:property>
-</ramp:crypto>
+&lt;ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin"&gt;
+    &lt;ramp:property name="keystoreType"&gt;JKS&lt;/ramp:property&gt;
+    &lt;ramp:property name="keystoreFile"&gt;/path/to/file.jks&lt;/ramp:property&gt;
+    &lt;ramp:property name="keystorePassword"&gt;password&lt;/ramp:property&gt;
+&lt;/ramp:crypto&gt;
 </pre>
  */
 public class CryptoConfig implements Assertion {

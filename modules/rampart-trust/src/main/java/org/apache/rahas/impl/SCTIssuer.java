@@ -48,7 +48,7 @@ public class SCTIssuer implements TokenIssuer {
     /**
      * Issue a {@link SecurityContextToken} based on the wsse:Signature or
      * wsse:UsernameToken
-     * <p/>
+     * <p>
      * This will support returning the SecurityContextToken with the following
      * types of wst:RequestedProof tokens:
      * <ul>

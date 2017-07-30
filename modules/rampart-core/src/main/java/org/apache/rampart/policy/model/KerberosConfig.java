@@ -189,7 +189,7 @@ public class KerberosConfig implements Assertion {
      * The class will be loaded using current service's {@link org.apache.axis2.description.AxisService#getClassLoader() classloader}.
      * </p>
      * 
-     * @param kerberosTokenValidatorClass A fully qualifier class name that implements {@link org.apache.ws.security.validate.KerberosTokenValidator}.
+     * @param kerberosTokenDecoderClass A fully qualifier class name that implements {@link org.apache.ws.security.validate.KerberosTokenValidator}.
      */
     public void setKerberosTokenDecoderClass(String kerberosTokenDecoderClass) {
         this.kerberosTokenDecoderClass = kerberosTokenDecoderClass;
@@ -243,9 +243,8 @@ public class KerberosConfig implements Assertion {
 
     /**
      * Enables Kerberos credential delegation. If credential delegation is requested, the initiator's TGT (Ticket
-     * granting ticket) is propagated to the receiver along with the TGS(Ticket granting service). <br/>
-     * <br/>
-     * 
+     * granting ticket) is propagated to the receiver along with the TGS(Ticket granting service).
+     * <p>
      * Enabling delegation requires <b>forwardable=true</b> property to be added to the <b>[libdefaults]</b> section in
      * the Kerberos setup configuration.KDC should also be explicitly configured to allow delegation as it is considered
      * a security issue and is disabled by default.

@@ -49,7 +49,7 @@ import org.apache.ws.security.util.XmlSchemaDateFormat;
  * This represents a security token which can have either one of 4 states. <ul> <li>ISSUED</li> <li>EXPIRED</li>
  * <li>CACELLED</li> <li>RENEWED</li> </ul> Also this holds the <code>OMElement</code>s representing the token in its
  * present state and the previous state.
- * <p/>
+ * <p>
  * These tokens are stored using the storage mechanism provided via the <code>TokenStorage</code> interface.
  *
  * @see org.apache.rahas.TokenStorage

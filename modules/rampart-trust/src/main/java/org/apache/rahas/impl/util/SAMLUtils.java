@@ -195,9 +195,9 @@ public class SAMLUtils {
     /**
      * Creates the subject confirmation method.
      * Relevant XML element would look like as follows,
-     * <saml:ConfirmationMethod>
+     * <pre>  &lt;saml:ConfirmationMethod&gt;
      *       urn:oasis:names:tc:SAML:1.0:cm:holder-of-key
-     *  </saml:ConfirmationMethod>
+     *  &lt;/saml:ConfirmationMethod&gt;</pre>
      * @param confirmationMethod Name of the actual confirmation method. Could be
      *      holder-of-key - "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key"
      *      sender-vouches - "urn:oasis:names:tc:SAML:1.0:cm:sender-vouches"
@@ -217,11 +217,11 @@ public class SAMLUtils {
 
     /**
      * Creates opensaml SubjectConfirmation representation. The relevant XML would looks as follows,
-     *  <saml:SubjectConfirmation>
-     *       <saml:ConfirmationMethod>
+     * <pre>   &lt;saml:SubjectConfirmation&gt;
+     *       &lt;saml:ConfirmationMethod&gt;
      *           urn:oasis:names:tc:SAML:1.0:cm:sender-vouches
-     *       </saml:ConfirmationMethod>
-     *   </saml:SubjectConfirmation>
+     *       &lt;/saml:ConfirmationMethod&gt;
+     *   &lt;/saml:SubjectConfirmation&gt;</pre>
      * @param confirmationMethod The subject confirmation method. Bearer, Sender-Vouches or Holder-Of-Key.
      * @param keyInfoContent The KeyInfo content. According to SPEC (SAML 1.1) this could be null.
      * @return OpenSAML representation of SubjectConfirmation.
@@ -245,21 +245,21 @@ public class SAMLUtils {
 
     /**
      * Creates an opensaml Subject representation. The relevant XML would looks as follows,
-     * <saml:Subject>
-     *       <saml:NameIdentifier
+     * <pre>   &lt;saml:Subject&gt;
+     *       &lt;saml:NameIdentifier
      *       NameQualifier="www.example.com"
-     *       Format="...">
+     *       Format="..."&gt;
      *       uid=joe,ou=people,ou=saml-demo,o=baltimore.com
-     *       </saml:NameIdentifier>
-     *       <saml:SubjectConfirmation>
-     *           <saml:ConfirmationMethod>
+     *       &lt;/saml:NameIdentifier&gt;
+     *       &lt;saml:SubjectConfirmation&gt;
+     *           &lt;saml:ConfirmationMethod&gt;
      *           urn:oasis:names:tc:SAML:1.0:cm:holder-of-key
-     *           </saml:ConfirmationMethod>
-     *       <ds:KeyInfo>
-     *           <ds:KeyValue>...</ds:KeyValue>
-     *       </ds:KeyInfo>
-     *       </saml:SubjectConfirmation>
-     *   </saml:Subject>
+     *           &lt;/saml:ConfirmationMethod&gt;
+     *       &lt;ds:KeyInfo&gt;
+     *           &lt;ds:KeyValue&gt;...&lt;/ds:KeyValue&gt;
+     *       &lt;/ds:KeyInfo&gt;
+     *       &lt;/saml:SubjectConfirmation&gt;
+     *   &lt;/saml:Subject&gt;</pre>
      * @param nameIdentifier Represent the "NameIdentifier" of XML element above.
      * @param confirmationMethod Represent the bearer, HOK or Sender-Vouches.
      * @param keyInfoContent Key info information. This could be null.
@@ -281,19 +281,19 @@ public class SAMLUtils {
 
     /**
      * Creates an AuthenticationStatement. The relevant XML element looks as follows,
-     * <AuthenticationStatement
+     * <pre>   &lt;AuthenticationStatement
      *       AuthenticationInstant="2003-04-17T00:46:00Z"
-     *       AuthenticationMethod="urn:oasis:names:tc:SAML:1.0:am:password">
-     *       <Subject>
-     *           <NameIdentifier
-     *           Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">
-     *           scott@example.org</NameIdentifier>
-     *               <SubjectConfirmation>
-     *                   <ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</ConfirmationMethod>
-     *               </SubjectConfirmation>
-     *       </Subject>
-     *       <SubjectLocality IPAddress="127.0.0.1"/>
-     *   </AuthenticationStatement>
+     *       AuthenticationMethod="urn:oasis:names:tc:SAML:1.0:am:password"&gt;
+     *       &lt;Subject&gt;
+     *           &lt;NameIdentifier
+     *           Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"&gt;
+     *           scott@example.org&lt;/NameIdentifier&gt;
+     *               &lt;SubjectConfirmation&gt;
+     *                   &lt;ConfirmationMethod&gt;urn:oasis:names:tc:SAML:1.0:cm:bearer&lt;/ConfirmationMethod&gt;
+     *               &lt;/SubjectConfirmation&gt;
+     *       &lt;/Subject&gt;
+     *       &lt;SubjectLocality IPAddress="127.0.0.1"/&gt;
+     *   &lt;/AuthenticationStatement&gt;</pre>
      * @param subject OpenSAML Subject implementation.
      * @param authenticationMethod How subject is authenticated ? i.e. by using a password, kerberos, certificate
      *          etc ... The method is defined as a URL in SAML specification.
@@ -316,33 +316,33 @@ public class SAMLUtils {
     }
 
     /**Creates an attribute statement. Sample attribute statement would look like follows,
-     *  <saml:AttributeStatement>
-     *       <saml:Subject>
-     *           <saml:NameIdentifier
+     * <pre>   &lt;saml:AttributeStatement&gt;
+     *       &lt;saml:Subject&gt;
+     *           &lt;saml:NameIdentifier
      *               NameQualifier="www.example.com"
-     *               Format="...">
+     *               Format="..."&gt;
      *               uid=joe,ou=people,ou=saml-demo,o=baltimore.com
-     *           </saml:NameIdentifier>
-     *           <saml:SubjectConfirmation>
-     *               <saml:ConfirmationMethod>
+     *           &lt;/saml:NameIdentifier&gt;
+     *           &lt;saml:SubjectConfirmation&gt;
+     *               &lt;saml:ConfirmationMethod&gt;
      *               urn:oasis:names:tc:SAML:1.0:cm:holder-of-key
-     *               </saml:ConfirmationMethod>
-     *               <ds:KeyInfo>
-     *                 <ds:KeyValue>...</ds:KeyValue>
-     *               </ds:KeyInfo>
-     *           </saml:SubjectConfirmation>
-     *       </saml:Subject>
-     *       <saml:Attribute
+     *               &lt;/saml:ConfirmationMethod&gt;
+     *               &lt;ds:KeyInfo&gt;
+     *                 &lt;ds:KeyValue&gt;...&lt;/ds:KeyValue&gt;
+     *               &lt;/ds:KeyInfo&gt;
+     *           &lt;/saml:SubjectConfirmation&gt;
+     *       &lt;/saml:Subject&gt;
+     *       &lt;saml:Attribute
      *           AttributeName="MemberLevel"
-     *           AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes">
-     *           <saml:AttributeValue>gold</saml:AttributeValue>
-     *       </saml:Attribute>
-     *       <saml:Attribute
+     *           AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes"&gt;
+     *           &lt;saml:AttributeValue&gt;gold&lt;/saml:AttributeValue&gt;
+     *       &lt;/saml:Attribute&gt;
+     *       &lt;saml:Attribute
      *           AttributeName="E-mail"
-     *           AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes">
-     *           <saml:AttributeValue>joe@yahoo.com</saml:AttributeValue>
-     *       </saml:Attribute>
-     *   </saml:AttributeStatement>
+     *           AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes"&gt;
+     *           &lt;saml:AttributeValue&gt;joe@yahoo.com&lt;/saml:AttributeValue&gt;
+     *       &lt;/saml:Attribute&gt;
+     *   &lt;/saml:AttributeStatement&gt;</pre>
      *
      * @param subject The OpenSAML representation of the Subject.
      * @param attributeList List of attribute values to include within the message.
@@ -363,9 +363,9 @@ public class SAMLUtils {
 
     /**
      * Creates Conditions object. Analogous XML element is as follows,
-     * <saml:Conditions>
+     * <pre>&lt;saml:Conditions
      *       NotBefore="2002-06-19T16:53:33.173Z"
-     *       NotOnOrAfter="2002-06-19T17:08:33.173Z"/>
+     *       NotOnOrAfter="2002-06-19T17:08:33.173Z"/&gt;</pre>
      * @param notBefore The validity of the Assertion starts from this value.
      * @param notOnOrAfter The validity ends from this value.
      * @return OpenSAML Conditions object.
@@ -383,43 +383,43 @@ public class SAMLUtils {
 
     /**
      * This method creates the final SAML assertion. The final SAML assertion would looks like as follows,
-     *  <saml:Assertion  AssertionID="_a75adf55-01d7-40cc-929f-dbd8372ebdfc"
+     * <pre>   &lt;saml:Assertion AssertionID="_a75adf55-01d7-40cc-929f-dbd8372ebdfc"
      *                   IssueInstant="2003-04-17T00:46:02Z"
      *                   Issuer="www.opensaml.org"
      *                   MajorVersion="1"
      *                   MinorVersion="1"
-     *                   xmlns="urn:oasis:names:tc:SAML:1.0:assertion">
-     *       <saml:Conditions>
+     *                   xmlns="urn:oasis:names:tc:SAML:1.0:assertion"&gt;
+     *       &lt;saml:Conditions&gt;
      *           NotBefore="2002-06-19T16:53:33.173Z"
-     *           NotOnOrAfter="2002-06-19T17:08:33.173Z"/>
-     *       <saml:AttributeStatement>
-     *           <saml:Subject>
-     *               <saml:NameIdentifier
+     *           NotOnOrAfter="2002-06-19T17:08:33.173Z"/&gt;
+     *       &lt;saml:AttributeStatement&gt;
+     *           &lt;saml:Subject&gt;
+     *               &lt;saml:NameIdentifier
      *                       NameQualifier="www.example.com"
-     *                       Format="...">
+     *                       Format="..."&gt;
      *                       uid=joe,ou=people,ou=saml-demo,o=baltimore.com
-     *               </saml:NameIdentifier>
-     *               <saml:SubjectConfirmation>
-     *                   <saml:ConfirmationMethod>
+     *               &lt;/saml:NameIdentifier&gt;
+     *               &lt;saml:SubjectConfirmation&gt;
+     *                   &lt;saml:ConfirmationMethod&gt;
      *                       urn:oasis:names:tc:SAML:1.0:cm:holder-of-key
-     *                   </saml:ConfirmationMethod>
-     *                   <ds:KeyInfo>
-     *                       <ds:KeyValue>...</ds:KeyValue>
-     *                   </ds:KeyInfo>
-     *               </saml:SubjectConfirmation>
-     *           </saml:Subject>
-     *           <saml:Attribute
+     *                   &lt;/saml:ConfirmationMethod&gt;
+     *                   &lt;ds:KeyInfo&gt;
+     *                       &lt;ds:KeyValue&gt;...&lt;/ds:KeyValue&gt;
+     *                   &lt;/ds:KeyInfo&gt;
+     *               &lt;/saml:SubjectConfirmation&gt;
+     *           &lt;/saml:Subject&gt;
+     *           &lt;saml:Attribute
      *               AttributeName="MemberLevel"
-     *               AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes">
-     *               <saml:AttributeValue>gold</saml:AttributeValue>
-     *           </saml:Attribute>
-     *           <saml:Attribute
-     *               AttributeName="E-mail" AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes">
-     *               <saml:AttributeValue>joe@yahoo.com</saml:AttributeValue>
-     *           </saml:Attribute>
-     *       </saml:AttributeStatement>
-     *       <ds:Signature>...</ds:Signature>
-     *   </saml:Assertion>
+     *               AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes"&gt;
+     *               &lt;saml:AttributeValue&gt;gold&lt;/saml:AttributeValue&gt;
+     *           &lt;/saml:Attribute&gt;
+     *           &lt;saml:Attribute
+     *               AttributeName="E-mail" AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes"&gt;
+     *               &lt;saml:AttributeValue&gt;joe@yahoo.com&lt;/saml:AttributeValue&gt;
+     *           &lt;/saml:Attribute&gt;
+     *       &lt;/saml:AttributeStatement&gt;
+     *       &lt;ds:Signature&gt;...&lt;/ds:Signature&gt;
+     *   &lt;/saml:Assertion&gt;</pre>
      * @param issuerName Represents the "Issuer" in Assertion.
      * @param notBefore The Condition's NotBefore value
      * @param notOnOrAfter The Condition's NotOnOrAfter value
@@ -442,11 +442,11 @@ public class SAMLUtils {
 
     /**
      * Creates a SAML attribute similar to following,
-     * <saml:Attribute
+     * <pre>   &lt;saml:Attribute
      *       AttributeName="MemberLevel"
-     *       AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes">
-     *       <saml:AttributeValue>gold</saml:AttributeValue>
-     *   </saml:Attribute>
+     *       AttributeNamespace="http://www.oasis.open.org/Catalyst2002/attributes"&gt;
+     *       &lt;saml:AttributeValue&gt;gold&lt;/saml:AttributeValue&gt;
+     *   &lt;/saml:Attribute&gt;</pre>
      * @param name attribute name
      * @param namespace attribute namespace.
      * @param value attribute value.
@@ -485,11 +485,11 @@ public class SAMLUtils {
 
      /**
      * Creates a KeyInfo element given EncryptedKey. The relevant XML would looks as follows,
-     *  <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
-     *     <xenc:EncryptedKey xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+     * <pre>   &lt;KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"&gt;
+     *     &lt;xenc:EncryptedKey xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
      *           ....
-     *     </xenc:EncryptedKey>
-     *   </ds:KeyInfo>
+     *     &lt;/xenc:EncryptedKey&gt;
+     *   &lt;/ds:KeyInfo&gt;</pre>
      * @param encryptedKey The OpemSAML representation of encrypted key.
      * @return The appropriate opensaml representation of the KeyInfo.
      * @throws org.apache.rahas.TrustException If unable to find the builder.
@@ -504,11 +504,11 @@ public class SAMLUtils {
 
     /**
      * Creates a KeyInfo element given EncryptedKey. The relevant XML would looks as follows,
-     *  <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
-     *     <X509Data xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+     * <pre>   &lt;KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"&gt;
+     *     &lt;X509Data xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
      *           ....
-     *     </X509Data>
-     *   </ds:KeyInfo>
+     *     &lt;/X509Data&gt;
+     *   &lt;/ds:KeyInfo&gt;</pre>
      * @param x509Data The OpemSAML representation X509Data
      * @return The appropriate opensaml representation of the KeyInfo.
      * @throws org.apache.rahas.TrustException If unable to find the builder.
@@ -526,27 +526,27 @@ public class SAMLUtils {
     /**
      * This method will created the "EncryptedKey" of a SAML assertion.
      * An encrypted key would look like as follows,
-     * <xenc:EncryptedKey xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+     * <pre>  &lt;xenc:EncryptedKey xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
      *    xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-     *   Id="EncKeyId-E5CEA44F9C25F55C4913269595550814">
-     *    <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"/>
-     *    <ds:KeyInfo>
-     *      <wsse:SecurityTokenReference
-     *        xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
-     *      <wsse:KeyIdentifier
+     *   Id="EncKeyId-E5CEA44F9C25F55C4913269595550814"&gt;
+     *    &lt;xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"/&gt;
+     *    &lt;ds:KeyInfo&gt;
+     *      &lt;wsse:SecurityTokenReference
+     *        xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"&gt;
+     *      &lt;wsse:KeyIdentifier
      *             EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0
      *             #Base64Binary"
-     *             ValueType="http://docs.oasis-open.org/wss/oasis-wss-soap-message-security-1.1#ThumbprintSHA1">
+     *             ValueType="http://docs.oasis-open.org/wss/oasis-wss-soap-message-security-1.1#ThumbprintSHA1"&gt;
      *             a/jhNus21KVuoFx65LmkW2O/l10=
-     *       </wsse:KeyIdentifier>
-     *     </wsse:SecurityTokenReference>
-     *    </ds:KeyInfo>
-     *    <xenc:CipherData>
-     *       <xenc:CipherValue>
+     *       &lt;/wsse:KeyIdentifier&gt;
+     *     &lt;/wsse:SecurityTokenReference&gt;
+     *    &lt;/ds:KeyInfo&gt;
+     *    &lt;xenc:CipherData&gt;
+     *       &lt;xenc:CipherValue&gt;
      *             dnP0MBHiMLlSmnjJhGFs/I8/z...
-     *        </xenc:CipherValue>
-     *     </xenc:CipherData>
-     *  </xenc:EncryptedKey>
+     *        &lt;/xenc:CipherValue&gt;
+     *     &lt;/xenc:CipherData&gt;
+     *  &lt;/xenc:EncryptedKey&gt;</pre>
      * @param certificate Certificate which holds the public key to encrypt ephemeral key.
      * @param wsSecEncryptedKey WS Security object which contains encrypted ephemeral key.
      *          TODO Passing WSSecEncryptedKey is an overhead. We should be able to create encrypted ephemeral

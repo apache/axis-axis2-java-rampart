@@ -57,7 +57,7 @@ public class RampartPolicyBuilder {
      * During this processing the method prepares the parameters in a format
      * that is ready for processing by the WSS4J functions.
      * 
-     * <p/>
+     * <p>
      * 
      * The WSS4J policy enabled handler takes this data block to control the
      * setup of the security header.

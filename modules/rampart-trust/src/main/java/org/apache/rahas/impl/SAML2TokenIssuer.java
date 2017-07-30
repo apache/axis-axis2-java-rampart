@@ -132,23 +132,23 @@ public class SAML2TokenIssuer implements TokenIssuer {
     /**
      * This method prepares the final response. This method will create a request security token response as
      * specified in WS-Trust specification. The equivalent XML would take following format,
-     * <wst:RequestSecurityTokenResponse xmlns:wst="...">
-     *       <wst:TokenType>...</wst:TokenType>
-     *       <wst:RequestedSecurityToken>...</wst:RequestedSecurityToken>
+     * <pre>  &lt;wst:RequestSecurityTokenResponse xmlns:wst="..."&gt;
+     *       &lt;wst:TokenType&gt;...&lt;/wst:TokenType&gt;
+     *       &lt;wst:RequestedSecurityToken&gt;...&lt;/wst:RequestedSecurityToken&gt;
      *       ...
-     *       <wsp:AppliesTo xmlns:wsp="...">...</wsp:AppliesTo>
-     *       <wst:RequestedAttachedReference>
+     *       &lt;wsp:AppliesTo xmlns:wsp="..."&gt;...&lt;/wsp:AppliesTo&gt;
+     *       &lt;wst:RequestedAttachedReference&gt;
      *       ...
-     *       </wst:RequestedAttachedReference>
-     *       <wst:RequestedUnattachedReference>
+     *       &lt;/wst:RequestedAttachedReference&gt;
+     *       &lt;wst:RequestedUnattachedReference&gt;
      *       ...
-     *       </wst:RequestedUnattachedReference>
-     *       <wst:RequestedProofToken>...</wst:RequestedProofToken>
-     *       <wst:Entropy>
-     *       <wst:BinarySecret>...</wst:BinarySecret>
-     *       </wst:Entropy>
-     *       <wst:Lifetime>...</wst:Lifetime>
-     *   </wst:RequestSecurityTokenResponse>
+     *       &lt;/wst:RequestedUnattachedReference&gt;
+     *       &lt;wst:RequestedProofToken&gt;...&lt;/wst:RequestedProofToken&gt;
+     *       &lt;wst:Entropy&gt;
+     *       &lt;wst:BinarySecret&gt;...&lt;/wst:BinarySecret&gt;
+     *       &lt;/wst:Entropy&gt;
+     *       &lt;wst:Lifetime&gt;...&lt;/wst:Lifetime&gt;
+     *   &lt;/wst:RequestSecurityTokenResponse&gt;</pre>
      *
      *   Thus the RequestedSecurityToken will have SAML2 assertion passed.
      * @param rahasData The configuration data which comes with RST
@@ -241,59 +241,59 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
     /**
      * This methods builds the SAML2 assertion. The equivalent XML would look as follows,
-     * <saml:Assertion
+     * <pre>&lt;saml:Assertion
      *      xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
      *      xmlns:xs="http://www.w3.org/2001/XMLSchema"
      *      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      *      ID="b07b804c-7c29-ea16-7300-4f3d6f7928ac"
      *      Version="2.0"
-     *      IssueInstant="2004-12-05T09:22:05Z">
-     *      <saml:Issuer>https://idp.example.org/SAML2</saml:Issuer>
-     *      <ds:Signature
-     *        xmlns:ds="http://www.w3.org/2000/09/xmldsig#">...</ds:Signature>
-     *      <saml:Subject>
-     *        <saml:NameID
-     *          Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">
+     *      IssueInstant="2004-12-05T09:22:05Z"&gt;
+     *      &lt;saml:Issuer&gt;https://idp.example.org/SAML2&lt;/saml:Issuer&gt;
+     *      &lt;ds:Signature
+     *        xmlns:ds="http://www.w3.org/2000/09/xmldsig#"&gt;...&lt;/ds:Signature&gt;
+     *      &lt;saml:Subject&gt;
+     *        &lt;saml:NameID
+     *          Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient"&gt;
      *          3f7b3dcf-1674-4ecd-92c8-1544f346baf8
-     *        </saml:NameID>
-     *        <saml:SubjectConfirmation
-     *          Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
-     *          <saml:SubjectConfirmationData
+     *        &lt;/saml:NameID&gt;
+     *        &lt;saml:SubjectConfirmation
+     *          Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"&gt;
+     *          &lt;saml:SubjectConfirmationData
      *            InResponseTo="aaf23196-1773-2113-474a-fe114412ab72"
      *            Recipient="https://sp.example.com/SAML2/SSO/POST"
-     *            NotOnOrAfter="2004-12-05T09:27:05Z"/>
-     *        </saml:SubjectConfirmation>
-     *      </saml:Subject>
-     *      <saml:Conditions
+     *            NotOnOrAfter="2004-12-05T09:27:05Z"/&gt;
+     *        &lt;/saml:SubjectConfirmation&gt;
+     *      &lt;/saml:Subject&gt;
+     *      &lt;saml:Conditions
      *        NotBefore="2004-12-05T09:17:05Z"
-     *        NotOnOrAfter="2004-12-05T09:27:05Z">
-     *        <saml:AudienceRestriction>
-     *          <saml:Audience>https://sp.example.com/SAML2</saml:Audience>
-     *        </saml:AudienceRestriction>
-     *      </saml:Conditions>
-     *      <saml:AuthnStatement
+     *        NotOnOrAfter="2004-12-05T09:27:05Z"&gt;
+     *        &lt;saml:AudienceRestriction&gt;
+     *          &lt;saml:Audience&gt;https://sp.example.com/SAML2&lt;/saml:Audience&gt;
+     *        &lt;/saml:AudienceRestriction&gt;
+     *      &lt;/saml:Conditions&gt;
+     *      &lt;saml:AuthnStatement
      *        AuthnInstant="2004-12-05T09:22:00Z"
-     *        SessionIndex="b07b804c-7c29-ea16-7300-4f3d6f7928ac">
-     *        <saml:AuthnContext>
-     *          <saml:AuthnContextClassRef>
+     *        SessionIndex="b07b804c-7c29-ea16-7300-4f3d6f7928ac"&gt;
+     *        &lt;saml:AuthnContext&gt;
+     *          &lt;saml:AuthnContextClassRef&gt;
      *            urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
-     *         </saml:AuthnContextClassRef>
-     *        </saml:AuthnContext>
-     *      </saml:AuthnStatement>
-     *      <saml:AttributeStatement>
-     *        <saml:Attribute
+     *         &lt;/saml:AuthnContextClassRef&gt;
+     *        &lt;/saml:AuthnContext&gt;
+     *      &lt;/saml:AuthnStatement&gt;
+     *      &lt;saml:AttributeStatement&gt;
+     *        &lt;saml:Attribute
      *          xmlns:x500="urn:oasis:names:tc:SAML:2.0:profiles:attribute:X500"
      *          x500:Encoding="LDAP"
      *          NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
      *          Name="urn:oid:1.3.6.1.4.1.5923.1.1.1.1"
-     *          FriendlyName="eduPersonAffiliation">
-     *          <saml:AttributeValue
-     *            xsi:type="xs:string">member</saml:AttributeValue>
-     *          <saml:AttributeValue
-     *            xsi:type="xs:string">staff</saml:AttributeValue>
-     *        </saml:Attribute>
-     *      </saml:AttributeStatement>
-     *    </saml:Assertion>
+     *          FriendlyName="eduPersonAffiliation"&gt;
+     *          &lt;saml:AttributeValue
+     *            xsi:type="xs:string"&gt;member&lt;/saml:AttributeValue&gt;
+     *          &lt;saml:AttributeValue
+     *            xsi:type="xs:string"&gt;staff&lt;/saml:AttributeValue&gt;
+     *        &lt;/saml:Attribute&gt;
+     *      &lt;/saml:AttributeStatement&gt;
+     *    &lt;/saml:Assertion&gt;</pre>
      *
      *    Reference - en.wikipedia.org/wiki/SAML_2.0#SAML_2.0_Assertions
      * @param doc The Document which comprises SAML 2 assertion.
@@ -354,20 +354,20 @@ public class SAML2TokenIssuer implements TokenIssuer {
     /**
      * This method will create a SAML 2 subject based on Holder of Key confirmation method.
      * The relevant XML would look as follows,
-     * <saml2:Subject>
-     *       <saml2:NameID>
+     * <pre>  &lt;saml2:Subject&gt;
+     *       &lt;saml2:NameID&gt;
      *           ...
-     *       </saml2:NameID>
-     *       <saml2:SubjectConfirmation
-     *               Method="urn:oasis:names:tc:SAML:2.0:cm:holder-of-key">
-     *           <saml2:SubjectConfirmationData
-     *                   xsi:type="saml2:KeyInfoConfirmationDataType">
-     *               <ds:KeyInfo>
-     *                   <ds:KeyValue>...</ds:KeyValue>
-     *               </ds:KeyInfo>
-     *           </saml2:SubjectConfirmationData>
-     *       </saml2:SubjectConfirmation>
-     *   </saml2:Subject>
+     *       &lt;/saml2:NameID&gt;
+     *       &lt;saml2:SubjectConfirmation
+     *               Method="urn:oasis:names:tc:SAML:2.0:cm:holder-of-key"&gt;
+     *           &lt;saml2:SubjectConfirmationData
+     *                   xsi:type="saml2:KeyInfoConfirmationDataType"&gt;
+     *               &lt;ds:KeyInfo&gt;
+     *                   &lt;ds:KeyValue&gt;...&lt;/ds:KeyValue&gt;
+     *               &lt;/ds:KeyInfo&gt;
+     *           &lt;/saml2:SubjectConfirmationData&gt;
+     *       &lt;/saml2:SubjectConfirmation&gt;
+     *   &lt;/saml2:Subject&gt;</pre>
      *
      * KeyInfo can be created based on public key or symmetric key. That is decided by looking at
      * the RahasData.getKeyType. TODO make sure this implementation is correct.
@@ -438,19 +438,19 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
     /**
      * This method creates a subject element with the bearer subject confirmation method.
-     * <saml:Subject>
-     *       <saml:NameIdentifier
+     * <pre>   &lt;saml:Subject&gt;
+     *       &lt;saml:NameIdentifier
      *                   NameQualifier="www.example.com"
      *                   Format="urn:oasis:names:tc:SAML:1.1:nameid-
-     *           format:X509SubjectName">
+     *           format:X509SubjectName"&gt;
      *           uid=joe,ou=people,ou=saml-demo,o=baltimore.com
-     *       </saml:NameIdentifier>
-     *       <saml:SubjectConfirmation>
-     *           <saml:ConfirmationMethod>
+     *       &lt;/saml:NameIdentifier&gt;
+     *       &lt;saml:SubjectConfirmation&gt;
+     *           &lt;saml:ConfirmationMethod&gt;
      *               urn:oasis:names:tc:SAML:1.0:cm:bearer
-     *           </saml:ConfirmationMethod>
-     *       </saml:SubjectConfirmation>
-     *   </saml:Subject>
+     *           &lt;/saml:ConfirmationMethod&gt;
+     *       &lt;/saml:SubjectConfirmation&gt;
+     *   &lt;/saml:Subject&gt;</pre>
      * @param data RahasData element
      * @return  SAML 2.0 Subject element with Bearer subject confirmation
      * @throws org.apache.rahas.TrustException if an error occurred while creating the subject.
@@ -574,19 +574,19 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
     /**
      * This method creates an AttributeStatement. The relevant XML would look like as follows,
-     * <saml:AttributeStatement>
-     *    <saml:Attribute
+     * <pre>  &lt;saml:AttributeStatement&gt;
+     *    &lt;saml:Attribute
      *      xmlns:x500="urn:oasis:names:tc:SAML:2.0:profiles:attribute:X500"
      *      x500:Encoding="LDAP"
      *      NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
      *      Name="urn:oid:1.3.6.1.4.1.5923.1.1.1.1"
-     *      FriendlyName="eduPersonAffiliation">
-     *      <saml:AttributeValue
-     *        xsi:type="xs:string">member</saml:AttributeValue>
-     *      <saml:AttributeValue
-     *        xsi:type="xs:string">staff</saml:AttributeValue>
-     *    </saml:Attribute>
-     *  </saml:AttributeStatement>
+     *      FriendlyName="eduPersonAffiliation"&gt;
+     *      &lt;saml:AttributeValue
+     *        xsi:type="xs:string"&gt;member&lt;/saml:AttributeValue&gt;
+     *      &lt;saml:AttributeValue
+     *        xsi:type="xs:string"&gt;staff&lt;/saml:AttributeValue&gt;
+     *    &lt;/saml:Attribute&gt;
+     *  &lt;/saml:AttributeStatement&gt;</pre>
      *  Reference -  http://en.wikipedia.org/wiki/SAML_2.0#SAML_2.0_Assertions
      * @param data The RahasData which carry information about RST.
      * @return An AttributeStatement with filled attributes retrieved by calling callback class.
@@ -644,15 +644,15 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
     /**
      * This method creates an authentication statement. The equivalent XML would look as follows,
-     * <saml:AuthnStatement
+     * <pre>  &lt;saml:AuthnStatement
      *    AuthnInstant="2004-12-05T09:22:00Z"
-     *    SessionIndex="b07b804c-7c29-ea16-7300-4f3d6f7928ac">
-     *    <saml:AuthnContext>
-     *      <saml:AuthnContextClassRef>
+     *    SessionIndex="b07b804c-7c29-ea16-7300-4f3d6f7928ac"&gt;
+     *    &lt;saml:AuthnContext&gt;
+     *      &lt;saml:AuthnContextClassRef&gt;
      *        urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
-     *     </saml:AuthnContextClassRef>
-     *    </saml:AuthnContext>
-     *  </saml:AuthnStatement>
+     *     &lt;/saml:AuthnContextClassRef&gt;
+     *    &lt;/saml:AuthnContext&gt;
+     *  &lt;/saml:AuthnStatement&gt;</pre>
      * @param data The RahasData which carry information about RST.
      * @return OpenSAML representation of an AuthnStatement class.
      * @throws TrustException If an error occurred while creating the authentication statement.
@@ -777,30 +777,18 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
     }
 
-    /**
-     * @inheritDoc
-     */
     public String getResponseAction(RahasData data) throws TrustException {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
     public void setConfigurationFile(String configFile) {
         this.configFile = configFile;
     }
 
-    /**
-     * @inheritDoc
-     */
     public void setConfigurationElement(OMElement configElement) {
         this.configElement = configElement;
     }
 
-    /**
-     * @inheritDoc
-     */
     public void setConfigurationParamName(String configParamName) {
         this.configParamName = configParamName;
     }

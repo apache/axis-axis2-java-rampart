@@ -210,7 +210,7 @@ public class SAMLTokenValidator implements TokenValidator {
     // ========================================================================
 
     /**
-     * Set the configuration file of this TokenValidator. <p/> This is the text
+     * Set the configuration file of this TokenValidator. <p> This is the text
      * value of the &lt;configuration-file&gt; element of the
      * token-dispatcher-configuration
      * 
@@ -221,7 +221,7 @@ public class SAMLTokenValidator implements TokenValidator {
     }
 
     /**
-     * Set the name of the configuration parameter. <p/> If this is used then
+     * Set the name of the configuration parameter. <p> If this is used then
      * there must be a <code>org.apache.axis2.description.Parameter</code>
      * object available in the via the messageContext when the
      * <code>TokenValidator</code> is called.
