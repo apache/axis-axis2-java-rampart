@@ -69,7 +69,6 @@ public class RampartException extends Exception {
 
     /**
      * get the message from resource bundle.
-     * <p/>
      *
      * @return the message translated from the property (message) file.
      */

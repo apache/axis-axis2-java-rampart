@@ -43,7 +43,7 @@ public class RequiredParts extends AbstractSecurityAssertion {
     }
 
     /**
-     * @param headers The headers to set.
+     * @param header The header to set.
      */
     public void addHeader(Header header) {
         this.headers.add(header);

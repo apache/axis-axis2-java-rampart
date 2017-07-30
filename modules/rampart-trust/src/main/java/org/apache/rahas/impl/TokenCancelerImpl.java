@@ -154,7 +154,7 @@ public class TokenCancelerImpl implements TokenCanceler {
 
     /**
      * Set the configuration file of this TokenCanceller.
-     * <p/>
+     * <p>
      * This is the text value of the &lt;configuration-file&gt; element of the
      * token-dispatcher-configuration
      *
@@ -166,7 +166,7 @@ public class TokenCancelerImpl implements TokenCanceler {
 
     /**
      * Set the configuration element of this TokenCanceller.
-     * <p/>
+     * <p>
      * This is the &lt;configuration&gt; element of the
      * token-dispatcher-configuration
      *
@@ -178,7 +178,7 @@ public class TokenCancelerImpl implements TokenCanceler {
 
     /**
      * Set the name of the configuration parameter.
-     * <p/>
+     * <p>
      * If this is used then there must be a
      * <code>org.apache.axis2.description.Parameter</code> object available in
      * the via the messageContext when the <code>TokenIssuer</code> is called.

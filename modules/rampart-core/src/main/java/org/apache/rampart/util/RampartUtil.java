@@ -244,7 +244,7 @@ public class RampartUtil {
 
     /**
      * Perform a callback to get a password.
-     * <p/>
+     * <p>
      * The called back function gets an indication why to provide a password:
      * to produce a UsernameToken, Signature, or a password (key) for a given
      * name.
@@ -449,17 +449,17 @@ public class RampartUtil {
     
     /**
      * Retrieve policy using metadata reference 
-     * <wsa:Metadata xmlns:wsa="http://www.w3.org/2005/08/addressing">
-     *  <mex:Metadata
+     * <pre> &lt;wsa:Metadata xmlns:wsa="http://www.w3.org/2005/08/addressing"&gt;
+     *  &lt;mex:Metadata
      *       xmlns:mex="http://schemas.xmlsoap.org/ws/2004/09/mex"
-     *       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-     *           <mex:MetadataSection>
-     *                  <mex:MetadataReference>
-     *                      <wsa:Address>http://address/of/mex/service</wsa:Address>
-     *                  </mex:MetadataReference>
-     *           </mex:MetadataSection>
-     *  </mex:Metadata>
-     * </wsa:Metadata>
+     *       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+     *           &lt;mex:MetadataSection&gt;
+     *                  &lt;mex:MetadataReference&gt;
+     *                      &lt;wsa:Address&gt;http://address/of/mex/service&lt;/wsa:Address&gt;
+     *                  &lt;/mex:MetadataReference&gt;
+     *           &lt;/mex:MetadataSection&gt;
+     *  &lt;/mex:Metadata&gt;
+     * &lt;/wsa:Metadata&gt;</pre>
      * @param mex Metadata element 
      * @return Policy from the mex service
      */
@@ -1426,7 +1426,7 @@ public class RampartUtil {
     }
     
     /**
-     * Scan through <code>WSHandlerResult<code> list for a Username token and return
+     * Scan through {@link WSHandlerResult} list for a Username token and return
      * the username if a Username Token found 
      * @param results
      * @return

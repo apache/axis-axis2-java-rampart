@@ -81,9 +81,6 @@ public class NonceCache extends AbstractUniqueMessageAttributeCache {
         super(maxLifeTime);
     }
 
-    /**
-     * @inheritdoc
-     */    
     public void addToCache(String id, String userName) {
 
         Nonce nonce = new Nonce(id, userName);
@@ -98,9 +95,6 @@ public class NonceCache extends AbstractUniqueMessageAttributeCache {
 
     }
 
-    /**
-     * @inheritdoc
-     */
     public boolean valueExistsInCache(String id, String userName) {
 
         lock.lock();
@@ -115,9 +109,6 @@ public class NonceCache extends AbstractUniqueMessageAttributeCache {
         return mapIdNonce.containsKey(nonce);
     }
 
-    /**
-     * @inheritdoc
-     */
     public void clearCache() {
 
         lock.lock();

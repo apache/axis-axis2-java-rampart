@@ -48,49 +48,28 @@ public class PostDispatchVerificationHandler implements Handler {
 
     private HandlerDescription handlerDesc;
     
-    /**
-     * @see org.apache.axis2.engine.Handler#cleanup()
-     */
     public void cleanup() {
     }
 
-    /**
-     * @see org.apache.axis2.engine.Handler#flowComplete(org.apache.axis2.context.MessageContext)
-     */
     public void flowComplete(MessageContext msgContext) {
     }
 
-    /**
-     * @see org.apache.axis2.engine.Handler#getHandlerDesc()
-     */
     public HandlerDescription getHandlerDesc() {
         return this.handlerDesc;
     }
 
-    /**
-     * @see org.apache.axis2.engine.Handler#getName()
-     */
     public String getName() {
         return "Post dispatch security verification handler";
     }
 
-    /**
-     * @see org.apache.axis2.engine.Handler#getParameter(java.lang.String)
-     */
     public Parameter getParameter(String name) {
         return this.handlerDesc.getParameter(name);
     }
 
-    /**
-     * @see org.apache.axis2.engine.Handler#init(org.apache.axis2.description.HandlerDescription)
-     */
     public void init(HandlerDescription handlerDesc) {
         this.handlerDesc = handlerDesc;
     }
 
-    /**
-     * @see org.apache.axis2.engine.Handler#invoke(org.apache.axis2.context.MessageContext)
-     */
     public InvocationResponse invoke(MessageContext msgContext)
             throws AxisFault {
         

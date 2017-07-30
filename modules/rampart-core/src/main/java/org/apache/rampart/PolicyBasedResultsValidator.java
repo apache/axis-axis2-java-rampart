@@ -718,7 +718,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     /**
      * Evaluate whether a given certificate should be trusted.
      * Hook to allow subclasses to implement custom validation methods however they see fit.
-     * <p/>
+     * <p>
      * Policy used in this implementation:
      * 1. Search the keystore for the transmitted certificate
      * 2. Search the keystore for a connection to the transmitted certificate

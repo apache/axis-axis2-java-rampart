@@ -32,15 +32,15 @@ import org.apache.rampart.policy.model.RampartConfig;
  * This clase deserialize the following XML fragment inside the RampartConfig.
  * Example
 <pre>
-&lt;ramp:optimizeParts&gt;<br />
-&lt;ramp:expressions&gt;<br />
-&lt;ramp:expression&gt;//ns1:data1&lt;/ramp:expression&gt;<br />
-&lt;ramp:expression&gt;//ns2:data2&lt;/ramp:expression&gt;<br />
-&lt;/ramp:expressions&gt;<br />
-&nbsp;&lt;ramp:namespaces&gt;<br />
-&lt;nampespace uri="http://test1.com" prefix="ns1"/&gt;<br />
-&lt;nampespace uri="http://test2.com" prefix="ns2"/&gt;<br />
-&lt;/ramp:namespaces&gt;<br />
+&lt;ramp:optimizeParts&gt;
+&lt;ramp:expressions&gt;
+&lt;ramp:expression&gt;//ns1:data1&lt;/ramp:expression&gt;
+&lt;ramp:expression&gt;//ns2:data2&lt;/ramp:expression&gt;
+&lt;/ramp:expressions&gt;
+&nbsp;&lt;ramp:namespaces&gt;
+&lt;nampespace uri="http://test1.com" prefix="ns1"/&gt;
+&lt;nampespace uri="http://test2.com" prefix="ns2"/&gt;
+&lt;/ramp:namespaces&gt;
 &lt;/ramp:optimizeParts&gt;
 </pre>
  * @see OptimizePartsConfig

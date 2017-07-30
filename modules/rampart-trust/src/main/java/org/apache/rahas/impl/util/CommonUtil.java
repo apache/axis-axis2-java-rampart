@@ -204,27 +204,27 @@ public class CommonUtil {
      * 3. Try create token configuration using a parameter name in message context.
      * The issuer configuration would look like as follows,
      *
-     *  <saml-issuer-config>
-     *       <issuerName>Test_STS</issuerName>
-     *       <issuerKeyAlias>ip</issuerKeyAlias>
-     *       <issuerKeyPassword>password</issuerKeyPassword>
-     *       <cryptoProperties>
-     *          <crypto provider="org.apache.ws.security.components.crypto.Merlin">
-     *               <property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</property>
-     *               <property name="org.apache.ws.security.crypto.merlin.file">META-INF/rahas-sts.jks</property>
-     *               <property name="org.apache.ws.security.crypto.merlin.keystore.password">password</property>
-     *           </crypto>
-     *       </cryptoProperties>
-     *       <timeToLive>300000</timeToLive>
-     *       <keySize>256</keySize>
-     *       <addRequestedAttachedRef />
-     *       <addRequestedUnattachedRef />
-     *       <keyComputation>2</keyComputation>
-     *       <proofKeyType>BinarySecret</proofKeyType>
-     *       <trusted-services>
-     *           <service alias="bob">http://localhost:8080/axis2/services/STS</service>
-     *       </trusted-services>
-     *   </saml-issuer-config>
+     * <pre>   &lt;saml-issuer-config&gt;
+     *       &lt;issuerName&gt;Test_STS&lt;/issuerName&gt;
+     *       &lt;issuerKeyAlias&gt;ip&lt;/issuerKeyAlias&gt;
+     *       &lt;issuerKeyPassword&gt;password&lt;/issuerKeyPassword&gt;
+     *       &lt;cryptoProperties&gt;
+     *          &lt;crypto provider="org.apache.ws.security.components.crypto.Merlin"&gt;
+     *               &lt;property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;JKS&lt;/property&gt;
+     *               &lt;property name="org.apache.ws.security.crypto.merlin.file"&gt;META-INF/rahas-sts.jks&lt;/property&gt;
+     *               &lt;property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;password&lt;/property&gt;
+     *           &lt;/crypto&gt;
+     *       &lt;/cryptoProperties&gt;
+     *       &lt;timeToLive&gt;300000&lt;/timeToLive&gt;
+     *       &lt;keySize&gt;256&lt;/keySize&gt;
+     *       &lt;addRequestedAttachedRef /&gt;
+     *       &lt;addRequestedUnattachedRef /&gt;
+     *       &lt;keyComputation&gt;2&lt;/keyComputation&gt;
+     *       &lt;proofKeyType&gt;BinarySecret&lt;/proofKeyType&gt;
+     *       &lt;trusted-services&gt;
+     *           &lt;service alias="bob"&gt;http://localhost:8080/axis2/services/STS&lt;/service&gt;
+     *       &lt;/trusted-services&gt;
+     *   &lt;/saml-issuer-config&gt;</pre>
      *
      * @param configElement Configuration as an OMElement.
      * @param configFile Configuration as a file.
