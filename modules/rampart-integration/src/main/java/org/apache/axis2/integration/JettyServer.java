@@ -40,7 +40,7 @@ public class JettyServer {
     public static final String KEYSTORE = "target/test-resources/jetty/server.jks";
     
     /**
-     * Keymanager password to configure for Jetty's ssl context factory: {@value
+     * Keymanager password to configure for Jetty's ssl context factory: {@value}
      */
     public static final String KEYMAN_PASSWORD = "password";
     
@@ -65,7 +65,7 @@ public class JettyServer {
     public static final String AXIS2_XML = "src/test/resources/conf/axis2.xml";
     
     /**
-     * Webapp resource base directory to use: {@value}
+     * Webapp resource base directory to use
      */
     public static final String WEBAPP_DIR = "target" + File.separator + "webapp";
     
