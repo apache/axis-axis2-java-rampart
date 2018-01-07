@@ -35,6 +35,7 @@
                 <include>org.apache.xerces:resolver:jar</include>
                 <include>org.apache.xerces:serializer:jar</include>
                 <include>org.owasp.esapi:esapi:jar</include>
+                <include>ca.juliusdavies:not-yet-commons-ssl</include>
             </includes>
         </dependencySet>
         <dependencySet>
