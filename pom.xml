@@ -623,7 +623,7 @@
 
         <failIfNoTests>false</failIfNoTests>
 
-        <jacoco.version>0.7.5.201505241946</jacoco.version>
+        <jacoco.version>0.8.0</jacoco.version>
     </properties>
 
     <pluginRepositories>
