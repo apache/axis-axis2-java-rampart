@@ -1,0 +1,13 @@
+dist: trusty
+language: java
+jdk:
+  - openjdk8
+install: true
+script: '[ "$TRAVIS_REPO_SLUG" == apache/rampart ] && [ "$TRAVIS_BRANCH" == trunk ] && [ "$TRAVIS_PULL_REQUEST" == false ] && goal=deploy || goal=verify ; mvn -B -s .travis-settings.xml -Papache-release -Dgpg.skip=true $goal'
+cache:
+  directories:
+    - $HOME/.m2
+notifications:
+  email:
+    # java-dev@axis.apache.org doesn't work here because it's not an address registered on GitHub.
+    - veithen@apache.org
