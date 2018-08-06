@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.rampart;
+package org.apache.rampart.testutils;
 
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
