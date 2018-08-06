@@ -34,9 +34,16 @@
     <packaging>jar</packaging>
     <name>Rampart - Test Suite</name>
 
+    <properties>
+        <aspectj.version>1.8.2</aspectj.version>
+    </properties>
+
     <build>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
             <testResource>
                 <directory>test-resources</directory>
                 <includes>
@@ -51,6 +58,35 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.veithen.alta</groupId>
+                <artifactId>alta-maven-plugin</artifactId>
+                <version>0.6.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-properties</goal>
+                        </goals>
+                        <configuration>
+                            <name>aspectjweaver</name>
+                            <value>%file%</value>
+                            <artifacts>
+                                <artifact>
+                                    <groupId>org.aspectj</groupId>
+                                    <artifactId>aspectjweaver</artifactId>
+                                    <version>${aspectj.version}</version>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${jacoco.surefireArgLine} -javaagent:${aspectjweaver}</argLine>
                 </configuration>
             </plugin>
         </plugins>
@@ -83,6 +119,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
