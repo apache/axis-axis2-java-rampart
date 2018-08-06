@@ -464,10 +464,31 @@
                 </executions>
             </plugin-->
             <plugin>
+                <groupId>com.github.veithen.alta</groupId>
+                <artifactId>alta-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-properties</goal>
+                        </goals>
+                        <configuration>
+                            <name>aspectjweaver</name>
+                            <value>%file%</value>
+                            <artifacts>
+                                <artifact>
+                                    <groupId>org.aspectj</groupId>
+                                    <artifactId>aspectjweaver</artifactId>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <!-- Add the Xerces/Xalan versions expected by OpenSAML to the boot classpath so that the build succeeds on older 1.5 JDKs -->
-                    <argLine>${jacoco.surefireArgLine} -Xbootclasspath/p:${project.build.directory}/endorsed/xml-apis.jar${path.separator}${project.build.directory}/endorsed/xercesImpl.jar${path.separator}${project.build.directory}/endorsed/resolver.jar${path.separator}${project.build.directory}/endorsed/serializer.jar${path.separator}${project.build.directory}/endorsed/xalan.jar</argLine>
+                    <argLine>${jacoco.surefireArgLine} -Xbootclasspath/p:${project.build.directory}/endorsed/xml-apis.jar${path.separator}${project.build.directory}/endorsed/xercesImpl.jar${path.separator}${project.build.directory}/endorsed/resolver.jar${path.separator}${project.build.directory}/endorsed/serializer.jar${path.separator}${project.build.directory}/endorsed/xalan.jar -javaagent:${aspectjweaver}</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -515,6 +536,12 @@
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.rampart</groupId>
+            <artifactId>rampart-testutils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>

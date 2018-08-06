@@ -194,6 +194,11 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.10.3</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.github.veithen.alta</groupId>
+                    <artifactId>alta-maven-plugin</artifactId>
+                    <version>0.6.2</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -545,6 +550,17 @@
                 <artifactId>junit</artifactId>
                 <version>3.8.2</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjrt</artifactId>
+                <version>1.8.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>1.8.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -599,6 +615,7 @@
         <module>modules/rampart-trust-mar</module>
         <module>modules/rampart-integration</module>
         <module>modules/rampart-samples</module> <!-- Compile sample codes -->
+        <module>modules/rampart-testutils</module>
         <module>modules/distribution</module>
         <module>code-coverage</module>
     </modules>
