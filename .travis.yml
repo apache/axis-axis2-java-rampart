@@ -4,6 +4,10 @@ jdk:
   - openjdk8
 install: true
 script: '[ "$TRAVIS_REPO_SLUG" == apache/rampart ] && [ "$TRAVIS_BRANCH" == trunk ] && [ "$TRAVIS_PULL_REQUEST" == false ] && goal=deploy || goal=verify ; mvn -B -s .travis-settings.xml -Papache-release -Dgpg.skip=true $goal'
+env:
+  global:
+    - secure: "EdhUKPgSqlyvV1WTzEhe91zTiTFzcQCG4FcdgN73j5VRYYU08hDuv7NeOTR7ks2iIhhVRBsKVJ6HdHlr5x7KDLKxelhP9J1zE+wHwQToQoL+pGSHS12h5pTRHwioy9nzCvCcZNM0nkN2w6M3Lbql8UOOjGjzdsOzWhVqYhpDc8c="
+    - secure: "G0DkdCmLgsnwqDsHexziUWiDQ33wvUreMLCl4tQYmp25AGDi5YtVaqzlZrQbZGI6KiaH3Ud2DO3oBaxi553H/LeJMqalDIwQcQPs+xjBru4HfPV3umuIMz+A9DRQ6x/274E9n25H7AwA49JLGmqpcL94vVbwE7ZgQ81Jh4txzWw="
 cache:
   directories:
     - $HOME/.m2
