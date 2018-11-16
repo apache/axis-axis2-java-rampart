@@ -621,8 +621,8 @@
     </modules>
 
     <properties>
-        <axis2.version>1.7.9-SNAPSHOT</axis2.version>
-        <axiom.version>1.2.21-SNAPSHOT</axiom.version>
+        <axis2.version>1.7.10-SNAPSHOT</axis2.version>
+        <axiom.version>1.2.22-SNAPSHOT</axiom.version>
 
         <wss4j.version>1.6.16</wss4j.version>
         <opensaml.version>2.5.1-1</opensaml.version>
