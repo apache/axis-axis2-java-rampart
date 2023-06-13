@@ -23,14 +23,14 @@ public class SAMLAssertionHandlerFactory {
 
     public static SAMLAssertionHandler createAssertionHandler(Object samlAssertion) {
 
-        if (samlAssertion instanceof org.opensaml.saml2.core.Assertion) {
+        if (samlAssertion instanceof org.opensaml.saml.saml2.core.Assertion) {
             SAMLAssertionHandler saml2AssertionHandler
-                    = new SAML2AssertionHandler((org.opensaml.saml2.core.Assertion) samlAssertion);
+                    = new SAML2AssertionHandler((org.opensaml.saml.saml2.core.Assertion) samlAssertion);
 
             return saml2AssertionHandler;
         } else {
             SAML1AssertionHandler saml1AssertionHandler
-                    = new SAML1AssertionHandler((org.opensaml.saml1.core.Assertion) samlAssertion);
+                    = new SAML1AssertionHandler((org.opensaml.saml.saml1.core.Assertion) samlAssertion);
             return saml1AssertionHandler;
         }
     }

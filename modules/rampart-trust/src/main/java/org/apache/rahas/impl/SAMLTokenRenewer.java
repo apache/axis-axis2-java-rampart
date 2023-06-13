@@ -1,7 +1,8 @@
 package org.apache.rahas.impl;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
@@ -17,11 +18,11 @@ import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLUtils;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
-import org.joda.time.DateTime;
-import org.opensaml.saml1.core.Assertion;
-import org.opensaml.saml1.core.Conditions;
+import org.opensaml.saml.saml1.core.Assertion;
+import org.opensaml.saml.saml1.core.Conditions;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.util.DateUtil;
+import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -96,16 +97,11 @@ public class SAMLTokenRenewer implements TokenRenewer {
                 RahasConstants.TOK_TYPE_SAML_10);
 
         // Creation and expiration times
-        Date creationTime = new Date();
-        Date expirationTime = new Date();
-        expirationTime.setTime(creationTime.getTime() + config.getTtl());
-
-        // Use GMT time in milliseconds
-        DateFormat zulu = new XmlSchemaDateFormat();
+        ZonedDateTime creationTime = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime expirationTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(creationTime.toInstant().toEpochMilli() + config.getTtl()), ZoneOffset.UTC);
 
         // Add the Lifetime element
-        TrustUtil.createLifetimeElement(wstVersion, rstrElem, zulu
-                .format(creationTime), zulu.format(expirationTime));
+        TrustUtil.createLifetimeElement(wstVersion, rstrElem, DateUtil.getDateTimeFormatter(true).format(creationTime), DateUtil.getDateTimeFormatter(true).format(expirationTime));
 
         // Obtain the token
         Token tk = tkStorage.getToken(data.getTokenId());
@@ -120,8 +116,8 @@ public class SAMLTokenRenewer implements TokenRenewer {
 
         }
 
-        samlAssertion.getConditions().setNotBefore(new DateTime(creationTime));
-        samlAssertion.getConditions().setNotOnOrAfter(new DateTime(expirationTime));
+        samlAssertion.getConditions().setNotBefore(creationTime.toInstant());
+        samlAssertion.getConditions().setNotOnOrAfter(creationTime.toInstant());
 
         // sign the assertion
         SAMLUtils.signAssertion(samlAssertion, crypto, config.getIssuerKeyAlias(), config.getIssuerKeyPassword());

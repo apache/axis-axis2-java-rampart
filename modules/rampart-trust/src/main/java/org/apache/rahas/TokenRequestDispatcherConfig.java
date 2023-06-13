@@ -19,7 +19,7 @@ package org.apache.rahas;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
-import org.apache.ws.security.util.Loader;
+import org.apache.wss4j.common.util.Loader;
 
 import javax.xml.namespace.QName;
 import java.io.FileInputStream;

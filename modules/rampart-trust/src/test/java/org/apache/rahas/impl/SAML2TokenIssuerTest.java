@@ -29,9 +29,8 @@ import org.apache.rahas.client.STSClient;
 import org.apache.rahas.test.util.AbstractTestCase;
 import org.apache.rahas.test.util.TestSTSClient;
 import org.apache.rahas.test.util.TestUtil;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.joda.time.DateTime;
-import org.opensaml.common.xml.SAMLConstants;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.w3c.dom.Document;
 
 import java.io.File;

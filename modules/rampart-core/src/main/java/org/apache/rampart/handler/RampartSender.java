@@ -27,7 +27,7 @@ import org.apache.rampart.MessageBuilder;
 import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartException;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.WSSecurityException;
+import org.apache.wss4j.common.ext.WSSecurityException;
 
 /**
  * Rampart outflow handler.

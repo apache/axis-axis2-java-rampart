@@ -22,8 +22,8 @@ import javax.xml.namespace.QName;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.neethi.Policy;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.conversation.ConversationConstants;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.common.derivedKey.ConversationConstants;
 
 public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
 	

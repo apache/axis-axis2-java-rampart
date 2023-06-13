@@ -20,11 +20,10 @@ import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.impl.util.CommonUtil;
 import org.apache.rahas.impl.util.SAMLUtils;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
-import org.opensaml.saml1.core.Assertion;
-import org.opensaml.xml.signature.SignatureValidator;
-import org.opensaml.xml.validation.ValidationException;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.crypto.CryptoFactory;
+import org.opensaml.saml.saml1.core.Assertion;
+import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.w3c.dom.Element;
 
 /**
@@ -125,10 +124,10 @@ public class SAMLTokenValidator implements TokenValidator {
             log.info("Verifying token validity...");
 
             // check if the token has been signed by the issuer.
-            SignatureValidator validator = new SignatureValidator(samlAssertion.getSignature().getSigningCredential());
-            validator.validate(samlAssertion.getSignature());
+            // SignatureValidator validator = new SignatureValidator();
+            SignatureValidator.validate(samlAssertion.getSignature(), samlAssertion.getSignature().getSigningCredential());
 
-        } catch (ValidationException e) {
+        } catch (Exception e) {
             log.error("Signature verification failed on SAML token.", e);
             return false;
         }
@@ -178,7 +177,7 @@ public class SAMLTokenValidator implements TokenValidator {
                 // elements
                 crypto = CryptoFactory.getInstance(TrustUtil
                         .toProperties(config.cryptoElement), inMsgCtx
-                        .getAxisService().getClassLoader());
+                        .getAxisService().getClassLoader(), null);
             } else { // crypto props defined in a properties file
                 crypto = CryptoFactory.getInstance(config.cryptoPropertiesFile,
                         inMsgCtx.getAxisService().getClassLoader());

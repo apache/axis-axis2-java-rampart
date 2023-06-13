@@ -74,8 +74,8 @@ public class AlgorithmSuite extends AbstractConfigurableSecurityAssertion {
     /**
      * Set the algorithm suite
      * 
-     * @param algoSuite
-     * @throws WSSPolicyException
+     * @param algoSuite The algorithm suite
+     * @throws WSSPolicyException If an error occurred setting the AlgorithmSuite
      * @see SPConstants#ALGO_SUITE_BASIC128
      * @see SPConstants#ALGO_SUITE_BASIC128_RSA15
      * @see SPConstants#ALGO_SUITE_BASIC128_SHA256

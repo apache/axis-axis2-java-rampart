@@ -24,48 +24,45 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.RampartConstants;
-import org.apache.ws.security.WSPasswordCallback;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.handler.RequestData;
-import org.apache.ws.security.message.token.UsernameToken;
-import org.apache.ws.security.validate.UsernameTokenValidator;
+import org.apache.wss4j.binding.wss10.PasswordString;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.handler.RequestData;
+import org.apache.wss4j.dom.message.token.UsernameToken;
+import org.apache.wss4j.stax.utils.WSSUtils;
+import org.apache.wss4j.stax.validate.TokenContext;
+import org.apache.wss4j.stax.validate.UsernameTokenValidatorImpl;
+
 
 /**
- * Overriding the default UsernameTokenValidator provided by WSS4J because the
+ * Overriding the default UsernameTokenValidatorImpl provided by WSS4J because the
  * default implementation expects the user to provide the plain text password to
  * WSS4J for validation.
  * 
  */
-public class RampartUsernameTokenValidator extends UsernameTokenValidator {
+public class RampartUsernameTokenValidator extends UsernameTokenValidatorImpl {
 
-	private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
+    private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
 
-	@Override
-	protected void verifyPlaintextPassword(UsernameToken usernameToken,
-			RequestData data) throws WSSecurityException {
+    /**
+     * Verify a UsernameToken containing a plaintext password.
+     */
+    @Override
+    protected void verifyPlaintextPassword(
+        String username,
+        PasswordString passwordType,
+        TokenContext tokenContext
+    ) throws WSSecurityException {
+        WSPasswordCallback pwCb = new WSPasswordCallback(username,
+                null,
+                passwordType.getType(),
+                WSPasswordCallback.USERNAME_TOKEN);
+        try {
+            WSSUtils.doPasswordCallback(tokenContext.getWssSecurityProperties().getCallbackHandler(), pwCb);
+        } catch (WSSecurityException e) {
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION, e);
+        }
 
-		String user = usernameToken.getName();
-		String password = usernameToken.getPassword();
-		String pwType = usernameToken.getPasswordType();
+    }
 
-		// Provide the password to the user for validation
-		WSPasswordCallback pwCb = new WSPasswordCallback(user, password,
-				pwType, WSPasswordCallback.USERNAME_TOKEN, data);
-		try {
-			data.getCallbackHandler().handle(new Callback[] { pwCb });
-		} catch (IOException e) {
-			if (mlog.isDebugEnabled()) {
-				mlog.debug(e);
-			}
-			throw new WSSecurityException(
-					WSSecurityException.FAILED_AUTHENTICATION);
-		} catch (UnsupportedCallbackException e) {
-			if (mlog.isDebugEnabled()) {
-				mlog.debug(e);
-			}
-			throw new WSSecurityException(
-					WSSecurityException.FAILED_AUTHENTICATION);
-		}
-
-	}
 }

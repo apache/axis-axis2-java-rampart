@@ -21,6 +21,9 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import javax.xml.namespace.QName;
 
@@ -35,10 +38,10 @@ import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.rahas.impl.AbstractIssuerConfig;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.message.token.Reference;
-import org.apache.ws.security.message.token.SecurityTokenReference;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
+import org.apache.wss4j.common.token.Reference;
+import org.apache.wss4j.common.token.SecurityTokenReference;
+import org.apache.wss4j.common.util.DateUtil;
+import org.apache.wss4j.dom.WSConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -364,16 +367,10 @@ public class TrustUtil {
                                                   OMElement parent,
                                                   long ttl) throws TrustException {
 
-        Date creationTime = new Date();
-        Date expirationTime = new Date();
-        expirationTime.setTime(creationTime.getTime() + ttl);
+        ZonedDateTime creationTime = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime expirationTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(creationTime.toInstant().toEpochMilli() + ttl), ZoneOffset.UTC);
 
-        DateFormat zulu = new XmlSchemaDateFormat();
-
-        return createLifetimeElement(version,
-                                     parent,
-                                     zulu.format(creationTime),
-                                     zulu.format(expirationTime));
+        return createLifetimeElement(version, parent, DateUtil.getDateTimeFormatter(true).format(creationTime), DateUtil.getDateTimeFormatter(true).format(expirationTime));
     }
 
     public static OMElement createAppliesToElement(OMElement parent,

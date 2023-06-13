@@ -29,7 +29,7 @@ import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axiom.soap.SOAPModelBuilder;
 import org.apache.rampart.handler.WSSHandlerConstants;
-import org.apache.ws.security.WSSecurityException;
+import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.xml.security.utils.XMLUtils;
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
@@ -78,7 +78,9 @@ public class Axis2Util {
 	/**
 	 * Creates a DOM Document using the SOAP Envelope.
 	 * @param env An org.apache.axiom.soap.SOAPEnvelope instance
-	 * @return Returns the DOM Document of the given SOAP Envelope.
+	 * @param useDoom boolean to enable the feature
+	 * @return Document Returns the DOM Document of the given SOAP Envelope.
+	 * @throws WSSecurityException If an error occurred getting the Document
 	 */
 	public static Document getDocumentFromSOAPEnvelope(SOAPEnvelope env, boolean useDoom)
 			throws WSSecurityException {
@@ -170,17 +172,16 @@ public class Axis2Util {
                 return factory.newDocumentBuilder().parse(bais);
             }
 		} catch (Exception e) {
-			throw new WSSecurityException(
-					"Error in converting SOAP Envelope to Document", e);
+                        throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "Error in converting SOAP Envelope to Document: " + e.getMessage());
 		}
 	}
 
 	/**
 	 * Builds a SOAPEnvelope from DOM Document.
 	 * @param doc - The dom document that contains a SOAP message
-	 * @param useDoom
-	 * @return
-	 * @throws WSSecurityException
+	 * @param useDoom boolean to enable the feature
+	 * @return SOAPEnvelope SOAPEnvelope from DOM Document
+	 * @throws WSSecurityException If an error occurred getting the SOAPEnvelope
 	 */
 	public static SOAPEnvelope getSOAPEnvelopeFromDOMDocument(Document doc, boolean useDoom)
             throws WSSecurityException {
@@ -274,7 +275,7 @@ public class Axis2Util {
                 return envelope;
 
             } catch (FactoryConfigurationError e) {
-                throw new WSSecurityException(e.getMessage());
+                throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e.getMessage());
             }
         } else {
             try {
@@ -285,7 +286,7 @@ public class Axis2Util {
                 SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createSOAPModelBuilder(bais, null);
                 return stAXSOAPModelBuilder.getSOAPEnvelope();
             } catch (Exception e) {
-                throw new WSSecurityException(e.getMessage());
+                throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e);
             }
         }
     }
@@ -314,9 +315,9 @@ public class Axis2Util {
 	
     /**
      * This will build a DOOM Element that is of the same <code>Document</code>
-     * @param factory
-     * @param element
-     * @return
+     * @param factory OMFactory Object
+     * @param element OMElement element
+     * @return OMElement The OMElement to return
      */
     public static OMElement toDOOM(OMFactory factory, OMElement element){
         OMXMLParserWrapper builder = OMXMLBuilderFactory.createStAXOMBuilder(factory, element.getXMLStreamReader());

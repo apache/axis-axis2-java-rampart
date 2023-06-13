@@ -54,7 +54,7 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param encryptionToken The encryptionToken to set.
-     * @throws WSSPolicyException 
+     * @throws WSSPolicyException If an error occurred setting the EncryptionToken
      */
     public void setEncryptionToken(EncryptionToken encryptionToken) 
     		throws WSSPolicyException  {
@@ -74,7 +74,7 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param protectionToken The protectionToken to set.
-     * @throws WSSPolicyException 
+     * @throws WSSPolicyException If an error occurred setting the ProtectionToken
      */
     public void setProtectionToken(ProtectionToken protectionToken) 
     		throws WSSPolicyException  {
@@ -95,7 +95,7 @@ public class SymmetricBinding extends SymmetricAsymmetricBindingBase {
 
     /**
      * @param signatureToken The signatureToken to set.
-     * @throws WSSPolicyException 
+     * @throws WSSPolicyException If an error occurred getting the SignatureToken
      */
     public void setSignatureToken(SignatureToken signatureToken) 
     		throws WSSPolicyException {

@@ -1,9 +1,9 @@
 package org.apache.rahas;
 
 import org.apache.rahas.impl.util.*;
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml1.core.Attribute;
-import org.opensaml.saml1.core.NameIdentifier;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml1.core.Attribute;
+import org.opensaml.saml.saml1.core.NameIdentifier;
 
 public class SAMLDataProvider implements SAMLCallbackHandler{
 	

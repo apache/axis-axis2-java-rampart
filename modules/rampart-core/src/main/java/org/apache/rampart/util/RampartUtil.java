@@ -36,8 +36,7 @@ import org.apache.axis2.mex.MexException;
 import org.apache.axis2.mex.om.Metadata;
 import org.apache.axis2.mex.om.MetadataReference;
 import org.apache.axis2.mex.om.MetadataSection;
-import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
@@ -60,24 +59,26 @@ import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.*;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSEncryptionPart;
-import org.apache.ws.security.WSPasswordCallback;
-import org.apache.ws.security.WSSConfig;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.WSUsernameTokenPrincipal;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
-import org.apache.ws.security.conversation.ConversationConstants;
-import org.apache.ws.security.conversation.ConversationException;
-import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.handler.WSHandlerResult;
-import org.apache.ws.security.message.WSSecBase;
-import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.util.Loader;
-import org.apache.ws.security.util.WSSecurityUtil;
-import org.apache.ws.security.validate.KerberosTokenDecoder;
+import org.apache.wss4j.dom.message.WSSecBase;
+import org.apache.wss4j.common.crypto.CryptoType;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.crypto.CryptoFactory;
+import org.apache.wss4j.common.derivedKey.ConversationConstants;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.kerberos.KerberosTokenDecoder;
+import org.apache.wss4j.common.kerberos.KerberosTokenDecoderException;
+import org.apache.wss4j.common.saml.builder.SAML1Constants;
+import org.apache.wss4j.common.util.Loader;
+import org.apache.wss4j.common.util.XMLUtils;
+import org.apache.wss4j.common.WSEncryptionPart;
+import org.apache.wss4j.dom.engine.WSSConfig;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+import org.apache.wss4j.dom.handler.WSHandlerResult;
+import org.apache.wss4j.dom.message.WSSecEncryptedKey;
+import org.apache.wss4j.dom.WSConstants;
+
 import org.apache.xml.security.utils.Constants;
 import org.jaxen.JaxenException;
 import org.jaxen.XPath;
@@ -93,6 +94,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -122,10 +124,10 @@ public class RampartUtil {
     }
 
     /**
-     * @param msgContext
-     * @param rpd
+     * @param msgContext Axis2 MessageContext
+     * @param rpd RampartPolicyData
      * @return The <code>CallbackHandler</code> instance
-     * @throws RampartException
+     * @throws RampartException If an error occurred getting the CallbackHandler Object
      */
     public static CallbackHandler getPasswordCB(MessageContext msgContext, RampartPolicyData rpd) throws RampartException {
         
@@ -309,12 +311,20 @@ public class RampartUtil {
      * The called back function gets an indication why to provide a password:
      * to produce a UsernameToken, Signature, or a password (key) for a given
      * name.
+     * @param cbHandler CallbackHandler
+     * @param username user
+     * @param doAction action
+     * @return WSPasswordCallback value of Callback
+     * @throws RampartException If an error occurred getting the CallbackHandler Object
      */
     public static WSPasswordCallback performCallback(CallbackHandler cbHandler,
                                                String username,
                                                int doAction)
             throws RampartException {
 
+        // WSPasswordCallback over time has been refactored extensively,
+        // see:
+        // https://coheigea.blogspot.com/2011/02/wspasswordcallback-changes-in-wss4j-16.html
         WSPasswordCallback pwCb;
         int reason = 0;
 
@@ -327,7 +337,7 @@ public class RampartUtil {
                 reason = WSPasswordCallback.SIGNATURE;
                 break;
             case WSConstants.ENCR:
-                reason = WSPasswordCallback.KEY_NAME;
+                reason = WSPasswordCallback.SECRET_KEY;
                 break;
         }
         pwCb = new WSPasswordCallback(username, reason);
@@ -348,9 +358,10 @@ public class RampartUtil {
      * Create the <code>Crypto</code> instance for encryption using information 
      * from the rampart configuration assertion
      * 
-     * @param config
+     * @param config Rampart Configuration
+     * @param loader ClassLoader to perform operations
      * @return The <code>Crypto</code> instance to be used for encryption
-     * @throws RampartException
+     * @throws RampartException If the arguments are malformed.
      */
     public static Crypto getEncryptionCrypto(RampartConfig config, ClassLoader loader)
             throws RampartException {
@@ -405,7 +416,7 @@ public class RampartUtil {
     private static Crypto createCrypto(Properties properties, ClassLoader classLoader) throws RampartException {
 
         try {
-            return CryptoFactory.getInstance(properties, classLoader);
+            return CryptoFactory.getInstance(properties, classLoader, null);
         } catch (WSSecurityException e) {
             log.error("Error loading crypto properties.", e);
             throw new RampartException("cannotCrateCryptoInstance", e);
@@ -416,9 +427,10 @@ public class RampartUtil {
      * Create the <code>Crypto</code> instance for signature using information 
      * from the rampart configuration assertion
      * 
-     * @param config
-     * @return The <code>Crypto</code> instance to be used for signature
-     * @throws RampartException
+     * @param config Rampart Configuration
+     * @param loader ClassLoader to perform operations
+     * @return The Crypto instance to be used for signature
+     * @throws RampartException If an error occurred getting the Crypto Object
      */
     public static Crypto getSignatureCrypto(RampartConfig config, ClassLoader loader)
             throws RampartException {
@@ -467,10 +479,10 @@ public class RampartUtil {
     
     
     /**
-     * figureout the key identifier of a give X509Token
-     * @param token
+     * figure out the key identifier of a give X509Token
+     * @param token X509 token
      * @return The key identifier of a give X509Token
-     * @throws RampartException
+     * @throws RampartException If an error occurred getting the key identifier
      */
     public static int getKeyIdentifier(X509Token token) throws RampartException {
         if (token.isRequireIssuerSerialReference()) {
@@ -488,7 +500,7 @@ public class RampartUtil {
     
     /**
      * Process a give issuer address element and return the address.
-     * @param issuerAddress
+     * @param issuerAddress address
      * @return The address of an issuer address element
      * @throws RampartException If the issuer address element is malformed.
      */
@@ -523,6 +535,7 @@ public class RampartUtil {
      * &lt;/wsa:Metadata&gt;</pre>
      * @param mex Metadata element 
      * @return Policy from the mex service
+     * @throws RampartException If the element is malformed.
      */
     public static Policy getPolicyFromMetadataRef(OMElement mex) throws RampartException {
         
@@ -600,7 +613,7 @@ public class RampartUtil {
             return rstTempl;
         } catch (TrustException e) {
             throw new RampartException("errorCreatingRSTTemplateForSCT", e);
-        } catch (ConversationException e) {
+        } catch (Exception e) {
             throw new RampartException("errorCreatingRSTTemplateForSCT", e);
         }
     }
@@ -652,11 +665,11 @@ public class RampartUtil {
 
     /**
      * Obtain a security context token.
-     * @param rmd
-     * @param secConvTok
+     * @param rmd RampartMessageData
+     * @param secConvTok context token
      * @return Return the SecurityContextidentifier of the token
-     * @throws TrustException
-     * @throws RampartException
+     * @throws TrustException If TrustUtil fails
+     * @throws RampartException If the arguments are malformed.
      */
     public static String getSecConvToken(RampartMessageData rmd,
             SecureConversationToken secConvTok) throws TrustException,
@@ -710,10 +723,10 @@ public class RampartUtil {
 
     /**
      * Obtain an issued token.
-     * @param rmd
-     * @param issuedToken
-     * @return The identifier of the issued token
-     * @throws RampartException
+     * @param rmd RampartMessageData
+     * @param issuedToken issued token
+     * @return String The identifier of the issued token
+     * @throws RampartException If the arguments are malformed.
      */
     public static String getIssuedToken(RampartMessageData rmd,
             IssuedToken issuedToken) throws RampartException {
@@ -754,13 +767,13 @@ public class RampartUtil {
     
     /**
      * Request a token.
-     * @param rmd
-     * @param rstTemplate
-     * @param issuerEpr
-     * @param action
-     * @param issuerPolicy
+     * @param rmd RampartMessageData
+     * @param rstTemplate template
+     * @param issuerEpr expiration
+     * @param action what to find
+     * @param issuerPolicy policy
      * @return Return the identifier of the obtained token
-     * @throws RampartException
+     * @throws RampartException If the arguments are malformed.
      */
     public static String getToken(RampartMessageData rmd, OMElement rstTemplate,
             String issuerEpr, String action, Policy issuerPolicy) throws RampartException {
@@ -809,11 +822,16 @@ public class RampartUtil {
                 options.setUserName(rmd.getMsgContext().getOptions().getUserName());
                 options.setPassword(rmd.getMsgContext().getOptions().getPassword());
                 
+                /* The commons httpclient 3.x code isn't compatible with 4.x
+                   and there doesn't seem to be test coverage for it.
+                   Leaving it commented out for now. The Protocol
+                   class works differently now.
                 if (msgContext.getProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER) != null) {
                     Protocol protocolHandler =
                         (Protocol)msgContext.getProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER);;
                     options.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER, protocolHandler);                 
                 } 
+                */
                 
                 if (msgContext.getParameter(WSHandlerConstants.PW_CALLBACK_REF) != null ) {
                     Parameter pwCallback = msgContext.getParameter(WSHandlerConstants.PW_CALLBACK_REF);
@@ -902,7 +920,7 @@ public class RampartUtil {
     
     public static Element appendChildToSecHeader(RampartMessageData rmd,
             Element elem) {
-        Element secHeaderElem = rmd.getSecHeader().getSecurityHeader();
+        Element secHeaderElem = rmd.getSecHeader().getSecurityHeaderElement();
         Node node = adoptNode(secHeaderElem.getOwnerDocument(), elem);
         return (Element)secHeaderElem.appendChild(node);
     }
@@ -916,7 +934,7 @@ public class RampartUtil {
 
                 if (child.getParentNode() == null
                         && !child.getLocalName().equals("UsernameToken")) {
-                    rmd.getSecHeader().getSecurityHeader().appendChild(child);
+                    rmd.getSecHeader().getSecurityHeaderElement().appendChild(child);
                 }
                 ((OMElement) child).insertSiblingAfter((OMElement) sibling);
                 return sibling;
@@ -1272,7 +1290,7 @@ public class RampartUtil {
      * @param envelope   SOAP Envelope of which we should check required elements
      * @param decNamespaces  Declared namespaces in RequiredElements assertion
      * @param expression  XPATH expression of required elements
-     * @return
+     * @return boolean State of required elements
      */
     public static boolean checkRequiredElements(SOAPEnvelope envelope, HashMap decNamespaces, String expression) {
 
@@ -1324,7 +1342,7 @@ public class RampartUtil {
             }
         } catch (NoSuchAlgorithmException e) {
             throw new WSSecurityException(
-                    WSSecurityException.UNSUPPORTED_ALGORITHM, null, null, e);
+                    WSSecurityException.ErrorCode.UNSUPPORTED_ALGORITHM, e);
         }
         return keyGen;
     }
@@ -1332,6 +1350,7 @@ public class RampartUtil {
     /**
      * Creates the unique (reproducible) id for to hold the context identifier
      * of the message exchange.
+     * @param msgContext Axis2 message state
      * @return Id to hold the context identifier in the message context
      */
     public static String getContextIdentifierKey(MessageContext msgContext) {
@@ -1341,7 +1360,8 @@ public class RampartUtil {
     
     /**
      * Returns the map of security context token identifiers
-     * @return the map of security context token identifiers
+     * @param msgContext The message context.
+     * @return Hashtable the map of security context token identifiers
      */
     public static Hashtable getContextMap(MessageContext msgContext) {
         //Fist check whether its there
@@ -1411,8 +1431,10 @@ public class RampartUtil {
      * according to the given <code>Token</code> and <code>RampartPolicyData</code>
      * First check the requirements specified under Token Assertion and if not found check 
      * the WSS11 and WSS10 assertions
+     * @param rmd RampartMessageData
+     * @param secBase ws-wss4j Object
+     * @param token Rampart token
      */
-    
     public static void setKeyIdentifierType(RampartMessageData rmd, WSSecBase secBase,org.apache.ws.secpolicy.model.Token token) {
 
         // Use a reference rather than the binary security token if: the policy never allows the token to be
@@ -1489,8 +1511,8 @@ public class RampartUtil {
     /**
      * Scan through {@link WSHandlerResult} list for a Username token and return
      * the username if a Username Token found 
-     * @param results
-     * @return
+     * @param results ws-wss4j Object
+     * @return String username
      */
     
     public static String getUsername(List<WSHandlerResult> results) {
@@ -1508,8 +1530,7 @@ public class RampartUtil {
             for (WSSecurityEngineResult wsSecEngineResult : wsSecEngineResults) {
                 Integer actInt = (Integer) wsSecEngineResult.get(WSSecurityEngineResult.TAG_ACTION);
                 if (actInt == WSConstants.UT) {
-                    WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) wsSecEngineResult.
-                            get(WSSecurityEngineResult.TAG_PRINCIPAL);
+                    Principal principal = (Principal) wsSecEngineResult.get(WSSecurityEngineResult.TAG_PRINCIPAL);
                     return principal.getName();
                 }
             }
@@ -1574,10 +1595,10 @@ public class RampartUtil {
      * 
      * If the child is null, then prepend the element.
      * 
-     * @param rmd
-     * @param child
+     * @param rmd RampartMessageData
+     * @param child Element
      * @param elem - element mentioned above
-     * @return
+     * @return Element new Element
      */
     public static Element insertSiblingAfterOrPrepend(RampartMessageData rmd, Element child, Element elem) {
         Element retElem = null;
@@ -1604,7 +1625,7 @@ public class RampartUtil {
     private static Element prependSecHeader(RampartMessageData rmd, Element elem) {
         Element retElem = null;
 
-        Element secHeaderElem = rmd.getSecHeader().getSecurityHeader();
+        Element secHeaderElem = rmd.getSecHeader().getSecurityHeaderElement();
         Node node = secHeaderElem.getOwnerDocument().importNode(
                 elem, true);
         Element firstElem = (Element) secHeaderElem.getFirstChild();
@@ -1627,11 +1648,12 @@ public class RampartUtil {
     
     /**
      * Method to check whether security header is required in incoming message
-     * @param rpd 
-     * @return true if a security header is required in the incoming message
+     * @param rpd RampartPolicyData
+     * @param initiator defines precendence
+     * @param inflow defines precendence
+     * @return boolean true if a security header is required in the incoming message
      */
-    public static boolean isSecHeaderRequired(RampartPolicyData rpd, boolean initiator, 
-                                                                                boolean inflow ) {
+    public static boolean isSecHeaderRequired(RampartPolicyData rpd, boolean initiator, boolean inflow ) {
         
         // Checking for time stamp
         if ( rpd.isIncludeTimestamp() ) {
@@ -1724,7 +1746,7 @@ public class RampartUtil {
                     String encDataID = encryptedPart.getEncId();
 
                     // TODO Do we need to go through the whole tree to find element by id ? Verify
-                    Element encDataElem = WSSecurityUtil.findElementById(doc.getDocumentElement(), encDataID, false);
+                    Element encDataElem = XMLUtils.findElementById(doc.getDocumentElement(), encDataID, false);
 
                     if (encDataElem != null) {
                         Element encHeader = (Element) encDataElem.getParentNode();
@@ -1783,25 +1805,6 @@ public class RampartUtil {
         return null;
     }
     
-    /**
-     * We use this method to prevent the singleton behavior of WSSConfig
-     * @return WSSConfig object with the latest settings.    
-     */
-    
-    public static WSSConfig getWSSConfigInstance() {
-        
-        WSSConfig defaultWssConfig = WSSConfig.getNewInstance();
-        WSSConfig wssConfig = WSSConfig.getNewInstance();
-        
-        wssConfig.setEnableSignatureConfirmation(defaultWssConfig.isEnableSignatureConfirmation());
-        wssConfig.setTimeStampStrict(defaultWssConfig.isTimeStampStrict());
-        wssConfig.setWsiBSPCompliant(defaultWssConfig.isWsiBSPCompliant());
-        wssConfig.setPrecisionInMilliSeconds(defaultWssConfig.isPrecisionInMilliSeconds());
-        
-        return  wssConfig;
-       
-    }
-
     public static void validateTransport(RampartMessageData rmd) throws RampartException {
 
         RampartPolicyData rpd = rmd.getPolicyData();
@@ -1968,7 +1971,7 @@ public class RampartUtil {
      * 
      * @param fault
      *            the SOAP fault; must not be <code>null</code>
-     * @return <code>true</code> if the fault is a security fault; <code>false</code> otherwise
+     * @return true if the fault is a security fault; false otherwise
      */
     public static boolean isSecurityFault(SOAPFault fault) {
         String soapVersionURI = fault.getNamespaceURI();

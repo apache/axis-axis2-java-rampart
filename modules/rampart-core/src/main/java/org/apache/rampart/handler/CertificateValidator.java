@@ -16,9 +16,10 @@
 
 package org.apache.rampart.handler;
 
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.validate.SignatureTrustValidator;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.dom.handler.RequestData;
+import org.apache.wss4j.dom.validate.SignatureTrustValidator;
 
 import java.security.cert.X509Certificate;
 
@@ -39,7 +40,11 @@ public class CertificateValidator extends SignatureTrustValidator {
      * @throws WSSecurityException If an error occurred while trying to access Crypto and Certificate properties.
      */
     boolean validateCertificate(X509Certificate certificate, Crypto signatureCrypto) throws WSSecurityException {
-        return verifyTrustInCert(certificate, signatureCrypto, false);
+        X509Certificate[] x509certs = new X509Certificate[1];
+        x509certs[0] = certificate;
+         // [ERROR] /home/rlapache/axis-axis2-java-rampart/modules/rampart-core/src/main/java/org/apache/rampart/handler/CertificateValidator.java:[45,34] incompatible types: void cannot be converted to boolean
+        verifyTrustInCerts(x509certs, signatureCrypto, new RequestData(), false);
+        return false;
     }
 
 }

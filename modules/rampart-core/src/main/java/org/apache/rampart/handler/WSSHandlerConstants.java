@@ -126,11 +126,11 @@ public class WSSHandlerConstants {
     
     /**
      * The <code>java.util.Properties</code> object holding the properties 
-     * of a <code>org.apache.ws.security.components.crypto.Crypto</code> impl.
+     * of a <code>import org.apache.wss4j.common.crypto.Crypto</code> impl.
      * 
      * This should ONLY be used when the CRYPTO_CLASS_KEY is specified.
      * 
-     * @see org.apache.ws.security.components.crypto.Crypto
+     * @see org.apache.wss4j.common.crypto.Crypto
      */
     public final static String CRYPTO_PROPERTIES_KEY = "cryptoPropertiesRef";
     

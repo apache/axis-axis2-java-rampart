@@ -141,6 +141,7 @@ public class KerberosConfig implements Assertion {
      * {@link RampartConfig#getPwCbClass() password callback}. Note that any 
      * principal password configured here will be ignored if the JAAS configuration 
      * configures usage of a keytab file.
+     * @param principalPassword clear-text password
      */
     public void setPrincipalPassword(String principalPassword) {
         this.principalPassword = principalPassword;
@@ -148,8 +149,7 @@ public class KerberosConfig implements Assertion {
 
     /**
      * @return The service principal name to use to obtain a service ticket on the 
-     * client-side. Note that by default,
-     * this name is assumed to be in a {@link #HOST_BASED_NAME_FORM} unless the
+     * client-side. Note that by default, * this name is assumed to be in a {@link #HOST_BASED_NAME_FORM} unless the
      * {@link #setServicePrincipalNameForm(String) service principal name form} is 
      * explicitly configured.
      */
@@ -163,6 +163,7 @@ public class KerberosConfig implements Assertion {
      * {@link #HOST_BASED_NAME_FORM} unless the 
      * {@link #setServicePrincipalNameForm(String)
      * service principal name form} is explicitly configured.
+     * @param servicePrincipalName service principal name
      */
     public void setServicePrincipalName(String servicePrincipalName) {
         this.servicePrincipalName = servicePrincipalName;
@@ -189,7 +190,7 @@ public class KerberosConfig implements Assertion {
      * The class will be loaded using current service's {@link org.apache.axis2.description.AxisService#getClassLoader() classloader}.
      * </p>
      * 
-     * @param kerberosTokenDecoderClass A fully qualifier class name that implements {@link org.apache.ws.security.validate.KerberosTokenValidator}.
+     * @param kerberosTokenDecoderClass A fully qualifier class name that implements {@link org.apache.wss4j.dom.validate.KerberosTokenValidator}.
      */
     public void setKerberosTokenDecoderClass(String kerberosTokenDecoderClass) {
         this.kerberosTokenDecoderClass = kerberosTokenDecoderClass;
@@ -201,7 +202,7 @@ public class KerberosConfig implements Assertion {
      * which is normally the case when using Java version older than 1.7.0_b07, 
      * see <a href="http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6710360"> JDK-6710360 : export Kerberos session key to applications</a>
      * 
-     * @return A fully qualifier class name that implements {@link org.apache.ws.security.validate.KerberosTokenValidator} or <code>null</code> if no Kerberos token decoder is configured.
+     * @return A fully qualifier class name that implements {@link org.apache.wss4j.dom.validate.KerberosTokenValidator} or <code>null</code> if no Kerberos token decoder is configured.
      */
     public String getKerberosTokenDecoderClass() {
         return this.kerberosTokenDecoderClass;

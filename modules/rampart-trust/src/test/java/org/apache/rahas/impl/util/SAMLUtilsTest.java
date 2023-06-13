@@ -28,16 +28,23 @@ import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.test.util.AbstractTestCase;
 import org.apache.rahas.test.util.TestUtil;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.util.Base64;
-import org.joda.time.DateTime;
-import org.opensaml.Configuration;
-import org.opensaml.saml1.core.*;
-import org.opensaml.xml.io.MarshallerFactory;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.signature.X509Data;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.message.WSSecEncryptedKey;
+
+import org.opensaml.xmlsec.encryption.EncryptedKey;
+import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.X509Data;
+
+
+import org.opensaml.saml.saml1.core.*;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.xml.io.UnmarshallingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -58,6 +65,13 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Base64;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 /**
  * A test class for SAML 1 Token Issuer.
@@ -79,7 +93,8 @@ public class SAMLUtilsTest extends AbstractTestCase {
         ConfirmationMethod confirmationMethod
                 = SAMLUtils.createSubjectConfirmationMethod("urn:oasis:names:tc:SAML:1.0:cm:holder-of-key");
 
-        marshallerFactory.getMarshaller(confirmationMethod).marshall(confirmationMethod);
+        Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(confirmationMethod);
+        marshaller.marshall(confirmationMethod);
         Assert.assertNotNull(confirmationMethod.getDOM());
 
         try {
@@ -95,9 +110,12 @@ public class SAMLUtilsTest extends AbstractTestCase {
     }
 
     public void testConditions() throws TrustException, MarshallingException, TransformerException {
-        Conditions conditions = SAMLUtils.createConditions(new DateTime(), new DateTime(2050, 1, 1, 0, 0, 0, 0));
+        ZonedDateTime created = ZonedDateTime.of(2050, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()); 
+        Instant instant = created.toInstant();
+        Conditions conditions = SAMLUtils.createConditions(Instant.now(), instant);
 
-        marshallerFactory.getMarshaller(conditions).marshall(conditions);
+        Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(conditions);
+        marshaller.marshall(conditions);
         Assert.assertNotNull(conditions.getDOM());
 
         try {
@@ -146,12 +164,12 @@ public class SAMLUtilsTest extends AbstractTestCase {
 
         WSSecEncryptedKey encryptedKey = getWSEncryptedKey();
 
-        org.opensaml.xml.encryption.EncryptedKey samlEncryptedKey
+        org.opensaml.xmlsec.encryption.EncryptedKey samlEncryptedKey
                 = SAMLUtils.createEncryptedKey(getTestCertificate(), encryptedKey);
+        org.opensaml.xmlsec.signature.KeyInfo keyInfo = SAMLUtils.createKeyInfo(samlEncryptedKey);
 
-        org.opensaml.xml.signature.KeyInfo keyInfo = SAMLUtils.createKeyInfo(samlEncryptedKey);
-
-        marshallerFactory.getMarshaller(keyInfo).marshall(keyInfo);
+        Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(keyInfo);
+        marshaller.marshall(keyInfo);
 
         Assert.assertNotNull(keyInfo.getDOM());
         printElement(keyInfo.getDOM());
@@ -159,11 +177,12 @@ public class SAMLUtilsTest extends AbstractTestCase {
 
     public void testCreateKeyInfoWithX509Data() throws Exception {
 
-        X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
+        org.opensaml.xmlsec.signature.X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
 
-        org.opensaml.xml.signature.KeyInfo keyInfo = SAMLUtils.createKeyInfo(x509Data);
+        org.opensaml.xmlsec.signature.KeyInfo keyInfo = SAMLUtils.createKeyInfo(x509Data);
 
-        marshallerFactory.getMarshaller(keyInfo).marshall(keyInfo);
+        Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(keyInfo);
+        marshaller.marshall(keyInfo);
 
         Assert.assertNotNull(keyInfo.getDOM());
         printElement(keyInfo.getDOM());
@@ -172,7 +191,8 @@ public class SAMLUtilsTest extends AbstractTestCase {
     public void testCreateAssertion() throws Exception {
 
         Assertion assertion = getAssertion();
-        marshallerFactory.getMarshaller(assertion).marshall(assertion);
+        Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(assertion);
+        marshaller.marshall(assertion);
         Assert.assertNotNull(assertion.getDOM());
 
         try {
@@ -197,9 +217,9 @@ public class SAMLUtilsTest extends AbstractTestCase {
                 = SAMLUtils.createNamedIdentifier("joe,ou=people,ou=saml-demo,o=baltimore.com",
                                                     NameIdentifier.X509_SUBJECT);
 
-        X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
+        org.opensaml.xmlsec.signature.X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
 
-        org.opensaml.xml.signature.KeyInfo keyInfo = SAMLUtils.createKeyInfo(x509Data);
+        org.opensaml.xmlsec.signature.KeyInfo keyInfo = SAMLUtils.createKeyInfo(x509Data);
 
         Subject subject
                 = SAMLUtils.createSubject(nameIdentifier, "urn:oasis:names:tc:SAML:1.0:cm:holder-of-key", keyInfo);
@@ -210,9 +230,10 @@ public class SAMLUtilsTest extends AbstractTestCase {
         List<Statement> statements = new ArrayList<Statement>();
         statements.add(attributeStatement);
 
+        LocalDateTime dateTime = LocalDateTime.of(2050, Month.JANUARY, 1, 0, 0, 0);
+        Instant instant = dateTime.toInstant(ZoneOffset.UTC);
         Assertion assertion
-                = SAMLUtils.createAssertion("www.opensaml.org", new DateTime(),
-                new DateTime(2050, 1, 1, 0, 0, 0, 0), statements);
+                = SAMLUtils.createAssertion("www.opensaml.org", Instant.now(), instant, statements);
 
         return assertion;
 
@@ -220,15 +241,16 @@ public class SAMLUtilsTest extends AbstractTestCase {
 
     public void testCreateX509Data() throws Exception {
 
-        X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
+        org.opensaml.xmlsec.signature.X509Data x509Data = CommonUtil.createX509Data(getTestCertificate());
         Assert.assertNotNull(x509Data);
 
-        marshallerFactory.getMarshaller(x509Data).marshall(x509Data);
+        Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(x509Data);
+        marshaller.marshall(x509Data);
         Assert.assertNotNull(x509Data.getDOM());
 
         // Check certificates are equal
 
-        String base64Cert = Base64.encode(getTestCertificate().getEncoded());
+        String base64Cert = new String(Base64.getEncoder().encode(getTestCertificate().getEncoded()));
         Assert.assertEquals(base64Cert, x509Data.getDOM().getFirstChild().getTextContent());
 
        /* try {
@@ -244,10 +266,11 @@ public class SAMLUtilsTest extends AbstractTestCase {
 
         WSSecEncryptedKey encryptedKey = getWSEncryptedKey();
 
-        org.opensaml.xml.encryption.EncryptedKey samlEncryptedKey
+        org.opensaml.xmlsec.encryption.EncryptedKey samlEncryptedKey
                 = SAMLUtils.createEncryptedKey(getTestCertificate(), encryptedKey);
 
-        marshallerFactory.getMarshaller(samlEncryptedKey).marshall(samlEncryptedKey);
+        Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(samlEncryptedKey);
+        marshaller.marshall(samlEncryptedKey);
         printElement(samlEncryptedKey.getDOM());
 
         Assert.assertTrue(equals(getXMLString(samlEncryptedKey.getDOM()),

@@ -24,8 +24,8 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.builder.SOAPBuilder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.neethi.Policy;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -72,7 +72,7 @@ public class RampartEngineTest extends MessageBuilderTestBase {
         buildSOAPEnvelope(ctx);
 
         RampartEngine engine = new RampartEngine();
-        List<org.apache.ws.security.WSSecurityEngineResult> results = engine.process(ctx);
+        List<org.apache.wss4j.dom.engine.WSSecurityEngineResult> results = engine.process(ctx);
 
         /*
         The principle purpose of the test case is to verify that the above processes

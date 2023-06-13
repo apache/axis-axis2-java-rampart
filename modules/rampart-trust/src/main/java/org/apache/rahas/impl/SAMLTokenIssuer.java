@@ -29,16 +29,16 @@ import org.apache.rahas.TokenIssuer;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.impl.util.*;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.WSUsernameTokenPrincipal;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.util.Loader;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
+import org.apache.wss4j.common.ext.WSSecurityException;
 
-import org.joda.time.DateTime;
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml1.core.*;
-import org.opensaml.xml.signature.KeyInfo;
+import org.apache.wss4j.common.principal.WSUsernameTokenPrincipalImpl;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.util.DateUtil;
+import org.apache.wss4j.common.util.Loader;
+
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml1.core.*;
+import org.opensaml.xmlsec.signature.KeyInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -47,9 +47,13 @@ import java.security.Principal;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 /**
  * Issuer to issue SAMl tokens
@@ -97,8 +101,8 @@ public class SAMLTokenIssuer implements TokenIssuer {
                     .getAxisService().getClassLoader());
 
         // Creation and expiration times
-        DateTime creationTime = new DateTime();
-        DateTime expirationTime = new DateTime(creationTime.getMillis() + tokenIssuerConfiguration.getTtl());
+        Instant creationTime = Instant.now();
+        Instant expirationTime = Instant.ofEpochMilli(creationTime.getEpochSecond() + tokenIssuerConfiguration.getTtl());
 
         // Get the document
         Document doc = ((Element) env).getOwnerDocument();
@@ -171,11 +175,11 @@ public class SAMLTokenIssuer implements TokenIssuer {
         }
 
         // Use GMT time in milliseconds
-        DateFormat zulu = new XmlSchemaDateFormat();
+        ZonedDateTime creationTimeZDT = ZonedDateTime.ofInstant(creationTime, ZoneOffset.UTC);
+        ZonedDateTime expirationTimeZDT = ZonedDateTime.ofInstant(expirationTime, ZoneOffset.UTC);
 
         // Add the Lifetime element
-        TrustUtil.createLifetimeElement(wstVersion, rstrElem, zulu
-                .format(creationTime.toDate()), zulu.format(expirationTime.toDate()));
+        TrustUtil.createLifetimeElement(wstVersion, rstrElem, DateUtil.getDateTimeFormatter(true).format(creationTimeZDT), DateUtil.getDateTimeFormatter(true).format(expirationTimeZDT));
 
         // Create the RequestedSecurityToken element and add the SAML token
         // to it
@@ -189,8 +193,8 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
             // Store the token
             assertionToken = new Token(assertion.getID(),
-                    (OMElement) assertion.getDOM(), creationTime.toDate(),
-                    expirationTime.toDate());
+                    (OMElement) assertion.getDOM(), Date.from(creationTime),
+                    Date.from(expirationTime));
 
             // At this point we definitely have the secret
             // Otherwise it should fail with an exception earlier
@@ -215,13 +219,13 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
 
     private Assertion createBearerAssertion(SAMLTokenIssuerConfig config,
-                                            Document doc, Crypto crypto, DateTime creationTime,
-                                            DateTime expirationTime, RahasData data) throws TrustException {
+                                            Document doc, Crypto crypto, Instant creationTime,
+                                            Instant expirationTime, RahasData data) throws TrustException {
 
         Principal principal = data.getPrincipal();
         Assertion assertion;
         // In the case where the principal is a UT
-        if (principal instanceof WSUsernameTokenPrincipal) {
+        if (principal instanceof WSUsernameTokenPrincipalImpl) {
             NameIdentifier nameId = null;
             if (config.getCallbackHandler() != null) {
                 SAMLNameIdentifierCallback cb = new SAMLNameIdentifierCallback(data);
@@ -249,8 +253,8 @@ public class SAMLTokenIssuer implements TokenIssuer {
     }
 
     private Assertion createHoKAssertion(SAMLTokenIssuerConfig config,
-            Document doc, Crypto crypto, DateTime creationTime,
-            DateTime expirationTime, RahasData data) throws TrustException {
+            Document doc, Crypto crypto, Instant creationTime,
+            Instant expirationTime, RahasData data) throws TrustException {
 
         if (data.getKeyType().endsWith(RahasConstants.KEY_TYPE_SYMM_KEY)) {
             X509Certificate serviceCert = null;
@@ -387,7 +391,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
     private Assertion createAttributeAssertion(RahasData data,
                                                KeyInfo keyInfo, NameIdentifier subjectNameId,
                                                SAMLTokenIssuerConfig config,
-                                               Crypto crypto, DateTime notBefore, DateTime notAfter) throws TrustException {
+                                               Crypto crypto, Instant notBefore, Instant notAfter) throws TrustException {
         try {
 
             Subject subject
@@ -440,8 +444,8 @@ public class SAMLTokenIssuer implements TokenIssuer {
      */
     private Assertion createAuthAssertion(String confirmationMethod,
             NameIdentifier subjectNameId, KeyInfo keyInfo,
-            SAMLTokenIssuerConfig config, Crypto crypto, DateTime notBefore,
-            DateTime notAfter, RahasData data) throws TrustException {
+            SAMLTokenIssuerConfig config, Crypto crypto, Instant notBefore,
+            Instant notAfter, RahasData data) throws TrustException {
         try {
 
             Subject subject = SAMLUtils.createSubject(subjectNameId,confirmationMethod, keyInfo);

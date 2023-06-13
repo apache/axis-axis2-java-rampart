@@ -39,10 +39,10 @@ import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.MessageOptimizer;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.message.WSSecHeader;
-import org.apache.ws.security.message.token.SecurityContextToken;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.message.WSSecHeader;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+import org.apache.wss4j.dom.message.token.SecurityContextToken;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -65,11 +65,10 @@ public class MessageBuilder {
         if(rpd == null || isSecurityValidationFault(msgCtx) || 
                 !RampartUtil.isSecHeaderRequired(rpd, rmd.isInitiator(),false)) {
             
-            Document doc = rmd.getDocument();
             WSSecHeader secHeader = rmd.getSecHeader();
             
-            if ( secHeader != null && secHeader.isEmpty(doc) ) {
-                secHeader.removeSecurityHeader(doc);
+            if ( secHeader != null && secHeader.isEmpty() ) {
+                secHeader.removeSecurityHeader();
             }
             
             return;
@@ -150,11 +149,10 @@ public class MessageBuilder {
        //TODO remove following check, we don't need this check here as we do a check to see whether 
        // security header required 
        
-       Document doc = rmd.getDocument();
        WSSecHeader secHeader = rmd.getSecHeader();
        
-       if ( secHeader != null && secHeader.isEmpty(doc) ) {
-           secHeader.removeSecurityHeader(doc);
+       if ( secHeader != null && secHeader.isEmpty() ) {
+           secHeader.removeSecurityHeader();
        }
         
        /*

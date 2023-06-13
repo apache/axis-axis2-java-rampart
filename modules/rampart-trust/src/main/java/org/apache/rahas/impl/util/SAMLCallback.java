@@ -18,7 +18,7 @@ public interface SAMLCallback {
     
     /**
      * Returns the type of callback
-     * @return
+     * @return int Indicates callback type
      */
     int getCallbackType();
 

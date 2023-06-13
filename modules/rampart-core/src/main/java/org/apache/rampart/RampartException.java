@@ -70,7 +70,9 @@ public class RampartException extends Exception {
     /**
      * get the message from resource bundle.
      *
-     * @return the message translated from the property (message) file.
+     * @param faultCode code to get message
+     * @param args Object array
+     * @return String the message translated from the property (message) file.
      */
     protected static String getMessage(String faultCode, Object[] args) {
         String msg = null;

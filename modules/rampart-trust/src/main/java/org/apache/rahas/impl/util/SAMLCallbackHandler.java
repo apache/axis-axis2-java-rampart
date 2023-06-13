@@ -1,6 +1,6 @@
 package org.apache.rahas.impl.util;
 
-import org.opensaml.common.SAMLException;
+import org.opensaml.saml.common.SAMLException;
 
 /**
  * SAMLCallback Handler enables you to add data to the
@@ -20,8 +20,8 @@ public interface SAMLCallbackHandler {
      *     \//Add your SAMLAttributes to the attrCallback here.
      *     
      * }
-     * @param callback
-     * @throws SAMLException
+     * @param callback SAML callback
+     * @throws SAMLException If an error occurs handling the callback
      */
     public void handle(SAMLCallback callback) throws SAMLException;
 

@@ -24,12 +24,12 @@ import org.apache.rahas.TrustException;
 import org.apache.rahas.impl.util.SAML2KeyInfo;
 import org.apache.rahas.impl.util.SAML2Utils;
 import org.apache.rampart.TokenCallbackHandler;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Conditions;
-import org.opensaml.saml2.core.Subject;
-import org.opensaml.saml2.core.SubjectConfirmationData;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Conditions;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 
 
 /**
@@ -70,19 +70,19 @@ public class SAML2AssertionHandler extends SAMLAssertionHandler{
         if (assertion.getConditions() != null) {
             Conditions conditions = assertion.getConditions();
             if (conditions.getNotBefore() != null) {
-                this.setDateNotBefore(conditions.getNotBefore().toDate());
+                this.setDateNotBefore(conditions.getNotBefore());
             }
             if (conditions.getNotOnOrAfter() != null) {
-                this.setDateNotOnOrAfter(conditions.getNotOnOrAfter().toDate());
+                this.setDateNotOnOrAfter(conditions.getNotOnOrAfter());
             }
         } else {
             SubjectConfirmationData scData = subject.getSubjectConfirmations()
                     .get(0).getSubjectConfirmationData();
             if (scData.getNotBefore() != null) {
-                this.setDateNotBefore(scData.getNotBefore().toDate());
+                this.setDateNotBefore(scData.getNotBefore());
             }
             if (scData.getNotOnOrAfter() != null) {
-                this.setDateNotOnOrAfter(scData.getNotOnOrAfter().toDate());
+                this.setDateNotOnOrAfter(scData.getNotOnOrAfter());
             }
         }
 

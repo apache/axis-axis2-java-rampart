@@ -20,7 +20,7 @@ import org.apache.rahas.EncryptedKeyToken;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
-import org.apache.ws.security.WSPasswordCallback;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
 import org.w3c.dom.Element;
 
 import javax.security.auth.callback.Callback;

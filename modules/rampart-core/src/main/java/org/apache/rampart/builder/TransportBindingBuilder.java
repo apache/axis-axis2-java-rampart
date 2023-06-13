@@ -39,15 +39,14 @@ import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
 import org.apache.ws.secpolicy.model.X509Token;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSEncryptionPart;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.conversation.ConversationException;
-import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.message.*;
-import org.apache.ws.security.message.token.KerberosSecurity;
-import org.apache.ws.security.util.Base64;
-import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.wss4j.common.util.KeyUtils;
+import org.apache.wss4j.common.WSEncryptionPart;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+import org.apache.wss4j.dom.message.*;
+import org.apache.wss4j.dom.message.token.KerberosSecurity;
+import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.apache.wss4j.dom.WSConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -56,6 +55,7 @@ import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.SignatureMethod;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
@@ -99,10 +99,10 @@ public class TransportBindingBuilder extends BindingBuilder {
                     if (token instanceof UsernameToken) {
                         WSSecUsernameToken utBuilder = addUsernameToken(rmd, (UsernameToken) token);
 
-                        utBuilder.prepare(rmd.getDocument());
+                        utBuilder.prepare();
 
                         //Add the UT
-                        utBuilder.appendToHeader(rmd.getSecHeader());
+                        utBuilder.appendToHeader();
 
                     } else {
                         throw new RampartException("unsupportedSignedSupportingToken",
@@ -219,11 +219,9 @@ public class TransportBindingBuilder extends BindingBuilder {
 
                 // Add <xenc:EncryptedKey Id="EncKeyId-E67B75302ACB3BEDF313277587471272">..</xenc:EncryptedKey>
                 // to security header.
-                encrKey.appendToHeader(rmd.getSecHeader());
+                encrKey.appendToHeader();
                 
-                WSSecDKSign dkSig = new WSSecDKSign();
-                
-                dkSig.setWsConfig(rmd.getConfig());
+                WSSecDKSign dkSig = new WSSecDKSign(rmd.getSecHeader());
                 
                 dkSig.setSigCanonicalization(rpd.getAlgorithmSuite().getInclusiveC14n());
                 dkSig.setSignatureAlgorithm(rpd.getAlgorithmSuite().getSymmetricSignature());
@@ -232,19 +230,19 @@ public class TransportBindingBuilder extends BindingBuilder {
                 /**
                  * Add a reference to encrypted key in the derived key
                  */
-                dkSig.setExternalKey(encrKey.getEphemeralKey(), encrKey.getId());
+                dkSig.setTokenIdentifier(encrKey.getId());
                 
-                dkSig.prepare(doc, rmd.getSecHeader());
+                dkSig.prepare(encrKey.getEncryptedKeySHA1().getBytes());
                 
                 
                 if(rpd.isTokenProtection()) {
                     sigParts.add(new WSEncryptionPart(encrKey.getBSTTokenId()));
                 }
                 
-                dkSig.setParts(sigParts);
+                dkSig.getParts().addAll(sigParts);
                 
                 List<Reference> referenceList
-                        = dkSig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                        = dkSig.addReferencesToSign(sigParts);
 
 
                 /**
@@ -252,7 +250,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                  * header. We need to add this just after Encrypted Key and just before <Signature>..</Signature>
                  * elements. (As a convention)
                  */
-                dkSig.appendDKElementToHeader(rmd.getSecHeader());
+                dkSig.appendDKElementToHeader();
 
                 //Do signature and append to the security header
                 dkSig.computeSignature(referenceList, false, null);
@@ -267,7 +265,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 
             } catch (WSSecurityException e) {
                 throw new RampartException("errorInDerivedKeyTokenSignature", e);
-            } catch (ConversationException e) {
+            } catch (Exception e) {
                 throw new RampartException("errorInDerivedKeyTokenSignature", e);
             }
             
@@ -277,7 +275,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 WSSecSignature sig = this.getSignatureBuilder(rmd, token);
                 
 
-                sig.appendBSTElementToHeader(rmd.getSecHeader());
+                sig.appendBSTElementToHeader();
                 
                 if (rpd.isTokenProtection()
                         && !(SPConstants.INCLUDE_TOKEN_NEVER == token.getInclusion())) {
@@ -285,7 +283,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 }
                 
                 List<Reference> referenceList
-                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                        = sig.addReferencesToSign(sigParts);
 
                 // TODO changed the order - verify
                 // Compute signature and append to the header
@@ -339,14 +337,14 @@ public class TransportBindingBuilder extends BindingBuilder {
             KerberosSecurity kerberosBst = addKerberosToken(rmd, token);
             kerberosBst.setID("Id-" + kerberosBst.hashCode());
             
-            WSSecSignature sign = new WSSecSignature();
+            WSSecSignature sign = new WSSecSignature(rmd.getSecHeader());
             sign.setSignatureAlgorithm(SignatureMethod.HMAC_SHA1);
             
             if (token.isRequiresKeyIdentifierReference()) {
                 sign.setKeyIdentifierType(WSConstants.CUSTOM_KEY_IDENTIFIER);
                
-                byte[] digestBytes = WSSecurityUtil.generateDigest(kerberosBst.getToken());
-                sign.setCustomTokenId(Base64.encode(digestBytes));
+                byte[] digestBytes = KeyUtils.generateDigest(kerberosBst.getToken());
+                sign.setCustomTokenId(new String(Base64.getEncoder().encode(digestBytes)));
                 sign.setCustomTokenValueType(WSConstants.WSS_KRB_KI_VALUE_TYPE);
             } else {
                 sign.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
@@ -358,11 +356,11 @@ public class TransportBindingBuilder extends BindingBuilder {
             SecretKey secretKey = kerberosBst.getSecretKey();
             sign.setSecretKey(secretKey.getEncoded());
             
-            sign.prepare(doc, null, rmd.getSecHeader());
+            sign.prepare(null);
             
-            WSSecurityUtil.prependChildElement(rmd.getSecHeader().getSecurityHeader(), kerberosBst.getElement());
+            WSSecurityUtil.prependChildElement(rmd.getSecHeader().getSecurityHeaderElement(), kerberosBst.getElement());
             
-            List<Reference> referenceList = sign.addReferencesToSign(sigParts, rmd.getSecHeader());
+            List<Reference> referenceList = sign.addReferencesToSign(sigParts);
 
             sign.computeSignature(referenceList, false, null);
 
@@ -376,7 +374,7 @@ public class TransportBindingBuilder extends BindingBuilder {
 
         // TODO this is bit dubious, before migration code was like "dkSig.appendSigToHeader(rmd.getSecHeader())"
         // but WSS4J has remove append methods. Need to find why ?
-        Element secHeaderElement = secHeader.getSecurityHeader();
+        Element secHeaderElement = secHeader.getSecurityHeaderElement();
         secHeaderElement.appendChild(appendingChild);
 
     }
@@ -414,7 +412,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 && rmd.isInitiator())) {
           
             //Add the token
-            rmd.getSecHeader().getSecurityHeader().appendChild(
+            rmd.getSecHeader().getSecurityHeaderElement().appendChild(
                   doc.importNode((Element) tok.getToken(), true));
           
             tokenIncluded = true;
@@ -454,7 +452,7 @@ public class TransportBindingBuilder extends BindingBuilder {
           try {
    
               //Do Signature with derived keys
-              WSSecDKSign dkSign = new WSSecDKSign();
+              WSSecDKSign dkSign = new WSSecDKSign(doc);
               
               // Setting the AttachedReference or the UnattachedReference according to the flag
               OMElement ref;
@@ -465,29 +463,28 @@ public class TransportBindingBuilder extends BindingBuilder {
               }
               
               if(ref != null) {
-                  dkSign.setExternalKey(tok.getSecret(), (Element) 
-                          doc.importNode((Element) ref, true));
+                  dkSign.setStrElem((Element) doc.importNode((Element) ref, true));
               } else {
-                  dkSign.setExternalKey(tok.getSecret(), tok.getId());
+                  dkSign.setTokenIdentifier(tok.getId());
               }
               
               //Set the algo info
               dkSign.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
               dkSign.setDerivedKeyLength(algorithmSuite.getSignatureDerivedKeyLength());
               
-              dkSign.prepare(doc);
+              dkSign.prepare(tok.getSecret());
 
               /**
                * Add <wsc:DerivedKeyToken>..</wsc:DerivedKeyToken> to security
                * header. We need to add this just after Encrypted Key and just before <Signature>..</Signature>
                * elements. (As a convention)
                */
-              dkSign.appendDKElementToHeader(rmd.getSecHeader());
+              dkSign.appendDKElementToHeader();
               
-              dkSign.setParts(sigParts);
+              dkSign.getParts().addAll(sigParts);
               
               List<Reference> referenceList
-                      = dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
+                      = dkSign.addReferencesToSign(sigParts);
               
               //Do signature
               dkSign.computeSignature(referenceList, false, null);
@@ -497,18 +494,17 @@ public class TransportBindingBuilder extends BindingBuilder {
               
               return dkSign.getSignatureValue();
               
-          } catch (ConversationException e) {
+          } catch (WSSecurityException e) {
               throw new RampartException(
                       "errorInDerivedKeyTokenSignature", e);
-          } catch (WSSecurityException e) {
+          } catch (Exception e) {
               throw new RampartException(
                       "errorInDerivedKeyTokenSignature", e);
           }
           
         } else {
             try {
-                WSSecSignature sig = new WSSecSignature();
-                sig.setWsConfig(rmd.getConfig());
+                WSSecSignature sig = new WSSecSignature(rmd.getSecHeader());
                 String tokId = tok.getId();
                 if (tokId.charAt(0) == '#') {
 		    tokId = tokId.substring(1);
@@ -519,13 +515,11 @@ public class TransportBindingBuilder extends BindingBuilder {
                 sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
                 sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
                 sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
-                sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
-                        .getRampartConfig(), rmd.getCustomClassLoader()),
-                        rmd.getSecHeader());
+                sig.prepare(RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
 
-                sig.setParts(sigParts);
+                sig.getParts().addAll(sigParts);
                 List<javax.xml.crypto.dsig.Reference> referenceList
-                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                        = sig.addReferencesToSign(sigParts);
 
                 //Do signature
                 sig.computeSignature(referenceList);
@@ -569,7 +563,7 @@ public class TransportBindingBuilder extends BindingBuilder {
                 && rmd.isInitiator())) {
           
             //Add the token
-            rmd.getSecHeader().getSecurityHeader().appendChild(
+            rmd.getSecHeader().getSecurityHeaderElement().appendChild(
                   doc.importNode((Element) tok.getToken(), true));
           
             tokenIncluded = true;
@@ -609,7 +603,7 @@ public class TransportBindingBuilder extends BindingBuilder {
           try {
    
               //Do Signature with derived keys
-              WSSecDKSign dkSign = new WSSecDKSign();
+              WSSecDKSign dkSign = new WSSecDKSign(rmd.getSecHeader());
               
               // Setting the AttachedReference or the UnattachedReference according to the flag
               OMElement ref;
@@ -620,62 +614,58 @@ public class TransportBindingBuilder extends BindingBuilder {
               }
               
               if(ref != null) {
-                  dkSign.setExternalKey(tok.getSecret(), (Element) 
-                          doc.importNode((Element) ref, true));
+                  dkSign.setStrElem((Element) doc.importNode((Element) ref, true));
               } else {
-                  dkSign.setExternalKey(tok.getSecret(), tok.getId());
+                  dkSign.setTokenIdentifier(tok.getId());
               }
               
               //Set the algo info
               dkSign.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
               dkSign.setDerivedKeyLength(algorithmSuite.getSignatureDerivedKeyLength());
               
-              dkSign.prepare(doc);
+              dkSign.prepare(tok.getSecret());
 
               /**
                * Add <wsc:DerivedKeyToken>..</wsc:DerivedKeyToken> to security
                * header. We need to add this just after Encrypted Key and just before <Signature>..</Signature>
                * elements. (As a convention)
                */
-              dkSign.appendDKElementToHeader(rmd.getSecHeader());
+              dkSign.appendDKElementToHeader();
               
-              dkSign.setParts(sigParts);
+              dkSign.getParts().addAll(sigParts);
               
               List<Reference> referenceList
-                      = dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
+                      = dkSign.addReferencesToSign(sigParts);
               
               //Do signature
               dkSign.computeSignature(referenceList, false, null);
 
-              //this.appendToHeader(rmd.getSecHeader(), dkSign.getSignatureElement());
-
+              // TODO verify before migration - dkSign.appendSigToHeader(rmd.getSecHeader())
+              // this.appendToHeader(rmd.getSecHeader(), dkSign.getSignatureElement());
               return dkSign.getSignatureValue();
               
-          } catch (ConversationException e) {
+          } catch (WSSecurityException e) {
               throw new RampartException(
                       "errorInDerivedKeyTokenSignature", e);
-          } catch (WSSecurityException e) {
+          } catch (Exception e) {
               throw new RampartException(
                       "errorInDerivedKeyTokenSignature", e);
           }
           
         } else {
             try {
-                WSSecSignature sig = new WSSecSignature();
-                sig.setWsConfig(rmd.getConfig());
+                WSSecSignature sig = new WSSecSignature(rmd.getSecHeader());
                 sig.setCustomTokenId(tok.getId().substring(1));
                 sig.setCustomTokenValueType(RampartUtil.getSAML10AssertionNamespace());
                 sig.setSecretKey(tok.getSecret());
                 sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
                 sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
                 sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
-                sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
-                        .getRampartConfig(), rmd.getCustomClassLoader()),
-                        rmd.getSecHeader());
+                sig.prepare(RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
 
-                sig.setParts(sigParts);
+                sig.getParts().addAll(sigParts);
                 List<Reference> referenceList
-                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                        = sig.addReferencesToSign(sigParts);
 
                 //Do signature
                 sig.computeSignature(referenceList, false, this.getInsertionLocation());

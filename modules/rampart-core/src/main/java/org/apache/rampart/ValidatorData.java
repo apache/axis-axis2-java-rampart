@@ -17,7 +17,7 @@
 package org.apache.rampart;
 
 import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.ws.security.WSConstants;
+import org.apache.wss4j.dom.WSConstants;
 import org.apache.xml.security.utils.EncryptionConstants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

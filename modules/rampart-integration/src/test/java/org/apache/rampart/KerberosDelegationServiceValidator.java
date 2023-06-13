@@ -20,8 +20,8 @@ package org.apache.rampart;
 
 import java.util.List;
 
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 import org.ietf.jgss.GSSCredential;
 
 public class KerberosDelegationServiceValidator extends PolicyBasedResultsValidator {

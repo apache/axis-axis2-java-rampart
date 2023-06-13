@@ -21,9 +21,9 @@ package org.apache.rahas.test.util;
 import junit.framework.TestCase;
 import org.apache.axiom.om.OMElement;
 import org.apache.rahas.Rahas;
-import org.apache.ws.security.WSSConfig;
-import org.opensaml.Configuration;
-import org.opensaml.xml.io.MarshallerFactory;
+import org.apache.wss4j.dom.engine.WSSConfig;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.MarshallerFactory;
 import org.w3c.dom.Element;
 
 import javax.xml.transform.OutputKeys;
@@ -53,7 +53,7 @@ public class AbstractTestCase extends TestCase {
 
         org.apache.xml.security.Init.init();
 
-        marshallerFactory = Configuration.getMarshallerFactory();
+        marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
 
     }
 

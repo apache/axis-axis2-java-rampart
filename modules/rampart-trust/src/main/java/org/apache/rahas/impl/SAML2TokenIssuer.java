@@ -24,20 +24,39 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.*;
 import org.apache.rahas.impl.util.*;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.util.DateUtil;
 import org.apache.xml.security.c14n.Canonicalizer;
 import org.apache.xml.security.signature.XMLSignature;
-import org.joda.time.DateTime;
-import org.opensaml.Configuration;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.*;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.io.*;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.schema.impl.XSStringBuilder;
-import org.opensaml.xml.signature.*;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.AttributeValue;
+import org.opensaml.saml.saml2.core.AuthnContext;
+import org.opensaml.saml.saml2.core.AuthnStatement;
+import org.opensaml.saml.saml2.core.AuthnContextClassRef;
+import org.opensaml.saml.saml2.core.Conditions;
+import org.opensaml.saml.saml2.core.Issuer;
+import org.opensaml.saml.saml2.core.KeyInfoConfirmationDataType;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
+
+import org.opensaml.xmlsec.signature.X509Data;
+import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.Signer;
+
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.core.xml.schema.impl.XSStringBuilder;
+import org.opensaml.xmlsec.signature.Signature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -45,8 +64,12 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -197,12 +220,11 @@ public class SAML2TokenIssuer implements TokenIssuer {
         }
 
         // Use GMT time in milliseconds
-        DateFormat xmlSchemaDateFormat = new XmlSchemaDateFormat();
+        ZonedDateTime creationTime = ZonedDateTime.ofInstant(rahasData.getAssertionCreatedDate().toInstant(), ZoneOffset.UTC);
+        ZonedDateTime expirationTime = ZonedDateTime.ofInstant(rahasData.getAssertionExpiringDate().toInstant(), ZoneOffset.UTC);
 
         // Add the Lifetime element
-        TrustUtil.createLifetimeElement(wstVersion, requestSecurityTokenResponse, xmlSchemaDateFormat
-                .format(rahasData.getAssertionCreatedDate()),
-                xmlSchemaDateFormat.format(rahasData.getAssertionExpiringDate()));
+        TrustUtil.createLifetimeElement(wstVersion, requestSecurityTokenResponse, DateUtil.getDateTimeFormatter(true).format(creationTime), DateUtil.getDateTimeFormatter(true).format(expirationTime));
 
         // Create the RequestedSecurityToken element and add the SAML token
         // to it
@@ -310,11 +332,11 @@ public class SAML2TokenIssuer implements TokenIssuer {
         assertion.setIssuer(issuer);
 
         // Validity period
-        DateTime creationDate = new DateTime();
-        DateTime expirationDate = new DateTime(creationDate.getMillis() + tokenIssuerConfiguration.getTtl());
+        Instant creationDate = Instant.now();
+        Instant expirationDate = Instant.ofEpochMilli(creationDate.toEpochMilli() + tokenIssuerConfiguration.getTtl());
 
-        data.setAssertionCreatedDate(creationDate.toDate());
-        data.setAssertionExpiringDate(expirationDate.toDate());
+        data.setAssertionCreatedDate(Date.from(creationDate));
+        data.setAssertionExpiringDate(Date.from(expirationDate));
 
         // Set the issued time.
         assertion.setIssueInstant(creationDate);
@@ -382,8 +404,8 @@ public class SAML2TokenIssuer implements TokenIssuer {
      * @throws TrustException If an error occurred while creating the subject.
      */
     protected Subject createSubjectWithHolderOfKeySubjectConfirmation(Document doc, Crypto crypto,
-                                                            DateTime creationTime,
-                                                            DateTime expirationTime, RahasData data)
+                                                            Instant creationTime,
+                                                            Instant expirationTime, RahasData data)
             throws TrustException {
 
 
@@ -426,10 +448,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
     }
 
     private KeyInfoConfirmationDataType createKeyInfoConfirmationDataType() {
-        XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
-        @SuppressWarnings({"unchecked"}) SAMLObjectBuilder<KeyInfoConfirmationDataType> keyInfoSubjectConfirmationDataBuilder =
-                (SAMLObjectBuilder<KeyInfoConfirmationDataType>) builderFactory.getBuilder
-                        (KeyInfoConfirmationDataType.TYPE_NAME);
+        SAMLObjectBuilder<KeyInfoConfirmationDataType> keyInfoSubjectConfirmationDataBuilder = (SAMLObjectBuilder<KeyInfoConfirmationDataType>) XMLObjectProviderRegistrySupport.getBuilderFactory().<KeyInfoConfirmationDataType>getBuilderOrThrow(KeyInfoConfirmationDataType.TYPE_NAME);
 
         //Build the subject confirmation data element
         return keyInfoSubjectConfirmationDataBuilder.
@@ -499,9 +518,9 @@ public class SAML2TokenIssuer implements TokenIssuer {
         try {
             KeyInfo keyInfo = (KeyInfo) CommonUtil.buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
             X509Data x509Data = (X509Data) CommonUtil.buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
-            org.opensaml.xml.signature.X509Certificate cert
-                    = (org.opensaml.xml.signature.X509Certificate) CommonUtil.buildXMLObject
-                    (org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
+            org.opensaml.xmlsec.signature.X509Certificate cert
+                    = (org.opensaml.xmlsec.signature.X509Certificate) CommonUtil.buildXMLObject
+                    (org.opensaml.xmlsec.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
             String value
                     = org.apache.xml.security.utils.Base64.encode(signKeyHolder.getEntityCertificate().getEncoded());
 
@@ -515,9 +534,8 @@ public class SAML2TokenIssuer implements TokenIssuer {
             signatureList.add(signature);
 
             //Marshall and Sign
-            MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
-            Marshaller marshaller = marshallerFactory.getMarshaller(assertion);
-            marshaller.marshall(assertion, document);
+            Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(assertion);
+            marshaller.marshall(assertion);
 
             Signer.signObjects(signatureList);
 
@@ -606,7 +624,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         if (handler != null) {
             try {
                 handler.handle(cb);
-            } catch (SAMLException e) {
+            } catch (Exception e) {
                 throw new TrustException(
                             "errorCallingSAMLCallback",
                             e);
@@ -622,12 +640,18 @@ public class SAML2TokenIssuer implements TokenIssuer {
             attribute.setName("Name");
             attribute.setNameFormat("urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified");
 
-            XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
+            XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
 
             XSStringBuilder attributeValueBuilder = (XSStringBuilder) builderFactory
                     .getBuilder(XSString.TYPE_NAME);
 
+XSString stringValue = null;
+/*
             XSString stringValue = attributeValueBuilder.buildObject(
+                    AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+
+*/
+            attributeValueBuilder.buildObject(
                     AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
             stringValue.setValue("Colombo/Rahas");
             attribute.getAttributeValues().add(stringValue);
@@ -667,7 +691,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
         // set the authn instance
         // TODO do we need to use the same time as specified in the conditions ?
-        authenticationStatement.setAuthnInstant(new DateTime());
+        authenticationStatement.setAuthnInstant(Instant.now());
 
         // Create authentication context
         AuthnContext authContext = (AuthnContext)CommonUtil.buildXMLObject(AuthnContext.DEFAULT_ELEMENT_NAME);

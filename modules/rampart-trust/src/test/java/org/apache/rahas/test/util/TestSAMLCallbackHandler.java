@@ -20,7 +20,7 @@ package org.apache.rahas.test.util;
 
 import org.apache.rahas.impl.util.SAMLCallback;
 import org.apache.rahas.impl.util.SAMLCallbackHandler;
-import org.opensaml.common.SAMLException;
+import org.opensaml.saml.common.SAMLException;
 
 /**
  * A callback handler for testing purpose.

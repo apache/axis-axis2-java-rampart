@@ -16,6 +16,8 @@
 package org.apache.rahas.impl;
 
 import java.security.SecureRandom;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
@@ -25,13 +27,13 @@ import org.apache.rahas.Token;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
 import org.apache.rahas.impl.util.CommonUtil;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.conversation.ConversationException;
-import org.apache.ws.security.conversation.dkalgo.P_SHA1;
-import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.derivedKey.P_SHA1;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.util.KeyUtils;
+import org.apache.wss4j.common.util.UsernameTokenUtil;
+import org.apache.wss4j.dom.message.WSSecEncryptedKey;
+import org.apache.wss4j.dom.WSConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -57,7 +59,7 @@ public class TokenIssuerUtil {
 
                 if (keyComputation ==
                     SAMLTokenIssuerConfig.KeyComputation.KEY_COMP_PROVIDE_ENT) {
-                    data.setResponseEntropy(WSSecurityUtil.generateNonce(keySize / 8));
+                    data.setResponseEntropy(UsernameTokenUtil.generateNonce(keySize / 8));
                     P_SHA1 p_sha1 = new P_SHA1();
                     return p_sha1.createKey(data.getRequestEntropy(),
                                             data.getResponseEntropy(),
@@ -72,8 +74,6 @@ public class TokenIssuerUtil {
                 return generateEphemeralKey(keySize);
             }
         } catch (WSSecurityException e) {
-            throw new TrustException("errorCreatingSymmKey", e);
-        } catch (ConversationException e) {
             throw new TrustException("errorCreatingSymmKey", e);
         }
     }
@@ -105,7 +105,8 @@ public class TokenIssuerUtil {
             compKeyElem.setText(data.getWstNs() + RahasConstants.COMPUTED_KEY_PSHA1);
         } else {
             if (TokenIssuerUtil.ENCRYPTED_KEY.equals(config.proofKeyType)) {
-                WSSecEncryptedKey encrKeyBuilder = new WSSecEncryptedKey();
+
+                WSSecEncryptedKey encrKeyBuilder = new WSSecEncryptedKey(doc);
                 Crypto crypto;
 
                 ClassLoader classLoader = data.getInMessageContext().getAxisService().getClassLoader();
@@ -115,11 +116,20 @@ public class TokenIssuerUtil {
                 } else { // crypto props defined in a properties file
                     crypto = CommonUtil.getCrypto(config.cryptoPropertiesFile, classLoader);
                 }
+                
+                SecretKey symmetricKey = null;
+                try {
+                    KeyGenerator keyGen = KeyUtils.getKeyGenerator(WSConstants.AES_128);
+                    symmetricKey = keyGen.generateKey();
+                    encrKeyBuilder.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
 
-                encrKeyBuilder.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
+                } catch (WSSecurityException e) {
+                    throw new TrustException("errorCreatingSecretKey", e);
+                }
+
                 try {
                     encrKeyBuilder.setUseThisCert(data.getClientCert());
-                    encrKeyBuilder.prepare(doc, crypto);
+                    encrKeyBuilder.prepare(crypto, symmetricKey);
                 } catch (WSSecurityException e) {
                     throw new TrustException("errorInBuildingTheEncryptedKeyForPrincipal",
                                              new String[]{data.
@@ -133,7 +143,7 @@ public class TokenIssuerUtil {
 
                 reqProofTokElem.addChild((OMElement) encryptedKeyElem);
 
-                token.setSecret(encrKeyBuilder.getEphemeralKey());
+                token.setSecret(encrKeyBuilder.getEncryptedKeySHA1().getBytes());
             } else if (TokenIssuerUtil.BINARY_SECRET.equals(config.proofKeyType)) {
                 byte[] secret = TokenIssuerUtil.getSharedSecret(data,
                                                                 config.keyComputation,

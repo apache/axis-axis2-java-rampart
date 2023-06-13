@@ -42,25 +42,26 @@ import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.UsernameToken;
 import org.apache.ws.secpolicy.model.X509Token;
-import org.apache.ws.security.NamePasswordCallbackHandler;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSEncryptionPart;
-import org.apache.ws.security.WSPasswordCallback;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.conversation.ConversationConstants;
-import org.apache.ws.security.conversation.ConversationException;
-import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.handler.WSHandlerResult;
-import org.apache.ws.security.message.WSSecDKSign;
-import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.message.WSSecSignature;
-import org.apache.ws.security.message.WSSecSignatureConfirmation;
-import org.apache.ws.security.message.WSSecTimestamp;
-import org.apache.ws.security.message.WSSecUsernameToken;
-import org.apache.ws.security.message.token.KerberosSecurity;
-import org.apache.ws.security.message.token.SecurityTokenReference;
-import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.wss4j.common.NamePasswordCallbackHandler;
+import org.apache.wss4j.common.WSEncryptionPart;
+import org.apache.wss4j.common.derivedKey.ConversationConstants;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.util.KeyUtils;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+import org.apache.wss4j.dom.handler.WSHandlerResult;
+import org.apache.wss4j.dom.message.WSSecDKSign;
+import org.apache.wss4j.dom.message.WSSecEncryptedKey;
+import org.apache.wss4j.dom.message.WSSecHeader;
+import org.apache.wss4j.dom.message.WSSecSignature;
+import org.apache.wss4j.dom.message.WSSecSignatureConfirmation;
+import org.apache.wss4j.dom.message.WSSecTimestamp;
+import org.apache.wss4j.dom.message.WSSecUsernameToken;
+import org.apache.wss4j.dom.message.token.KerberosSecurity;
+import org.apache.wss4j.common.token.SecurityTokenReference;
+import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -71,6 +72,8 @@ import javax.xml.crypto.dsig.Reference;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 public abstract class BindingBuilder {
     private static Log log = LogFactory.getLog(BindingBuilder.class);
@@ -87,20 +90,18 @@ public abstract class BindingBuilder {
     
     
     /**
-     * @param rmd
+     * @param rmd RampartMessageData
      */
     protected void addTimestamp(RampartMessageData rmd) {
         log.debug("Adding timestamp");
 
-        WSSecTimestamp timestampBuilder = new WSSecTimestamp();
-        timestampBuilder.setWsConfig(rmd.getConfig());
+        WSSecTimestamp timestampBuilder = new WSSecTimestamp(rmd.getSecHeader());
 
         timestampBuilder.setTimeToLive(RampartUtil.getTimeToLive(rmd));
         
         // add the Timestamp to the SOAP Enevelope
 
-        timestampBuilder.build(rmd.getDocument(), rmd
-                .getSecHeader());
+        timestampBuilder.build();
 
         if (log.isDebugEnabled()) {
             log.debug("Timestamp id: " + timestampBuilder.getId());
@@ -113,9 +114,10 @@ public abstract class BindingBuilder {
     
     /**
      * Add a UsernameToken to the security header
-     * @param rmd
+     * @param rmd RampartMessageData
+     * @param token Rampart token
      * @return The <code>WSSecUsernameToken</code> instance
-     * @throws RampartException
+     * @throws RampartException If an error occurred during the addition of a UsernameToken Object
      */
     protected WSSecUsernameToken addUsernameToken(RampartMessageData rmd, UsernameToken token) throws RampartException {
 
@@ -141,12 +143,9 @@ public abstract class BindingBuilder {
 
             // If NoPassword property is set we don't need to set the password
             if (token.isNoPassword()) {
-                WSSecUsernameToken utBuilder = new WSSecUsernameToken();
+                WSSecUsernameToken utBuilder = new WSSecUsernameToken(rmd.getSecHeader());
                 utBuilder.setUserInfo(user, null);
                 utBuilder.setPasswordType(null);
-                if (rmd.getConfig() != null) {
-                    utBuilder.setWsConfig(rmd.getConfig());
-                }
                 return utBuilder;
             }
             
@@ -181,10 +180,7 @@ public abstract class BindingBuilder {
             if(password != null && !"".equals(password)) {
                 //If the password is available then build the token
                 
-                WSSecUsernameToken utBuilder = new WSSecUsernameToken();
-                if(rmd.getConfig() != null) {
-                    utBuilder.setWsConfig(rmd.getConfig());
-                }
+                WSSecUsernameToken utBuilder = new WSSecUsernameToken(rmd.getSecHeader());
                 if (token.isHashPassword()) {
                     utBuilder.setPasswordType(WSConstants.PASSWORD_DIGEST);  
                 } else {
@@ -209,17 +205,17 @@ public abstract class BindingBuilder {
     
     
     /**
-     * @param rmd
-     * @param token
-     * @return
-     * @throws RampartException
+     * @param rmd RampartMessageData
+     * @param token Identifier
+     * @return WSSecEncryptedKey encrypted key
+     * @throws RampartException If an error occurred getting the WSSecEncryptedKey
      */
     protected WSSecEncryptedKey getEncryptedKeyBuilder(RampartMessageData rmd, Token token) throws RampartException {
         
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
         
-        WSSecEncryptedKey encrKey = new WSSecEncryptedKey();
+        WSSecEncryptedKey encrKey = new WSSecEncryptedKey(doc);
         
         try {
             RampartUtil.setKeyIdentifierType(rmd, encrKey, token);
@@ -228,7 +224,10 @@ public abstract class BindingBuilder {
             //TODO we do not need to pass keysize as it is taken from algorithm it self - verify
             encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
             
-            encrKey.prepare(doc, RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
+            log.debug("getEncryptedKeyBuilder() setting KeyEncAlgo to value: " + rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
+            KeyGenerator keyGen = KeyUtils.getKeyGenerator(WSConstants.AES_128);
+            SecretKey symmetricKey = keyGen.generateKey();
+            encrKey.prepare(RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()), symmetricKey);
             
             return encrKey;
         } catch (WSSecurityException e) {
@@ -246,9 +245,8 @@ public abstract class BindingBuilder {
 
         RampartPolicyData rpd = rmd.getPolicyData();
         
-        WSSecSignature sig = new WSSecSignature();
+        WSSecSignature sig = new WSSecSignature(rmd.getSecHeader());
         checkForX509PkiPath(sig, token);
-        sig.setWsConfig(rmd.getConfig());
 
         if (log.isDebugEnabled()) {
             log.debug("Token inclusion: " + token.getInclusion());
@@ -328,8 +326,7 @@ public abstract class BindingBuilder {
         sig.setDigestAlgo(algorithmSuite.getDigest());
 
         try {
-            sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rampartConfig, rmd.getCustomClassLoader()), 
-                    rmd.getSecHeader());
+            sig.prepare(RampartUtil.getSignatureCrypto(rampartConfig, rmd.getCustomClassLoader()));
         } catch (WSSecurityException e) {
             throw new RampartException("errorInSignatureWithX509Token", e);
         }
@@ -338,9 +335,10 @@ public abstract class BindingBuilder {
     }
     
     /**
-     * @param rmd
-     * @param suppTokens
-     * @throws RampartException
+     * @param rmd RampartMessageData
+     * @param suppTokens SupportingToken
+     * @throws RampartException If an error occurred processing the SupportingToken Object
+     * @return HashMap
      */
     protected HashMap<Token,Object> handleSupportingTokens(RampartMessageData rmd, SupportingToken suppTokens)
             throws RampartException {
@@ -408,7 +406,7 @@ public abstract class BindingBuilder {
                 } else if (token instanceof UsernameToken) {
                     WSSecUsernameToken utBuilder = addUsernameToken(rmd, (UsernameToken) token);
 
-                    utBuilder.prepare(rmd.getDocument());
+                    utBuilder.prepare();
 
                     //Add the UT
                     Element elem = utBuilder.getUsernameTokenElement();
@@ -436,9 +434,10 @@ public abstract class BindingBuilder {
         return endSuppTokMap;
     }
     /**
-     * @param tokenMap
-     * @param sigParts
-     * @throws RampartException
+     * @param tokenMap the tokenMap
+     * @param sigParts the sigParts
+     * @return List from the sigParts
+     * @throws RampartException If an error occurred processing the Signature Parts
      */
     protected List<WSEncryptionPart> addSignatureParts(HashMap tokenMap, List<WSEncryptionPart> sigParts)
             throws RampartException {
@@ -510,7 +509,7 @@ public abstract class BindingBuilder {
 
 
                     List<Reference> referenceList
-                            = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                            = sig.addReferencesToSign(sigParts);
 
                     /**
                      * Before migration it was - this.setInsertionLocation(RampartUtil.insertSiblingAfter(rmd, this
@@ -546,7 +545,7 @@ public abstract class BindingBuilder {
         AlgorithmSuite algorithmSuite = rpd.getAlgorithmSuite();
 		if(policyToken.isDerivedKeys()) {
             try {
-                WSSecDKSign dkSign = new WSSecDKSign();  
+                WSSecDKSign dkSign = new WSSecDKSign(rmd.getSecHeader());  
                 
                 //Check whether it is security policy 1.2 and use the secure conversation accordingly
                 if (SPConstants.SP_V12 == policyToken.getVersion()) {
@@ -572,8 +571,8 @@ public abstract class BindingBuilder {
                 }
                 
                 if(ref != null) {
-                    dkSign.setExternalKey(tok.getSecret(), (Element) 
-                            doc.importNode((Element) ref, true));
+                    dkSign.setStrElem((Element) doc.importNode((Element) ref, true));
+                    dkSign.prepare(tok.getSecret());
                 } else if (!rmd.isInitiator() && policyToken.isDerivedKeys()) { 
                 	
                 	// If the Encrypted key used to create the derived key is not
@@ -583,11 +582,13 @@ public abstract class BindingBuilder {
                 	if(tok instanceof EncryptedKeyToken) {
                 	    tokenRef.setKeyIdentifierEncKeySHA1(((EncryptedKeyToken)tok).getSHA1());;
                 	}
-                	dkSign.setExternalKey(tok.getSecret(), tokenRef.getElement());
+                        dkSign.setStrElem(tokenRef.getElement());
+                        dkSign.prepare(tok.getSecret());
                     tokenRef.addTokenType(WSConstants.WSS_ENC_KEY_VALUE_TYPE);  // TODO check this
                 
                 } else {
-                    dkSign.setExternalKey(tok.getSecret(), tok.getId());
+                    dkSign.setTokenIdentifier(tok.getId());
+                    dkSign.prepare(tok.getSecret());
                 }
 
                 //Set the algo info
@@ -600,8 +601,6 @@ public abstract class BindingBuilder {
                         + WSConstants.ENC_KEY_VALUE_TYPE);
                 }
                 
-                dkSign.prepare(doc, rmd.getSecHeader());
-                
                 if(rpd.isTokenProtection()) {
 
                     //Hack to handle reference id issues
@@ -613,10 +612,10 @@ public abstract class BindingBuilder {
                     sigParts.add(new WSEncryptionPart(sigTokId));
                 }
                 
-                dkSign.setParts(sigParts);
+                dkSign.getParts().addAll(sigParts); 
                 
                 List<Reference> referenceList
-                        = dkSign.addReferencesToSign(sigParts, rmd.getSecHeader());
+                        = dkSign.addReferencesToSign(sigParts);
 
                 //Add elements to header
                 //Do signature
@@ -643,7 +642,7 @@ public abstract class BindingBuilder {
                      * Add <wsc:DerivedKeyToken>..</wsc:DerivedKeyToken> to security
                      * header.
                      */
-                    dkSign.appendDKElementToHeader(rmd.getSecHeader());
+                    dkSign.appendDKElementToHeader();
 
                     this.setInsertionLocation(dkSign.getdktElement());
 
@@ -658,17 +657,13 @@ public abstract class BindingBuilder {
 
                 return dkSign.getSignatureValue();
                 
-            } catch (ConversationException e) {
-                throw new RampartException(
-                        "errorInDerivedKeyTokenSignature", e);
             } catch (WSSecurityException e) {
                 throw new RampartException(
                         "errorInDerivedKeyTokenSignature", e);
             }
         } else {
             try {
-                WSSecSignature sig = new WSSecSignature();
-                sig.setWsConfig(rmd.getConfig());
+                WSSecSignature sig = new WSSecSignature(rmd.getSecHeader());
                 
                 // If a EncryptedKeyToken is used, set the correct value type to
                 // be used in the wsse:Reference in ds:KeyInfo
@@ -718,13 +713,11 @@ public abstract class BindingBuilder {
                 sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature()); // TODO what is the correct algorith ? For sure one is redundant
                 sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
                 sig.setDigestAlgo(algorithmSuite.getDigest());
-                sig.prepare(rmd.getDocument(), RampartUtil.getSignatureCrypto(rpd
-                        .getRampartConfig(), rmd.getCustomClassLoader()),
-                        rmd.getSecHeader());
+                sig.prepare(RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
 
-                sig.setParts(sigParts);
+                sig.getParts().addAll(sigParts); 
                 List<Reference> referenceList
-                        = sig.addReferencesToSign(sigParts, rmd.getSecHeader());
+                        = sig.addReferencesToSign(sigParts);
 
                 //Do signature
                 if (rpd.getProtectionOrder().equals(SPConstants.ENCRYPT_BEFORE_SIGNING)
@@ -764,10 +757,10 @@ public abstract class BindingBuilder {
     
     /**
      * Get hold of the token from the token storage
-     * @param rmd
-     * @param tokenId
+     * @param rmd RampartMessageData
+     * @param tokenId Identifier
      * @return token from the token storage
-     * @throws RampartException
+     * @throws RampartException If an error occurred getting the Token
      */
     protected org.apache.rahas.Token getToken(RampartMessageData rmd, 
                     String tokenId) throws RampartException {
@@ -808,16 +801,13 @@ public abstract class BindingBuilder {
         for (Object result : results) {
             WSHandlerResult wshResult = (WSHandlerResult) result;
 
-            WSSecurityUtil.fetchAllActionResults(wshResult.getResults(),
-                    WSConstants.SIGN, signatureActions);
-            WSSecurityUtil.fetchAllActionResults(wshResult.getResults(),
-                    WSConstants.ST_SIGNED, signatureActions);
-            WSSecurityUtil.fetchAllActionResults(wshResult.getResults(),
-                    WSConstants.UT_SIGN, signatureActions);
+            signatureActions.addAll(wshResult.getActionResults().get(WSConstants.SIGN));
+            signatureActions.addAll(wshResult.getActionResults().get(WSConstants.ST_SIGNED));
+            signatureActions.addAll(wshResult.getActionResults().get(WSConstants.UT_SIGN));
         }
         
         // prepare a SignatureConfirmation token
-        WSSecSignatureConfirmation wsc = new WSSecSignatureConfirmation();
+        WSSecSignatureConfirmation wsc = new WSSecSignatureConfirmation(doc);
         if (signatureActions.size() > 0) {
             if (log.isDebugEnabled()) {
                 log.debug("Signature Confirmation: number of Signature results: "
@@ -826,7 +816,7 @@ public abstract class BindingBuilder {
             for (WSSecurityEngineResult signatureAction : signatureActions) {
                 byte[] sigVal = (byte[]) signatureAction.get(WSSecurityEngineResult.TAG_SIGNATURE_VALUE);
                 wsc.setSignatureValue(sigVal);
-                wsc.prepare(doc);
+                wsc.prepare();
                 RampartUtil.appendChildToSecHeader(rmd, wsc.getSignatureConfirmationElement());
                 if (sigParts != null) {
                     sigParts.add(new WSEncryptionPart(wsc.getId()));
@@ -834,7 +824,7 @@ public abstract class BindingBuilder {
             }
         } else {
             //No Sig value
-            wsc.prepare(doc);
+            wsc.prepare();
             RampartUtil.appendChildToSecHeader(rmd, wsc.getSignatureConfirmationElement());
             if(sigParts != null) {
                 sigParts.add(new WSEncryptionPart(wsc.getId()));

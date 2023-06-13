@@ -21,14 +21,15 @@ import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.impl.util.SAMLUtils;
 import org.apache.rampart.TokenCallbackHandler;
-import org.apache.ws.security.WSDocInfo;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.handler.RequestData;
-import org.apache.ws.security.saml.SAMLKeyInfo;
-import org.apache.ws.security.saml.SAMLUtil;
-import org.opensaml.saml1.core.Assertion;
-import org.opensaml.saml1.core.Conditions;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.saml.SAMLKeyInfo;
+import org.apache.wss4j.common.saml.SAMLUtil;
+import org.apache.wss4j.dom.WSDocInfo;
+import org.apache.wss4j.dom.handler.RequestData;
+import org.apache.wss4j.dom.saml.WSSSAMLKeyInfoProcessor;
+import org.opensaml.saml.saml1.core.Assertion;
+import org.opensaml.saml.saml1.core.Conditions;
 
 /**
  * This class handles SAML1 assertions.Processes SAML1 assertion and will extract SAML1 attributes
@@ -58,10 +59,10 @@ public class SAML1AssertionHandler extends SAMLAssertionHandler{
         if (assertion.getConditions() != null) {
             Conditions conditions = assertion.getConditions();
             if (conditions.getNotBefore() != null) {
-                this.setDateNotBefore(conditions.getNotBefore().toDate());
+                this.setDateNotBefore(conditions.getNotBefore());
             }
             if (conditions.getNotOnOrAfter() != null) {
-                this.setDateNotOnOrAfter(conditions.getNotOnOrAfter().toDate());
+                this.setDateNotOnOrAfter(conditions.getNotOnOrAfter());
             }
         }
     }
@@ -72,13 +73,12 @@ public class SAML1AssertionHandler extends SAMLAssertionHandler{
 
         RequestData requestData = new RequestData();
         requestData.setCallbackHandler(tokenCallbackHandler);
-        requestData.setSigCrypto(signatureCrypto);
+        requestData.setSigVerCrypto(signatureCrypto);
 
         WSDocInfo docInfo = new WSDocInfo(assertion.getDOM().getOwnerDocument()); // TODO Improve ..
 
         // TODO change this to use SAMLAssertion parameter once wss4j conversion is done ....
-        SAMLKeyInfo samlKi = SAMLUtil.getCredentialFromSubject(assertion,
-                requestData, docInfo, true);
+        SAMLKeyInfo samlKi = SAMLUtil.getCredentialFromSubject(assertion, new WSSSAMLKeyInfoProcessor(requestData), signatureCrypto);
         return samlKi.getSecret();
     }
 

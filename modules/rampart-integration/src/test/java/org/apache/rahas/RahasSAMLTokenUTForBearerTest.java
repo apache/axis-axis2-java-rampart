@@ -21,13 +21,13 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.neethi.Policy;
 import org.apache.ws.secpolicy.SP11Constants;
-import org.opensaml.Configuration;
-import org.opensaml.saml1.core.Assertion;
-import org.opensaml.saml1.core.AuthenticationStatement;
-import org.opensaml.saml1.core.ConfirmationMethod;
-import org.opensaml.saml1.core.SubjectStatement;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
+import org.opensaml.saml.saml1.core.Assertion;
+import org.opensaml.saml.saml1.core.AuthenticationStatement;
+import org.opensaml.saml.saml1.core.ConfirmationMethod;
+import org.opensaml.saml.saml1.core.SubjectStatement;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -141,11 +141,10 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
             DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(new ByteArrayInputStream(omElement.toString().getBytes()));
             Element element = document.getDocumentElement();
-            UnmarshallerFactory unmarshallerFactory = Configuration
-                    .getUnmarshallerFactory();
+            UnmarshallerFactory unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
             Unmarshaller unmarshaller = unmarshallerFactory
                     .getUnmarshaller(element);
-            assertion = (org.opensaml.saml1.core.Assertion) unmarshaller
+            assertion = (org.opensaml.saml.saml1.core.Assertion) unmarshaller
                     .unmarshall(element);
         } catch (Exception e){
             e.printStackTrace();

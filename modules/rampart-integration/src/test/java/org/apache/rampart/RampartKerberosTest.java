@@ -35,7 +35,7 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.testutils.ClientHelper;
 import org.apache.axis2.testutils.JettyServer;
-import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.commons.io.IOUtils;
 import org.apache.neethi.Policy;
 import org.apache.rampart.policy.model.KerberosConfig;

@@ -65,7 +65,8 @@ public class RampartPolicyBuilder {
      * @param topLevelAssertions
      *            The iterator of the top level policy assertions
      * @return The compile Policy data block.
-     * @throws WSSPolicyException
+     * @throws WSSPolicyException If an error occurs building RampartPolicyData
+
      */
     public static RampartPolicyData build(List<Assertion> topLevelAssertions)
             throws WSSPolicyException {
@@ -374,7 +375,11 @@ public class RampartPolicyBuilder {
 
     private static void processSupportingTokens(SupportingToken token,
             RampartPolicyData rpd) throws WSSPolicyException {
-        rpd.setSupportingTokens(token);
+        try {
+            rpd.setSupportingTokens(token);
+        } catch (org.apache.wss4j.common.WSSPolicyException ex) {
+            throw new WSSPolicyException(ex.getMessage(), ex);
+        }
     }
     
    

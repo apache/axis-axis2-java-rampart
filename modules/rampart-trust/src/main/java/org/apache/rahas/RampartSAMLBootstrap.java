@@ -20,46 +20,36 @@
 package org.apache.rahas;
 
 import org.apache.rahas.impl.util.AxiomParserPool;
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.parse.XMLParserException;
+import org.opensaml.core.config.ConfigurationService;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistry;
 
 /**
  * Rampart specific SAML bootstrap class. Here we set parser pool to
  * axiom specific one.
  */
-public class RampartSAMLBootstrap extends DefaultBootstrap {
+public class RampartSAMLBootstrap extends InitializationService {
     protected RampartSAMLBootstrap() {
         super();
     }
 
-    public static synchronized void bootstrap() throws ConfigurationException {
-        initializeXMLSecurity();
-
-        initializeXMLTooling();
-
-        initializeArtifactBuilderFactories();
-
-        initializeGlobalSecurityConfiguration();
-
+    public static synchronized void initialize() throws InitializationException {
+        InitializationService.initialize();
         initializeParserPool();
 
-        initializeESAPI();
-
-        initializeHttpClient();
     }
 
-    protected static void initializeParserPool() throws ConfigurationException {
+    protected static void initializeParserPool() throws InitializationException {
 
         AxiomParserPool pp = new AxiomParserPool();
         pp.setMaxPoolSize(50);
         try {
             pp.initialize();
-        } catch (XMLParserException e) {
-            throw new ConfigurationException("Error initializing axiom based parser pool", e);
+        } catch (Exception e) {
+            throw new InitializationException("Error initializing axiom based parser pool", e);
         }
-        Configuration.setParserPool(pp);
+        ConfigurationService.get(XMLObjectProviderRegistry.class).setParserPool(pp);
 
     }
 }

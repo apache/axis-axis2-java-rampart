@@ -27,22 +27,27 @@ import org.apache.rahas.RahasData;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.impl.SAMLTokenIssuerConfig;
 import org.apache.rahas.impl.TokenIssuerUtil;
-import org.apache.ws.security.*;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoFactory;
-import org.apache.ws.security.components.crypto.CryptoType;
-import org.apache.ws.security.handler.RequestData;
-import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.processor.EncryptedKeyProcessor;
-import org.apache.ws.security.util.Base64;
-import org.apache.ws.security.util.Loader;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.crypto.CryptoFactory;
+import org.apache.wss4j.common.crypto.CryptoType;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.util.KeyUtils;
+import org.apache.wss4j.common.util.Loader;
+import org.apache.wss4j.dom.engine.WSSConfig;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
+import org.apache.wss4j.dom.handler.RequestData;
+import org.apache.wss4j.dom.message.WSSecEncryptedKey;
+import org.apache.wss4j.dom.processor.EncryptedKeyProcessor;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.WSDocInfo;
 import org.apache.xml.security.utils.EncryptionConstants;
-import org.opensaml.Configuration;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilder;
-import org.opensaml.xml.encryption.EncryptedKey;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.X509Data;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.xmlsec.encryption.EncryptedKey;
+import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.X509Data;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -56,6 +61,9 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Properties;
+import java.util.Base64;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 import static org.apache.axiom.om.OMAbstractFactory.FEATURE_DOM;
 
@@ -150,11 +158,11 @@ public class CommonUtil {
         requestData.setWssConfig(cfg);
 
         WSDocInfo docInfo = new WSDocInfo(encryptedKeyElement.getOwnerDocument());
+        requestData.setWsDocInfo(docInfo);
 
         List<WSSecurityEngineResult> resultList;
 
-        resultList = encryptedKeyProcessor.handleToken((Element) encryptedKeyElement, requestData, docInfo);
-
+        resultList = encryptedKeyProcessor.handleToken((Element) encryptedKeyElement, requestData);
 
         WSSecurityEngineResult wsSecurityEngineResult = resultList.get(0);
 
@@ -171,7 +179,7 @@ public class CommonUtil {
      */
     public static Crypto getCrypto(Properties properties, ClassLoader classLoader) throws TrustException {
         try {
-            return CryptoFactory.getInstance(properties, classLoader);
+            return CryptoFactory.getInstance(properties, classLoader, null);
         } catch (WSSecurityException e) {
             log.error("An error occurred while loading crypto properties", e);
             throw new TrustException("errorLoadingCryptoProperties", e);
@@ -311,7 +319,9 @@ public class CommonUtil {
      * @throws org.apache.rahas.TrustException If unable to find the appropriate builder.
      */
     public static XMLObject buildXMLObject(QName objectQName) throws TrustException {
-        XMLObjectBuilder builder = Configuration.getBuilderFactory().getBuilder(objectQName);
+
+        XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
+        XMLObjectBuilder builder = builderFactory.getBuilderOrThrow(objectQName);
         if (builder == null) {
             log.debug("Unable to find OpenSAML builder for object " + objectQName);
             throw new TrustException("builderNotFound",new Object[]{objectQName});
@@ -349,7 +359,7 @@ public class CommonUtil {
 
         // Extract the base64 encoded secret value
         byte[] tempKey = new byte[keySize / 8];
-        System.arraycopy(encryptedKey.getEphemeralKey(), 0, tempKey,
+        System.arraycopy(ephemeralKey, 0, tempKey,
                 0, keySize / 8);
 
 
@@ -364,24 +374,26 @@ public class CommonUtil {
                                                                        X509Certificate serviceCert,
                                                                        Crypto crypto) throws WSSecurityException,
             TrustException {
+
+
         // Create the encrypted key
-        WSSecEncryptedKey encryptedKeyBuilder = new WSSecEncryptedKey();
+        WSSecEncryptedKey encryptedKeyBuilder = new WSSecEncryptedKey(doc);
 
         // Use thumbprint id
         encryptedKeyBuilder
-                .setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
+                .setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
 
         // SEt the encryption cert
         encryptedKeyBuilder.setUseThisCert(serviceCert);
-
-        encryptedKeyBuilder.setEphemeralKey(ephemeralKey);
 
         // Set key encryption algo
         encryptedKeyBuilder
                 .setKeyEncAlgo(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSA15);
 
         // Build
-        encryptedKeyBuilder.prepare(doc, crypto);
+        KeyGenerator keyGen = KeyUtils.getKeyGenerator(WSConstants.AES_128);
+        SecretKey symmetricKey = keyGen.generateKey();
+        encryptedKeyBuilder.prepare(crypto, symmetricKey);
 
         return encryptedKeyBuilder;
     }
@@ -418,11 +430,12 @@ public class CommonUtil {
             log.error("An error occurred while encoding certificate.", e);
             throw new TrustException("An error occurred while encoding certificate.", e);
         }
-        String base64Cert = Base64.encode(clientCertBytes);
+        String base64Cert = new String(Base64.getEncoder().encode(clientCertBytes));
 
-        org.opensaml.xml.signature.X509Certificate x509Certificate
-                = (org.opensaml.xml.signature.X509Certificate)CommonUtil.buildXMLObject
-                (org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
+
+        org.opensaml.xmlsec.signature.X509Certificate x509Certificate
+                = (org.opensaml.xmlsec.signature.X509Certificate)CommonUtil.buildXMLObject
+                (org.opensaml.xmlsec.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
 
         x509Certificate.setValue(base64Cert);
 

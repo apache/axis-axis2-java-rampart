@@ -28,8 +28,8 @@ import javax.security.auth.Subject;
 
 import org.apache.directory.shared.kerberos.codec.KerberosDecoder;
 import org.apache.directory.shared.kerberos.components.EncTicketPart;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.validate.KerberosTokenDecoder;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.kerberos.KerberosTokenDecoder;
 
 /**
  * A copy of wss4j 2.0 Kerberos token decoder implementation.
@@ -119,23 +119,23 @@ public class KerberosTokenDecoderImpl implements KerberosTokenDecoder {
                     (org.bouncycastle.asn1.DERApplicationSpecific) asn1InputStream.readObject();
             if (derToken == null || !derToken.isConstructed()) {
                 asn1InputStream.close();
-                throw new WSSecurityException("invalid kerberos token");
+                throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "invalid kerberos token");
             }
             asn1InputStream.close();
 
             asn1InputStream = new org.bouncycastle.asn1.ASN1InputStream(new ByteArrayInputStream(derToken.getContents()));
-            org.bouncycastle.asn1.DERObjectIdentifier kerberosOid =
-                    (org.bouncycastle.asn1.DERObjectIdentifier) asn1InputStream.readObject();
+            org.bouncycastle.asn1.ASN1ObjectIdentifier kerberosOid =
+                    (org.bouncycastle.asn1.ASN1ObjectIdentifier) asn1InputStream.readObject();
             if (!kerberosOid.getId().equals(KERBEROS_OID)) {
                 asn1InputStream.close();
-                throw new WSSecurityException("invalid kerberos token");
+                throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "invalid kerberos token");
             }
 
             int readLowByte = asn1InputStream.read() & 0xff;
             int readHighByte = asn1InputStream.read() & 0xff;
             int read = (readHighByte << 8) + readLowByte; //NOPMD
             if (read != 0x01) {
-                throw new WSSecurityException("invalid kerberos token");
+                throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "invalid kerberos token");
             }
             
             this.encTicketPart = KerberosDecoder.decodeEncTicketPart(toByteArray(asn1InputStream));

@@ -42,22 +42,24 @@ import org.apache.rampart.saml.SAMLAssertionHandler;
 import org.apache.rampart.saml.SAMLAssertionHandlerFactory;
 import org.apache.rampart.util.Axis2Util;
 import org.apache.rampart.util.RampartUtil;
-import org.apache.ws.secpolicy.SP11Constants;
-import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.WSSPolicyException;
-import org.apache.ws.security.SOAPConstants;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSConfig;
-import org.apache.ws.security.WSSecurityEngine;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.conversation.ConversationConstants;
-import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.handler.WSHandlerResult;
-import org.apache.ws.security.message.WSSecHeader;
-import org.apache.ws.security.message.token.SecurityContextToken;
-import org.apache.ws.security.util.Loader;
-import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.wss4j.policy.SP11Constants;
+import org.apache.wss4j.policy.SP12Constants;
+import org.apache.wss4j.dom.handler.RequestData;
+import org.apache.wss4j.dom.SOAPConstants;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.engine.WSSConfig;
+import org.apache.wss4j.common.derivedKey.ConversationConstants;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.util.Loader;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+import org.apache.wss4j.dom.handler.WSHandlerResult;
+import org.apache.wss4j.dom.message.WSSecHeader;
+import org.apache.wss4j.dom.message.token.SecurityContextToken;
+import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.apache.wss4j.dom.engine.WSSecurityEngine;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
+
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;
@@ -179,7 +181,7 @@ public class RampartMessageData {
             this.config = WSSConfig.getNewInstance();
             
             //Update the UsernameToken validator
-            this.config.setValidator(WSSecurityEngine.USERNAME_TOKEN, RampartUsernameTokenValidator.class);
+            this.config.setValidator(WSConstants.USERNAME_TOKEN, RampartUsernameTokenValidator.class);
             
             // First obtain the axis service as we have to do a null check, there can be situations 
             // where Axis Service is null
@@ -350,6 +352,7 @@ public class RampartMessageData {
                 }
             }
 
+            RequestData requestData = new RequestData();
             // Check whether RampartConfig is present
             if (this.policyData != null && this.policyData.getRampartConfig() != null) {
 
@@ -360,22 +363,25 @@ public class RampartMessageData {
 
                 // We do not need earlier logic as now WSS4J returns a new instance of WSSConfig, rather
                 // than a singleton instance. Therefore modifying logic as follows,
-                this.config.setTimeStampStrict(timestampStrict);
-                this.config.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);
+                requestData.setTimeStampStrict(timestampStrict);
+                requestData.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);
 
             }
 
             // To handle scenarios where password type is not set by default.
-            this.config.setHandleCustomPasswordTypes(true);
+            requestData.setHandleCustomPasswordTypes(true);
 
             if (axisService != null) { 
                 this.customClassLoader = axisService.getClassLoader(); 
             } 
             
             if(this.sender && this.policyData != null) {
-                this.secHeader = new WSSecHeader();
-                secHeader.insertSecurityHeader(this.document);
+                this.secHeader = new WSSecHeader(this.document);
+                secHeader.insertSecurityHeader();
             }
+
+            WSSecurityEngine secEngine = new WSSecurityEngine();
+            secEngine.processSecurityHeader(this.document, requestData);
             
         } catch (AxisFault e) {
             throw new RampartException("errorInExtractingMsgProps", e);
@@ -627,6 +633,7 @@ public class RampartMessageData {
 
     /**
      * @return Returns the tokenStorage.
+     * @throws RampartException If an error occurs getting TokenStorage
      */
     public TokenStorage getTokenStorage() throws RampartException {
 

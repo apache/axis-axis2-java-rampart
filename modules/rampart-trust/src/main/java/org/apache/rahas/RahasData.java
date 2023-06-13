@@ -22,13 +22,14 @@ import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.handler.WSHandlerResult;
-import org.apache.ws.security.message.token.SecurityTokenReference;
-import org.opensaml.saml1.core.Assertion;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+import org.apache.wss4j.dom.handler.WSHandlerResult;;
+import org.apache.wss4j.common.token.SecurityTokenReference;
+import org.opensaml.saml.saml1.core.Assertion;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
@@ -339,7 +340,8 @@ public class RahasData {
                     strElem.getXMLStreamReader()).getDocumentElement();
             
             try {
-                SecurityTokenReference str = new SecurityTokenReference((Element)elem);
+                Document doc = elem.getOwnerDocument();
+                SecurityTokenReference str = new SecurityTokenReference(doc);
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
                 } else if(str.containsKeyIdentifier()){
@@ -366,7 +368,8 @@ public class RahasData {
                     strElem.getXMLStreamReader()).getDocumentElement();
             
             try {
-                SecurityTokenReference str = new SecurityTokenReference((Element)elem);
+                Document doc = elem.getOwnerDocument();
+                SecurityTokenReference str = new SecurityTokenReference(doc);
                 if (str.containsReference()) {
                     tokenId = str.getReference().getURI();
                 } else if(str.containsKeyIdentifier()){

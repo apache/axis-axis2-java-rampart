@@ -21,16 +21,18 @@ import org.apache.neethi.Policy;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.policy.model.OptimizePartsConfig;
 import org.apache.rampart.policy.model.RampartConfig;
-import org.apache.ws.secpolicy.SPConstants;
-import org.apache.ws.secpolicy.WSSPolicyException;
+import org.apache.wss4j.common.WSEncryptionPart;
+import org.apache.wss4j.common.WSSPolicyException;
+import org.apache.wss4j.dom.SOAPConstants;
+import org.apache.wss4j.dom.WSConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.SecureConversationToken;
+import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.SupportingToken;
 import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.secpolicy.model.Trust10;
 import org.apache.ws.secpolicy.model.Wss10;
 import org.apache.ws.secpolicy.model.Wss11;
-import org.apache.ws.security.WSEncryptionPart;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -832,8 +834,10 @@ public class RampartPolicyData {
     
     /**
      * Add the given token and id to the map. 
-     * @param token
-     * @param id
+     * @param token Rampart token
+     * @param id identifier
+     * @param type Matching int of SPConstants 
+     * @throws RampartException If an error occurred setting the Supportting token Id
      */
     public void setSupporttingtokenId(Token token, String id, int type) throws RampartException {
         

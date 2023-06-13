@@ -1,6 +1,6 @@
 package org.apache.rampart;
 
-import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 
 import java.util.List;
 

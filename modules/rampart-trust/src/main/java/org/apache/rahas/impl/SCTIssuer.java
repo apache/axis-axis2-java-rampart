@@ -25,15 +25,18 @@ import org.apache.rahas.Token;
 import org.apache.rahas.TokenIssuer;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.TrustUtil;
-import org.apache.ws.security.conversation.ConversationConstants;
-import org.apache.ws.security.conversation.ConversationException;
-import org.apache.ws.security.message.token.SecurityContextToken;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
+import org.apache.wss4j.common.derivedKey.ConversationConstants;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.util.DateUtil;
+import org.apache.wss4j.dom.message.token.SecurityContextToken;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class SCTIssuer implements TokenIssuer {
 
@@ -151,25 +154,17 @@ public class SCTIssuer implements TokenIssuer {
             }
 
             //Creation and expiration times
-            Date creationTime = new Date();
-            Date expirationTime = new Date();
-
-            expirationTime.setTime(creationTime.getTime() + config.getTtl());
-
-            // Use GMT time in milliseconds
-            DateFormat zulu = new XmlSchemaDateFormat();
+            ZonedDateTime creationTime = ZonedDateTime.now(ZoneOffset.UTC);
+            ZonedDateTime expirationTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(creationTime.toInstant().toEpochMilli() + config.getTtl()), ZoneOffset.UTC);
 
             // Add the Lifetime element
-            TrustUtil.createLifetimeElement(wstVersion,
-                                            rstrElem,
-                                            zulu.format(creationTime),
-                                            zulu.format(expirationTime));
+            TrustUtil.createLifetimeElement(wstVersion, rstrElem, DateUtil.getDateTimeFormatter(true).format(creationTime), DateUtil.getDateTimeFormatter(true).format(expirationTime));
 
             // Store the tokens
             Token sctToken = new Token(sct.getIdentifier(),
                                        (OMElement) sct.getElement(),
-                                       creationTime,
-                                       expirationTime);
+                                       Date.from(creationTime.toInstant()),
+                                       Date.from(expirationTime.toInstant()));
             
             if(config.isAddRequestedAttachedRef()) {
                 sctToken.setAttachedReference(reqAttachedRef.getFirstElement());
@@ -193,7 +188,7 @@ public class SCTIssuer implements TokenIssuer {
             sctToken.setState(Token.ISSUED);
             TrustUtil.getTokenStore(data.getInMessageContext()).add(sctToken);
             return env;
-        } catch (ConversationException e) {
+        } catch (Exception e) {
             throw new TrustException(e.getMessage(), e);
         }
     }
@@ -220,7 +215,7 @@ public class SCTIssuer implements TokenIssuer {
         this.configParamName = configParamName;
     }
 
-    private int getWSCVersion(String tokenTypeValue) throws ConversationException {
+    private int getWSCVersion(String tokenTypeValue) throws WSSecurityException {
 
         if (tokenTypeValue == null) {
             return ConversationConstants.DEFAULT_VERSION;
@@ -231,7 +226,7 @@ public class SCTIssuer implements TokenIssuer {
         } else if (tokenTypeValue.startsWith(ConversationConstants.WSC_NS_05_12)) {
             return ConversationConstants.getWSTVersion(ConversationConstants.WSC_NS_05_12);
         } else {
-            throw new ConversationException("unsupportedSecConvVersion");
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "unsupportedSecConvVersion");
         }
     }
 }

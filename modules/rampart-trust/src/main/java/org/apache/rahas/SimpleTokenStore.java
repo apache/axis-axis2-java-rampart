@@ -17,8 +17,8 @@
 package org.apache.rahas;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.message.token.Reference;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.common.token.Reference;
 
 import javax.xml.namespace.QName;
 

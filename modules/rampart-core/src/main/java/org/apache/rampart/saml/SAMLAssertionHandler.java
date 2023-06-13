@@ -22,10 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.TrustException;
 import org.apache.rampart.TokenCallbackHandler;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.crypto.Crypto;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * A class to handle attributes to common SAML1 and SAML2 assertions.
@@ -35,9 +35,9 @@ public abstract class SAMLAssertionHandler {
 
     private String assertionId;
 
-    private Date dateNotBefore;
+    private Instant dateNotBefore;
 
-    private Date dateNotOnOrAfter;
+    private Instant dateNotOnOrAfter;
 
     public String getAssertionId() {
         return assertionId;
@@ -47,19 +47,19 @@ public abstract class SAMLAssertionHandler {
         this.assertionId = assertionId;
     }
 
-    public Date getDateNotBefore() {
+    public Instant getDateNotBefore() {
         return dateNotBefore;
     }
 
-    protected void setDateNotBefore(Date dateNotBefore) {
+    protected void setDateNotBefore(Instant dateNotBefore) {
         this.dateNotBefore = dateNotBefore;
     }
 
-    public Date getDateNotOnOrAfter() {
+    public Instant getDateNotOnOrAfter() {
         return dateNotOnOrAfter;
     }
 
-    protected void setDateNotOnOrAfter(Date dateNotOnOrAfter) {
+    protected void setDateNotOnOrAfter(Instant dateNotOnOrAfter) {
         this.dateNotOnOrAfter = dateNotOnOrAfter;
     }
 

@@ -5,27 +5,46 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.message.WSSecEncryptedKey;
-import org.apache.ws.security.util.Base64;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.dom.message.WSSecEncryptedKey;
 import org.apache.xml.security.signature.XMLSignature;
 import org.apache.xml.security.utils.EncryptionConstants;
-import org.joda.time.DateTime;
-import org.opensaml.Configuration;
-import org.opensaml.saml1.core.*;
-import org.opensaml.ws.wssecurity.KeyIdentifier;
-import org.opensaml.ws.wssecurity.SecurityTokenReference;
-import org.opensaml.ws.wssecurity.WSSecurityConstants;
-import org.opensaml.xml.encryption.CipherData;
-import org.opensaml.xml.encryption.CipherValue;
-import org.opensaml.xml.encryption.EncryptedKey;
-import org.opensaml.xml.encryption.EncryptionMethod;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.schema.impl.XSStringBuilder;
-import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.signature.*;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.core.xml.schema.impl.XSStringBuilder;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.saml1.core.Assertion;
+import org.opensaml.saml.saml1.core.Attribute;
+import org.opensaml.saml.saml1.core.AttributeStatement;
+import org.opensaml.saml.saml1.core.AttributeValue;
+import org.opensaml.saml.saml1.core.AuthenticationStatement;
+import org.opensaml.saml.saml1.core.ConfirmationMethod;
+import org.opensaml.saml.saml1.core.NameIdentifier;
+import org.opensaml.saml.saml1.core.Subject;
+import org.opensaml.saml.saml1.core.SubjectConfirmation;
+import org.opensaml.saml.saml1.core.SubjectStatement;
+import org.opensaml.saml.saml1.core.Conditions;
+import org.opensaml.saml.saml1.core.Statement;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.CredentialSupport;
+import org.opensaml.soap.wssecurity.SecurityTokenReference;
+import org.opensaml.soap.wssecurity.WSSecurityConstants;
+import org.opensaml.soap.wssecurity.KeyIdentifier;
+import org.opensaml.xmlsec.encryption.CipherData;
+import org.opensaml.xmlsec.encryption.CipherValue;
+import org.opensaml.xmlsec.encryption.EncryptedKey;
+import org.opensaml.xmlsec.encryption.EncryptionMethod;
+import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
+import org.opensaml.xmlsec.signature.support.Signer;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.X509Data;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,6 +55,7 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.time.Instant;
 
 /**
  * Utility class for SAML 1 assertions. Responsible for manipulating all SAML1 specific objects
@@ -65,9 +85,9 @@ public class SAMLUtils {
      */
     public static Assertion buildAssertion(Element assertionElement) {
 
-       return (Assertion) Configuration.getBuilderFactory().
-               getBuilder(Assertion.DEFAULT_ELEMENT_NAME).buildObject(assertionElement);
+       final SAMLObjectBuilder<Assertion> assertionBuilder = (SAMLObjectBuilder<Assertion>) XMLObjectProviderRegistrySupport.getBuilderFactory().<Assertion>getBuilderOrThrow(Assertion.DEFAULT_ELEMENT_NAME);
 
+       return assertionBuilder.buildObject();
     }
 
 /**
@@ -75,8 +95,8 @@ public class SAMLUtils {
      * <ol>
      *     <li>Get certificate for issuer alias</li>
      *     <li>Extract private key</li>
-     *     <li>Create {@link org.opensaml.xml.security.credential.Credential} object</li>
-     *     <li>Create {@link org.opensaml.xml.signature.Signature} object</li>
+     *     <li>Create {@link org.opensaml.security.credential.Credential} object</li>
+     *     <li>Create {@link org.opensaml.xmlsec.signature.Signature} object</li>
      *     <li>Set Signature object in Assertion</li>
      *     <li>Prepare signing environment - SecurityHelper.prepareSignatureParams</li>
      *     <li>Perform signing action - Signer.signObject</li>
@@ -111,7 +131,7 @@ public class SAMLUtils {
             throw new TrustException("issuerPrivateKeyNotFound", new Object[]{issuerKeyAlias});
         }
 
-        Credential signingCredential = SecurityHelper.getSimpleCredential(issuerPublicKey, issuerPrivateKey);
+        Credential signingCredential = CredentialSupport.getSimpleCredential(issuerPublicKey, issuerPrivateKey);
 
         Signature signature = (Signature) CommonUtil.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
         signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
@@ -128,7 +148,9 @@ public class SAMLUtils {
 
             Document document = CommonUtil.getOMDOMDocument();
 
-            Configuration.getMarshallerFactory().getMarshaller(assertion).marshall(assertion, document);
+            Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(assertion);
+            marshaller.marshall(assertion, document);
+
         } catch (MarshallingException e) {
             log.debug("Error while marshalling assertion ", e);
             throw new TrustException("errorMarshallingAssertion", e);
@@ -157,7 +179,7 @@ public class SAMLUtils {
         // TODO check whether there is an efficient method of doing this
         if (!statements.isEmpty()) {
             SubjectStatement subjectStatement = (SubjectStatement) statements.get(0);
-            Subject subject = subjectStatement.getSubject();
+            org.opensaml.saml.saml1.core.Subject subject = subjectStatement.getSubject();
 
             if (subject != null) {
                 SubjectConfirmation subjectConfirmation = subject.getSubjectConfirmation();
@@ -186,7 +208,7 @@ public class SAMLUtils {
     public static NameIdentifier createNamedIdentifier(String principalName, String format) throws TrustException{
 
         NameIdentifier nameId = (NameIdentifier)CommonUtil.buildXMLObject(NameIdentifier.DEFAULT_ELEMENT_NAME);
-        nameId.setNameIdentifier(principalName);
+        nameId.setValue(principalName);
         nameId.setFormat(format);
 
         return nameId;
@@ -227,11 +249,11 @@ public class SAMLUtils {
      * @return OpenSAML representation of SubjectConfirmation.
      * @throws TrustException If unable to find any of the XML builders.
      */
-    public static SubjectConfirmation createSubjectConfirmation(final String confirmationMethod,
+    public static org.opensaml.saml.saml1.core.SubjectConfirmation createSubjectConfirmation(final String confirmationMethod,
                                                           KeyInfo keyInfoContent) throws TrustException {
 
-        SubjectConfirmation subjectConfirmation
-                = (SubjectConfirmation)CommonUtil.buildXMLObject(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
+        org.opensaml.saml.saml1.core.SubjectConfirmation subjectConfirmation
+                = (org.opensaml.saml.saml1.core.SubjectConfirmation)CommonUtil.buildXMLObject(org.opensaml.saml.saml1.core.SubjectConfirmation.DEFAULT_ELEMENT_NAME);
 
         ConfirmationMethod method = SAMLUtils.createSubjectConfirmationMethod(confirmationMethod);
         subjectConfirmation.getConfirmationMethods().add(method);
@@ -266,13 +288,13 @@ public class SAMLUtils {
      * @return OpenSAML representation of the Subject.
      * @throws TrustException If a relevant XML builder is unable to find.
      */
-    public static Subject createSubject(final NameIdentifier nameIdentifier, final String confirmationMethod,
+    public static org.opensaml.saml.saml1.core.Subject createSubject(final NameIdentifier nameIdentifier, final String confirmationMethod,
                                                           KeyInfo keyInfoContent) throws TrustException {
 
-        Subject subject = (Subject)CommonUtil.buildXMLObject(Subject.DEFAULT_ELEMENT_NAME);
+        org.opensaml.saml.saml1.core.Subject subject = (org.opensaml.saml.saml1.core.Subject)CommonUtil.buildXMLObject(org.opensaml.saml.saml1.core.Subject.DEFAULT_ELEMENT_NAME);
         subject.setNameIdentifier(nameIdentifier);
 
-        SubjectConfirmation subjectConfirmation
+        org.opensaml.saml.saml1.core.SubjectConfirmation subjectConfirmation
                 = SAMLUtils.createSubjectConfirmation(confirmationMethod,keyInfoContent);
         subject.setSubjectConfirmation(subjectConfirmation);
 
@@ -301,8 +323,8 @@ public class SAMLUtils {
      * @return opensaml AuthenticationStatement object.
      * @throws org.apache.rahas.TrustException If unable to find the builder.
      */
-    public static AuthenticationStatement createAuthenticationStatement(Subject subject, String authenticationMethod,
-                                                                    DateTime authenticationInstant)
+    public static AuthenticationStatement createAuthenticationStatement(org.opensaml.saml.saml1.core.Subject subject, String authenticationMethod,
+                                                                    Instant authenticationInstant)
                                                                     throws TrustException {
 
         AuthenticationStatement authenticationStatement
@@ -349,7 +371,7 @@ public class SAMLUtils {
      * @return OpenSAML representation of AttributeStatement.
      * @throws org.apache.rahas.TrustException If unable to find the appropriate builder.
      */
-    public static AttributeStatement createAttributeStatement(Subject subject, List<Attribute> attributeList)
+    public static AttributeStatement createAttributeStatement(org.opensaml.saml.saml1.core.Subject subject, List<Attribute> attributeList)
             throws TrustException {
 
         AttributeStatement attributeStatement
@@ -371,7 +393,7 @@ public class SAMLUtils {
      * @return OpenSAML Conditions object.
      * @throws org.apache.rahas.TrustException If unable to find appropriate builder.
      */
-    public static Conditions createConditions(DateTime notBefore, DateTime notOnOrAfter) throws TrustException {
+    public static Conditions createConditions(Instant notBefore, Instant notOnOrAfter) throws TrustException {
 
         Conditions conditions = (Conditions)CommonUtil.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME);
 
@@ -427,7 +449,7 @@ public class SAMLUtils {
      * @return An opensaml Assertion object.
      * @throws org.apache.rahas.TrustException If unable to find the appropriate builder.
      */
-    public static Assertion createAssertion(String issuerName, DateTime notBefore, DateTime notOnOrAfter,
+    public static Assertion createAssertion(String issuerName, Instant notBefore, Instant notOnOrAfter,
                                         List<Statement> statements) throws TrustException {
 
         Assertion assertion = (Assertion)CommonUtil.buildXMLObject(Assertion.DEFAULT_ELEMENT_NAME);
@@ -436,7 +458,7 @@ public class SAMLUtils {
         assertion.setConditions(SAMLUtils.createConditions(notBefore, notOnOrAfter));
         assertion.getStatements().addAll(statements);
         assertion.setID(UIDGenerator.generateUID());
-        assertion.setIssueInstant(new DateTime());
+        assertion.setIssueInstant(Instant.now());
         return assertion;
     }
 
@@ -460,11 +482,11 @@ public class SAMLUtils {
         attribute.setAttributeName(name);
         attribute.setAttributeNamespace(namespace);
 
-        XSStringBuilder attributeValueBuilder = (XSStringBuilder)Configuration.getBuilderFactory().
-                getBuilder(XSString.TYPE_NAME);
+        XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
 
-        XSString stringValue
-                = attributeValueBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+        XMLObjectBuilder<XSString> builder = builderFactory.getBuilderOrThrow(XSString.TYPE_NAME);
+
+        XSString stringValue = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
         stringValue.setValue(value);
 
         attribute.getAttributeValues().add(stringValue);
@@ -574,7 +596,7 @@ public class SAMLUtils {
         keyInfo.getXMLObjects().add(securityTokenReference);
 
         CipherValue cipherValue = (CipherValue)CommonUtil.buildXMLObject(CipherValue.DEFAULT_ELEMENT_NAME);
-        cipherValue.setValue(Base64.encode(wsSecEncryptedKey.getEncryptedEphemeralKey()));
+        cipherValue.setValue(new String(Base64.getEncoder().encode(wsSecEncryptedKey.getEncryptedKeySHA1().getBytes())));
 
         CipherData cipherData = (CipherData)CommonUtil.buildXMLObject(CipherData.DEFAULT_ELEMENT_NAME);
         cipherData.setCipherValue(cipherValue);
@@ -609,7 +631,7 @@ public class SAMLUtils {
         }
         byte[] data = sha.digest();
 
-        return Base64.encode(data);
+        return new String(Base64.getEncoder().encode(data));
     }
 
 }

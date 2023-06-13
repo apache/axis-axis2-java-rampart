@@ -33,16 +33,19 @@ import org.apache.rahas.test.util.AbstractTestCase;
 import org.apache.rahas.test.util.TestCallbackHandler;
 import org.apache.rahas.test.util.TestSAMLCallbackHandler;
 import org.apache.rahas.test.util.TestUtil;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSEncryptionPart;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.message.WSSecEncrypt;
-import org.apache.ws.security.message.WSSecHeader;
-import org.opensaml.Configuration;
-import org.opensaml.xml.signature.KeyInfo;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.common.WSEncryptionPart;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.util.KeyUtils;
+import org.apache.wss4j.dom.message.WSSecEncrypt;
+import org.apache.wss4j.dom.message.WSSecHeader;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.xmlsec.signature.KeyInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.util.*;
@@ -139,7 +142,7 @@ public class CommonUtilTest extends AbstractTestCase {
         checkConfigurations(tokenIssuerConfig);
 
         Crypto signatureCrypto = tokenIssuerConfig.getIssuerCrypto(this.getClass().getClassLoader());
-        Assert.assertEquals(signatureCrypto.getClass().getName(), "org.apache.ws.security.components.crypto.Merlin");
+        Assert.assertEquals(signatureCrypto.getClass().getName(), "org.apache.wss4j.common.crypto.Merlin");
 
     }
 
@@ -170,15 +173,18 @@ public class CommonUtilTest extends AbstractTestCase {
 
         Document doc = TestUtil.getTestDocument();
 
-        WSSecEncrypt builder = new WSSecEncrypt();
+        WSSecHeader secHeader = new WSSecHeader(doc);
+        secHeader.insertSecurityHeader();
+
+        WSSecEncrypt builder = new WSSecEncrypt(secHeader);
         builder.setUserInfo("apache");
         builder.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
         builder.setSymmetricEncAlgorithm(WSConstants.TRIPLE_DES);
-        builder.setEphemeralKey(ephemeralKey);
-        WSSecHeader secHeader = new WSSecHeader();
-        secHeader.insertSecurityHeader(doc);
 
-        builder.prepare(doc, TestUtil.getCrypto());
+        KeyGenerator keyGen = KeyUtils.getKeyGenerator(WSConstants.TRIPLE_DES);
+        SecretKey symmetricKey = keyGen.generateKey();
+
+        builder.prepare(TestUtil.getCrypto(), symmetricKey);
 
         List<WSEncryptionPart> parts = new ArrayList<WSEncryptionPart>();
         WSEncryptionPart encP =
@@ -187,12 +193,16 @@ public class CommonUtilTest extends AbstractTestCase {
             );
         parts.add(encP);
 
-        Element refs = builder.encryptForRef(null, parts);
+        Element refs = builder.encryptForRef(null, parts, symmetricKey);
         builder.addInternalRefElement(refs);
 
-        builder.prependToHeader(secHeader);
+        /*
+         * now add (prepend) the EncryptedKey element, then a
+         * BinarySecurityToken if one was setup during prepare
+         */
+        builder.prependToHeader();
 
-        builder.prependBSTElementToHeader(secHeader);
+        builder.prependBSTElementToHeader();
 
         Element element = builder.getEncryptedKeyElement();
 
@@ -213,7 +223,7 @@ public class CommonUtilTest extends AbstractTestCase {
 
         Assert.assertNotNull(keyInfo);
 
-        marshallerFactory.getMarshaller(keyInfo).marshall(keyInfo, doc.getDocumentElement());
+        XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(keyInfo).marshall(keyInfo, doc.getDocumentElement());
 
         printElement(keyInfo.getDOM());
 
@@ -236,7 +246,7 @@ public class CommonUtilTest extends AbstractTestCase {
 
         Assert.assertNotNull(keyInfo);
 
-        marshallerFactory.getMarshaller(keyInfo).marshall(keyInfo, doc.getDocumentElement());
+        XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(keyInfo).marshall(keyInfo, doc.getDocumentElement());
 
         printElement(keyInfo.getDOM());
 

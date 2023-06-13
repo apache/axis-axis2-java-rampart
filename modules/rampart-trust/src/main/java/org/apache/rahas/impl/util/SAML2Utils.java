@@ -23,23 +23,35 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
-import org.apache.ws.security.*;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.util.Base64;
-import org.apache.ws.security.util.UUIDGenerator;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
+import org.apache.wss4j.dom.engine.WSSecurityEngine;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.apache.wss4j.dom.WSConstants;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.keys.KeyInfo;
 import org.apache.xml.security.keys.content.X509Data;
 import org.apache.xml.security.keys.content.x509.XMLX509Certificate;
-import org.joda.time.DateTime;
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.common.SAMLVersion;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.*;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.*;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.AuthnStatement;
+import org.opensaml.saml.saml2.core.Conditions;
+import org.opensaml.saml.saml2.core.Issuer;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
+import org.opensaml.saml.common.SAMLVersion;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.config.InitializationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -56,7 +68,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
+import java.util.Base64;
 
 public class SAML2Utils {
 
@@ -65,8 +80,7 @@ public class SAML2Utils {
     public static Element getElementFromAssertion(XMLObject xmlObj) throws TrustException {
         try {
             
-            MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
-            Marshaller marshaller = marshallerFactory.getMarshaller(xmlObj);
+            Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(xmlObj);
             Element assertionElement = marshaller.marshall(xmlObj,
                     ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory().newDocumentBuilder().newDocument());
 
@@ -84,8 +98,8 @@ public class SAML2Utils {
      * @param elem  The element to process.
      * @param crypto The crypto properties.
      * @param cb Callback class to get the Key
-     * @return the SAML2 Key Info
-     * @throws org.apache.ws.security.WSSecurityException If an error occurred while extracting KeyInfo.
+     * @return SAML2KeyInfo the SAML2 Key Info
+     * @throws org.apache.wss4j.common.ext.WSSecurityException If an error occurred while extracting KeyInfo.
      *
      */
     public static SAML2KeyInfo getSAML2KeyInfo(Element elem, Crypto crypto,
@@ -94,7 +108,7 @@ public class SAML2Utils {
 
         //build the assertion by unmarhalling the DOM element.
         try {
-            DefaultBootstrap.bootstrap();
+            InitializationService.initialize();
 
             String keyInfoElementString = elem.toString();
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -102,28 +116,28 @@ public class SAML2Utils {
             DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(new ByteArrayInputStream(keyInfoElementString.trim().getBytes()));
             Element element = document.getDocumentElement();
-            UnmarshallerFactory unmarshallerFactory = Configuration
-                    .getUnmarshallerFactory();
+            UnmarshallerFactory unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
             Unmarshaller unmarshaller = unmarshallerFactory
                     .getUnmarshaller(element);
             assertion = (Assertion) unmarshaller
                     .unmarshall(element);
         }
-        catch (ConfigurationException e) {
+        catch (InitializationException e) {
+//[ERROR] /home/rlapache/axis-axis2-java-rampart/modules/rampart-trust/src/main/java/org/apache/rahas/impl/util/SAML2Utils.java:[123,60] incompatible types: java.lang.String cannot be converted to java.lang.Exception
             throw new WSSecurityException(
-                    WSSecurityException.FAILURE, "Failure in bootstrapping", null, e);
+                    WSSecurityException.ErrorCode.FAILURE, e, "Failure in bootstrapping");
         } catch (UnmarshallingException e) {
             throw new WSSecurityException(
-                    WSSecurityException.FAILURE, "Failure in unmarshelling the assertion", null, e);
+                    WSSecurityException.ErrorCode.FAILURE, e, "Failure in unmarshelling the assertion");
         } catch (IOException e) {
             throw new WSSecurityException(
-                    WSSecurityException.FAILURE, "Failure in unmarshelling the assertion", null, e);
+                    WSSecurityException.ErrorCode.FAILURE, e, "Failure in unmarshelling the assertion");
         } catch (SAXException e) {
             throw new WSSecurityException(
-                    WSSecurityException.FAILURE, "Failure in unmarshelling the assertion", null, e);
+                    WSSecurityException.ErrorCode.FAILURE, e, "Failure in unmarshelling the assertion");
         } catch (ParserConfigurationException e) {
             throw new WSSecurityException(
-                    WSSecurityException.FAILURE, "Failure in unmarshelling the assertion", null, e);
+                    WSSecurityException.ErrorCode.FAILURE, e, "Failure in unmarshelling the assertion");
         }
         return getSAML2KeyInfo(assertion, crypto, cb);
 
@@ -138,8 +152,7 @@ public class SAML2Utils {
             try {
                 cb.handle(new Callback[]{pwcb});
             } catch (Exception e1) {
-                throw new WSSecurityException(WSSecurityException.FAILURE, "noKey",
-                        new Object[]{assertion.getID()}, e1);
+                throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e1, "noKey");
             }
         }
 
@@ -153,14 +166,14 @@ public class SAML2Utils {
                 // extract the subject
                 Subject samlSubject = assertion.getSubject();
                 if (samlSubject == null) {
-                    throw new WSSecurityException(WSSecurityException.FAILURE,
+                    throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no Subject)"});
                 }
 
                 // extract the subject confirmation element from the subject
                 SubjectConfirmation subjectConf = samlSubject.getSubjectConfirmations().get(0);
                 if (subjectConf == null) {
-                    throw new WSSecurityException(WSSecurityException.FAILURE,
+                    throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no Subject Confirmation)"});
                 }
 
@@ -168,7 +181,7 @@ public class SAML2Utils {
                 SubjectConfirmationData scData = subjectConf.getSubjectConfirmationData();
                 
                 if (scData == null) {
-                    throw new WSSecurityException(WSSecurityException.FAILURE,
+                    throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no Subject Confirmation Data)"});
                 }
 
@@ -176,7 +189,7 @@ public class SAML2Utils {
                 XMLObject KIElem = null;
                 List<XMLObject> scDataElements = scData.getOrderedChildren();
                 for (XMLObject xmlObj : scDataElements) {
-                    if (xmlObj instanceof org.opensaml.xml.signature.KeyInfo) {
+                    if (xmlObj instanceof org.opensaml.xmlsec.signature.KeyInfo) {
                         KIElem = xmlObj;
                         break;
                     }
@@ -187,8 +200,7 @@ public class SAML2Utils {
                 // Generate a DOM element from the XMLObject.
                 if (KIElem != null) {
 
-                    MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
-                    Marshaller marshaller = marshallerFactory.getMarshaller(KIElem);
+                    Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(KIElem);
                     try {
                         keyInfoElement = marshaller.marshall(KIElem,
                                 ((DOMMetaFactory)OMAbstractFactory.getMetaFactory(OMAbstractFactory.FEATURE_DOM)).newDocumentBuilderFactory().newDocumentBuilder().newDocument());
@@ -198,7 +210,7 @@ public class SAML2Utils {
                     }
 
                 } else {
-                    throw new WSSecurityException(WSSecurityException.FAILURE,
+                    throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE,
                             "invalidSAML2Token", new Object[]{"for Signature (no key info element)"});
                 }
 
@@ -218,14 +230,14 @@ public class SAML2Utils {
                             continue;
                         }
                         QName el = new QName(child.getNamespaceURI(), child.getLocalName());
-                        if (el.equals(WSSecurityEngine.ENCRYPTED_KEY)) {
+                        if (el.equals(WSConstants.ENCRYPTED_KEY)) {
 
                             byte[] secret = CommonUtil.getDecryptedBytes(cb, crypto, child);
 
                             return new SAML2KeyInfo(assertion, secret);
                         } else if (el.equals(new QName(WSConstants.WST_NS, "BinarySecret"))) {
                             Text txt = (Text) child.getFirstChild();
-                            return new SAML2KeyInfo(assertion, Base64.decode(txt.getData()));
+                            return new SAML2KeyInfo(assertion, Base64.getDecoder().decode(txt.getData()));
                         }
                     }
 
@@ -253,21 +265,18 @@ public class SAML2Utils {
                         }
 
                     } catch (XMLSecurityException e3) {
-                        throw new WSSecurityException(WSSecurityException.FAILURE,
-                                "invalidSAMLsecurity",
-                                new Object[]{"cannot get certificate (key holder)"}, e3);
+                        throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e3, "invalidSAMLsecurity", new Object[]{"cannot get certificate (key holder)"});
                     }
 
                 }
 
 
-                throw new WSSecurityException(WSSecurityException.FAILURE,
+                throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE,
                         "invalidSAMLsecurity",
                         new Object[]{"cannot get certificate or key "});
 
             } catch (MarshallingException e) {
-                throw new WSSecurityException(WSSecurityException.FAILURE,
-                        "Failed marshalling the SAML Assertion", null, e);
+                throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e, "Failed marshalling the SAML Assertion", null);
             }
         }
     }
@@ -294,10 +303,10 @@ public class SAML2Utils {
             assertion.setVersion(SAMLVersion.VERSION_20);
 
             // Set an UUID as the ID of an assertion
-            assertion.setID(UUIDGenerator.getUUID());
+            assertion.setID(UUID.randomUUID().toString());
             return assertion;
         } catch (TrustException e) {
-            throw new TrustException("Unable to create an Assertion object", e);
+            throw new TrustException("Unable to create an Assertion object: " + e.getMessage(), e);
         }
     }
 
@@ -311,7 +320,7 @@ public class SAML2Utils {
         }
     }
 
-    public static Conditions createConditions(DateTime creationTime, DateTime expirationTime) throws TrustException {
+    public static Conditions createConditions(Instant creationTime, Instant expirationTime) throws TrustException {
         try {
             Conditions conditions = (Conditions)CommonUtil.buildXMLObject(Conditions.DEFAULT_ELEMENT_NAME);
             conditions.setNotBefore(creationTime);

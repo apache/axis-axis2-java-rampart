@@ -33,9 +33,9 @@ import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.util.RampartUtil;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.SupportingToken;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.handler.WSHandlerConstants;
-import org.apache.ws.security.handler.WSHandlerResult;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+import org.apache.wss4j.dom.handler.WSHandlerResult;
 
 import java.util.Iterator;
 import java.util.List;

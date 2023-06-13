@@ -125,6 +125,28 @@
         </site>
     </distributionManagement>
     
+    <repositories>
+        <repository>
+            <id>A_maven.central</id>
+            <name>Maven Central</name>
+            <url>https://repo1.maven.org/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>B_shibboleth</id>
+            <name>OpenSAML</name>
+            <url>https://build.shibboleth.net/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -142,26 +164,25 @@
                     <version>${axis2.version}</version>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.10</version>
-                    <configuration>
-                        <argLine>${jacoco.surefireArgLine}</argLine>
-                    </configuration>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-surefire-plugin</artifactId>
+                  <version>3.0.0-M8</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.7</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.gmavenplus</groupId>
                     <artifactId>gmavenplus-plugin</artifactId>
-                    <version>1.5</version>
+                    <version>2.0.0</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.codehaus.groovy</groupId>
                             <artifactId>groovy-all</artifactId>
-                            <version>2.4.4</version>
+                            <version>3.0.14</version>
+                            <type>pom</type>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -188,23 +209,23 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.veithen.alta</groupId>
                     <artifactId>alta-maven-plugin</artifactId>
-                    <version>0.6.2</version>
+                    <version>0.8.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -215,7 +236,7 @@
                             <rules>
                                 <requireNoRepositories>
                                     <message>The POM must not include repository definitions since non Apache repositories threaten the build stability.</message>
-                                    <banRepositories>true</banRepositories>
+                                    <banRepositories>false</banRepositories>
                                     <banPluginRepositories>true</banPluginRepositories>
                                     <!-- We still need to allow the Apache snapshot repository -->
                                     <allowSnapshotRepositories>true</allowSnapshotRepositories>
@@ -282,48 +303,29 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent-for-surefire</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <propertyName>jacoco.surefireArgLine</propertyName>
-                            <!-- Anonymize the session ID (by default it contains the name of the host executing the build) -->
-                            <sessionId>mvn:${project.groupId}:${project.artifactId}:${project.version}:surefire</sessionId>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${skipJacoco}</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-jacoco-exec</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <skipAttach>${skipJacoco}</skipAttach>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/jacoco.exec</file>
-                                    <classifier>jacoco</classifier>
-                                    <type>exec</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
+              <groupId>org.jacoco</groupId>
+              <artifactId>jacoco-maven-plugin</artifactId>
+              <version>0.8.10</version>
+              <configuration>
+                <skip>${skipJacoco}</skip>
+              </configuration>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>prepare-agent</goal>
+                  </goals>
+                  <configuration>
+                    <sessionId>mvn:${project.groupId}:${project.artifactId}:${project.version}:@id@</sessionId>
+                  </configuration>
+                </execution>
+                <execution>
+                  <id>generate-code-coverage-report</id>
+                  <phase>test</phase>
+                  <goals>
+                    <goal>report</goal>
+                  </goals>
+                </execution>
+              </executions>
             </plugin>
             <plugin>
                 <!-- We need (some of) the source JARs for the code coverage analysis. -->
@@ -340,20 +342,19 @@
                     <attach>true</attach>
                 </configuration>
             </plugin>
-            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.11.0</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.17</version>
+                <version>1.23</version>
                 <executions>
                     <execution>
                         <id>check</id>
@@ -364,8 +365,8 @@
                         <configuration>
                             <signature>
                                 <groupId>org.codehaus.mojo.signature</groupId>
-                                <artifactId>java16</artifactId>
-                                <version>1.1</version>
+                                <artifactId>java18</artifactId>
+                                <version>1.0</version>
                             </signature>
                         </configuration>
                     </execution>
@@ -404,7 +405,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-publish-plugin</artifactId>
-                <version>1.0-beta-2</version>
+                <version>3.2.1</version>
             </plugin>
         </plugins>
     </build>
@@ -413,7 +414,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>3.4.5</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -478,8 +479,24 @@
 
             <!-- Other Rampart Dependencies -->
             <dependency>
-                <groupId>org.apache.ws.security</groupId>
+                <groupId>org.apache.wss4j</groupId>
                 <artifactId>wss4j</artifactId>
+                <version>${wss4j.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.wss4j</groupId>
+                <artifactId>wss4j-ws-security-common</artifactId>
+                <version>${wss4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.wss4j</groupId>
+                <artifactId>wss4j-ws-security-dom</artifactId>
+                <version>${wss4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.wss4j</groupId>
+                <artifactId>wss4j-policy</artifactId>
                 <version>${wss4j.version}</version>
             </dependency>
             <dependency>
@@ -499,34 +516,91 @@
             </dependency>
             <dependency>
                 <groupId>org.opensaml</groupId>
-                <artifactId>opensaml</artifactId>
+                <artifactId>opensaml-saml-impl</artifactId>
                 <version>${opensaml.version}</version>
+                <scope>compile</scope>
                 <exclusions>
-                    <!-- Don't allow OpenSAML to impose a particular logging implementation -->
                     <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>jcl-over-slf4j</artifactId>
+                        <groupId>org.opensaml</groupId>
+                        <artifactId>opensaml-xacml-api</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>log4j-over-slf4j</artifactId>
+                        <groupId>org.opensaml</groupId>
+                        <artifactId>opensaml-xacml-impl</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.bouncycastle</groupId>
-                        <artifactId>bcprov-jdk15</artifactId>
+                        <groupId>org.opensaml</groupId>
+                        <artifactId>opensaml-soap-impl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.opensaml</groupId>
+                        <artifactId>opensaml-storage-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.opensaml</groupId>
+                        <artifactId>opensaml-messaging-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.opensaml</groupId>
+                        <artifactId>opensaml-soap-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.velocity</groupId>
+                        <artifactId>velocity-engine-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpcore</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpclient</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.code.findbugs</groupId>
+                        <artifactId>jsr305</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.cryptacular</groupId>
+                        <artifactId>cryptacular</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-core</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-soap-api</artifactId>
+                <version>${opensaml.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-xacml-impl</artifactId>
+                <version>${opensaml.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-xacml-api</artifactId>
+                <version>${opensaml.version}</version>
+                <scope>compile</scope>
+            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
-                <version>1.6.1</version>
+                <version>1.7.36</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-jcl</artifactId>
-                <version>1.6.1</version>
+                <version>1.7.36</version>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>
@@ -562,19 +636,25 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.2</version>
             </dependency>
 
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjrt</artifactId>
-                <version>1.8.2</version>
+                <version>1.9.19</version>
             </dependency>
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
-                <version>1.8.2</version>
+                <version>1.9.19</version>
             </dependency>
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>4.0.0</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -635,17 +715,17 @@
     </modules>
 
     <properties>
-        <axis2.version>1.8.0</axis2.version>
-        <axiom.version>1.3.0</axiom.version>
+        <axis2.version>1.8.2</axis2.version>
+        <axiom.version>1.4.0</axiom.version>
 
-        <wss4j.version>1.6.19</wss4j.version>
-        <opensaml.version>2.6.4</opensaml.version>
+        <wss4j.version>3.0.0</wss4j.version>
+        <opensaml.version>4.3.0</opensaml.version>
 
-        <bcprov.jdk15.version>1.60</bcprov.jdk15.version>
+        <bcprov.jdk15.version>1.70</bcprov.jdk15.version>
 
         <failIfNoTests>false</failIfNoTests>
 
-        <jacoco.version>0.8.0</jacoco.version>
+        <jacoco.version>0.8.8</jacoco.version>
     </properties>
 
     <pluginRepositories>

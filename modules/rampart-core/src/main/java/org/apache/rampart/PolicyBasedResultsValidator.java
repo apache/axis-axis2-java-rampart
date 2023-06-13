@@ -24,13 +24,23 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.SupportingPolicyData;
 import org.apache.rampart.util.RampartUtil;
-import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.*;
-import org.apache.ws.security.*;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.components.crypto.CryptoType;
-import org.apache.ws.security.message.token.Timestamp;
-import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.wss4j.policy.SPConstants;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.crypto.CryptoType;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.WSEncryptionPart;
+import org.apache.wss4j.common.WSSPolicyException;
+import org.apache.wss4j.dom.engine.WSSecurityEngine;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
+import org.apache.wss4j.dom.handler.WSHandlerResult;
+import org.apache.wss4j.dom.message.token.Timestamp;
+import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.apache.wss4j.common.util.XMLUtils;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.WSDataRef;
+import org.apache.wss4j.dom.SOAP11Constants;
+import org.apache.wss4j.dom.SOAP12Constants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -41,6 +51,7 @@ import javax.xml.namespace.QName;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.time.Instant;
 
 public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallbackHandler {
     
@@ -71,8 +82,19 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         //Check presence of timestamp
         WSSecurityEngineResult tsResult = null;
         if(rpd != null &&  rpd.isIncludeTimestamp()) {
-            tsResult = 
-                WSSecurityUtil.fetchActionResult(results, WSConstants.TS);
+
+
+            WSSecurityEngine secEngine = new WSSecurityEngine();
+            try {
+                WSHandlerResult wsResults =
+                    secEngine.processSecurityHeader(rmd.getDocument(), null, null, null);
+                tsResult =
+                    wsResults.getActionResults().get(WSConstants.TS).get(0);
+            } catch (WSSecurityException e) {
+                // This has to be changed to propagate an instance of a RampartException up
+                throw new RampartException("An error occurred while searching for timestamp elements.", e);
+            }
+
             if(tsResult == null && !rpd.isIncludeTimestampOptional()) {
                 throw new RampartException("timestampMissing");
             }
@@ -177,8 +199,18 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
          */
 
         // Extract the signature action result from the action vector
-        WSSecurityEngineResult actionResult = WSSecurityUtil.fetchActionResult(
-                results, WSConstants.SIGN);
+        WSSecurityEngine secEngine = new WSSecurityEngine();
+        WSSecurityEngineResult actionResult = null;
+        WSHandlerResult wsResults = null;
+        try {
+            wsResults =
+                secEngine.processSecurityHeader(rmd.getDocument(), null, null, null);
+            actionResult =
+                wsResults.getActionResults().get(WSConstants.SIGN).get(0);
+        } catch (WSSecurityException e) {
+            // This has to be changed to propagate an instance of a RampartException up
+            throw new RampartException("An error occurred while searching for signed elements.", e);
+        }
 
         if (actionResult != null) {
             X509Certificate returnCert = (X509Certificate) actionResult
@@ -203,7 +235,9 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
          */
 
         // Extract the timestamp action result from the action vector
-        actionResult = WSSecurityUtil.fetchActionResult(results, WSConstants.TS);
+        actionResult = null;
+        actionResult =
+            wsResults.getActionResults().get(WSConstants.TS).get(0);
 
         if (actionResult != null) {
             Timestamp timestamp = (Timestamp) actionResult
@@ -218,8 +252,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     }
     
     /**
-     * @param encryptedParts
-     * @param signatureParts
+     * @param data Validator data
+     * @param encryptedParts optionally can be size of zero 
+     * @param signatureParts optionally can be size of zero 
+     * @param results used for getting SigEncrActions
+     * @throws RampartException If an errors during validation
      */
     protected void validateEncrSig(ValidatorData data,List<WSEncryptionPart> encryptedParts,
                                    List<WSEncryptionPart> signatureParts, List<WSSecurityEngineResult> results)
@@ -278,51 +315,63 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     }
 
     /**
-     * @param data
-     * @param results
+     * @param data contains RampartMessageData
+     * @param results Used to handle SupportingTokens
+     * @throws RampartException If an errors during validation
      */
     protected void validateSupportingTokens(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
         
         //Check for UsernameToken
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
+        RampartMessageData rmd = data.getRampartMessageData();
         List<SupportingToken> supportingTokens = rpd.getSupportingTokensList();
         for (SupportingToken suppTok : supportingTokens) {
-            handleSupportingTokens(results, suppTok);
+            handleSupportingTokens(rmd, results, suppTok);
         }
         SupportingToken signedSuppToken = rpd.getSignedSupportingTokens();
-        handleSupportingTokens(results, signedSuppToken);
+        handleSupportingTokens(rmd, results, signedSuppToken);
         SupportingToken signedEndSuppToken = rpd.getSignedEndorsingSupportingTokens();
-        handleSupportingTokens(results, signedEndSuppToken);
+        handleSupportingTokens(rmd, results, signedEndSuppToken);
         SupportingToken endSuppToken = rpd.getEndorsingSupportingTokens();
-        handleSupportingTokens(results, endSuppToken);
+        handleSupportingTokens(rmd, results, endSuppToken);
     }
 
     /**
-     * @param results
-     * @param suppTok
-     * @throws RampartException
+     * @param rmd Rampart configuration Object
+     * @param results unused
+     * @param suppTok Defines an ArrayList of tokens 
+     * @throws RampartException If an errors during processing
      */
-    protected void handleSupportingTokens(List<WSSecurityEngineResult> results, SupportingToken suppTok) throws RampartException {
+    protected void handleSupportingTokens(RampartMessageData rmd, List<WSSecurityEngineResult> results, SupportingToken suppTok) throws RampartException {
         
         if(suppTok == null) {
             return;
         }
         
+        WSHandlerResult wsResults = null;
+        try {
+            WSSecurityEngine secEngine = new WSSecurityEngine();
+            wsResults =
+                secEngine.processSecurityHeader(rmd.getDocument(), null, null, null);
+        } catch (WSSecurityException e) {
+            // This has to be changed to propagate an instance of a RampartException up
+            throw new RampartException("An error occurred while searching for signed elements.", e);
+        }
+ 
         ArrayList tokens = suppTok.getTokens();
         for (Object objectToken : tokens) {
             Token token = (Token) objectToken;
             if (token instanceof UsernameToken) {
                 UsernameToken ut = (UsernameToken) token;
                 //Check presence of a UsernameToken
-                WSSecurityEngineResult utResult = WSSecurityUtil.fetchActionResult(results, WSConstants.UT);
+                WSSecurityEngineResult utResult = wsResults.getActionResults().get(WSConstants.UT).get(0);
                 
                 if (utResult == null && !ut.isOptional()) {
                     throw new RampartException("usernameTokenMissing");
                 }
                 
-                org.apache.ws.security.message.token.UsernameToken wssUt = 
-                		(org.apache.ws.security.message.token.UsernameToken) utResult.get(WSSecurityEngineResult.TAG_USERNAME_TOKEN);
+                org.apache.wss4j.dom.message.token.UsernameToken wssUt = (org.apache.wss4j.dom.message.token.UsernameToken) utResult.get(WSSecurityEngineResult.TAG_USERNAME_TOKEN);
                 
                 if(ut.isNoPassword() && wssUt.getPassword() != null) {
                 	throw new RampartException("invalidUsernameTokenType");
@@ -338,18 +387,18 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 
 
             } else if (token instanceof IssuedToken) {
-                WSSecurityEngineResult samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_SIGNED);
+                WSSecurityEngineResult samlResult = wsResults.getActionResults().get(WSConstants.ST_SIGNED).get(0);
                 // Then check for unsigned saml tokens
                 if (samlResult == null) {
                     log.debug("No signed SAMLToken found. Looking for unsigned SAMLTokens");
-                    samlResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ST_UNSIGNED);
+                    samlResult = wsResults.getActionResults().get(WSConstants.ST_UNSIGNED).get(0);
                 }
                 if (samlResult == null) {
                     throw new RampartException("samlTokenMissing");
                 }
             } else if (token instanceof X509Token) {
                 X509Token x509Token = (X509Token) token;
-                WSSecurityEngineResult x509Result = WSSecurityUtil.fetchActionResult(results, WSConstants.BST);
+                WSSecurityEngineResult x509Result = wsResults.getActionResults().get(WSConstants.BST).get(0);
                 if (x509Result == null && !x509Token.isOptional()) {
                     throw new RampartException("binaryTokenMissing");
                 }
@@ -361,8 +410,9 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     
 
     /**
-     * @param data
-     * @param results
+     * @param data contains RampartMessageData
+     * @param results Used to get SigEncrActions
+     * @throws RampartException If an errors during validation
      */
     protected void validateProtectionOrder(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
@@ -576,11 +626,19 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     throws RampartException {
         
         RampartMessageData rmd = data.getRampartMessageData();
-        
         Node envelope = rmd.getDocument().getFirstChild();
         
-        WSSecurityEngineResult[] actionResults = fetchActionResults(results, WSConstants.SIGN);
+        WSSecurityEngine secEngine = new WSSecurityEngine();
+        List<WSSecurityEngineResult> actionResults = null;
+        try {
+            WSHandlerResult wsResults =
+                secEngine.processSecurityHeader(rmd.getDocument(), null, null, null);
+            actionResults = wsResults.getActionResults().get(WSConstants.SIGN);
 
+        } catch (WSSecurityException e) {
+            // This has to be changed to propagate an instance of a RampartException up
+            throw new RampartException("An error occurred while searching for signed elements.", e);
+        }
         // Find elements that are signed
         List<QName> actuallySigned = new ArrayList<QName>();
         if (actionResults != null) {
@@ -637,7 +695,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 // This means that encrypted element of an XPath expression type. Therefore we are checking
                 // now whether an XPath expression exists. - Verify
 
-                Element element = WSSecurityUtil.findElement(
+                Element element = XMLUtils.findElement(
                         envelope, wsep.getName(), wsep.getNamespace());
 
                 if (element == null) {
@@ -682,9 +740,9 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         long maxSkew = RampartUtil.getTimestampMaxSkew(rmd);
 
         //Verify that ts->Created is before 'now'
-        Date createdTime = timestamp.getCreated();
+        Instant createdTime = timestamp.getCreated();
         if (createdTime != null) {
-            long now = Calendar.getInstance().getTimeInMillis();
+            long now = Instant.now().toEpochMilli();
 
             //calculate the tolerance limit for timeskew of the 'Created' in timestamp
             if (maxSkew > 0) {
@@ -692,22 +750,22 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
             }
 
             // fail if ts->Created is after 'now'
-            if (createdTime.getTime() > now) {
+            if (createdTime.toEpochMilli() > now) {
                 return false;
             }
         }
 
         //Verify that ts->Expires is after now.
-        Date expires = timestamp.getExpires();
+        Instant expires = timestamp.getExpires();
 
         if (expires != null) {
-            long now = Calendar.getInstance().getTimeInMillis();
+            long now = Instant.now().toEpochMilli();
             //calculate the tolerance limit for timeskew of the 'Expires' in timestamp
             if (maxSkew > 0) {
                 now -= (maxSkew * 1000);
             }
             //fail if ts->Expires is before 'now'
-            if (expires.getTime() < now) {
+            if (expires.toEpochMilli() < now) {
                 return false;
             }
         }
@@ -845,26 +903,22 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         //
         // TODO we need to configure enable revocation ...
         try {
-            if (crypto.verifyTrust(x509certs, false)) {
-                if (log.isDebugEnabled()) {
-                    log.debug(
-                        "Certificate path has been verified for certificate with subject "
-                         + subjectString
-                    );
-                }
-                return true;
+            crypto.verifyTrust(x509certs, false, null, null);
+            if (log.isDebugEnabled()) {
+                log.debug(
+                    "Certificate path has been verified for certificate with subject "
+                     + subjectString
+                );
             }
+            return true;
         } catch (WSSecurityException e) {
-            throw new RampartException("certPathVerificationFailed", e);
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug(
+            log.error(
                 "Certificate path could not be verified for certificate with subject "
                 + subjectString
             );
+            throw new RampartException("certPathVerificationFailed", e);
         }
-        return false;
+
     }
 
     /**

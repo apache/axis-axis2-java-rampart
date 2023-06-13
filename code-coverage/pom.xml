@@ -119,82 +119,19 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration combine.self="append">
+        
+                </configuration>
                 <executions>
                     <execution>
-                        <id>copy-jacoco-exec</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/jacoco/exec</outputDirectory>
-                            <includeClassifiers>jacoco</includeClassifiers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-sources</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/jacoco/sources</outputDirectory>
-                            <includeClassifiers>sources</includeClassifiers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-classes</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/jacoco/classes</outputDirectory>
-                            <includeTypes>jar</includeTypes>
-                            <excludeClassifiers>sources</excludeClassifiers>
-                            <excludeTransitive>true</excludeTransitive>
-                        </configuration>
+                      <phase>verify</phase>
+                      <goals>
+                          <goal>report-aggregate</goal>
+                      </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>jacoco-report</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <taskdef name="report" classname="org.jacoco.ant.ReportTask" />
-                                <report>
-                                    <executiondata>
-                                        <fileset dir="${project.build.directory}/jacoco/exec" />
-                                    </executiondata>
-                                    <structure name="Coverage Report">
-                                        <classfiles>
-                                            <fileset dir="${project.build.directory}/jacoco/classes" />
-                                        </classfiles>
-                                        <sourcefiles>
-                                            <fileset dir="${project.build.directory}/jacoco/sources" />
-                                        </sourcefiles>
-                                    </structure>
-                                    <html destdir="${project.reporting.outputDirectory}" />
-                                </report>
-                            </target>
-                        </configuration>
-                    </execution>  
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>org.jacoco.ant</artifactId>
-                        <version>${jacoco.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>

@@ -34,7 +34,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.apache.ws.security.WSConstants;
+import org.apache.wss4j.dom.WSConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
