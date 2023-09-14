@@ -33,6 +33,7 @@ import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.common.util.KeyUtils;
 import org.apache.wss4j.common.util.Loader;
+import org.apache.wss4j.dom.callback.DOMCallbackLookup;
 import org.apache.wss4j.dom.engine.WSSConfig;
 import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 import org.apache.wss4j.dom.handler.RequestData;
@@ -45,6 +46,9 @@ import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLObjectBuilder;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.soap.wssecurity.KeyIdentifier;
+import org.opensaml.soap.wssecurity.impl.SecurityTokenReferenceBuilder;
+import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.xmlsec.encryption.EncryptedKey;
 import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.X509Data;
@@ -59,7 +63,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Base64;
 import javax.crypto.KeyGenerator;
@@ -158,6 +164,7 @@ public class CommonUtil {
         requestData.setWssConfig(cfg);
 
         WSDocInfo docInfo = new WSDocInfo(encryptedKeyElement.getOwnerDocument());
+        docInfo.setCallbackLookup(new DOMCallbackLookup(encryptedKeyElement.getOwnerDocument()));
         requestData.setWsDocInfo(docInfo);
 
         List<WSSecurityEngineResult> resultList;
@@ -320,10 +327,20 @@ public class CommonUtil {
      */
     public static XMLObject buildXMLObject(QName objectQName) throws TrustException {
 
+        log.debug("buildXMLObject() is starting on QName: " + objectQName);
         XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
+        if (builderFactory.getBuilder(objectQName) == null) {
+            if (KeyIdentifier.ELEMENT_NAME == objectQName) {
+                builderFactory.registerBuilder(KeyIdentifier.ELEMENT_NAME, new SecurityTokenReferenceBuilder());
+                log.warn("An opensaml SecurityTokenReferenceBuilder was added to the opensaml registry for QName key: " + KeyIdentifier.ELEMENT_NAME);
+            } else {
+                log.error("No opensaml builders found for QName key: " + objectQName);
+            }
+
+        }
         XMLObjectBuilder builder = builderFactory.getBuilderOrThrow(objectQName);
         if (builder == null) {
-            log.debug("Unable to find OpenSAML builder for object " + objectQName);
+            log.error("Unable to find OpenSAML builder for object " + objectQName);
             throw new TrustException("builderNotFound",new Object[]{objectQName});
         }
         return builder.buildObject(objectQName.getNamespaceURI(), objectQName.getLocalPart(), objectQName.getPrefix());

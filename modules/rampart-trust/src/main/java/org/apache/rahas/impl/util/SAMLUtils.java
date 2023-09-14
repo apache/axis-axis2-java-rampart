@@ -546,7 +546,7 @@ public class SAMLUtils {
 
 
     /**
-     * This method will created the "EncryptedKey" of a SAML assertion.
+     * This method will create the "EncryptedKey" of a SAML assertion.
      * An encrypted key would look like as follows,
      * <pre>  &lt;xenc:EncryptedKey xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
      *    xmlns:ds="http://www.w3.org/2000/09/xmldsig#"

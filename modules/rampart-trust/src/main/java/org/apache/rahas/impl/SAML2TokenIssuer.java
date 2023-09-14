@@ -233,6 +233,12 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
         Element assertionElement = assertion.getDOM();
 
+        try {
+            System.out.println("createRequestSecurityTokenResponse() found assertionElement local name: " + assertionElement.getLocalName() + " , text value: " + ((org.w3c.dom.ls.DOMImplementationLS)assertionElement.getOwnerDocument().getImplementation()).createLSSerializer().writeToString(assertionElement) + " , on OMElement requestedSecurityTokenElement.toStringWithConsume() : " + requestedSecurityTokenElement.toStringWithConsume()); 
+    
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex); 
+        }
         requestedSecurityTokenElement.addChild((OMNode)assertionElement);
 
         // Store the token
@@ -645,12 +651,9 @@ public class SAML2TokenIssuer implements TokenIssuer {
             XSStringBuilder attributeValueBuilder = (XSStringBuilder) builderFactory
                     .getBuilder(XSString.TYPE_NAME);
 
-XSString stringValue = null;
-/*
             XSString stringValue = attributeValueBuilder.buildObject(
                     AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
 
-*/
             attributeValueBuilder.buildObject(
                     AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
             stringValue.setValue("Colombo/Rahas");

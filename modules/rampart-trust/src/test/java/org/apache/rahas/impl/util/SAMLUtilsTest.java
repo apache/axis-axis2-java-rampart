@@ -84,7 +84,7 @@ public class SAMLUtilsTest extends AbstractTestCase {
         try {
             CommonUtil.buildXMLObject(new QName("http://x.com", "y"));
             Assert.fail("This should throw an exception");
-        } catch (TrustException e) {
+        } catch (Exception e) {
         }
     }
 

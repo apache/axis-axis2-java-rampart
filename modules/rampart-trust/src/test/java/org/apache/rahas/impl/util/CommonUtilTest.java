@@ -44,7 +44,6 @@ import org.opensaml.xmlsec.signature.KeyInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -181,8 +180,7 @@ public class CommonUtilTest extends AbstractTestCase {
         builder.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
         builder.setSymmetricEncAlgorithm(WSConstants.TRIPLE_DES);
 
-        KeyGenerator keyGen = KeyUtils.getKeyGenerator(WSConstants.TRIPLE_DES);
-        SecretKey symmetricKey = keyGen.generateKey();
+        SecretKey symmetricKey = KeyUtils.prepareSecretKey(WSConstants.TRIPLE_DES, ephemeralKey);
 
         builder.prepare(TestUtil.getCrypto(), symmetricKey);
 
