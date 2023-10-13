@@ -541,7 +541,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
             //Marshall and Sign
             Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(assertion);
-            marshaller.marshall(assertion);
+            marshaller.marshall(assertion,document);
 
             Signer.signObjects(signatureList);
 
