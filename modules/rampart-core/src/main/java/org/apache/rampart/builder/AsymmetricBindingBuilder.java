@@ -693,7 +693,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 setupEncryptedKey(rmd, sigToken);
             }
             
-            WSSecDKSign dkSign = new WSSecDKSign(doc);
+            WSSecDKSign dkSign = new WSSecDKSign(rmd.getSecHeader());
 
             dkSign.setTokenIdentifier(this.encryptedKeyId);
 
