@@ -24,7 +24,7 @@ import org.apache.wss4j.dom.validate.UsernameTokenValidator;
  * WSS4J for validation.
  * 
  */
-public class RampartUsernameTokenValidator extends UsernameTokenValidator { // BLBLBL can't inherit from stax, - wss4j.dom.validate expected
+public class RampartUsernameTokenValidator extends UsernameTokenValidator {
     private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
 
     /**
