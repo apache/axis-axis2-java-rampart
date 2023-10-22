@@ -908,7 +908,15 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
      */
     private void createEncryptedKey(RampartMessageData rmd, Token token) throws RampartException {
         //Set up the encrypted key to use
-        encrKey = this.getEncryptedKeyBuilder(rmd, token);
+        KeyGenerator keyGen;
+        try {
+            keyGen = KeyUtils.getKeyGenerator(WSConstants.AES_128);
+        } catch (WSSecurityException e) {
+            e.printStackTrace();
+            return;
+        }
+        SecretKey symmetricKey = keyGen.generateKey();
+        encrKey = this.getEncryptedKeyBuilder(rmd, token, symmetricKey);
 
         Element bstElem = encrKey.getBinarySecurityTokenElement();
         if (bstElem != null) {
@@ -920,7 +928,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         encrTokenElement = encrKey.getEncryptedKeyElement();
         this.encrTokenElement = RampartUtil.appendChildToSecHeader(rmd,
                 encrTokenElement);
-        encryptedKeyValue = encrKey.getEncryptedKeySHA1().getBytes();
+        encryptedKeyValue = symmetricKey.getEncoded();
         encryptedKeyId = encrKey.getId();
 
         //Store the token for client - response verification 
