@@ -92,9 +92,9 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
-        list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
+        list.add(new QName(ConversationConstants.WSC_NS_05_12, ConversationConstants.DERIVED_KEY_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.REF_LIST_LN));
-        list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
+        list.add(new QName(ConversationConstants.WSC_NS_05_12, ConversationConstants.DERIVED_KEY_TOKEN_LN));
         list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
         
         this.verifySecHeader(list.iterator(), ctx.getEnvelope());
@@ -116,9 +116,9 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
-        list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
+        list.add(new QName(ConversationConstants.WSC_NS_05_12, ConversationConstants.DERIVED_KEY_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.REF_LIST_LN));
-        list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
+        list.add(new QName(ConversationConstants.WSC_NS_05_12, ConversationConstants.DERIVED_KEY_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_DATA_LN));
         
         this.verifySecHeader(list.iterator(), ctx.getEnvelope());
@@ -162,9 +162,9 @@ public class SymmetricBindingBuilderTest extends MessageBuilderTestBase {
         
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
-        list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
+        list.add(new QName(ConversationConstants.WSC_NS_05_12, ConversationConstants.DERIVED_KEY_TOKEN_LN));
         list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
-        list.add(new QName(ConversationConstants.WSC_NS_05_02, ConversationConstants.DERIVED_KEY_TOKEN_LN));
+        list.add(new QName(ConversationConstants.WSC_NS_05_12, ConversationConstants.DERIVED_KEY_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.REF_LIST_LN));
 
         
