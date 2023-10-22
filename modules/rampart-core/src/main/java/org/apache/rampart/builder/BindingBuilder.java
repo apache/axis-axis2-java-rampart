@@ -215,7 +215,7 @@ public abstract class BindingBuilder {
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
         
-        WSSecEncryptedKey encrKey = new WSSecEncryptedKey(doc);
+        WSSecEncryptedKey encrKey = new WSSecEncryptedKey(rmd.getSecHeader());
         
         try {
             RampartUtil.setKeyIdentifierType(rmd, encrKey, token);
