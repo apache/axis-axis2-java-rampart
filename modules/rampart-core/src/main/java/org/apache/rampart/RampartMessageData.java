@@ -380,8 +380,8 @@ public class RampartMessageData {
                 secHeader.insertSecurityHeader();
             }
 
-            WSSecurityEngine secEngine = new WSSecurityEngine();
-            secEngine.processSecurityHeader(this.document, requestData);
+            //WSSecurityEngine secEngine = new WSSecurityEngine();
+            //secEngine.processSecurityHeader(this.document, requestData);
             
         } catch (AxisFault e) {
             throw new RampartException("errorInExtractingMsgProps", e);
