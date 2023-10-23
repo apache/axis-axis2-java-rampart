@@ -266,7 +266,9 @@ public class RampartEngine {
                 } else {
 
                     log.debug("Processing security header in normal path");
-                    WSHandlerResult result = engine.processSecurityHeader(rmd.getDocument(), actorValue, tokenCallbackHandler, signatureCrypto, RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), msgCtx.getAxisService().getClassLoader()));
+                    Crypto decCrypto = RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), msgCtx.getAxisService().getClassLoader());
+                    WSHandlerResult result = processSecurityHeaderWithRSA15(engine, rmd, engine.getWssConfig(), actorValue,
+                        tokenCallbackHandler, signatureCrypto, decCrypto);
                     results = result.getResults();
 		}
 
@@ -400,6 +402,21 @@ public class RampartEngine {
 		log.debug("Return process(MessageContext msgCtx)");
 		return results;
 	}
+
+    private WSHandlerResult processSecurityHeaderWithRSA15(
+        WSSecurityEngine engine, RampartMessageData rmd, WSSConfig config, String actor, CallbackHandler cb, Crypto sigCrypto,  Crypto decCrypto) 
+                throws WSSecurityException {
+    
+        RequestData data = new RequestData();
+        data.setWssConfig(config);
+        data.setActor(actor);
+        data.setDecCrypto(decCrypto);
+        data.setSigVerCrypto(sigCrypto);
+        data.setCallbackHandler(cb);
+        data.setAllowRSA15KeyTransportAlgorithm(true);
+
+        return engine.processSecurityHeader(rmd.getDocument(), data);
+    }
 	
 	// Check whether this a soap fault because of failure in processing the security header 
 	//and if so, we don't expect the security header
