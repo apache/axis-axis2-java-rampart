@@ -173,8 +173,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     KeyGenerator keyGen = KeyUtils.getKeyGenerator(rpd.getAlgorithmSuite().getEncryption());
                     SecretKey symmetricKey = keyGen.generateKey();
             
-                    Element refs = encr.encryptForRef(null, encrParts, symmetricKey);
-                    encr.addInternalRefElement(refs);
+                    //Element refs = encr.encryptForRef(null, encrParts, symmetricKey);
+                    //encr.addInternalRefElement(refs);
 
 
                     RampartUtil.setEncryptionUser(rmd, encr);
