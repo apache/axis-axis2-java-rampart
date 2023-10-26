@@ -79,7 +79,7 @@ public class TransportBindingBuilderTest extends MessageBuilderTestBase {
         list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
         list.add(new QName(WSConstants.WSSE_NS, WSConstants.USERNAME_TOKEN_LN));
         list.add(new QName(WSConstants.ENC_NS, WSConstants.ENC_KEY_LN));
-        list.add(new QName(ConversationConstants.WSC_NS_05_02,
+        list.add(new QName(ConversationConstants.WSC_NS_05_12,
                            ConversationConstants.DERIVED_KEY_TOKEN_LN));
         list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
         this.verifySecHeader(list.iterator(), ctx.getEnvelope());
