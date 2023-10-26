@@ -517,7 +517,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
+                    <artifactId>bcprov-jdk18on</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -529,7 +529,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
+                    <artifactId>bcprov-jdk18on</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -541,7 +541,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
+                    <artifactId>bcprov-jdk18on</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -553,7 +553,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
+                    <artifactId>bcprov-jdk18on</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
