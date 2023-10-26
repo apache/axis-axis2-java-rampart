@@ -501,13 +501,13 @@
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>${bcprov.jdk15.version}</version>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bcprov.jdk18.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
-                <version>${bcprov.jdk15.version}</version>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bcprov.jdk18.version}</version>
             </dependency>
             <dependency>
                 <groupId>xalan</groupId>
@@ -727,7 +727,7 @@
         <wss4j.version>3.0.0</wss4j.version>
         <opensaml.version>4.3.0</opensaml.version>
 
-        <bcprov.jdk15.version>1.70</bcprov.jdk15.version>
+        <bcprov.jdk18.version>1.72</bcprov.jdk18.version>
 
         <failIfNoTests>false</failIfNoTests>
 
