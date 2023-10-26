@@ -32,7 +32,7 @@ import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
-import org.apache.wss4j.dom.handler.WSHandlerResult;;
+import org.apache.wss4j.dom.handler.WSHandlerResult;
 import org.apache.wss4j.dom.message.WSSecDKEncrypt;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.apache.wss4j.dom.message.WSSecEncrypt;
@@ -47,12 +47,14 @@ import org.apache.ws.secpolicy.model.X509Token;
 import org.apache.wss4j.common.WSEncryptionPart;
 import org.apache.wss4j.common.derivedKey.ConversationConstants;
 import org.apache.wss4j.common.token.SecurityTokenReference;
+import org.apache.wss4j.common.util.KeyUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -687,10 +689,19 @@ public class SymmetricBindingBuilder extends BindingBuilder {
     private String setupEncryptedKey(RampartMessageData rmd, Token sigToken) 
     throws RampartException {
         try {
+            KeyGenerator keyGen;
+			try {
+				keyGen = KeyUtils.getKeyGenerator(WSConstants.AES_128);
+			} catch (WSSecurityException e) {
+				e.printStackTrace();
+				return null;
+			}
+            SecretKey symmetricKey = keyGen.generateKey();
             WSSecEncryptedKey encrKey = this.getEncryptedKeyBuilder(rmd, 
-                                                                sigToken);
+                                                                sigToken,
+                                                                symmetricKey);
             String id = encrKey.getId();
-            byte[] secret = encrKey.getEncryptedKeySHA1().getBytes();
+            byte[] secret = symmetricKey.getEncoded();
             //Create a rahas token from this info and store it so we can use
             //it in the next steps
     

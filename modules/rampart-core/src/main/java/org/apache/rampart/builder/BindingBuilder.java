@@ -210,12 +210,12 @@ public abstract class BindingBuilder {
      * @return WSSecEncryptedKey encrypted key
      * @throws RampartException If an error occurred getting the WSSecEncryptedKey
      */
-    protected WSSecEncryptedKey getEncryptedKeyBuilder(RampartMessageData rmd, Token token) throws RampartException {
+    protected WSSecEncryptedKey getEncryptedKeyBuilder(RampartMessageData rmd, Token token, SecretKey symmetricKey) throws RampartException {
         
         RampartPolicyData rpd = rmd.getPolicyData();
         Document doc = rmd.getDocument();
         
-        WSSecEncryptedKey encrKey = new WSSecEncryptedKey(doc);
+        WSSecEncryptedKey encrKey = new WSSecEncryptedKey(rmd.getSecHeader());
         
         try {
             RampartUtil.setKeyIdentifierType(rmd, encrKey, token);
@@ -225,8 +225,6 @@ public abstract class BindingBuilder {
             encrKey.setKeyEncAlgo(rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
             
             log.debug("getEncryptedKeyBuilder() setting KeyEncAlgo to value: " + rpd.getAlgorithmSuite().getAsymmetricKeyWrap());
-            KeyGenerator keyGen = KeyUtils.getKeyGenerator(WSConstants.AES_128);
-            SecretKey symmetricKey = keyGen.generateKey();
             encrKey.prepare(RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()), symmetricKey);
             
             return encrKey;

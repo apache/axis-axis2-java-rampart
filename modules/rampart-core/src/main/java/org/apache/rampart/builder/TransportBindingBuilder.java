@@ -51,6 +51,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.crypto.SecretKey;
+import javax.crypto.KeyGenerator;
 import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.SignatureMethod;
 
@@ -209,8 +210,15 @@ public class TransportBindingBuilder extends BindingBuilder {
             //other party's key and then use it as the parent key of the
             // derived keys
             try {
-                
-                WSSecEncryptedKey encrKey = getEncryptedKeyBuilder(rmd, token);
+                KeyGenerator keyGen;
+                try {
+                    keyGen = KeyUtils.getKeyGenerator(WSConstants.AES_128);
+                } catch (WSSecurityException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                SecretKey symmetricKey = keyGen.generateKey();
+                WSSecEncryptedKey encrKey = getEncryptedKeyBuilder(rmd, token, symmetricKey);
                 
                 Element bstElem = encrKey.getBinarySecurityTokenElement();
                 if(bstElem != null) {
