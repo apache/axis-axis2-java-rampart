@@ -54,7 +54,7 @@ import java.util.*;
 import java.time.Instant;
 
 public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallbackHandler {
-    
+   
     private static Log log = LogFactory.getLog(PolicyBasedResultsValidator.class);
 
     public void validate(ValidatorData data, Vector results)
@@ -62,55 +62,43 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         List<WSSecurityEngineResult> resultsList = new ArrayList<WSSecurityEngineResult>(results);
         this.validate(data, resultsList);
     }
-    
-    /** 
+   
+    /**
      * {@inheritDoc}
      */
     public void validate(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
-        
+       
         RampartMessageData rmd = data.getRampartMessageData();
-        
+       
         RampartPolicyData rpd = rmd.getPolicyData();
-        
-        //If there's Security policy present and no results 
+       
+        //If there's Security policy present and no results
         //then we should throw an error
         if(rpd != null && results == null) {
             throw new RampartException("noSecurityResults");
         }
-        
+       
         //Check presence of timestamp
         WSSecurityEngineResult tsResult = null;
         if(rpd != null &&  rpd.isIncludeTimestamp()) {
-
-
-            WSSecurityEngine secEngine = new WSSecurityEngine();
-            try {
-                WSHandlerResult wsResults =
-                    secEngine.processSecurityHeader(rmd.getDocument(), null, null, null);
-                tsResult =
-                    wsResults.getActionResults().get(WSConstants.TS).get(0);
-            } catch (WSSecurityException e) {
-                // This has to be changed to propagate an instance of a RampartException up
-                throw new RampartException("An error occurred while searching for timestamp elements.", e);
-            }
-
+            tsResult = fetchActionResult(results, WSConstants.TS);
             if(tsResult == null && !rpd.isIncludeTimestampOptional()) {
                 throw new RampartException("timestampMissing");
             }
-            
+           
         }
-        
+       
         //sig/encr
         List<WSEncryptionPart> encryptedParts = RampartUtil.getEncryptedParts(rmd);
         if(rpd != null && rpd.isSignatureProtection() && isSignatureRequired(rmd)) {
-            
+           
             String sigId = RampartUtil.getSigElementId(rmd);
 
             encryptedParts.add(RampartUtil.createEncryptionPart(WSConstants.SIG_LN, sigId, WSConstants.SIG_NS,
                     RampartConstants.XML_ENCRYPTION_MODIFIER_ELEMENT));
         }
-        
+       
         List<WSEncryptionPart> signatureParts = RampartUtil.getSignedParts(rmd);
 
         //Timestamp is not included in sig parts
@@ -124,7 +112,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         }
 
         if(!rmd.isInitiator()) {
-                        
+                       
             //Just an indicator for EndorsingSupportingToken signature
             SupportingToken endSupportingToken = null;
             if (rpd != null) {
@@ -134,7 +122,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
             if(endSupportingToken !=  null && !endSupportingToken.isOptional()) {
                 SignedEncryptedParts endSignedParts = endSupportingToken.getSignedParts();
                 if((endSignedParts != null && !endSignedParts.isOptional() &&
-                        (endSignedParts.isBody() || 
+                        (endSignedParts.isBody() ||
                                 endSignedParts.getHeaders().size() > 0)) ||
                                 rpd.isIncludeTimestamp()) {
 
@@ -150,8 +138,8 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
             if(sgndEndSupportingToken != null && !sgndEndSupportingToken.isOptional()) {
                 SignedEncryptedParts sgndEndSignedParts = sgndEndSupportingToken.getSignedParts();
                 if((sgndEndSignedParts != null && !sgndEndSignedParts.isOptional() &&
-                        (sgndEndSignedParts.isBody() || 
-                                sgndEndSignedParts.getHeaders().size() > 0)) || 
+                        (sgndEndSignedParts.isBody() ||
+                                sgndEndSignedParts.getHeaders().size() > 0)) ||
                                 rpd.isIncludeTimestamp()) {
 
                     signatureParts.add(RampartUtil.createEncryptionPart("SignedEndorsingSupportingTokens",
@@ -171,7 +159,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 }
             }
         }
-        
+       
         validateEncrSig(data,encryptedParts, signatureParts, results);
 
         if(rpd != null && !rpd.isTransportBinding()) {
@@ -181,37 +169,27 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         validateEncryptedParts(data, encryptedParts, results);
 
         validateSignedPartsHeaders(data, signatureParts, results);
-        
+       
         validateRequiredElements(data);
 
         //Supporting tokens
         if(!rmd.isInitiator()) {
             validateSupportingTokens(data, results);
         }
-        
+       
         /*
          * Now we can check the certificate used to sign the message. In the
          * following implementation the certificate is only trusted if either it
          * itself or the certificate of the issuer is installed in the keystore.
-         * 
+         *
          * Note: the method verifyTrust(X509Certificate) allows custom
          * implementations with other validation algorithms for subclasses.
          */
 
         // Extract the signature action result from the action vector
-        WSSecurityEngine secEngine = new WSSecurityEngine();
-        WSSecurityEngineResult actionResult = null;
-        WSHandlerResult wsResults = null;
-        try {
-            wsResults =
-                secEngine.processSecurityHeader(rmd.getDocument(), null, null, null);
-            actionResult =
-                wsResults.getActionResults().get(WSConstants.SIGN).get(0);
-        } catch (WSSecurityException e) {
-            // This has to be changed to propagate an instance of a RampartException up
-            throw new RampartException("An error occurred while searching for signed elements.", e);
-        }
 
+        WSSecurityEngineResult actionResult = fetchActionResult(
+                results, WSConstants.SIGN);
         if (actionResult != null) {
             X509Certificate returnCert = (X509Certificate) actionResult
                     .get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
@@ -222,10 +200,10 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 }
             }
         }
-        
+       
         /*
          * Perform further checks on the timestamp that was transmitted in the
-         * header. 
+         * header.
          * In the following implementation the timestamp is valid if :
          * Timestamp->Created < 'now' < Timestamp->Expires.
          * (Last test handled by WSS4J also if timeStampStrict enabled)
@@ -235,9 +213,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
          */
 
         // Extract the timestamp action result from the action vector
-        actionResult = null;
-        actionResult =
-            wsResults.getActionResults().get(WSConstants.TS).get(0);
+        actionResult = fetchActionResult(results, WSConstants.TS);
 
         if (actionResult != null) {
             Timestamp timestamp = (Timestamp) actionResult
@@ -250,11 +226,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
             }
         }
     }
-    
+   
     /**
      * @param data Validator data
-     * @param encryptedParts optionally can be size of zero 
-     * @param signatureParts optionally can be size of zero 
+     * @param encryptedParts optionally can be size of zero
+     * @param signatureParts optionally can be size of zero
      * @param results used for getting SigEncrActions
      * @throws RampartException If an errors during validation
      */
@@ -262,7 +238,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                                    List<WSEncryptionPart> signatureParts, List<WSSecurityEngineResult> results)
     throws RampartException {
         List<Integer> actions = getSigEncrActions(results);
-        boolean sig = false; 
+        boolean sig = false;
         boolean encr = false;
         for (Object action : actions) {
             Integer act = (Integer) action;
@@ -272,26 +248,26 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 encr = true;
             }
         }
-        
+       
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
-        
+       
         SupportingToken sgndSupTokens = rpd.getSignedSupportingTokens();
         SupportingToken sgndEndorSupTokens = rpd.getSignedEndorsingSupportingTokens();
-        
-        if(sig && signatureParts.size() == 0 
+       
+        if(sig && signatureParts.size() == 0
                 && (sgndSupTokens == null || sgndSupTokens.getTokens().size() == 0)
                  && (sgndEndorSupTokens == null || sgndEndorSupTokens.getTokens().size() == 0)) {
-            
+           
             //Unexpected signature
             throw new RampartException("unexprectedSignature");
         } else if(!sig && signatureParts.size() > 0) {
-            
+           
             //required signature missing
             throw new RampartException("signatureMissing");
         }
-        
+       
         if(encr && encryptedParts.size() == 0) {
-            
+           
             //Check whether its just an encrypted key
             List<WSSecurityEngineResult> list = this.getResults(results, WSConstants.ENCR);
 
@@ -308,7 +284,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 throw new RampartException("unexprectedEncryptedPart");
             }
         } else if(!encr && encryptedParts.size() > 0) {
-            
+           
             //required signature missing
             throw new RampartException("encryptionMissing");
         }
@@ -321,7 +297,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
      */
     protected void validateSupportingTokens(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
-        
+       
         //Check for UsernameToken
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
         RampartMessageData rmd = data.getRampartMessageData();
@@ -340,74 +316,64 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     /**
      * @param rmd Rampart configuration Object
      * @param results unused
-     * @param suppTok Defines an ArrayList of tokens 
+     * @param suppTok Defines an ArrayList of tokens
      * @throws RampartException If an errors during processing
      */
     protected void handleSupportingTokens(RampartMessageData rmd, List<WSSecurityEngineResult> results, SupportingToken suppTok) throws RampartException {
-        
+       
         if(suppTok == null) {
             return;
         }
-        
-        WSHandlerResult wsResults = null;
-        try {
-            WSSecurityEngine secEngine = new WSSecurityEngine();
-            wsResults =
-                secEngine.processSecurityHeader(rmd.getDocument(), null, null, null);
-        } catch (WSSecurityException e) {
-            // This has to be changed to propagate an instance of a RampartException up
-            throw new RampartException("An error occurred while searching for signed elements.", e);
-        }
- 
+
         ArrayList tokens = suppTok.getTokens();
         for (Object objectToken : tokens) {
             Token token = (Token) objectToken;
             if (token instanceof UsernameToken) {
                 UsernameToken ut = (UsernameToken) token;
                 //Check presence of a UsernameToken
-                WSSecurityEngineResult utResult = wsResults.getActionResults().get(WSConstants.UT).get(0);
-                
+                WSSecurityEngineResult utResult = fetchActionResult(results, WSConstants.UT);
+               
                 if (utResult == null && !ut.isOptional()) {
                     throw new RampartException("usernameTokenMissing");
                 }
-                
+               
                 org.apache.wss4j.dom.message.token.UsernameToken wssUt = (org.apache.wss4j.dom.message.token.UsernameToken) utResult.get(WSSecurityEngineResult.TAG_USERNAME_TOKEN);
-                
+               
                 if(ut.isNoPassword() && wssUt.getPassword() != null) {
-                	throw new RampartException("invalidUsernameTokenType");
+                throw new RampartException("invalidUsernameTokenType");
                 }
-                
-            	if(ut.isHashPassword() && !wssUt.isHashed()) {
-                	throw new RampartException("invalidUsernameTokenType");
+               
+            if(ut.isHashPassword() && !wssUt.isHashed()) {
+                throw new RampartException("invalidUsernameTokenType");
                 } else if (!ut.isHashPassword() && (wssUt.getPassword() == null ||
                         !wssUt.getPasswordType().equals(WSConstants.PASSWORD_TEXT))) {
-                	throw new RampartException("invalidUsernameTokenType");
+                throw new RampartException("invalidUsernameTokenType");
                 }
-                
-                
+               
+               
 
             } else if (token instanceof IssuedToken) {
-                WSSecurityEngineResult samlResult = wsResults.getActionResults().get(WSConstants.ST_SIGNED).get(0);
+                WSSecurityEngineResult samlResult = fetchActionResult(results, WSConstants.ST_SIGNED);
                 // Then check for unsigned saml tokens
                 if (samlResult == null) {
                     log.debug("No signed SAMLToken found. Looking for unsigned SAMLTokens");
-                    samlResult = wsResults.getActionResults().get(WSConstants.ST_UNSIGNED).get(0);
+                    samlResult = fetchActionResult(results, WSConstants.ST_UNSIGNED);
                 }
                 if (samlResult == null) {
                     throw new RampartException("samlTokenMissing");
                 }
             } else if (token instanceof X509Token) {
                 X509Token x509Token = (X509Token) token;
-                WSSecurityEngineResult x509Result = wsResults.getActionResults().get(WSConstants.BST).get(0);
+                WSSecurityEngineResult x509Result = fetchActionResult(results, WSConstants.BST);
                 if (x509Result == null && !x509Token.isOptional()) {
                     throw new RampartException("binaryTokenMissing");
                 }
             }
         }
     }
-    
-    
-    
+   
+   
+   
 
     /**
      * @param data contains RampartMessageData
@@ -416,16 +382,16 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
      */
     protected void validateProtectionOrder(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
-        
+       
         String protectionOrder = data.getRampartMessageData().getPolicyData().getProtectionOrder();
         List<Integer> sigEncrActions = this.getSigEncrActions(results);
-        
+       
         if(sigEncrActions.size() < 2) {
             //There are no results to COMPARE
             return;
         }
-        
-        boolean sigNotPresent = true; 
+       
+        boolean sigNotPresent = true;
         boolean encrNotPresent = true;
 
         for (Object sigEncrAction : sigEncrActions) {
@@ -436,18 +402,18 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 encrNotPresent = false;
             }
         }
-        
+       
         // Only one action is present, so there is no order to check
         if ( sigNotPresent || encrNotPresent ) {
             return;
         }
-        
-        
+       
+       
         boolean done = false;
         if(SPConstants.SIGN_BEFORE_ENCRYPTING.equals(protectionOrder)) {
-                        
+                       
             boolean sigFound = false;
-            for (Iterator iter = sigEncrActions.iterator(); 
+            for (Iterator iter = sigEncrActions.iterator();
                 iter.hasNext() || !done;) {
                 Integer act = (Integer) iter.next();
                 if(act == WSConstants.ENCR && ! sigFound ) {
@@ -461,7 +427,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                     done = true;
                 }
             }
-            
+           
         } else {
             boolean encrFound = false;
             for (Object sigEncrAction : sigEncrActions) {
@@ -478,7 +444,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 }
             }
         }
-        
+       
         if(!done) {
             throw new RampartException("protectionOrderMismatch");
         }
@@ -502,11 +468,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     protected void validateEncryptedParts(ValidatorData data,
                                           List<WSEncryptionPart> encryptedParts, List<WSSecurityEngineResult> results)
                                                                                 throws RampartException {
-        
+       
         RampartMessageData rmd = data.getRampartMessageData();
-        
+       
         ArrayList encrRefs = getEncryptedReferences(results);
-        
+       
         RampartPolicyData rpd = rmd.getPolicyData();
 
         // build the list of encrypted nodes based on the dataRefs xpath expressions
@@ -544,9 +510,9 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
 
         //Check for encrypted body
         if(rpd.isEncryptBody()&& !rpd.isEncryptBodyOptional()) {
-            
+           
             if( !isRefIdPresent(encrRefs, data.getBodyEncrDataId())){
-                throw new RampartException("encryptedPartMissing", 
+                throw new RampartException("encryptedPartMissing",
                         new String[]{data.getBodyEncrDataId()});
             }
         }
@@ -601,15 +567,15 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
             }
 
         }
-        
+       
     }
-    
+   
     public void validateRequiredElements(ValidatorData data) throws RampartException {
-        
+       
         RampartMessageData rmd = data.getRampartMessageData();
-        
+       
         RampartPolicyData rpd = rmd.getPolicyData();
-        
+       
         SOAPEnvelope envelope = rmd.getMsgContext().getEnvelope();
 
         for (String expression : rpd.getRequiredElements()) {
@@ -618,27 +584,18 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 throw new RampartException("requiredElementsMissing", new String[]{expression});
             }
         }
-        
+       
     }
 
     protected void validateSignedPartsHeaders(ValidatorData data, List<WSEncryptionPart> signatureParts,
                                               List<WSSecurityEngineResult> results)
     throws RampartException {
-        
+       
         RampartMessageData rmd = data.getRampartMessageData();
         Node envelope = rmd.getDocument().getFirstChild();
-        
-        WSSecurityEngine secEngine = new WSSecurityEngine();
-        List<WSSecurityEngineResult> actionResults = null;
-        try {
-            WSHandlerResult wsResults =
-                secEngine.processSecurityHeader(rmd.getDocument(), null, null, null);
-            actionResults = wsResults.getActionResults().get(WSConstants.SIGN);
+       
+        WSSecurityEngineResult[] actionResults = fetchActionResults(results, WSConstants.SIGN);
 
-        } catch (WSSecurityException e) {
-            // This has to be changed to propagate an instance of a RampartException up
-            throw new RampartException("An error occurred while searching for signed elements.", e);
-        }
         // Find elements that are signed
         List<QName> actuallySigned = new ArrayList<QName>();
         if (actionResults != null) {
@@ -699,7 +656,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                         envelope, wsep.getName(), wsep.getNamespace());
 
                 if (element == null) {
-                    // The signedpart header or element we are checking is not present in 
+                    // The signedpart header or element we are checking is not present in
                     // soap envelope - this is allowed
                     continue;
                 }
@@ -719,11 +676,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         }
     }
 
-    
+   
     protected boolean isSignatureRequired(RampartMessageData rmd) {
         RampartPolicyData rpd = rmd.getPolicyData();
         return (rpd.isSymmetricBinding() && rpd.getSignatureToken() != null) ||
-                (!rpd.isSymmetricBinding() && !rpd.isTransportBinding() && 
+                (!rpd.isSymmetricBinding() && !rpd.isTransportBinding() &&
                         ((rpd.getInitiatorToken() != null && rmd.isInitiator())
                                 || rpd.getRecipientToken() != null && !rmd.isInitiator()));
     }
@@ -772,7 +729,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
 
         return true;
     }
-    
+   
     /**
      * Evaluate whether a given certificate should be trusted.
      * Hook to allow subclasses to implement custom validation methods however they see fit.
@@ -967,16 +924,17 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         return false;
     }
 
-    
+   
     protected ArrayList getEncryptedReferences(List<WSSecurityEngineResult> results) {
-        
+       
         //there can be multiple ref lists
         List<WSSecurityEngineResult> encrResults = getResults(results, WSConstants.ENCR);
-        
+       
         ArrayList refs = new ArrayList();
 
         for (WSSecurityEngineResult engineResult : encrResults) {
-            ArrayList dataRefUris = (ArrayList) engineResult
+            // EmptyList rather than null is passed back from result creation so need to use List rather than ArrayList
+            List dataRefUris = (List) engineResult
                     .get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
 
             //take only the ref list processing results
@@ -988,14 +946,14 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 }
             }
         }
-        
+       
         return refs;
     }
-    
-    
-    
+   
+   
+   
     protected List<WSSecurityEngineResult> getResults(List<WSSecurityEngineResult> results, int action) {
-        
+       
         List<WSSecurityEngineResult> list = new ArrayList<WSSecurityEngineResult>();
 
         for (WSSecurityEngineResult result : results) {
@@ -1006,46 +964,46 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 list.add(result);
             }
         }
-        
+       
         return list;
     }
-    
+   
     protected boolean isUsernameTokenPresent(ValidatorData data) {
-        
+       
         //TODO This can be integrated with supporting token processing
         // which also checks whether Username Tokens present
-        
+       
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
-        
+       
         List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
         for (SupportingToken suppTok : supportingToks) {
             if (isUsernameTokenPresent(suppTok)) {
                 return true;
             }
         }
-        
+       
         SupportingToken signedSuppToken = rpd.getSignedSupportingTokens();
         if(isUsernameTokenPresent(signedSuppToken)) {
             return true;
         }
-        
+       
         SupportingToken signedEndSuppToken = rpd.getSignedEndorsingSupportingTokens();
         if(isUsernameTokenPresent(signedEndSuppToken)) {
             return true;
         }
-        
+       
         SupportingToken endSuppToken = rpd.getEndorsingSupportingTokens();
         return isUsernameTokenPresent(endSuppToken);
 
 
     }
-    
+   
     protected boolean isUsernameTokenPresent(SupportingToken suppTok) {
-        
+       
         if(suppTok == null) {
             return false;
         }
-        
+       
         ArrayList tokens = suppTok.getTokens();
         for (Iterator iter = tokens.iterator(); iter.hasNext();) {
             Token token = (Token) iter.next();
@@ -1053,10 +1011,10 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 return true;
             }
         }
-        
+       
         return false;
     }
-    
+   
     private boolean isRefIdPresent(ArrayList refList , String id) {
 
         if(id != null && id.charAt(0) == '#') {
@@ -1083,11 +1041,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 return true;
             }
         }
-        
+       
         return false;
-        
+       
     }
-    
+   
     public static WSSecurityEngineResult[] fetchActionResults(List<WSSecurityEngineResult> wsSecurityEngineResults, int action) {
         List<WSSecurityEngineResult> wsResult = new ArrayList<WSSecurityEngineResult>();
 
@@ -1104,7 +1062,29 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         return wsResult.toArray(new WSSecurityEngineResult[wsResult
                 .size()]);
     }
-    
+   
+    // Just copied fetchActionResult from older WSSec as it's been removed - it's a very simple filter
+    public static WSSecurityEngineResult fetchActionResult(
+            List<WSSecurityEngineResult> resultList,
+            int action
+        ) {
+   
+        WSSecurityEngineResult returnResult = null;
+       
+        for (WSSecurityEngineResult result : resultList) {
+            //
+            // Check the result of every action whether it matches the given action
+            //
+            int resultAction =
+                ((java.lang.Integer)result.get(WSSecurityEngineResult.TAG_ACTION)).intValue();
+            if (resultAction == action) {
+                returnResult = result;
+            }
+        }
+
+        return returnResult;
+    }
+   
     private boolean isRefIdPresent(ArrayList refList , QName qname) {
 
         for (Object aRefList : refList) {
@@ -1122,10 +1102,10 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
             }
 
         }
-        
+       
         return false;
-        
+       
     }
 
-    
+   
 }
