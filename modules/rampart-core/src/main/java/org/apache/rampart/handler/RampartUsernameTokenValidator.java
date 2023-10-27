@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.rampart.handler;
+ package org.apache.rampart.handler;
 
 import java.io.IOException;
 
@@ -31,7 +31,7 @@ import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.message.token.UsernameToken;
 import org.apache.wss4j.stax.utils.WSSUtils;
 import org.apache.wss4j.stax.validate.TokenContext;
-import org.apache.wss4j.stax.validate.UsernameTokenValidatorImpl;
+import org.apache.wss4j.dom.validate.UsernameTokenValidator;
 
 
 /**
@@ -40,25 +40,21 @@ import org.apache.wss4j.stax.validate.UsernameTokenValidatorImpl;
  * WSS4J for validation.
  * 
  */
-public class RampartUsernameTokenValidator extends UsernameTokenValidatorImpl {
-
+public class RampartUsernameTokenValidator extends UsernameTokenValidator {
     private static Log mlog = LogFactory.getLog(RampartConstants.MESSAGE_LOG);
 
     /**
      * Verify a UsernameToken containing a plaintext password.
      */
     @Override
-    protected void verifyPlaintextPassword(
-        String username,
-        PasswordString passwordType,
-        TokenContext tokenContext
+    protected void verifyPlaintextPassword(UsernameToken usernameToken, RequestData data
     ) throws WSSecurityException {
-        WSPasswordCallback pwCb = new WSPasswordCallback(username,
-                null,
-                passwordType.getType(),
+        WSPasswordCallback pwCb = new WSPasswordCallback(usernameToken.getName(),
+        		usernameToken.getPassword(),
+                usernameToken.getPasswordType(), 
                 WSPasswordCallback.USERNAME_TOKEN);
         try {
-            WSSUtils.doPasswordCallback(tokenContext.getWssSecurityProperties().getCallbackHandler(), pwCb);
+            WSSUtils.doPasswordCallback(data.getCallbackHandler(), pwCb);
         } catch (WSSecurityException e) {
             throw new WSSecurityException(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION, e);
         }
