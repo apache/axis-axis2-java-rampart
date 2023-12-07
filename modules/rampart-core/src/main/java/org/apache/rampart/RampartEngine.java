@@ -252,6 +252,7 @@ public class RampartEngine {
                     requestData.setCallbackHandler(tokenCallbackHandler);
                     requestData.setSigVerCrypto(signatureCrypto);
                     requestData.setActor(actorValue);
+                    requestData.setAllowRSA15KeyTransportAlgorithm(true);
                     requestData.setDecCrypto(RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), msgCtx.getAxisService().getClassLoader()));
 
                     WSHandlerResult result = engine.processSecurityHeader(rmd.getDocument(), requestData); 

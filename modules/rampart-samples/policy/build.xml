@@ -202,7 +202,7 @@
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
                     <classpath refid="runtime.classpath"/>
-                    <jvmarg line="-Djava.endorsed.dirs=${endorsed.dir} ${vmargs}"/>
+                    <jvmarg line="${vmargs}"/>
             </java>
 
 	   </sequential>
@@ -266,7 +266,7 @@
                     <arg value="${service.repos.dir}/sample@{sample.number}"/>
                     <arg value="-p${server.port}"/>
                     <classpath refid="runtime.classpath"/>
-                    <jvmarg line="-Djava.endorsed.dirs=${endorsed.dir} ${vmargs}"/>
+                    <jvmarg line="${vmargs}"/>
             </java>
 
        </sequential>
