@@ -16,7 +16,7 @@
 
 package org.apache.rampart.tomcat.sample;
 
-import org.apache.ws.security.WSPasswordCallback;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -32,7 +32,7 @@ public class PWCBHandler implements CallbackHandler {
             
             //When the server side need to authenticate the user
             WSPasswordCallback pwcb = (WSPasswordCallback)callbacks[i];
-            if (pwcb.getUsage() == WSPasswordCallback.USERNAME_TOKEN_UNKNOWN) {
+            if (pwcb.getUsage() == WSPasswordCallback.UNKNOWN) {
                 if(pwcb.getIdentifier().equals("alice") && pwcb.getPassword().equals("bobPW")) {
                     return;
                 } else {
