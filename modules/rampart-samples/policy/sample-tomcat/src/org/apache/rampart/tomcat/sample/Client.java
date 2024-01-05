@@ -16,6 +16,7 @@
 
 package org.apache.rampart.tomcat.sample;
 
+import java.io.FileInputStream;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,7 +24,8 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -61,7 +63,7 @@ public class Client {
     }
 
     private static Policy loadPolicy(String xmlPath) throws Exception {
-        StAXOMBuilder builder = new StAXOMBuilder(xmlPath);
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(xmlPath));
         OMElement elem = builder.getDocumentElement();
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
