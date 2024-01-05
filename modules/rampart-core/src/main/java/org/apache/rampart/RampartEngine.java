@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
+import org.apache.rahas.TrustException;
 import org.apache.rampart.policy.RampartPolicyData;
 import org.apache.rampart.policy.model.KerberosConfig;
 import org.apache.rampart.policy.model.RampartConfig;
@@ -243,35 +244,19 @@ public class RampartEngine {
 
 		Crypto signatureCrypto = RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
                 msgCtx.getAxisService().getClassLoader());
-                TokenCallbackHandler tokenCallbackHandler = new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd));
-                if(rpd.isSymmetricBinding()) {
-                    //Here we have to create the CB handler to get the tokens from the 
-                    //token storage
-                    log.debug("Processing security header using SymetricBinding");
-                    requestData.setEncodePasswords(true);
-                    requestData.setCallbackHandler(tokenCallbackHandler);
-                    requestData.setSigVerCrypto(signatureCrypto);
-                    requestData.setActor(actorValue);
-                    requestData.setAllowRSA15KeyTransportAlgorithm(true);
-                    requestData.setDecCrypto(RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), msgCtx.getAxisService().getClassLoader()));
+        TokenCallbackHandler tokenCallbackHandler = new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd));
+                
+        Crypto decCrypto = RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), msgCtx.getAxisService().getClassLoader());
+        WSHandlerResult result = processSecurityHeaderWithRSA15(engine, rmd, engine.getWssConfig(), actorValue,
+                tokenCallbackHandler, signatureCrypto, decCrypto);
+        results = result.getResults();
 
-                    WSHandlerResult result = engine.processSecurityHeader(rmd.getDocument(), requestData); 
-                    results = result.getResults();
-            // Removcryption tokens if this is the initiator and if initiator is receiving a message
-
-                    if (rmd.isInitiator() && (msgCtx.getFLOW() == MessageContext.IN_FLOW ||
-                            msgCtx.getFLOW() == MessageContext.IN_FAULT_FLOW)) {
-                        tokenCallbackHandler.removeEncryptedToken();
-                    }
-
-                } else {
-
-                    log.debug("Processing security header in normal path");
-                    Crypto decCrypto = RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), msgCtx.getAxisService().getClassLoader());
-                    WSHandlerResult result = processSecurityHeaderWithRSA15(engine, rmd, engine.getWssConfig(), actorValue,
-                        tokenCallbackHandler, signatureCrypto, decCrypto);
-                    results = result.getResults();
-		}
+        if(rpd.isSymmetricBinding()) {
+            if (rmd.isInitiator() && (msgCtx.getFLOW() == MessageContext.IN_FLOW ||
+                msgCtx.getFLOW() == MessageContext.IN_FAULT_FLOW)) {
+            tokenCallbackHandler.removeEncryptedToken();
+            }   
+        }
 
 		if(dotDebug){
 			t1 = System.currentTimeMillis();
@@ -409,12 +394,13 @@ public class RampartEngine {
                 throws WSSecurityException {
     
         RequestData data = new RequestData();
-        data.setWssConfig(config);
+        data.setEncodePasswords(false);
         data.setActor(actor);
         data.setDecCrypto(decCrypto);
         data.setSigVerCrypto(sigCrypto);
         data.setCallbackHandler(cb);
-        data.setAllowRSA15KeyTransportAlgorithm(true);
+        data.setAllowRSA15KeyTransportAlgorithm(true); // backward compatibility
+        data.setValidateSamlSubjectConfirmation(false); // backward compatibility
 
         return engine.processSecurityHeader(rmd.getDocument(), data);
     }
