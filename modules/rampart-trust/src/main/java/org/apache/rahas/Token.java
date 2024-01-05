@@ -26,6 +26,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -177,17 +178,15 @@ public class Token implements Externalizable {
             OMElement createdElem =
                 lifetimeElem.getFirstChildWithName(new QName(WSConstants.WSU_NS, WSConstants.CREATED_LN));
 
-            LocalDate localDateCreated = LocalDate.parse(createdElem.getText(), DateUtil.getDateTimeFormatter(true));
-            ZonedDateTime createdDateTime = localDateCreated.atStartOfDay(ZoneOffset.UTC);
-            this.created = Date.from(createdDateTime.toInstant());
+            LocalDateTime localDateCreated = LocalDateTime.parse(createdElem.getText(), DateUtil.getDateTimeFormatter(true));
+            this.created = Date.from(localDateCreated.atZone(ZoneOffset.UTC).toInstant());
 
             OMElement expiresElem =
                 lifetimeElem.getFirstChildWithName(new QName(WSConstants.WSU_NS, WSConstants.EXPIRES_LN));
 
-            LocalDate localDateExpires = LocalDate.parse(expiresElem.getText(), DateUtil.getDateTimeFormatter(true));
-            ZonedDateTime expiresDateTime = localDateExpires.atStartOfDay(ZoneOffset.UTC);
-
-            this.expires = Date.from(expiresDateTime.toInstant());
+            LocalDateTime localDateExpires = LocalDateTime.parse(expiresElem.getText(), DateUtil.getDateTimeFormatter(true));
+            this.expires = Date.from(localDateExpires.atZone(ZoneOffset.UTC).toInstant());
+            
         } catch (OMException e) {
             throw new TrustException("lifeTimeProcessingError", new String[]{lifetimeElem.toString()}, e);
         } catch (Exception e) {
