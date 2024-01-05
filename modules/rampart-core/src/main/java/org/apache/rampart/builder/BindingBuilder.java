@@ -790,6 +790,7 @@ public abstract class BindingBuilder {
 
         List<WSHandlerResult> results
                 = (List<WSHandlerResult>)rmd.getMsgContext().getProperty(WSHandlerConstants.RECV_RESULTS);
+
         /*
          * loop over all results gathered by all handlers in the chain. For each
          * handler result get the various actions. After that loop we have all
@@ -799,9 +800,17 @@ public abstract class BindingBuilder {
         for (Object result : results) {
             WSHandlerResult wshResult = (WSHandlerResult) result;
 
-            signatureActions.addAll(wshResult.getActionResults().get(WSConstants.SIGN));
-            signatureActions.addAll(wshResult.getActionResults().get(WSConstants.ST_SIGNED));
-            signatureActions.addAll(wshResult.getActionResults().get(WSConstants.UT_SIGN));
+            if (null != wshResult.getActionResults()) {
+            	if (null != wshResult.getActionResults().get(WSConstants.SIGN)) {
+            		signatureActions.addAll(wshResult.getActionResults().get(WSConstants.SIGN));
+            	}
+            	if (null != wshResult.getActionResults().get(WSConstants.ST_SIGNED)) {
+            		signatureActions.addAll(wshResult.getActionResults().get(WSConstants.ST_SIGNED));
+            	}
+            	if (null != wshResult.getActionResults().get(WSConstants.UT_SIGN)) {
+            		signatureActions.addAll(wshResult.getActionResults().get(WSConstants.UT_SIGN));
+            	}
+            }
         }
         
         // prepare a SignatureConfirmation token
