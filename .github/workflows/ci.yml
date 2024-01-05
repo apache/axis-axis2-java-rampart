@@ -26,10 +26,11 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
-        java: [ 8 ]
+        java: [ 11, 17, 19 ]
     name: "Java ${{ matrix.java }}"
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
