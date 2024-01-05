@@ -273,10 +273,13 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
 
             boolean encrDataFound = false;
             for (WSSecurityEngineResult result : list) {
-                ArrayList dataRefURIs = (ArrayList) result.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
-                if (dataRefURIs != null && dataRefURIs.size() != 0) {
-                    encrDataFound = true;
-                }
+            	Object resultElement = result.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
+            	if (resultElement instanceof ArrayList) {
+	                ArrayList dataRefURIs = (ArrayList) resultElement;
+	                if (dataRefURIs != null && dataRefURIs.size() != 0) {
+	                    encrDataFound = true;
+	                }
+            	}
             }
             //TODO check whether the encrptedDataFound is an UsernameToken
             if(encrDataFound && !isUsernameTokenPresent(data)) {
