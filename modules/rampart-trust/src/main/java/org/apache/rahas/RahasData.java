@@ -26,7 +26,7 @@ import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
-import org.apache.wss4j.dom.handler.WSHandlerResult;;
+import org.apache.wss4j.dom.handler.WSHandlerResult;
 import org.apache.wss4j.common.token.SecurityTokenReference;
 import org.opensaml.saml.saml1.core.Assertion;
 import org.w3c.dom.Document;
