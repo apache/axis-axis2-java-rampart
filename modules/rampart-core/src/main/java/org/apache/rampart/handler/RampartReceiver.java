@@ -40,8 +40,11 @@ import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.apache.wss4j.dom.handler.WSHandlerResult;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -109,7 +112,7 @@ public class RampartReceiver implements Handler {
             results = new ArrayList<WSHandlerResult>();
             msgContext.setProperty(WSHandlerConstants.RECV_RESULTS, results);
         }
-        WSHandlerResult rResult = new WSHandlerResult("", wsResult, null);
+        WSHandlerResult rResult = new WSHandlerResult("", wsResult, filterActionResults(wsResult));
         results.add(0, rResult);
         
         SOAPHeader header = null;
@@ -141,7 +144,23 @@ public class RampartReceiver implements Handler {
         return InvocationResponse.CONTINUE;        
 
     }
-
+    
+    private  Map<Integer, List<WSSecurityEngineResult>> filterActionResults( List<WSSecurityEngineResult> results) {
+    	Map<Integer, List<WSSecurityEngineResult>> actionResultsMap = new HashMap();
+    	
+        for (WSSecurityEngineResult result : results) {
+            Integer resultTag = (Integer)result.get(WSSecurityEngineResult.TAG_ACTION);
+            if (null != resultTag) {
+            	List<WSSecurityEngineResult> actionResults = actionResultsMap.get(resultTag);
+            	if (null == actionResults) {
+            		actionResults = new ArrayList<>();
+            		actionResultsMap.put(resultTag, actionResults);
+            	}
+            	actionResults.add(result);
+            }
+        }
+    	return actionResultsMap;
+    }
     
     public HandlerDescription getHandlerDesc() {
         return this.handlerDesc;

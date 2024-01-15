@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import org.apache.ws.security.WSPasswordCallback;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -32,7 +32,7 @@ public class JPAMCallbackHandler implements CallbackHandler {
         for (int i = 0; i < callbacks.length; i++) {
             // When the server side need to authenticate the user
             WSPasswordCallback pwcb = (WSPasswordCallback) callbacks[i];
-            if (pwcb.getUsage() == WSPasswordCallback.USERNAME_TOKEN_UNKNOWN) {
+            if (pwcb.getUsage() == WSPasswordCallback.UNKNOWN) {
                 Pam pam = new Pam();
                 PamReturnValue ret = pam.authenticate(pwcb.getIdentifer(), pwcb
                         .getPassword());

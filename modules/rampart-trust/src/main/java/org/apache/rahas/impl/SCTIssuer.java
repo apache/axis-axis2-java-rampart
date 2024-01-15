@@ -18,6 +18,7 @@ package org.apache.rahas.impl;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.description.Parameter;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.RahasData;
@@ -108,6 +109,9 @@ public class SCTIssuer implements TokenIssuer {
 
             SecurityContextToken sct =
                     new SecurityContextToken(this.getWSCVersion(data.getTokenType()), doc);
+            
+            // It appears WSS4J no longer includes an Id for SecurityContextToken automatically
+            sct.setID(UIDGenerator.generateUID());
 
             OMElement rstrElem;
             if (wstVersion == RahasConstants.VERSION_05_12) {

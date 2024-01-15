@@ -34,7 +34,7 @@ import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustUtil;
 import org.apache.rampart.RampartMessageData;
 import org.apache.ws.secpolicy.SP11Constants;
-import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml.common.xml.SAMLConstants;
 
 import java.io.FileInputStream;
 

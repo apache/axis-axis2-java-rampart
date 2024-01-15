@@ -720,7 +720,8 @@ public class SymmetricBindingBuilder extends BindingBuilder {
             
             // Set the SHA1 value of the encrypted key, this is used when the encrypted
             // key is referenced via a key identifier of type EncryptedKeySHA1
-            tempTok.setSHA1(getSHA1(encrKey.getEncryptedKeySHA1().getBytes()));
+            //tempTok.setSHA1(getSHA1(encrKey.getEncryptedKeySHA1().getBytes()));
+            tempTok.setSHA1(encrKey.getEncryptedKeySHA1());
             
             rmd.getTokenStorage().add(tempTok);
             

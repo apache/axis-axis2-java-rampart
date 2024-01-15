@@ -102,7 +102,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
         // Creation and expiration times
         Instant creationTime = Instant.now();
-        Instant expirationTime = Instant.ofEpochMilli(creationTime.getEpochSecond() + tokenIssuerConfiguration.getTtl());
+        Instant expirationTime = creationTime.plusMillis(tokenIssuerConfiguration.getTtl());
 
         // Get the document
         Document doc = ((Element) env).getOwnerDocument();
