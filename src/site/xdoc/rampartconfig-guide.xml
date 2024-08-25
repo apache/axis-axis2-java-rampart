@@ -34,8 +34,8 @@
 <pre>
 &lt;signatureCrypto&gt;
 	&lt;crypto provider="org.apache.ws.security.components.crypto.Merlin"&gt;
-		&lt;property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;JKS&lt;/property&gt;
-		&lt;property name="org.apache.ws.security.crypto.merlin.file"&gt;client.jks&lt;/property&gt;
+		&lt;property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;PKCS12&lt;/property&gt;
+		&lt;property name="org.apache.ws.security.crypto.merlin.file"&gt;client.pkcs12&lt;/property&gt;
 		&lt;property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;apache&lt;/property&gt;
 	&lt;/crypto&gt;
 &lt;signatureCrypto&gt;
@@ -111,15 +111,15 @@ configuration properties used by the implementation class
           &lt;ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy";&gt;
             &lt;ramp:signatureCrypto&gt;
                 &lt;ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin" cryptoKey="org.apache.ws.security.crypto.merlin.file" cacheRefreshInterval="300000"&gt;
-                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;JKS&lt;/ramp:property&gt;
-                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.file"&gt;service.jks&lt;/ramp:property&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;PKCS12&lt;/ramp:property&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.file"&gt;service.pkcs12&lt;/ramp:property&gt;
                     &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;servicePW&lt;/ramp:property&gt;
                 &lt;/ramp:crypto&gt;
             &lt;/ramp:signatureCrypto&gt;
             &lt;ramp:encryptionCypto&gt;
                 &lt;ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin" cryptoKey="org.apache.ws.security.crypto.merlin.file" cacheRefreshInterval="300000&gt;
-                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;JKS&lt;/ramp:property&gt;
-                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.file"&gt;service.jks&lt;/ramp:property&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;PKCS12&lt;/ramp:property&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.file"&gt;service.pkcs12&lt;/ramp:property&gt;
                     &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;apache&lt;/ramp:property&gt;
                 &lt;/ramp:crypto&gt;
             &lt;/ramp:encryptionCypto&gt;
@@ -133,8 +133,8 @@ configuration properties used by the implementation class
       <pre xmlns="http://www.w3.org/1999/xhtml" xml:space="preserve">
             &lt;ramp:signatureCrypto&gt;
                 &lt;ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin" enableCryptoCaching="false"&gt;
-                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;JKS&lt;/ramp:property&gt;
-                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.file"&gt;service.jks&lt;/ramp:property&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;PKCS12&lt;/ramp:property&gt;
+                    &lt;ramp:property name="org.apache.ws.security.crypto.merlin.file"&gt;service.pkcs12&lt;/ramp:property&gt;
                     &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;servicePW&lt;/ramp:property&gt;
                 &lt;/ramp:crypto&gt;
             &lt;/ramp:signatureCrypto&gt;

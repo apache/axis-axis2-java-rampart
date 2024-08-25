@@ -61,8 +61,8 @@ public class CommonUtilTest extends AbstractTestCase {
             "<issuerKeyAlias>ip</issuerKeyAlias>" +
             "<issuerKeyPassword>password</issuerKeyPassword>" +
             "<cryptoProperties><crypto provider=\"org.apache.ws.security.components.crypto.Merlin\">" +
-            "<property name=\"org.apache.ws.security.crypto.merlin.keystore.type\">JKS</property>" +
-            "<property name=\"org.apache.ws.security.crypto.merlin.file\">src/test/resources/keystore.jks</property>" +
+            "<property name=\"org.apache.ws.security.crypto.merlin.keystore.type\">pkcs12</property>" +
+            "<property name=\"org.apache.ws.security.crypto.merlin.file\">src/test/resources/apache.pkcs12</property>" +
             "<property name=\"org.apache.ws.security.crypto.merlin.keystore.password\">password</property></crypto>" +
             "</cryptoProperties>" +
             "<timeToLive>300000</timeToLive>" +
@@ -108,16 +108,16 @@ public class CommonUtilTest extends AbstractTestCase {
             OMAttribute attribute = child.getAttribute(new QName("name"));
 
             if (attribute.getAttributeValue().equals("org.apache.ws.security.crypto.merlin.keystore.type")) {
-                Assert.assertEquals(child.getText(), "JKS");
+                Assert.assertEquals(child.getText(), "pkcs12");
                 continue;
             }
 
             if (attribute.getAttributeValue().equals("org.apache.ws.security.crypto.merlin.file")) {
 
                 if (!this.isConfigFromFile) {
-                    Assert.assertEquals(child.getText(), "src/test/resources/keystore.jks");
+                    Assert.assertEquals(child.getText(), "src/test/resources/apache.pkcs12");
                 } else {
-                    Assert.assertEquals(child.getText(), "META-INF/rahas-sts.jks");
+                    Assert.assertEquals(child.getText(), "META-INF/rahas-sts2024.pkcs12");
                 }
                 continue;
             }

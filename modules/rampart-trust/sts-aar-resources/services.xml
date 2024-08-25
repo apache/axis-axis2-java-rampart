@@ -31,8 +31,8 @@
 					
 					<ramp:signatureCrypto>
 						<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
-							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
-							<ramp:property name="org.apache.ws.security.crypto.merlin.file">META-INF/rahas-sts.jks</ramp:property>
+							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12</ramp:property>
+							<ramp:property name="org.apache.ws.security.crypto.merlin.file">META-INF/rahas-sts2024.pkcs12</ramp:property>
 							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">password</ramp:property>
 						</ramp:crypto>
 					</ramp:signatureCrypto>

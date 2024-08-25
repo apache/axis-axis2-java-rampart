@@ -63,7 +63,7 @@
                         <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS
                         </ramp:property>
                         <ramp:property name="org.apache.ws.security.crypto.merlin.file">
-                            rampart/store.jks
+                            rampart/store2024.pkcs12
                         </ramp:property>
                         <ramp:property
                                 name="org.apache.ws.security.crypto.merlin.keystore.password">
@@ -76,7 +76,7 @@
                         <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS
                         </ramp:property>
                         <ramp:property name="org.apache.ws.security.crypto.merlin.file">
-                            rampart/store.jks
+                            rampart/store2024.pkcs12
                         </ramp:property>
                         <ramp:property
                                 name="org.apache.ws.security.crypto.merlin.keystore.password">

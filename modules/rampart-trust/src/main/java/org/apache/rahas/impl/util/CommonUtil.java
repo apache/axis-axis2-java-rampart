@@ -225,8 +225,8 @@ public class CommonUtil {
      *       &lt;issuerKeyPassword&gt;password&lt;/issuerKeyPassword&gt;
      *       &lt;cryptoProperties&gt;
      *          &lt;crypto provider="org.apache.ws.security.components.crypto.Merlin"&gt;
-     *               &lt;property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;JKS&lt;/property&gt;
-     *               &lt;property name="org.apache.ws.security.crypto.merlin.file"&gt;META-INF/rahas-sts.jks&lt;/property&gt;
+     *               &lt;property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;pkcs12&lt;/property&gt;
+     *               &lt;property name="org.apache.ws.security.crypto.merlin.file"&gt;META-INF/rahas-sts2024.pkcs12&lt;/property&gt;
      *               &lt;property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;password&lt;/property&gt;
      *           &lt;/crypto&gt;
      *       &lt;/cryptoProperties&gt;
