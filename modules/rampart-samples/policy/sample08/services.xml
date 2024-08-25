@@ -28,7 +28,7 @@
 			<issuerKeyPassword>apache</issuerKeyPassword>
             		<cryptoProperties>
                			<crypto provider="org.apache.ws.security.components.crypto.Merlin">
-                    		<property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</property>
+                    		<property name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12</property>
                     		<property name="org.apache.ws.security.crypto.merlin.file">service.jks</property>
                     		<property name="org.apache.ws.security.crypto.merlin.keystore.password">apache</property>
                 		</crypto>
@@ -114,7 +114,7 @@
 					
 					<ramp:signatureCrypto>
 						<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
-							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
+							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12</ramp:property>
 							<ramp:property name="org.apache.ws.security.crypto.merlin.file">service.jks</ramp:property>
 							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache</ramp:property>
 						</ramp:crypto>

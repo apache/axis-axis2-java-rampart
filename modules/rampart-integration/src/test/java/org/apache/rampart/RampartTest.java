@@ -125,6 +125,7 @@ public class RampartTest {
                     serviceClient.addHeader(header);
                 }
                 
+                System.out.println("Testing WS-Sec: custom scenario " + i + " , so far");
                 // Invoking the service in the TestCase-28 should fail. So handling it differently..
                 if (i == 28 || i == 34) {
                     try {
@@ -192,6 +193,7 @@ public class RampartTest {
                 } catch (AxisFault axisFault) {
                     assertEquals("Testing negative scenarios with Apache Rampart. Intentional Exception", axisFault.getMessage());
                 }
+                System.out.println("Testing WS-Sec: custom scenario " + i + " , so goog");
             }
 
             

@@ -80,7 +80,7 @@
                     <ramp:signatureCrypto>
                         <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
                             <ramp:property
-                                    name="org.apache.ws.security.crypto.merlin.keystore.type">JKS
+                                    name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12
                             </ramp:property>
                             <ramp:property name="org.apache.ws.security.crypto.merlin.file">
                                 rampart/store2024.pkcs12
@@ -94,7 +94,7 @@
                     <ramp:encryptionCypto>
                         <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
                             <ramp:property
-                                    name="org.apache.ws.security.crypto.merlin.keystore.type">JKS
+                                    name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12
                             </ramp:property>
                             <ramp:property name="org.apache.ws.security.crypto.merlin.file">
                                 rampart/store2024.pkcs12
