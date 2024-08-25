@@ -161,7 +161,7 @@
                                 <mkdir dir="target/temp-ramp" />
                                 <mkdir dir="target/temp-ramp/META-INF" />
 
-                                <copy overwrite="yes" file="src/test/resources/rampart/store2024.pkcs12" tofile="target/temp-ramp/store.jks" />
+                                <copy overwrite="yes" file="src/test/resources/rampart/store2024.pkcs12" tofile="target/temp-ramp/store2024.pkcs12" />
                                 <!--path id="ramp.client.props" location="test-resources/rampart"/-->
                                 <!--maven:addPath id="maven.dependency.classpath" refid="ramp.client.props" -->
                                 <mkdir dir="target/test-resources/rampart_client_repo" />

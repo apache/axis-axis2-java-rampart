@@ -45,8 +45,8 @@ public class SAML2TokenIssuerTest extends AbstractTestCase {
             "<issuerKeyAlias>apache</issuerKeyAlias>" +
             "<issuerKeyPassword>password</issuerKeyPassword>" +
             "<cryptoProperties><crypto provider=\"org.apache.ws.security.components.crypto.Merlin\">" +
-            "<property name=\"org.apache.ws.security.crypto.merlin.keystore.type\">JKS</property>" +
-            "<property name=\"org.apache.ws.security.crypto.merlin.file\">src/test/resources/keystore.jks</property>" +
+            "<property name=\"org.apache.ws.security.crypto.merlin.keystore.type\">pkcs12</property>" +
+            "<property name=\"org.apache.ws.security.crypto.merlin.file\">src/test/resources/apache.pkcs12</property>" +
             "<property name=\"org.apache.ws.security.crypto.merlin.keystore.password\">password</property></crypto>" +
             "</cryptoProperties>" +
             "<timeToLive>300000</timeToLive>" +

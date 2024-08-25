@@ -43,8 +43,8 @@ import javax.xml.stream.XMLStreamWriter;
  *  
  *  &lt;ramp:signatureCrypto&gt;
  *  &lt;ramp:crypto provider=&quot;org.apache.ws.security.components.crypto.Merlin&quot;&gt;
- *  &lt;ramp:property name=&quot;keystoreType&quot;&gt;JKS&lt;/ramp:property&gt;
- *  &lt;ramp:property name=&quot;keystoreFile&quot;&gt;/path/to/file.jks&lt;/ramp:property&gt;
+ *  &lt;ramp:property name=&quot;keystoreType&quot;&gt;pkcs12&lt;/ramp:property&gt;
+ *  &lt;ramp:property name=&quot;keystoreFile&quot;&gt;/path/to/file.pkcs12&lt;/ramp:property&gt;
  *  &lt;ramp:property name=&quot;keystorePassword&quot;&gt;password&lt;/ramp:property&gt;
  *  &lt;/ramp:crypto&gt;
  *  &lt;/ramp:signatureCrypto&gt;

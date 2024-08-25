@@ -71,9 +71,9 @@ public class RampartPolicyTest extends TestCase {
         Properties prop = sigCryptoConfig.getProp();
         assertEquals("Incorrect number of properties", 3, prop.size());
         
-        assertEquals("Incorrect property value", "JKS", prop
+        assertEquals("Incorrect property value", "pkcs12", prop
                 .getProperty("keystoreType"));
-        assertEquals("Incorrect property value", "/path/to/file.jks", prop
+        assertEquals("Incorrect property value", "/path/to/file.pkcs12", prop
                 .getProperty("keystoreFile"));
         assertEquals("Incorrect property value", "password", prop
                 .getProperty("keystorePassword"));

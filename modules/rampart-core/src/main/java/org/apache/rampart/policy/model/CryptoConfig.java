@@ -33,8 +33,8 @@ import java.util.Properties;
  * Example:
 <pre>
 &lt;ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin"&gt;
-    &lt;ramp:property name="keystoreType"&gt;JKS&lt;/ramp:property&gt;
-    &lt;ramp:property name="keystoreFile"&gt;/path/to/file.jks&lt;/ramp:property&gt;
+    &lt;ramp:property name="keystoreType"&gt;pkcs12&lt;/ramp:property&gt;
+    &lt;ramp:property name="keystoreFile"&gt;/path/to/file.pkcs12&lt;/ramp:property&gt;
     &lt;ramp:property name="keystorePassword"&gt;password&lt;/ramp:property&gt;
 &lt;/ramp:crypto&gt;
 </pre>

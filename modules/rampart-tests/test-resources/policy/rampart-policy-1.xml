@@ -6,8 +6,8 @@
 		
 		<ramp:signatureCrypto>
 			<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
-				<ramp:property name="keystoreType">JKS</ramp:property>
-				<ramp:property name="keystoreFile">/path/to/file.jks</ramp:property>
+				<ramp:property name="keystoreType">pkcs12</ramp:property>
+				<ramp:property name="keystoreFile">/path/to/file.pkcs12</ramp:property>
 				<ramp:property name="keystorePassword">password</ramp:property>
 			</ramp:crypto>
 		</ramp:signatureCrypto>

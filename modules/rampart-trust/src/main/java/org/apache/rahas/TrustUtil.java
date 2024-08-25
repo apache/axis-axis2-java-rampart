@@ -594,8 +594,8 @@ public class TrustUtil {
            Process an element similar to this;
 
                 <crypto provider="org.apache.ws.security.components.crypto.Merlin">
-                    <property name="org.apache.ws.security.crypto.merlin.keystore.type">jks</property>
-                    <property name="org.apache.ws.security.crypto.merlin.file">sts.jks</property>
+                    <property name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12</property>
+                    <property name="org.apache.ws.security.crypto.merlin.file">sts2024.pkcs12</property>
                     <property name="org.apache.ws.security.crypto.merlin.keystore.password">password</property>
                 </crypto>
         */
