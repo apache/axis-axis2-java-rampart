@@ -108,13 +108,14 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         RampartConfig config = rpd.getRampartConfig();
 
         /*
-         * We need to hold on to these two element to use them as refence in the
-         * case of encypting the signature
+         * We need to hold on to these elements to use them as reference in the
+         * case of encrypting the signature
          */
         Element encrDKTokenElem = null;
         WSSecEncrypt encr = null;
         refList = null;
         WSSecDKEncrypt dkEncr = null;
+        SecretKey symmetricKey = null;
 
         /*
          * We MUST use keys derived from the same token
@@ -171,7 +172,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     encr = new WSSecEncrypt(secHeader);
 
                     KeyGenerator keyGen = KeyUtils.getKeyGenerator(rpd.getAlgorithmSuite().getEncryption());
-                    SecretKey symmetricKey = keyGen.generateKey();
+                    symmetricKey = keyGen.generateKey();
             
                     //Element refs = encr.encryptForRef(null, encrParts, symmetricKey);
                     //encr.addInternalRefElement(refs);
@@ -330,8 +331,6 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                     }
                 } else {
                     try {
-                        KeyGenerator keyGen = KeyUtils.getKeyGenerator(rpd.getAlgorithmSuite().getEncryption());
-                        SecretKey symmetricKey = keyGen.generateKey();
                         // Encrypt, get hold of the ref list and add it
                         secondRefList = encr.encryptForRef(null,
                                 secondEncrParts, symmetricKey);
@@ -509,6 +508,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                         this.setupEncryptedKey(rmd, encrToken);
                     }
                     
+                    dkEncr.setTokenIdentifier(this.encryptedKeyId);
                     dkEncr.setCustomValueType(WSConstants.SOAPMESSAGE_NS11 + "#"
                             + WSConstants.ENC_KEY_VALUE_TYPE);
                     dkEncr.setSymmetricEncAlgorithm(algorithmSuite.getEncryption());
