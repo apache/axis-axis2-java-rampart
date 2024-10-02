@@ -28,7 +28,7 @@
 			<issuerKeyPassword>apache</issuerKeyPassword>
             		<cryptoProperties>
                			<crypto provider="org.apache.ws.security.components.crypto.Merlin">
-                    		<property name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12</property>
+                    		<property name="org.apache.ws.security.crypto.merlin.keystore.type">jks</property>
                     		<property name="org.apache.ws.security.crypto.merlin.file">service.jks</property>
                     		<property name="org.apache.ws.security.crypto.merlin.keystore.password">apache</property>
                 		</crypto>
