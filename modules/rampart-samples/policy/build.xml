@@ -189,7 +189,7 @@
                 </filterset>
             </copy>
 	   		<copy file="${keys.dir}/service.jks" tofile="${temp.dir}/service.jks" overwrite="true"/>
-	   		<copy file="${keys.dir}/sts2024.jks" tofile="${temp.dir}/sts2024.jks" overwrite="true"/>
+	   		<copy file="${keys.dir}/sts.jks" tofile="${temp.dir}/sts.jks" overwrite="true"/>
 	   		<copy file="${keys.dir}/service.properties" tofile="${temp.dir}/service.properties" overwrite="true"/>
 
 	   		<jar destfile="${service.repos.dir}/sample@{sample.number}/services/sample@{sample.number}.aar">
@@ -253,7 +253,7 @@
                 </filterset>
             </copy>
             <copy file="${keys.dir}/service.jks" tofile="${temp.dir}/service.jks" overwrite="true"/>
-            <copy file="${keys.dir}/sts2024.jks" tofile="${temp.dir}/sts2024.jks" overwrite="true"/>
+            <copy file="${keys.dir}/sts.jks" tofile="${temp.dir}/sts.jks" overwrite="true"/>
             <copy file="${keys.dir}/service.properties" tofile="${temp.dir}/service.properties" overwrite="true"/>
 
             <jar destfile="${service.repos.dir}/sample@{sample.number}/services/sample@{sample.number}.aar">

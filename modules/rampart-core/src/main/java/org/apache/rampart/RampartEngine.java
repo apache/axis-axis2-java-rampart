@@ -225,32 +225,15 @@ public class RampartEngine {
 		if(dotDebug){
 			t0 = System.currentTimeMillis();
 		}
-
-		//wss4j does not allow username tokens with no password per default, see https://issues.apache.org/jira/browse/WSS-420
-		//configure it to allow them explicitly if at least one username token assertion with no password requirement is found
-                RequestData requestData = new RequestData();
-		if (!rmd.isInitiator()) {
-		    Collection<UsernameToken> usernameTokens = RampartUtil.getUsernameTokens(rpd);
-		    for (UsernameToken usernameTok : usernameTokens) {
-		        if (usernameTok.isNoPassword()) {
-		            log.debug("Found UsernameToken with no password assertion in policy, configuring ws security processing to allow username tokens without password." );
-		            requestData.setAllowUsernameTokenNoPassword(true);
-		            break;
-		        }
-		    }
-		}
 		
-		String actorValue = secHeader.getRole();
-
 		Crypto signatureCrypto = RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), 
                 msgCtx.getAxisService().getClassLoader());
-        TokenCallbackHandler tokenCallbackHandler = new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd));
-                
         Crypto decCrypto = RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), msgCtx.getAxisService().getClassLoader());
-        WSHandlerResult result = processSecurityHeaderWithRSA15(engine, rmd, engine.getWssConfig(), actorValue,
-                tokenCallbackHandler, signatureCrypto, decCrypto);
+        TokenCallbackHandler tokenCallbackHandler = new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd));
+        
+        WSHandlerResult result = processSecurityHeaderWithRSA15(rmd, secHeader, engine, signatureCrypto, decCrypto, tokenCallbackHandler);
         results = result.getResults();
-
+        
         if(rpd.isSymmetricBinding()) {
             if (rmd.isInitiator() && (msgCtx.getFLOW() == MessageContext.IN_FLOW ||
                 msgCtx.getFLOW() == MessageContext.IN_FAULT_FLOW)) {
@@ -389,20 +372,35 @@ public class RampartEngine {
 		return results;
 	}
 
-    private WSHandlerResult processSecurityHeaderWithRSA15(
-        WSSecurityEngine engine, RampartMessageData rmd, WSSConfig config, String actor, CallbackHandler cb, Crypto sigCrypto,  Crypto decCrypto) 
-                throws WSSecurityException {
-    
-        RequestData data = new RequestData();
-        data.setEncodePasswords(false);
-        data.setActor(actor);
-        data.setDecCrypto(decCrypto);
-        data.setSigVerCrypto(sigCrypto);
-        data.setCallbackHandler(cb);
-        data.setAllowRSA15KeyTransportAlgorithm(true); // backward compatibility
-        data.setValidateSamlSubjectConfirmation(false); // backward compatibility
+    private WSHandlerResult processSecurityHeaderWithRSA15(RampartMessageData rmd, SOAPHeaderBlock secHeader, WSSecurityEngine engine,
+    		Crypto signatureCrypto, Crypto decCrypto, TokenCallbackHandler tokenCallbackHandler) 
+                throws WSSecurityException, RampartException {
+    	
+    	RampartPolicyData rpd = rmd.getPolicyData();
 
-        return engine.processSecurityHeader(rmd.getDocument(), data);
+		RequestData requestData = new RequestData();
+		requestData.setEncodePasswords(false);
+		requestData.setActor(secHeader.getRole());
+		requestData.setDecCrypto(decCrypto);
+		requestData.setSigVerCrypto(signatureCrypto);
+		requestData.setCallbackHandler(tokenCallbackHandler);
+		requestData.setAllowRSA15KeyTransportAlgorithm(true); // backward compatibility
+		requestData.setValidateSamlSubjectConfirmation(false); // backward compatibility
+        
+		//wss4j does not allow username tokens with no password per default, see https://issues.apache.org/jira/browse/WSS-420
+		//configure it to allow them explicitly if at least one username token assertion with no password requirement is found
+		if (!rmd.isInitiator()) {
+		    Collection<UsernameToken> usernameTokens = RampartUtil.getUsernameTokens(rpd);
+		    for (UsernameToken usernameTok : usernameTokens) {
+		        if (usernameTok.isNoPassword()) {
+		            log.debug("Found UsernameToken with no password assertion in policy, configuring ws security processing to allow username tokens without password." );
+		            requestData.setAllowUsernameTokenNoPassword(true);
+		            break;
+		        }
+		    }
+		}
+
+        return engine.processSecurityHeader(rmd.getDocument(), requestData);
     }
 	
 	// Check whether this a soap fault because of failure in processing the security header 
