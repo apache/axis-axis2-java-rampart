@@ -163,12 +163,6 @@
             <artifactId>slf4j-jdk14</artifactId>
             <version>2.0.13</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>apidocs</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
     </dependencies>
 
 </project>
