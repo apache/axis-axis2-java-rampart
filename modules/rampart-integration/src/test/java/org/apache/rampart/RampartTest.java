@@ -109,7 +109,6 @@ public class RampartTest {
                     options.setPassword("password");
                 }
                 
-                System.out.println("Testing WS-Sec: custom scenario " + i);
                 options.setAction("urn:echo");
 
                 ServiceContext context = serviceClient.getServiceContext();
@@ -125,7 +124,6 @@ public class RampartTest {
                     serviceClient.addHeader(header);
                 }
                 
-                System.out.println("Testing WS-Sec: custom scenario " + i + " , so far");
                 // Invoking the service in the TestCase-28 should fail. So handling it differently..
                 if (i == 28 || i == 34) {
                     try {
@@ -193,7 +191,6 @@ public class RampartTest {
                 } catch (AxisFault axisFault) {
                     assertEquals("Testing negative scenarios with Apache Rampart. Intentional Exception", axisFault.getMessage());
                 }
-                System.out.println("Testing WS-Sec: custom scenario " + i + " , so goog");
             }
 
             
@@ -207,7 +204,6 @@ public class RampartTest {
                 }
                 Options options = serviceClient.getOptions();
 
-                System.out.println("Testing WS-SecConv: custom scenario " + i);
                 options.setAction("urn:echo");
 
                 serviceClient.getServiceContext().setProperty(RampartMessageData.KEY_RAMPART_POLICY, loadPolicy("/rampart/policy/sc-" + i + ".xml"));
