@@ -711,7 +711,7 @@
         <axis2.version>1.8.2</axis2.version>
         <axiom.version>1.4.0</axiom.version>
 
-        <wss4j.version>3.0.0</wss4j.version>
+        <wss4j.version>3.0.3</wss4j.version>
         <opensaml.version>4.3.0</opensaml.version>
 
         <bcprov.jdk18.version>1.78.1</bcprov.jdk18.version>
