@@ -512,7 +512,7 @@
         <dependency>
             <groupId>org.apache.directory.server</groupId>
             <artifactId>apacheds-core-annotations</artifactId>
-            <version>2.0.0.AM26</version>
+            <version>2.0.0.AM27</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -524,7 +524,7 @@
         <dependency>
             <groupId>org.apache.directory.server</groupId>
             <artifactId>apacheds-protocol-shared</artifactId>
-            <version>2.0.0.AM26</version>
+            <version>2.0.0.AM27</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -547,8 +547,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-interceptor-kerberos</artifactId>
+            <artifactId>apacheds-kerberos-codec</artifactId>
             <version>2.0.0.AM26</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-interceptor-kerberos</artifactId>
+            <version>2.0.0.AM27</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -560,12 +565,12 @@
         <dependency>
             <groupId>org.apache.directory.api</groupId>
             <artifactId>api-ldap-codec-standalone</artifactId>
-            <version>2.0.0</version>
+            <version>2.1.7</version>
         </dependency>
         <dependency>
             <groupId>org.apache.directory.api</groupId>
             <artifactId>api-ldap-extras-codec-api</artifactId>
-            <version>2.0.0</version>
+            <version>2.1.7</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -591,27 +596,27 @@
 	<dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jul</artifactId>
-            <version>2.23.1</version>
+            <version>2.24.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.23.1</version>
+            <version>2.24.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.23.1</version>
+            <version>2.24.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.23.1</version>
+            <version>2.24.1</version>
         </dependency>
 	<dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>2.23.1</version>
+            <version>2.24.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
