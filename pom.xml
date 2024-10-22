@@ -201,7 +201,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.20.0</version>
+                    <version>3.21.0</version>
                     <configuration>
                         <!-- Required by maven-scm-publish-plugin -->
                         <skipDeploy>true</skipDeploy>
@@ -418,9 +418,9 @@
                 <reportSets>
                     <reportSet>
                         <reports>
-                            <report>project-team</report>
-                            <report>dependencies</report>
-                            <report>mailing-list</report>
+                            <report>issue-management</report>
+                            <report>mailing-lists</report>
+                            <report>team</report>
                         </reports>
                     </reportSet>
                 </reportSets>
