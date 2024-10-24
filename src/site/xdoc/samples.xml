@@ -113,7 +113,7 @@ Messages in the secure conversation includes a timestamp, all headers are signed
                 <tr/>            
            </tbody>
         </table>
-        <div class="b" style="margin-left:2px;margin-right:-2px;">WS-Trust - RST - Resquest Security Token Service - Issuing a SAML token - issuing a token </div>
+        <div class="b" style="margin-left:2px;margin-right:-2px;">WS-Trust - RST - Request Security Token Service - Issuing a SAML token - issuing a token </div>
         <ul>
             <li><a href="samples/policy/sample05.xml">Policy</a></li>
             <li><a href="samples/msgs/req05.xml">Request Message</a></li>
@@ -126,7 +126,7 @@ Messages in the secure conversation includes a timestamp, all headers are signed
                 <tr/>
            </tbody>
         </table>
-        <div class="b" style="margin-left:2px;margin-right:-2px;">WS-Trust ( With WS Metada Exchange) - RST - Resquest Security Token Service - Issuing a SAML token  </div>
+        <div class="b" style="margin-left:2px;margin-right:-2px;">WS-Trust ( With WS Metada Exchange) - RST - Request Security Token Service - Issuing a SAML token  </div>
         <ul>
             <li><a href="samples/policy/sample01.xml">Policy</a></li>
             <li><a href="samples/msgs/req06.xml">Request Message</a></li>
