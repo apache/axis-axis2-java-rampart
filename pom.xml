@@ -510,16 +510,6 @@
                 <version>${bcprov.jdk18.version}</version>
             </dependency>
             <dependency>
-                <groupId>xalan</groupId>
-                <artifactId>xalan</artifactId>
-                <version>2.7.3</version>
-            </dependency>
-	    <dependency>
-                <groupId>xalan</groupId>
-                <artifactId>serializer</artifactId>
-                <version>2.7.3</version>
-            </dependency>
-            <dependency>
                 <groupId>org.opensaml</groupId>
                 <artifactId>opensaml-saml-impl</artifactId>
                 <version>${opensaml.version}</version>

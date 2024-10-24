@@ -46,11 +46,6 @@
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
-                        <configuration>
-                            <includeGroupIds>org.apache.xerces,org.apache.xalan</includeGroupIds>
-                            <outputDirectory>${project.build.directory}/endorsed</outputDirectory>
-                            <stripVersion>true</stripVersion>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
