@@ -145,10 +145,7 @@ public class RampartTest {
                         if (i == 28) {
                             assertEquals(resources.getString("encryptionMissing"), axisFault.getMessage());
                         } else if (i == 34) {
-                            // TODO this is failing in build server
-                            // Need to find the exact cause
-                            //assertEquals(resources.getString("invalidSignatureAlgo"), axisFault.getMessage());
-                            System.out.println(axisFault.getMessage());
+                            assertEquals(resources.getString("invalidSignatureAlgo"), axisFault.getMessage());
                         }
 
                     }

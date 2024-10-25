@@ -41,8 +41,7 @@ final class Sample {
         project.setUserProperty("client.port", String.valueOf(port));
         project.setUserProperty("server.port", String.valueOf(port));
         StringBuilder vmargs = new StringBuilder();
-        vmargs.append("-Dlog4j.configuration=");
-        vmargs.append(new File("src/test/conf/log4j.properties").getAbsoluteFile().toURI().toString());
+        vmargs.append("-Dorg.apache.logging.log4j.simplelog.StatusLogger.level=info");
         String jacocoArgLineTemplate = System.getProperty("jacoco.argLineTemplate");
         if (jacocoArgLineTemplate != null) {
             vmargs.append(" ");
