@@ -435,6 +435,17 @@
                 <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2-kernel</artifactId>
                 <version>${axis2.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-fileupload</groupId>
+                        <artifactId>commons-fileupload</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>1.5</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.axis2</groupId>
@@ -610,13 +621,23 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j-impl</artifactId>
+                <artifactId>log4j-jcl</artifactId>
                 <version>2.24.1</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-jcl</artifactId>
-                <version>2.24.1</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.santuario</groupId>
@@ -720,6 +741,7 @@
         <failIfNoTests>false</failIfNoTests>
 
         <jacoco.version>0.8.12</jacoco.version>
+        <slf4j.version>2.0.16</slf4j.version>
     </properties>
 
     <pluginRepositories>
