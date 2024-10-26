@@ -109,19 +109,16 @@
     </developers>
 
     <scm>
-        <connection>
-            scm:svn:http://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
-        </connection>
-        <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/axis/axis2/java/rampart/trunk
-        </developerConnection>
-        <url>http://svn.apache.org/viewvc/axis/axis2/java/rampart/trunk</url>
+        <connection>scm:git:https://gitbox.apache.org/repos/asf/axis-axis2-java-rampart.git</connection>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/axis-axis2-java-rampart.git</developerConnection>
+        <url>https://gitbox.apache.org/repos/asf?p=axis-axis2-java-rampart.git;a=summary</url>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
         <site>
             <id>site</id>
-            <url>scm:svn:https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart-staging</url>
+	    <url>scm:git:https://github.com/apache/axis-site/tree/master/axis2/java/rampart/core-staging</url>
         </site>
     </distributionManagement>
     
