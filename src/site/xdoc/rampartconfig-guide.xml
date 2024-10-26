@@ -41,12 +41,12 @@
 &lt;signatureCrypto&gt;
 </pre>
 		</td></tr>
-    <tr class="b"><td>encryptionCypto</td><td>properties to needed perform signature, such as crypto
+    <tr class="b"><td>encryptionCrypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>
 <pre>
-&lt;encryptionCypto&gt;
+&lt;encryptionCrypto&gt;
     ....crypto element ......
-&lt;/encryptionCypto&gt;
+&lt;/encryptionCrypto&gt;
 </pre></td></tr>
     <tr class="a"><td>decryptionCrypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>
@@ -116,13 +116,13 @@ configuration properties used by the implementation class
                     &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;servicePW&lt;/ramp:property&gt;
                 &lt;/ramp:crypto&gt;
             &lt;/ramp:signatureCrypto&gt;
-            &lt;ramp:encryptionCypto&gt;
+            &lt;ramp:encryptionCrypto&gt;
                 &lt;ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin" cryptoKey="org.apache.ws.security.crypto.merlin.file" cacheRefreshInterval="300000&gt;
                     &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type"&gt;PKCS12&lt;/ramp:property&gt;
                     &lt;ramp:property name="org.apache.ws.security.crypto.merlin.file"&gt;service.pkcs12&lt;/ramp:property&gt;
                     &lt;ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password"&gt;apache&lt;/ramp:property&gt;
                 &lt;/ramp:crypto&gt;
-            &lt;/ramp:encryptionCypto&gt;
+            &lt;/ramp:encryptionCrypto&gt;
           &lt;/ramp:RampartConfig&gt;
       </pre>
       <p>Crypto caching is enabled by default when Merlin is used as the crypto provider. So Rampart will cache the crypto objects
