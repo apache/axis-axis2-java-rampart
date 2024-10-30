@@ -55,6 +55,7 @@
     ....crypto element ......
 &lt;/decryptionCrypto&gt;</pre></td></tr>
  <tr class="b"><td>timestampTTL</td><td>Time to live of Timestamp</td><td>The default timestamp time to live is 300 seconds</td></tr>
+ <tr class="b"><td>disableBSPEnforcement.</td><td>WSS4J param to set on class RequestData</td><td>The default is false</td></tr>
     <tr class="a"><td>timestampMaxSkew</td><td>The maximum tolerence limit for timeskew of the timestamp</td><td>Rampart allows timestamps created slightly ahead of the reciever's time.<br/> This parameter allows to specify the tolerence limit</td></tr>
     <tr class="b"><td>timestampPrecisionInMilliseconds</td><td> Whether the timestamps precision should be milliseconds </td><td>When this value is set false, generated timestamps doesn't contain milliseconds </td></tr>
     <tr class="a"><td>optimizeParts</td><td></td><td></td></tr>
