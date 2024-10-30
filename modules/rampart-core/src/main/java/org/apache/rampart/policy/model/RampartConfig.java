@@ -40,6 +40,7 @@ import javax.xml.stream.XMLStreamWriter;
  *  &lt;ramp:timestampMaxSkew&gt;0&lt;/ramp:timestampMaxSkew&gt;
  *  &lt;ramp:tokenStoreClass&gt;org.apache.rahas.StorageImpl&lt;/ramp:tokenStoreClass&gt;
  *  &lt;ramp:nonceLifeTime&gt;org.apache.rahas.StorageImpl&lt;/ramp:nonceLifeTime&gt;
+ *  &lt;ramp:disableBSPEnforcement&gt;false&lt;/ramp:disableBSPEnforcement&gt;
  *  
  *  &lt;ramp:signatureCrypto&gt;
  *  &lt;ramp:crypto provider=&quot;org.apache.ws.security.components.crypto.Merlin&quot;&gt;
@@ -77,6 +78,8 @@ public class RampartConfig implements Assertion {
     public final static String RAMPART_CONFIG_LN = "RampartConfig";
 
     public final static String USER_LN = "user";
+
+    public final static String DISABLE_BSP_ENFORCEMENT_LN = "disableBSPEnforcement";
     
     public final static String USER_CERT_ALIAS_LN = "userCertAlias";
 
@@ -129,6 +132,8 @@ public class RampartConfig implements Assertion {
     private String policyValidatorCbClass;
     
     private String rampartConfigCbClass;
+
+    private String disableBSPEnforcement;
 
     private CryptoConfig sigCryptoConfig;
 
@@ -275,6 +280,17 @@ public class RampartConfig implements Assertion {
     
     public void setUserCertAlias(String userCertAlias) {
         this.userCertAlias = userCertAlias;
+    }
+
+    public String getDisableBSPEnforcement() {
+	if (disableBSPEnforcement == null) {
+            return "false";
+	}	
+        return disableBSPEnforcement;
+    }
+
+    public void setDisableBSPEnforcement(String disableBSPEnforcement) {
+        this.disableBSPEnforcement = disableBSPEnforcement;
     }
 
     public QName getName() {

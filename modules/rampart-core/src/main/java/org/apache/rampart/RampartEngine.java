@@ -276,8 +276,7 @@ public class RampartEngine {
                                             Date.from(samlAssertionHandler.getDateNotBefore()),
                                             Date.from(samlAssertionHandler.getDateNotOnOrAfter()));
         
-                                    token.setSecret(samlAssertionHandler.
-                                            getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler));
+                                    token.setSecret(samlAssertionHandler.getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler, Boolean.parseBoolean(rampartConfig.getDisableBSPEnforcement())));
                                     store.add(token);
                                 }
                             } catch (Exception e) {
@@ -386,6 +385,11 @@ public class RampartEngine {
 		requestData.setCallbackHandler(tokenCallbackHandler);
 		requestData.setAllowRSA15KeyTransportAlgorithm(true); // backward compatibility
 		requestData.setValidateSamlSubjectConfirmation(false); // backward compatibility
+		
+                RampartConfig rampartConfig = rpd.getRampartConfig();
+		if (rampartConfig != null) {
+                    requestData.setDisableBSPEnforcement(Boolean.parseBoolean(rampartConfig.getDisableBSPEnforcement())); // WSS4J
+		}
         
 		//wss4j does not allow username tokens with no password per default, see https://issues.apache.org/jira/browse/WSS-420
 		//configure it to allow them explicitly if at least one username token assertion with no password requirement is found

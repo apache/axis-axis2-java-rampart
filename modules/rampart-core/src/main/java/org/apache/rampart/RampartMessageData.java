@@ -360,11 +360,13 @@ public class RampartMessageData {
                         .getRampartConfig().isDefaultTimestampPrecisionInMs();
                 boolean timestampStrict = this.policyData.getRampartConfig().isTimeStampStrict();
 
+                boolean disableBSPEnforcement = Boolean.parseBoolean(this.policyData.getRampartConfig().getDisableBSPEnforcement());
 
                 // We do not need earlier logic as now WSS4J returns a new instance of WSSConfig, rather
                 // than a singleton instance. Therefore modifying logic as follows,
                 requestData.setTimeStampStrict(timestampStrict);
                 requestData.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);
+                requestData.setDisableBSPEnforcement(disableBSPEnforcement); // WSS4J
 
             }
 

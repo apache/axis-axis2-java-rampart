@@ -145,4 +145,6 @@ public class RahasConstants {
     public static final String SAML_NS = "urn:oasis:names:tc:SAML:1.0:assertion";
 
     public static final String  AUTHENTICATION_METHOD_PASSWORD = "urn:oasis:names:tc:SAML:1.0:am:password";
+    // WSS4J, see RAMPART-432 
+    public static final String DISABLE_BSP_ENFORCEMENT = "disableBSPEnforcement";
 }

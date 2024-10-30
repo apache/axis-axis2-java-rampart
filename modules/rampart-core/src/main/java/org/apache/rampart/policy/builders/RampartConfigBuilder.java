@@ -171,6 +171,12 @@ public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
             rampartConfig.setTimeStampStrict(childElement.getText().trim());
         }
 
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.DISABLE_BSP_ENFORCEMENT_LN));
+        if (childElement != null) {
+            rampartConfig.setDisableBSPEnforcement(childElement.getText().trim());
+        }
+
         return rampartConfig;
     }
 

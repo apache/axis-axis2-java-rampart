@@ -36,14 +36,16 @@ public class CertificateValidator extends SignatureTrustValidator {
      * Checks the validity of the given certificate. For more info see SignatureTrustValidator.verifyTrustInCert.
      * @param certificate Certificate to be validated.
      * @param signatureCrypto Signature crypto instance.
+     * @param disableBSPEnforcement Disable WSS4J feature
      * @return true if certificate used in signature is valid. False if it is not valid.
      * @throws WSSecurityException If an error occurred while trying to access Crypto and Certificate properties.
      */
-    boolean validateCertificate(X509Certificate certificate, Crypto signatureCrypto) throws WSSecurityException {
+    boolean validateCertificate(X509Certificate certificate, Crypto signatureCrypto, boolean disableBSPEnforcement) throws WSSecurityException {
         X509Certificate[] x509certs = new X509Certificate[1];
         x509certs[0] = certificate;
-         // [ERROR] /home/rlapache/axis-axis2-java-rampart/modules/rampart-core/src/main/java/org/apache/rampart/handler/CertificateValidator.java:[45,34] incompatible types: void cannot be converted to boolean
-        verifyTrustInCerts(x509certs, signatureCrypto, new RequestData(), false);
+        RequestData requestData = new RequestData();
+	requestData.setDisableBSPEnforcement(disableBSPEnforcement); // WSS4J
+        verifyTrustInCerts(x509certs, signatureCrypto, requestData, false);
         return false;
     }
 

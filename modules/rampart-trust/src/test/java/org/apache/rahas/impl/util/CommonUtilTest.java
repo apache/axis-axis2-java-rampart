@@ -204,9 +204,13 @@ public class CommonUtilTest extends AbstractTestCase {
 
         Element element = builder.getEncryptedKeyElement();
 
-        byte[] decryptedKey = CommonUtil.getDecryptedBytes(new TestCallbackHandler(), TestUtil.getCrypto(), element);
+        byte[] decryptedKey = CommonUtil.getDecryptedBytes(new TestCallbackHandler(), TestUtil.getCrypto(), element, false);
 
         Assert.assertTrue(Arrays.equals(ephemeralKey, decryptedKey));
+
+	// FIXME - need a test case for disabling BSP compliance on WSS4J
+        // byte[] decryptedKey2 = CommonUtil.getDecryptedBytes(new TestCallbackHandler(), TestUtil.getCrypto(), element, true);
+        // Assert.assertTrue(Arrays.equals(ephemeralKey, decryptedKey2));
 
     }
 

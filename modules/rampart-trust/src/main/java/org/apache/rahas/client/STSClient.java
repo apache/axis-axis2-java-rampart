@@ -479,7 +479,11 @@ public class STSClient {
                         child.getXMLStreamReader()).getDocumentElement();
 
                 try {
-                    secret = CommonUtil.getDecryptedBytes(this.cbHandler, this.crypto, domChild);
+	            boolean disableBSPEnforcement = false;
+                    if (this.options != null && this.options.getProperty(RahasConstants.DISABLE_BSP_ENFORCEMENT) != null) {
+	                disableBSPEnforcement = Boolean.parseBoolean((String) this.options.getProperty(RahasConstants.DISABLE_BSP_ENFORCEMENT));
+		    }
+                    secret = CommonUtil.getDecryptedBytes(this.cbHandler, this.crypto, domChild, disableBSPEnforcement);
                 } catch (WSSecurityException e) {
                     log.error("Error decrypting encrypted key element", e);
                     throw new TrustException("errorInProcessingEncryptedKey", e);

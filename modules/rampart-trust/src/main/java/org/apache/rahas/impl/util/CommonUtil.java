@@ -151,7 +151,7 @@ public class CommonUtil {
      * @return The secret as a byte stream.
      * @throws WSSecurityException If an error is occurred while decrypting the element.
      */
-    public static byte[] getDecryptedBytes(CallbackHandler callbackHandler, Crypto crypto, Node encryptedKeyElement)
+    public static byte[] getDecryptedBytes(CallbackHandler callbackHandler, Crypto crypto, Node encryptedKeyElement, boolean disableBSPEnforcement)
             throws WSSecurityException {
 
         EncryptedKeyProcessor encryptedKeyProcessor = new EncryptedKeyProcessor();
@@ -159,6 +159,7 @@ public class CommonUtil {
         RequestData requestData = new RequestData();
         requestData.setCallbackHandler(callbackHandler);
         requestData.setDecCrypto(crypto);
+        requestData.setDisableBSPEnforcement(disableBSPEnforcement);
 
         final WSSConfig cfg = WSSConfig.getNewInstance();
         requestData.setWssConfig(cfg);

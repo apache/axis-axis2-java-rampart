@@ -88,11 +88,10 @@ public class SAML2AssertionHandler extends SAMLAssertionHandler{
 
     }
 
-    public byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler)
-            throws WSSecurityException {
+    public byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler, boolean disableBSPEnforcement) throws WSSecurityException {
         // TODO : SAML2KeyInfo element needs to be moved to WSS4J.
         SAML2KeyInfo saml2KeyInfo = SAML2Utils.
-                getSAML2KeyInfo(assertion, signatureCrypto, tokenCallbackHandler);
+                getSAML2KeyInfo(assertion, signatureCrypto, tokenCallbackHandler, disableBSPEnforcement);
 
         return saml2KeyInfo.getSecret();
     }

@@ -103,7 +103,7 @@ public class SAML2Utils {
      *
      */
     public static SAML2KeyInfo getSAML2KeyInfo(Element elem, Crypto crypto,
-                                              CallbackHandler cb) throws WSSecurityException {
+                                              CallbackHandler cb, boolean disableBSPEnforcement) throws WSSecurityException {
         Assertion assertion;
 
         //build the assertion by unmarhalling the DOM element.
@@ -139,12 +139,12 @@ public class SAML2Utils {
             throw new WSSecurityException(
                     WSSecurityException.ErrorCode.FAILURE, e, "Failure in unmarshelling the assertion");
         }
-        return getSAML2KeyInfo(assertion, crypto, cb);
+        return getSAML2KeyInfo(assertion, crypto, cb, disableBSPEnforcement);
 
     }
 
     public static SAML2KeyInfo getSAML2KeyInfo(Assertion assertion, Crypto crypto,
-                                               CallbackHandler cb) throws WSSecurityException {
+                                               CallbackHandler cb, boolean disableBSPEnforcement) throws WSSecurityException {
 
         //First ask the cb whether it can provide the secret
         WSPasswordCallback pwcb = new WSPasswordCallback(assertion.getID(), WSPasswordCallback.CUSTOM_TOKEN);
@@ -232,7 +232,7 @@ public class SAML2Utils {
                         QName el = new QName(child.getNamespaceURI(), child.getLocalName());
                         if (el.equals(WSConstants.ENCRYPTED_KEY)) {
 
-                            byte[] secret = CommonUtil.getDecryptedBytes(cb, crypto, child);
+                            byte[] secret = CommonUtil.getDecryptedBytes(cb, crypto, child, disableBSPEnforcement);
 
                             return new SAML2KeyInfo(assertion, secret);
                         } else if (el.equals(new QName(WSConstants.WST_NS, "BinarySecret"))) {

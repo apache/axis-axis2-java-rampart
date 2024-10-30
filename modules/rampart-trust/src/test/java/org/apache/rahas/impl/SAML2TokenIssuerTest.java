@@ -25,7 +25,6 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.RahasData;
 import org.apache.rahas.Token;
-import org.apache.rahas.client.STSClient;
 import org.apache.rahas.test.util.AbstractTestCase;
 import org.apache.rahas.test.util.TestSTSClient;
 import org.apache.rahas.test.util.TestUtil;
