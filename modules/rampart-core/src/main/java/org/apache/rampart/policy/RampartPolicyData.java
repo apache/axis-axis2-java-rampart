@@ -966,7 +966,7 @@ public class RampartPolicyData {
     }
     
     public OptimizePartsConfig getOptimizePartsConfig(){
-    	return rampartConfig.getOptimizeParts();
+        return rampartConfig == null ? null : rampartConfig.getOptimizeParts();
     }
    
      
