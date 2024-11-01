@@ -1479,7 +1479,7 @@ public class RampartUtil {
 						&& ((Wss11) wss).isMustSupportRefThumbprint()) {
 					secBase.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
 				} else if (log.isDebugEnabled()) {
-					log.debug("RampartUtil.setKeyIdentifierType() attempted secpolicy Wss10 and Wss111 but was not able to identify the correcc constant to set on WSSecBase.setKeyIdentifierType()" );
+					log.debug("RampartUtil.setKeyIdentifierType() attempted secpolicy Wss10 and Wss11 but was not able to identify the correcc constant to set on WSSecBase.setKeyIdentifierType()" );
 				}
     		}
     		
