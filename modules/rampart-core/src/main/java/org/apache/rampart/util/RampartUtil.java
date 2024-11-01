@@ -1459,7 +1459,9 @@ public class RampartUtil {
     			} else if (x509Token.isRequireThumbprintReference()) {
     				secBase.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
     				tokenTypeSet = true;
-    			}
+    			} else if (log.isDebugEnabled()) {
+    				log.debug("RampartUtil.setKeyIdentifierType() found a Token that is an instanceof X509Token but was not able to identify the correcc constant to set on WSSecBase.setKeyIdentifierType()" );
+                        }
     		} 
     		
     		if (!tokenTypeSet) {
@@ -1469,13 +1471,15 @@ public class RampartUtil {
 					wss = rpd.getWss10();
 				}
 				
-				if (wss.isMustSupportRefKeyIdentifier()) {
+				if (wss !=null && wss.isMustSupportRefKeyIdentifier()) {
 					secBase.setKeyIdentifierType(WSConstants.SKI_KEY_IDENTIFIER);
-				} else if (wss.isMustSupportRefIssuerSerial()) {
+				} else if (wss !=null && wss.isMustSupportRefIssuerSerial()) {
 					secBase.setKeyIdentifierType(WSConstants.ISSUER_SERIAL);
-				} else if (wss instanceof Wss11
+				} else if (wss !=null && wss instanceof Wss11
 						&& ((Wss11) wss).isMustSupportRefThumbprint()) {
 					secBase.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
+				} else if (log.isDebugEnabled()) {
+					log.debug("RampartUtil.setKeyIdentifierType() attempted secpolicy Wss10 and Wss111 but was not able to identify the correcc constant to set on WSSecBase.setKeyIdentifierType()" );
 				}
     		}
     		
