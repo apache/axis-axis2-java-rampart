@@ -20,8 +20,6 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.Constants;
 import org.apache.neethi.PolicyComponent;
 
-import org.apache.wss4j.dom.handler.RequestData;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -673,22 +671,4 @@ public class RampartConfig implements Assertion {
         this.allowRSA15KeyTransportAlgorithm = Boolean.valueOf(allowRSA15KeyTransportAlgorithm);
     }
 
-    // set some vars on WSS4J class RequestData via RamparConfig as desired in 
-    // Jira issues RAMPART-205, RAMPART-361, RAMPART-432, RAMPART-435
-	/*
-    public RequestData getRequestData() {
-        RequestData requestData = new RequestData();
-        requestData.setTimeStampStrict(timeStampStrict);
-        requestData.setPrecisionInMilliSeconds(isTimestampPrecisionInMs);
-        // 1.8.0 and later
-        requestData.setDisableBSPEnforcement(disableBSPEnforcement);
-        requestData.setHandleCustomPasswordTypes(handleCustomPasswordTypes);
-        requestData.setAllowNamespaceQualifiedPasswordTypes(allowNamespaceQualifiedPasswordTypes);
-        requestData.setAllowUsernameTokenNoPassword(allowUsernameTokenNoPassword);
-        requestData.setTimeStampFutureTTL(timeStampFutureTTL);
-        requestData.setUtTTL(utTTL);
-        requestData.setUtFutureTTL(utFutureTTL);
-        return requestData;
-    }
-	*/
 }
