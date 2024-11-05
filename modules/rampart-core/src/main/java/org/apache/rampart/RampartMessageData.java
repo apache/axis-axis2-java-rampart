@@ -360,18 +360,34 @@ public class RampartMessageData {
                         .getRampartConfig().isDefaultTimestampPrecisionInMs();
                 boolean timestampStrict = this.policyData.getRampartConfig().isTimeStampStrict();
 
-                boolean disableBSPEnforcement = Boolean.parseBoolean(this.policyData.getRampartConfig().getDisableBSPEnforcement());
+		// set some vars on WSS4J class RequestData via RamparConfig as desired in 
+		// Jira issues RAMPART-205, RAMPART-361, RAMPART-432, RAMPART-435
+                boolean disableBSPEnforcement = this.policyData.getRampartConfig().isDisableBSPEnforcement();
+                boolean handleCustomPasswordTypes = this.policyData.getRampartConfig().isHandleCustomPasswordTypes();
+                boolean allowNamespaceQualifiedPasswordTypes = this.policyData.getRampartConfig().isAllowNamespaceQualifiedPasswordTypes();
+                boolean allowUsernameTokenNoPassword = this.policyData.getRampartConfig().isAllowUsernameTokenNoPassword();
+                boolean allowRSA15KeyTransportAlgorithm = this.policyData.getRampartConfig().isAllowRSA15KeyTransportAlgorithm();
+                int timeStampFutureTTL = this.policyData.getRampartConfig().getTimeStampFutureTTL();
+                int utTTL = this.policyData.getRampartConfig().getUtTTL();
+                int utFutureTTL = this.policyData.getRampartConfig().getUtFutureTTL();
 
                 // We do not need earlier logic as now WSS4J returns a new instance of WSSConfig, rather
                 // than a singleton instance. Therefore modifying logic as follows,
                 requestData.setTimeStampStrict(timestampStrict);
                 requestData.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);
-                requestData.setDisableBSPEnforcement(disableBSPEnforcement); // WSS4J
-
-            }
-
-            // To handle scenarios where password type is not set by default.
-            requestData.setHandleCustomPasswordTypes(true);
+		// 1.8.0 and later
+                requestData.setDisableBSPEnforcement(disableBSPEnforcement);
+                requestData.setHandleCustomPasswordTypes(handleCustomPasswordTypes);
+                requestData.setAllowNamespaceQualifiedPasswordTypes(allowNamespaceQualifiedPasswordTypes);
+                requestData.setAllowUsernameTokenNoPassword(allowUsernameTokenNoPassword);
+                requestData.setTimeStampFutureTTL(timeStampFutureTTL);
+                requestData.setUtTTL(utTTL);
+                requestData.setUtFutureTTL(utFutureTTL);
+                requestData.setAllowRSA15KeyTransportAlgorithm(allowRSA15KeyTransportAlgorithm); // backward compatibility as true
+            } else {
+                // To handle scenarios where password type is not set by default.
+                requestData.setHandleCustomPasswordTypes(true);
+	    }
 
             if (axisService != null) { 
                 this.customClassLoader = axisService.getClassLoader(); 

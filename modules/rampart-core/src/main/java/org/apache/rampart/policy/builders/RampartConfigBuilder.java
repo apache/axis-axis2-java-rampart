@@ -171,10 +171,65 @@ public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
             rampartConfig.setTimeStampStrict(childElement.getText().trim());
         }
 
+	// 1.8.0 and later
         childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.DISABLE_BSP_ENFORCEMENT_LN));
         if (childElement != null) {
             rampartConfig.setDisableBSPEnforcement(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.ALLOW_USERNAME_TOKEN_NO_PASSWORD_LN));
+        if (childElement != null) {
+            rampartConfig.setAllowUsernameTokenNoPassword(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.TIMESTAMP_FUTURE_TTL_LN));
+        if (childElement != null) {
+            rampartConfig.setTimeStampFutureTTL(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.UT_TTL_LN));
+        if (childElement != null) {
+            rampartConfig.setUtTTL(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.UT_FUTURE_TTL_LN));
+        if (childElement != null) {
+            rampartConfig.setUtFutureTTL(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.HANDLE_CUSTOM_PASSWORD_TYPES_LN));
+        if (childElement != null) {
+            rampartConfig.setHandleCustomPasswordTypes(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.ALLOW_NAMESPACE_QUALIFIED_PASSWORDTYPES_LN));
+        if (childElement != null) {
+            rampartConfig.setAllowNamespaceQualifiedPasswordTypes(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.ENCODE_PASSWORDS_LN));
+        if (childElement != null) {
+            rampartConfig.setEncodePasswords(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.VALIDATE_SAML_SUBJECT_CONFIRMATION_LN));
+        if (childElement != null) {
+            rampartConfig.setValidateSamlSubjectConfirmation(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM_LN));
+        if (childElement != null) {
+            rampartConfig.setAllowRSA15KeyTransportAlgorithm(childElement.getText().trim());
         }
 
         return rampartConfig;

@@ -68,12 +68,10 @@ public class SAML1AssertionHandler extends SAMLAssertionHandler{
     }
 
     @Override
-    public byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler, boolean disableBSPEnforcement) throws WSSecurityException {
+    public byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler, RequestData requestData) throws WSSecurityException {
 
-        RequestData requestData = new RequestData();
         requestData.setCallbackHandler(tokenCallbackHandler);
         requestData.setSigVerCrypto(signatureCrypto);
-	requestData.setDisableBSPEnforcement(disableBSPEnforcement); // WSS4J
 
         WSDocInfo docInfo = new WSDocInfo(assertion.getDOM().getOwnerDocument()); // TODO Improve ..
         // TODO change this to use SAMLAssertion parameter once wss4j conversion is done ....

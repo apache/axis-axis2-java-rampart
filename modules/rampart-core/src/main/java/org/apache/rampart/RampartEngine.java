@@ -115,6 +115,7 @@ public class RampartEngine {
 		engine.setWssConfig(rmd.getConfig());
 
         RampartConfig rampartConfig = rpd.getRampartConfig();
+        RequestData requestData = new RequestData();
         if (rampartConfig != null) {
             WSSConfig config = engine.getWssConfig();
 
@@ -194,7 +195,25 @@ public class RampartEngine {
             }
             
             engine.setWssConfig(config);
-        }
+            requestData.setTimeStampStrict(rampartConfig.isTimeStampStrict());
+            requestData.setPrecisionInMilliSeconds(rampartConfig.isDefaultTimestampPrecisionInMs());
+            // 1.8.0 and later
+            requestData.setDisableBSPEnforcement(rampartConfig.isDisableBSPEnforcement());
+            requestData.setHandleCustomPasswordTypes(rampartConfig.isHandleCustomPasswordTypes());
+            requestData.setAllowNamespaceQualifiedPasswordTypes(rampartConfig.isAllowNamespaceQualifiedPasswordTypes());
+	    // this is set below
+            // requestData.setAllowUsernameTokenNoPassword(rampartConfig.isAllowNamespaceQualifiedPasswordTypes());
+            requestData.setValidateSamlSubjectConfirmation(rampartConfig.isValidateSamlSubjectConfirmation());
+            requestData.setTimeStampFutureTTL(rampartConfig.getTimeStampFutureTTL());
+            requestData.setUtTTL(rampartConfig.getUtTTL());
+            requestData.setUtFutureTTL(rampartConfig.getUtFutureTTL());
+            requestData.setAllowRSA15KeyTransportAlgorithm(rampartConfig.isAllowRSA15KeyTransportAlgorithm()); // backward compatibility as true
+        
+	} else {
+            requestData.setAllowRSA15KeyTransportAlgorithm(true); // backward compatibility
+            requestData.setValidateSamlSubjectConfirmation(false); // backward compatibility
+            requestData.setEncodePasswords(false); // default
+	}
 
         ValidatorData data = new ValidatorData(rmd);
 
@@ -231,7 +250,7 @@ public class RampartEngine {
         Crypto decCrypto = RampartUtil.getEncryptionCrypto(rpd.getRampartConfig(), msgCtx.getAxisService().getClassLoader());
         TokenCallbackHandler tokenCallbackHandler = new TokenCallbackHandler(rmd.getTokenStorage(), RampartUtil.getPasswordCB(rmd));
         
-        WSHandlerResult result = processSecurityHeaderWithRSA15(rmd, secHeader, engine, signatureCrypto, decCrypto, tokenCallbackHandler);
+        WSHandlerResult result = processSecurityHeaderWithRSA15(rmd, secHeader, engine, signatureCrypto, decCrypto, tokenCallbackHandler, requestData);
         results = result.getResults();
         
         if(rpd.isSymmetricBinding()) {
@@ -276,7 +295,8 @@ public class RampartEngine {
                                             Date.from(samlAssertionHandler.getDateNotBefore()),
                                             Date.from(samlAssertionHandler.getDateNotOnOrAfter()));
         
-                                    token.setSecret(samlAssertionHandler.getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler, Boolean.parseBoolean(rampartConfig.getDisableBSPEnforcement())));
+				    // FIXME
+                                    token.setSecret(samlAssertionHandler.getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler, new RequestData()));
                                     store.add(token);
                                 }
                             } catch (Exception e) {
@@ -372,25 +392,18 @@ public class RampartEngine {
 	}
 
     private WSHandlerResult processSecurityHeaderWithRSA15(RampartMessageData rmd, SOAPHeaderBlock secHeader, WSSecurityEngine engine,
-    		Crypto signatureCrypto, Crypto decCrypto, TokenCallbackHandler tokenCallbackHandler) 
+    		Crypto signatureCrypto, Crypto decCrypto, TokenCallbackHandler tokenCallbackHandler,
+		RequestData requestData) 
                 throws WSSecurityException, RampartException {
     	
     	RampartPolicyData rpd = rmd.getPolicyData();
 
-		RequestData requestData = new RequestData();
-		requestData.setEncodePasswords(false);
 		requestData.setActor(secHeader.getRole());
 		requestData.setDecCrypto(decCrypto);
 		requestData.setSigVerCrypto(signatureCrypto);
 		requestData.setCallbackHandler(tokenCallbackHandler);
-		requestData.setAllowRSA15KeyTransportAlgorithm(true); // backward compatibility
-		requestData.setValidateSamlSubjectConfirmation(false); // backward compatibility
 		
-                RampartConfig rampartConfig = rpd.getRampartConfig();
-		if (rampartConfig != null) {
-                    requestData.setDisableBSPEnforcement(Boolean.parseBoolean(rampartConfig.getDisableBSPEnforcement())); // WSS4J
-		}
-        
+		
 		//wss4j does not allow username tokens with no password per default, see https://issues.apache.org/jira/browse/WSS-420
 		//configure it to allow them explicitly if at least one username token assertion with no password requirement is found
 		if (!rmd.isInitiator()) {

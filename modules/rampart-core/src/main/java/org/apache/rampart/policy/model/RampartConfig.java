@@ -20,6 +20,8 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.Constants;
 import org.apache.neethi.PolicyComponent;
 
+import org.apache.wss4j.dom.handler.RequestData;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -79,8 +81,6 @@ public class RampartConfig implements Assertion {
 
     public final static String USER_LN = "user";
 
-    public final static String DISABLE_BSP_ENFORCEMENT_LN = "disableBSPEnforcement";
-    
     public final static String USER_CERT_ALIAS_LN = "userCertAlias";
 
     public final static String ENCRYPTION_USER_LN = "encryptionUser";
@@ -118,6 +118,26 @@ public class RampartConfig implements Assertion {
     public final static String SSL_CONFIG = "sslConfig";
     
     public final static String KERBEROS_CONFIG = "kerberosConfig";
+
+    // These constants are 1.8.0 and after
+    public final static String DISABLE_BSP_ENFORCEMENT_LN = "disableBSPEnforcement";
+
+    public final static String ALLOW_USERNAME_TOKEN_NO_PASSWORD_LN = "allowUsernameTokenNoPassword";
+
+    public final static String TIMESTAMP_FUTURE_TTL_LN = "timeStampFutureTTL";
+
+    public final static String UT_TTL_LN = "utTTL";
+
+    public final static String UT_FUTURE_TTL_LN = "utFutureTTL";
+
+    public final static String HANDLE_CUSTOM_PASSWORD_TYPES_LN = "handleCustomPasswordTypes";
+
+    public final static String ALLOW_NAMESPACE_QUALIFIED_PASSWORDTYPES_LN = "allowNamespaceQualifiedPasswordTypes";
+    public final static String ENCODE_PASSWORDS_LN = "encodePasswords";
+
+    public final static String VALIDATE_SAML_SUBJECT_CONFIRMATION_LN = "validateSamlSubjectConfirmation";
+
+    public final static String ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM_LN = "allowRSA15KeyTransportAlgorithm";
     
     private String user;
     
@@ -132,8 +152,6 @@ public class RampartConfig implements Assertion {
     private String policyValidatorCbClass;
     
     private String rampartConfigCbClass;
-
-    private String disableBSPEnforcement;
 
     private CryptoConfig sigCryptoConfig;
 
@@ -168,8 +186,30 @@ public class RampartConfig implements Assertion {
         this.kerberosConfig = kerberosConfig;
     }
     
-    /*To set timeStampStrict in WSSConfig through rampartConfig - default value is false*/
+    /*To set timeStampStrict in WSS4J RequestData through rampartConfig - default value is false*/
     private boolean timeStampStrict = false;
+
+    /* As of 1.8.0, the following params can also be overridden to set on RequestData */
+    private boolean disableBSPEnforcement = false;
+
+    private boolean allowUsernameTokenNoPassword = false;
+
+    private int timeStampFutureTTL = 60;
+
+    private int utTTL = 300;
+
+    private int utFutureTTL = 60;
+
+    /* WSS4J sets this as false however before 1.8.0 this was hard-coded to true */
+    private boolean handleCustomPasswordTypes = true;
+
+    private boolean allowNamespaceQualifiedPasswordTypes = false;
+
+    private boolean encodePasswords = false;
+
+    private boolean validateSamlSubjectConfirmation = false; // backward compatibility
+
+    private boolean allowRSA15KeyTransportAlgorithm = true; // backward compatibility
     
     public SSLConfig getSSLConfig() {
         return sslConfig;
@@ -282,17 +322,6 @@ public class RampartConfig implements Assertion {
         this.userCertAlias = userCertAlias;
     }
 
-    public String getDisableBSPEnforcement() {
-	if (disableBSPEnforcement == null) {
-            return "false";
-	}	
-        return disableBSPEnforcement;
-    }
-
-    public void setDisableBSPEnforcement(String disableBSPEnforcement) {
-        this.disableBSPEnforcement = disableBSPEnforcement;
-    }
-
     public QName getName() {
         return new QName(NS, RAMPART_CONFIG_LN);
     }
@@ -381,6 +410,46 @@ public class RampartConfig implements Assertion {
 
         writer.writeStartElement(NS, TIMESTAMP_STRICT_LN);
         writer.writeCharacters(Boolean.toString(isTimeStampStrict()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, TIMESTAMP_FUTURE_TTL_LN);
+        writer.writeCharacters(Integer.toString(getTimeStampFutureTTL()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, UT_TTL_LN);
+        writer.writeCharacters(Integer.toString(getUtTTL()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, UT_FUTURE_TTL_LN);
+        writer.writeCharacters(Integer.toString(getUtFutureTTL()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, DISABLE_BSP_ENFORCEMENT_LN);
+        writer.writeCharacters(Boolean.toString(isDisableBSPEnforcement()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, ALLOW_USERNAME_TOKEN_NO_PASSWORD_LN);
+        writer.writeCharacters(Boolean.toString(isAllowUsernameTokenNoPassword()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, HANDLE_CUSTOM_PASSWORD_TYPES_LN);
+        writer.writeCharacters(Boolean.toString(isHandleCustomPasswordTypes()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, ALLOW_NAMESPACE_QUALIFIED_PASSWORDTYPES_LN);
+        writer.writeCharacters(Boolean.toString(isAllowNamespaceQualifiedPasswordTypes()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, ENCODE_PASSWORDS_LN);
+        writer.writeCharacters(Boolean.toString(isEncodePasswords()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, VALIDATE_SAML_SUBJECT_CONFIRMATION_LN);
+        writer.writeCharacters(Boolean.toString(isValidateSamlSubjectConfirmation()));
+        writer.writeEndElement();
+
+        writer.writeStartElement(NS, ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM_LN);
+        writer.writeCharacters(Boolean.toString(isAllowRSA15KeyTransportAlgorithm()));
         writer.writeEndElement();
 
         if (getTokenStoreClass() != null) {
@@ -522,4 +591,104 @@ public class RampartConfig implements Assertion {
         this.timeStampStrict = Boolean.valueOf(timeStampStrict);
     }
     
+    // The vars below are 1.8.0 and after 
+
+    public boolean isDisableBSPEnforcement() {
+        return disableBSPEnforcement;
+    }
+
+    public void setDisableBSPEnforcement(String disableBSPEnforcement) {
+        this.disableBSPEnforcement = Boolean.valueOf(disableBSPEnforcement);
+    }
+
+    public boolean isAllowUsernameTokenNoPassword() {
+        return allowUsernameTokenNoPassword;
+    }
+
+    public void setAllowUsernameTokenNoPassword(String allowUsernameTokenNoPassword) {
+        this.allowUsernameTokenNoPassword = Boolean.valueOf(allowUsernameTokenNoPassword);
+    }
+
+    public int getTimeStampFutureTTL() {
+        return timeStampFutureTTL;
+    }
+
+    public void setTimeStampFutureTTL(String timeStampFutureTTL) {
+        this.timeStampFutureTTL = Integer.valueOf(timeStampFutureTTL);
+    }
+
+    public int getUtTTL() {
+        return utTTL;
+    }
+
+    public void setUtTTL(String utTTL) {
+        this.utTTL = Integer.valueOf(utTTL);
+    }
+
+    public int getUtFutureTTL() {
+        return utFutureTTL;
+    }
+
+    public void setUtFutureTTL(String utFutureTTL) {
+        this.utFutureTTL = Integer.valueOf(utFutureTTL);
+    }
+
+    public boolean isHandleCustomPasswordTypes() {
+        return handleCustomPasswordTypes;
+    }
+
+    public void setHandleCustomPasswordTypes(String handleCustomPasswordTypes) {
+        this.handleCustomPasswordTypes = Boolean.valueOf(handleCustomPasswordTypes);
+    }
+
+    public boolean isAllowNamespaceQualifiedPasswordTypes() {
+        return allowNamespaceQualifiedPasswordTypes;
+    }
+
+    public void setAllowNamespaceQualifiedPasswordTypes(String allowNamespaceQualifiedPasswordTypes) {
+        this.allowNamespaceQualifiedPasswordTypes = Boolean.valueOf(allowNamespaceQualifiedPasswordTypes);
+    }
+
+    public boolean isEncodePasswords() {
+        return encodePasswords;
+    }
+
+    public void setEncodePasswords(String encodePasswords) {
+        this.encodePasswords = Boolean.valueOf(encodePasswords);
+    }
+
+    public boolean isValidateSamlSubjectConfirmation() {
+        return validateSamlSubjectConfirmation;
+    }
+
+    public void setValidateSamlSubjectConfirmation(String validateSamlSubjectConfirmation) {
+        this.validateSamlSubjectConfirmation = Boolean.valueOf(validateSamlSubjectConfirmation);
+    }
+
+    public boolean isAllowRSA15KeyTransportAlgorithm() {
+        return allowRSA15KeyTransportAlgorithm;
+    }
+
+    public void setAllowRSA15KeyTransportAlgorithm(String allowRSA15KeyTransportAlgorithm) {
+        this.allowRSA15KeyTransportAlgorithm = Boolean.valueOf(allowRSA15KeyTransportAlgorithm);
+    }
+
+    // set some vars on WSS4J class RequestData via RamparConfig as desired in 
+    // Jira issues RAMPART-205, RAMPART-361, RAMPART-432, RAMPART-435
+	/*
+    public RequestData getRequestData() {
+        RequestData requestData = new RequestData();
+        requestData.setTimeStampStrict(timeStampStrict);
+        requestData.setPrecisionInMilliSeconds(isTimestampPrecisionInMs);
+        // 1.8.0 and later
+        requestData.setDisableBSPEnforcement(disableBSPEnforcement);
+        requestData.setHandleCustomPasswordTypes(handleCustomPasswordTypes);
+        requestData.setAllowNamespaceQualifiedPasswordTypes(allowNamespaceQualifiedPasswordTypes);
+        requestData.setAllowUsernameTokenNoPassword(allowUsernameTokenNoPassword);
+        requestData.setTimeStampFutureTTL(timeStampFutureTTL);
+        requestData.setUtTTL(utTTL);
+        requestData.setUtFutureTTL(utFutureTTL);
+        return requestData;
+    }
+	*/
 }

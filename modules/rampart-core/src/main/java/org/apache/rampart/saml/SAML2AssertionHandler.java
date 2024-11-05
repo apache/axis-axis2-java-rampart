@@ -26,6 +26,7 @@ import org.apache.rahas.impl.util.SAML2Utils;
 import org.apache.rampart.TokenCallbackHandler;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.dom.handler.RequestData;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Conditions;
 import org.opensaml.saml.saml2.core.Subject;
@@ -88,10 +89,10 @@ public class SAML2AssertionHandler extends SAMLAssertionHandler{
 
     }
 
-    public byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler, boolean disableBSPEnforcement) throws WSSecurityException {
+    public byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler, RequestData requestData) throws WSSecurityException {
         // TODO : SAML2KeyInfo element needs to be moved to WSS4J.
         SAML2KeyInfo saml2KeyInfo = SAML2Utils.
-                getSAML2KeyInfo(assertion, signatureCrypto, tokenCallbackHandler, disableBSPEnforcement);
+                getSAML2KeyInfo(assertion, signatureCrypto, tokenCallbackHandler, requestData);
 
         return saml2KeyInfo.getSecret();
     }

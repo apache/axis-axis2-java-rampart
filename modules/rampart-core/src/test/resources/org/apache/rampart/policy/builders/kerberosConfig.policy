@@ -6,6 +6,16 @@
                 <rampart:timestampTTL>300</rampart:timestampTTL>
                 <rampart:timestampMaxSkew>300</rampart:timestampMaxSkew>
                 <rampart:timestampStrict>false</rampart:timestampStrict>
+                <rampart:timeStampFutureTTL>60</rampart:timeStampFutureTTL>
+                <rampart:utTTL>300</rampart:utTTL>
+                <rampart:utFutureTTL>60</rampart:utFutureTTL>
+                <rampart:disableBSPEnforcement>false</rampart:disableBSPEnforcement>
+                <rampart:allowUsernameTokenNoPassword>false</rampart:allowUsernameTokenNoPassword>
+                <rampart:handleCustomPasswordTypes>true</rampart:handleCustomPasswordTypes>
+                <rampart:allowNamespaceQualifiedPasswordTypes>false</rampart:allowNamespaceQualifiedPasswordTypes>
+                <rampart:encodePasswords>false</rampart:encodePasswords>
+                <rampart:validateSamlSubjectConfirmation>false</rampart:validateSamlSubjectConfirmation>
+                <rampart:allowRSA15KeyTransportAlgorithm>true</rampart:allowRSA15KeyTransportAlgorithm>
                 <rampart:nonceLifeTime>300</rampart:nonceLifeTime>
                 <rampart:kerberosConfig>
                     <rampart:jaasContext>alice</rampart:jaasContext>

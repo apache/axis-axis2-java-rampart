@@ -34,6 +34,7 @@ import org.apache.rahas.test.util.TestCallbackHandler;
 import org.apache.rahas.test.util.TestSAMLCallbackHandler;
 import org.apache.rahas.test.util.TestUtil;
 import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.common.WSEncryptionPart;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.util.KeyUtils;
@@ -204,7 +205,7 @@ public class CommonUtilTest extends AbstractTestCase {
 
         Element element = builder.getEncryptedKeyElement();
 
-        byte[] decryptedKey = CommonUtil.getDecryptedBytes(new TestCallbackHandler(), TestUtil.getCrypto(), element, false);
+        byte[] decryptedKey = CommonUtil.getDecryptedBytes(new TestCallbackHandler(), TestUtil.getCrypto(), element, new RequestData());
 
         Assert.assertTrue(Arrays.equals(ephemeralKey, decryptedKey));
 

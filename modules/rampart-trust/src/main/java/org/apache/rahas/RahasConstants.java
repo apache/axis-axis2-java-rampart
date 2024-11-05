@@ -145,6 +145,23 @@ public class RahasConstants {
     public static final String SAML_NS = "urn:oasis:names:tc:SAML:1.0:assertion";
 
     public static final String  AUTHENTICATION_METHOD_PASSWORD = "urn:oasis:names:tc:SAML:1.0:am:password";
-    // WSS4J, see RAMPART-432 
+    // set some vars on WSS4J class RequestData via Rahas as desired in 
+    // Jira issues RAMPART-205, RAMPART-361, RAMPART-432, RAMPART-435
     public static final String DISABLE_BSP_ENFORCEMENT = "disableBSPEnforcement";
+    public final static String ALLOW_USERNAME_TOKEN_NO_PASSWORD = "allowUsernameTokenNoPassword";
+
+    public final static String TIMESTAMP_FUTURE_TTL = "timeStampFutureTTL";
+
+    public final static String UT_TTL = "utTTL";
+
+    public final static String UT_FUTURE_TTL = "utFutureTTL";
+
+    public final static String HANDLE_CUSTOM_PASSWORD_TYPES = "handleCustomPasswordTypes";
+
+    public final static String ALLOW_NAMESPACE_QUALIFIED_PASSWORDTYPES = "allowNamespaceQualifiedPasswordTypes";
+    public final static String ENCODE_PASSWORDS = "encodePasswords";
+
+    public final static String VALIDATE_SAML_SUBJECT_CONFIRMATION = "validateSamlSubjectConfirmation";
+
+    public final static String ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM = "allowRSA15KeyTransportAlgorithm";
 }

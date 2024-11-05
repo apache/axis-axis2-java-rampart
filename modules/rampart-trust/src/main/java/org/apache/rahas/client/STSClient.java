@@ -47,6 +47,7 @@ import org.apache.ws.secpolicy.model.AlgorithmSuite;
 import org.apache.ws.secpolicy.model.Binding;
 import org.apache.ws.secpolicy.model.Trust10;
 import org.apache.ws.secpolicy.model.Trust13;
+import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.common.ext.WSPasswordCallback;
 import org.apache.wss4j.common.ext.WSSecurityException;
@@ -479,11 +480,68 @@ public class STSClient {
                         child.getXMLStreamReader()).getDocumentElement();
 
                 try {
+                    RequestData requestData = new RequestData();
 	            boolean disableBSPEnforcement = false;
                     if (this.options != null && this.options.getProperty(RahasConstants.DISABLE_BSP_ENFORCEMENT) != null) {
 	                disableBSPEnforcement = Boolean.parseBoolean((String) this.options.getProperty(RahasConstants.DISABLE_BSP_ENFORCEMENT));
+                        requestData.setDisableBSPEnforcement(disableBSPEnforcement);
 		    }
-                    secret = CommonUtil.getDecryptedBytes(this.cbHandler, this.crypto, domChild, disableBSPEnforcement);
+	            boolean allowUsernameTokenNoPassword = false;
+                    if (this.options != null && this.options.getProperty(RahasConstants.ALLOW_USERNAME_TOKEN_NO_PASSWORD) != null) {
+	                allowUsernameTokenNoPassword = Boolean.parseBoolean((String) this.options.getProperty(RahasConstants.ALLOW_USERNAME_TOKEN_NO_PASSWORD));
+                        requestData.setAllowUsernameTokenNoPassword(allowUsernameTokenNoPassword);
+		    }
+
+                    int timeStampFutureTTL = 60;
+                    if (this.options != null && this.options.getProperty(RahasConstants.TIMESTAMP_FUTURE_TTL) != null) {
+	                timeStampFutureTTL = Integer.valueOf((String) this.options.getProperty(RahasConstants.TIMESTAMP_FUTURE_TTL));
+                        requestData.setTimeStampFutureTTL(timeStampFutureTTL);
+		    }
+
+                    int utTTL = 300;
+                    if (this.options != null && this.options.getProperty(RahasConstants.UT_TTL) != null) {
+	                utTTL = Integer.valueOf((String) this.options.getProperty(RahasConstants.UT_TTL));
+                        requestData.setUtTTL(utTTL);
+		    }
+
+                    int utFutureTTL = 60;
+                    if (this.options != null && this.options.getProperty(RahasConstants.UT_FUTURE_TTL) != null) {
+	                utFutureTTL = Integer.valueOf((String) this.options.getProperty(RahasConstants.UT_FUTURE_TTL));
+                        requestData.setUtFutureTTL(utFutureTTL);
+		    }
+
+                    /* WSS4J sets this as false however before 1.8.0 this was hard-coded to true */
+                    boolean handleCustomPasswordTypes = true;
+                    if (this.options != null && this.options.getProperty(RahasConstants.HANDLE_CUSTOM_PASSWORD_TYPES) != null) {
+	                handleCustomPasswordTypes = Boolean.valueOf((String) this.options.getProperty(RahasConstants.HANDLE_CUSTOM_PASSWORD_TYPES));
+                        requestData.setHandleCustomPasswordTypes(handleCustomPasswordTypes);
+		    }
+
+                    boolean allowNamespaceQualifiedPasswordTypes = false;
+                    if (this.options != null && this.options.getProperty(RahasConstants.ALLOW_NAMESPACE_QUALIFIED_PASSWORDTYPES) != null) {
+	                allowNamespaceQualifiedPasswordTypes = Boolean.valueOf((String) this.options.getProperty(RahasConstants.ALLOW_NAMESPACE_QUALIFIED_PASSWORDTYPES));
+                        requestData.setAllowNamespaceQualifiedPasswordTypes(allowNamespaceQualifiedPasswordTypes);
+		    }
+
+                    boolean encodePasswords = false;
+                    if (this.options != null && this.options.getProperty(RahasConstants.ENCODE_PASSWORDS) != null) {
+	                encodePasswords = Boolean.valueOf((String) this.options.getProperty(RahasConstants.ENCODE_PASSWORDS));
+                        requestData.setEncodePasswords(encodePasswords);
+		    }
+
+                    boolean validateSamlSubjectConfirmation = false; // backward compatibility
+                    if (this.options != null && this.options.getProperty(RahasConstants.VALIDATE_SAML_SUBJECT_CONFIRMATION) != null) {
+	                validateSamlSubjectConfirmation = Boolean.valueOf((String) this.options.getProperty(RahasConstants.VALIDATE_SAML_SUBJECT_CONFIRMATION));
+                        requestData.setValidateSamlSubjectConfirmation(validateSamlSubjectConfirmation);
+		    }
+
+                    boolean allowRSA15KeyTransportAlgorithm = true; // backward compatibility
+                    if (this.options != null && this.options.getProperty(RahasConstants.ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM) != null) {
+	                allowRSA15KeyTransportAlgorithm = Boolean.valueOf((String) this.options.getProperty(RahasConstants.ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM));
+                        requestData.setAllowRSA15KeyTransportAlgorithm(allowRSA15KeyTransportAlgorithm);
+		    }
+
+                    secret = CommonUtil.getDecryptedBytes(this.cbHandler, this.crypto, domChild, requestData);
                 } catch (WSSecurityException e) {
                     log.error("Error decrypting encrypted key element", e);
                     throw new TrustException("errorInProcessingEncryptedKey", e);

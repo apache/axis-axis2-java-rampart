@@ -24,6 +24,7 @@ import org.apache.rahas.TrustException;
 import org.apache.rampart.TokenCallbackHandler;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.dom.handler.RequestData;
 
 import java.time.Instant;
 
@@ -76,12 +77,12 @@ public abstract class SAMLAssertionHandler {
     /**
      * Gets the secret in assertion.
      * @param signatureCrypto Signature crypto info, private,public keys.
-     * @param tokenCallbackHandler The token callback class. TODO Why ?
-     * @param disableBSPEnforcement Pass the value to WSS4J when creating RequestData
+     * @param tokenCallbackHandler The token callback class, required for WSS4J processing
+     * @param requestData Allow customization of the numerous optional WSS4J params
      * @return Secret as a byte array
      * @throws WSSecurityException If an error occurred while validating the signature.
      */
-    public abstract byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler, boolean disableBSPEnforcement)
+    public abstract byte[] getAssertionKeyInfoSecret(Crypto signatureCrypto, TokenCallbackHandler tokenCallbackHandler, RequestData requestData)
             throws WSSecurityException;
 
     /**

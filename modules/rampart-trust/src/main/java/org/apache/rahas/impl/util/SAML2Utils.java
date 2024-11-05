@@ -25,8 +25,9 @@ import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.ext.WSPasswordCallback;
-import org.apache.wss4j.dom.engine.WSSecurityEngine;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.engine.WSSecurityEngine;
+import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.xml.security.exceptions.XMLSecurityException;
@@ -103,7 +104,7 @@ public class SAML2Utils {
      *
      */
     public static SAML2KeyInfo getSAML2KeyInfo(Element elem, Crypto crypto,
-                                              CallbackHandler cb, boolean disableBSPEnforcement) throws WSSecurityException {
+                                              CallbackHandler cb, RequestData requestData) throws WSSecurityException {
         Assertion assertion;
 
         //build the assertion by unmarhalling the DOM element.
@@ -139,12 +140,12 @@ public class SAML2Utils {
             throw new WSSecurityException(
                     WSSecurityException.ErrorCode.FAILURE, e, "Failure in unmarshelling the assertion");
         }
-        return getSAML2KeyInfo(assertion, crypto, cb, disableBSPEnforcement);
+        return getSAML2KeyInfo(assertion, crypto, cb, requestData);
 
     }
 
     public static SAML2KeyInfo getSAML2KeyInfo(Assertion assertion, Crypto crypto,
-                                               CallbackHandler cb, boolean disableBSPEnforcement) throws WSSecurityException {
+                                               CallbackHandler cb, RequestData requestData) throws WSSecurityException {
 
         //First ask the cb whether it can provide the secret
         WSPasswordCallback pwcb = new WSPasswordCallback(assertion.getID(), WSPasswordCallback.CUSTOM_TOKEN);
@@ -232,7 +233,7 @@ public class SAML2Utils {
                         QName el = new QName(child.getNamespaceURI(), child.getLocalName());
                         if (el.equals(WSConstants.ENCRYPTED_KEY)) {
 
-                            byte[] secret = CommonUtil.getDecryptedBytes(cb, crypto, child, disableBSPEnforcement);
+                            byte[] secret = CommonUtil.getDecryptedBytes(cb, crypto, child, requestData);
 
                             return new SAML2KeyInfo(assertion, secret);
                         } else if (el.equals(new QName(WSConstants.WST_NS, "BinarySecret"))) {

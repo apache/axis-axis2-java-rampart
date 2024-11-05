@@ -144,14 +144,49 @@ public class CommonUtil {
     }
 
     /**
-     * Decrypts the EncryptedKey element and returns the secret that was used.
+     * Decrypts the EncryptedKey element and returns the secret that was used. This method has been deprecated - use the method that 
+     * passes in org.apache.wss4j.dom.handler.RequestData 
+     * @param callbackHandler Callback handler to pass to WSS4J framework.
+     * @param crypto To get private key information.
+     * @param encryptedKeyElement The encrypted Key element.
+     * @param requestData Set optional WSS4J values and pass this Object in
+     * @return The secret as a byte stream.
+     * @throws WSSecurityException If an error is occurred while decrypting the element.
+     */
+    public static byte[] getDecryptedBytes(CallbackHandler callbackHandler, Crypto crypto, Node encryptedKeyElement, RequestData requestData)
+            throws WSSecurityException {
+
+        EncryptedKeyProcessor encryptedKeyProcessor = new EncryptedKeyProcessor();
+
+        requestData.setCallbackHandler(callbackHandler);
+        requestData.setDecCrypto(crypto);
+
+        final WSSConfig cfg = WSSConfig.getNewInstance();
+        requestData.setWssConfig(cfg);
+
+        WSDocInfo docInfo = new WSDocInfo(encryptedKeyElement.getOwnerDocument());
+        docInfo.setCallbackLookup(new DOMCallbackLookup(encryptedKeyElement.getOwnerDocument()));
+        requestData.setWsDocInfo(docInfo);
+
+        List<WSSecurityEngineResult> resultList;
+
+        resultList = encryptedKeyProcessor.handleToken((Element) encryptedKeyElement, requestData);
+
+        WSSecurityEngineResult wsSecurityEngineResult = resultList.get(0);
+
+        return (byte[]) wsSecurityEngineResult.get(WSSecurityEngineResult.TAG_SECRET);
+    }
+    /**
+     * Decrypts the EncryptedKey element and returns the secret that was used. This method has been deprecated - use the method that 
+     * passes in org.apache.wss4j.dom.handler.RequestData 
      * @param callbackHandler Callback handler to pass to WSS4J framework.
      * @param crypto To get private key information.
      * @param encryptedKeyElement The encrypted Key element.
      * @return The secret as a byte stream.
      * @throws WSSecurityException If an error is occurred while decrypting the element.
      */
-    public static byte[] getDecryptedBytes(CallbackHandler callbackHandler, Crypto crypto, Node encryptedKeyElement, boolean disableBSPEnforcement)
+    @Deprecated
+    public static byte[] getDecryptedBytes(CallbackHandler callbackHandler, Crypto crypto, Node encryptedKeyElement)
             throws WSSecurityException {
 
         EncryptedKeyProcessor encryptedKeyProcessor = new EncryptedKeyProcessor();
@@ -159,7 +194,6 @@ public class CommonUtil {
         RequestData requestData = new RequestData();
         requestData.setCallbackHandler(callbackHandler);
         requestData.setDecCrypto(crypto);
-        requestData.setDisableBSPEnforcement(disableBSPEnforcement);
 
         final WSSConfig cfg = WSSConfig.getNewInstance();
         requestData.setWssConfig(cfg);
