@@ -248,6 +248,9 @@ public class TransportBindingBuilder extends BindingBuilder {
                 }
                 
                 dkSig.getParts().addAll(sigParts);
+
+		// 1.8.0 and later, see RAMPART-437
+		dkSig.setDigestAlgorithm(rpd.getAlgorithmSuite().getDigest());
                 
                 List<Reference> referenceList
                         = dkSig.addReferencesToSign(sigParts);
@@ -290,6 +293,8 @@ public class TransportBindingBuilder extends BindingBuilder {
                     sigParts.add(new WSEncryptionPart(sig.getBSTTokenId()));
                 }
                 
+		// 1.8.0 and later, see RAMPART-437
+		sig.setDigestAlgo(rpd.getAlgorithmSuite().getDigest());
                 List<Reference> referenceList
                         = sig.addReferencesToSign(sigParts);
 
@@ -526,6 +531,8 @@ public class TransportBindingBuilder extends BindingBuilder {
                 sig.prepare(RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
 
                 sig.getParts().addAll(sigParts);
+		// 1.8.0 and later, see RAMPART-437
+		sig.setDigestAlgo(rpd.getAlgorithmSuite().getDigest());
                 List<javax.xml.crypto.dsig.Reference> referenceList
                         = sig.addReferencesToSign(sigParts);
 
@@ -672,6 +679,8 @@ public class TransportBindingBuilder extends BindingBuilder {
                 sig.prepare(RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
 
                 sig.getParts().addAll(sigParts);
+		// 1.8.0 and later, see RAMPART-437
+		sig.setDigestAlgo(rpd.getAlgorithmSuite().getDigest());
                 List<Reference> referenceList
                         = sig.addReferencesToSign(sigParts);
 
