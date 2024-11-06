@@ -150,6 +150,8 @@ public class RampartMessageData {
     public final static String SCT_ID = "sctID";
 
     public final static String X509_CERT ="X509Certificate";
+
+    public final static String MUST_UNDERSTAND_SECURITY_HEADER = "mustUnderstandSecurityHeader";
     
     private MessageContext msgContext = null;
 
@@ -450,6 +452,13 @@ public class RampartMessageData {
             if(this.sender && this.policyData != null) {
                 this.secHeader = new WSSecHeader(this.document);
                 secHeader.insertSecurityHeader();
+		// RAMPART-261
+                Boolean mustUnderstandSecurityHeaderInput = (Boolean)msgCtx.getProperty(MUST_UNDERSTAND_SECURITY_HEADER);
+                if (mustUnderstandSecurityHeaderInput != null) {
+                    secHeader.setMustUnderstand(mustUnderstandSecurityHeaderInput);
+                } else if (this.policyData != null && this.policyData.getRampartConfig() != null) {
+                    secHeader.setMustUnderstand(this.policyData.getRampartConfig().isMustUnderstandSecurityHeader());
+		}
             }
             
         } catch (AxisFault e) {

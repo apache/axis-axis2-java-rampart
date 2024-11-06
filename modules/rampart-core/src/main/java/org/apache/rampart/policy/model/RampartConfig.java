@@ -136,6 +136,7 @@ public class RampartConfig implements Assertion {
     public final static String VALIDATE_SAML_SUBJECT_CONFIRMATION_LN = "validateSamlSubjectConfirmation";
 
     public final static String ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM_LN = "allowRSA15KeyTransportAlgorithm";
+    public final static String MUST_UNDERSTAND_SECURITY_HEADER_LN = "mustUnderstandSecurityHeader";
     
     private String user;
     
@@ -209,7 +210,9 @@ public class RampartConfig implements Assertion {
     private boolean validateSamlSubjectConfirmation = false; // backward compatibility
 
     private boolean allowRSA15KeyTransportAlgorithm = true; // backward compatibility
-    
+
+    private boolean mustUnderstandSecurityHeader = true; // RAMPART-261, WSS4J default is true
+
     public SSLConfig getSSLConfig() {
         return sslConfig;
     }
@@ -390,6 +393,10 @@ public class RampartConfig implements Assertion {
             writer.writeCharacters(getRampartConfigCbClass());
             writer.writeEndElement();
         }
+
+        writer.writeStartElement(NS, MUST_UNDERSTAND_SECURITY_HEADER_LN);
+        writer.writeCharacters(Boolean.toString(isMustUnderstandSecurityHeader()));
+        writer.writeEndElement();
 
         writer.writeStartElement(NS, TIMESTAMP_PRECISION_IN_MS_LN);
         writer.writeCharacters(Boolean.toString(isTimestampPrecisionInMs()));
@@ -711,6 +718,18 @@ public class RampartConfig implements Assertion {
 
     public void setAllowRSA15KeyTransportAlgorithm(boolean allowRSA15KeyTransportAlgorithm) {
         this.allowRSA15KeyTransportAlgorithm = allowRSA15KeyTransportAlgorithm;
+    }
+
+    public boolean isMustUnderstandSecurityHeader() {
+        return mustUnderstandSecurityHeader;
+    }
+
+    public void setMustUnderstandSecurityHeader(String mustUnderstandSecurityHeader) {
+        this.mustUnderstandSecurityHeader = Boolean.valueOf(mustUnderstandSecurityHeader);
+    }
+
+    public void setMustUnderstandSecurityHeader(boolean mustUnderstandSecurityHeader) {
+        this.mustUnderstandSecurityHeader = mustUnderstandSecurityHeader;
     }
 
 }

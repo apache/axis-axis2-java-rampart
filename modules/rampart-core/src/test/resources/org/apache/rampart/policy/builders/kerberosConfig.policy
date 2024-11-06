@@ -2,6 +2,7 @@
     <wsp:ExactlyOne>
         <wsp:All>
             <rampart:RampartConfig xmlns:rampart="http://ws.apache.org/rampart/policy">
+                <rampart:mustUnderstandSecurityHeader>true</rampart:mustUnderstandSecurityHeader>
                 <rampart:timestampPrecisionInMs>true</rampart:timestampPrecisionInMs>
                 <rampart:timestampTTL>300</rampart:timestampTTL>
                 <rampart:timestampMaxSkew>300</rampart:timestampMaxSkew>

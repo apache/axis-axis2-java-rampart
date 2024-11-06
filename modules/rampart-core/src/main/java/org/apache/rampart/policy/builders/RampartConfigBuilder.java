@@ -232,6 +232,12 @@ public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
             rampartConfig.setAllowRSA15KeyTransportAlgorithm(childElement.getText().trim());
         }
 
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.MUST_UNDERSTAND_SECURITY_HEADER_LN));
+        if (childElement != null) {
+            rampartConfig.setMustUnderstandSecurityHeader(childElement.getText().trim());
+        }
+
         return rampartConfig;
     }
 
