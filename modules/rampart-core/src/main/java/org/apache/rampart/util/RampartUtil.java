@@ -491,6 +491,8 @@ public class RampartUtil {
             return WSConstants.THUMBPRINT_IDENTIFIER;
         } else if (token.isRequireEmbeddedTokenReference()) {
             return WSConstants.BST_DIRECT_REFERENCE;
+        } else if (token.isRequireX509V3KeyIdentifierReference()) {
+            return WSConstants.X509_KEY_IDENTIFIER;
         } else {
             throw new RampartException(
                     "unknownKeyRefSpeficier");
@@ -1459,6 +1461,9 @@ public class RampartUtil {
     			} else if (x509Token.isRequireThumbprintReference()) {
     				secBase.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
     				tokenTypeSet = true;
+     			} else if (x509Token.isRequireX509V3KeyIdentifierReference()) {
+                                secBase.setKeyIdentifierType(WSConstants.X509_KEY_IDENTIFIER);
+                                tokenTypeSet = true;
     			} else if (log.isDebugEnabled()) {
     				log.debug("RampartUtil.setKeyIdentifierType() found a Token that is an instanceof X509Token but was not able to identify the correcc constant to set on WSSecBase.setKeyIdentifierType()" );
                         }

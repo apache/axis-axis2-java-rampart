@@ -36,6 +36,8 @@ public class X509Token extends Token {
     
     private boolean requireThumbprintReference;
     
+    private boolean requireX509V3KeyIdentifierReference;
+    
     private String tokenVersionAndType = Constants.WSS_X509_V3_TOKEN10;
     
     private String encryptionUser;
@@ -121,6 +123,20 @@ public class X509Token extends Token {
     }
 
     /**
+     * @return Returns the requireX509V3KeyIdentifierReference
+     */
+    public boolean isRequireX509V3KeyIdentifierReference() {
+        return requireX509V3KeyIdentifierReference;
+    }
+    
+    /**
+     * @param requireX509V3KeyIdentifierReference The requireX509V3KeyIdentifierReference to set
+     */
+    public void setRequireX509V3KeyIdentifierReference(boolean requireX509V3KeyIdentifierReference) {
+        this.requireX509V3KeyIdentifierReference = requireX509V3KeyIdentifierReference;
+    }
+    
+    /**
      * @return Returns the tokenVersionAndType.
      */
     public String getTokenVersionAndType() {
@@ -169,7 +185,7 @@ public class X509Token extends Token {
         // <wsp:Policy>
         writeStartElement(writer, SPConstants.POLICY);
         
-        if (isRequireKeyIdentifierReference()) {
+        if (isRequireKeyIdentifierReference() || isRequireX509V3KeyIdentifierReference()) {
             // <sp:RequireKeyIdentifierReference />
             writeEmptyElement(writer, prefix, SPConstants.REQUIRE_KEY_IDENTIFIRE_REFERENCE, namespaceURI);
         }
