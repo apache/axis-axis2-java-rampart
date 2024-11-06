@@ -1883,9 +1883,6 @@ public class RampartUtil {
                     }
                 }
 
-                MessageContext messageContext = messageData.getMsgContext();
-                HttpServletRequest request = ((HttpServletRequest) messageContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST));
-                
                 // verify client certificate used
                 // try to obtain the client certificate chain directly from the message context
                 // and then from the servlet request
@@ -1898,6 +1895,7 @@ public class RampartUtil {
                     } else {
                         Object requestProperty = msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
                         if (requestProperty instanceof HttpServletRequest) {
+		            HttpServletRequest request = (HttpServletRequest)requestProperty;
                             Object certificateChain = request.getAttribute("javax.servlet.request.X509Certificate"); //$NON-NLS-1$
                             if (certificateChain instanceof X509Certificate[]) {
                                 // HTTPS client certificate chain found
