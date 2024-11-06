@@ -675,8 +675,9 @@ public class STSClient {
      * the RST.
      *
      * @param servicePolicy
+     * @throws TrustException 
      */
-    private void processPolicy(Policy issuerPolicy, Policy servicePolicy) {
+    private void processPolicy(Policy issuerPolicy, Policy servicePolicy) throws TrustException {
         //Get the policy assertions
         //Assumption: there's only one alternative
 
@@ -694,6 +695,10 @@ public class STSClient {
 
                     this.algorithmSuite = ((Binding) tempAssertion)
                             .getAlgorithmSuite();
+                    
+                    if(algorithmSuite == null) {
+                    	throw new TrustException("Invalid STS policy. AlgorithmSuite not found");
+                    }
                 }
             }
         }
@@ -768,6 +773,8 @@ public class STSClient {
                 }
             }
         }
+        
+        int nonceLength = this.algorithmSuite != null ? this.algorithmSuite.getMaximumSymmetricKeyLength() / 8 : 16; 
 
         try {
             // Handle entropy
@@ -786,8 +793,7 @@ public class STSClient {
                                                                 ent,
                                                                 RahasConstants.BIN_SEC_TYPE_NONCE);
                     this.requestorEntropy =
-                            UsernameTokenUtil.generateNonce(this.algorithmSuite.
-                                    getMaximumSymmetricKeyLength()/8);
+                            UsernameTokenUtil.generateNonce(nonceLength);
                     binSec.setText(Base64Utils.encode(this.requestorEntropy));
 
                     if (log.isDebugEnabled()) {
@@ -812,8 +818,7 @@ public class STSClient {
                                                                 ent,
                                                                 RahasConstants.BIN_SEC_TYPE_NONCE);
                     this.requestorEntropy =
-                            UsernameTokenUtil.generateNonce(this.algorithmSuite.
-                                    getMaximumSymmetricKeyLength()/8);
+                            UsernameTokenUtil.generateNonce(nonceLength);
                     binSec.setText(Base64Utils.encode(this.requestorEntropy));
 
                     if (log.isDebugEnabled()) {
