@@ -697,7 +697,7 @@ public class STSClient {
                             .getAlgorithmSuite();
                     
                     if(algorithmSuite == null) {
-                    	throw new TrustException("Invalid STS policy. AlgorithmSuite not found");
+                        throw new TrustException("Invalid STS policy. AlgorithmSuite not found");
                     }
                 }
             }
@@ -774,7 +774,7 @@ public class STSClient {
             }
         }
         
-        int nonceLength = this.algorithmSuite != null ? this.algorithmSuite.getMaximumSymmetricKeyLength() / 8 : 16; 
+        int nonceLength = this.algorithmSuite != null ? this.algorithmSuite.getMaximumSymmetricKeyLength() / 8 : 16;
 
         try {
             // Handle entropy
