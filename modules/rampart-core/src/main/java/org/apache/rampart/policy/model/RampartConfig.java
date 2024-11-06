@@ -35,7 +35,7 @@ import javax.xml.stream.XMLStreamWriter;
  *  &lt;ramp:encryptionUser&gt;bob&lt;/ramp:encryptionUser&gt;
  *  &lt;ramp:passwordCallbackClass&gt;org.apache.axis2.security.PWCallback&lt;/ramp:passwordCallbackClass&gt;
  *  &lt;ramp:policyValidatorCbClass&gt;org.apache.axis2.security.ramp:PolicyValidatorCallbackHandler&lt;/ramp:policyValidatorCbClass&gt;
- *  &lt;ramp:timestampPrecisionInMilliseconds&gt;true&lt;/timestampPrecisionInMilliseconds&gt;
+ *  &lt;ramp:timestampPrecisionInMs&gt;true&lt;/timestampPrecisionInMs&gt;
  *  &lt;ramp:timestampTTL&gt;300&lt;/ramp:timestampTTL&gt;
  *  &lt;ramp:timestampMaxSkew&gt;0&lt;/ramp:timestampMaxSkew&gt;
  *  &lt;ramp:tokenStoreClass&gt;org.apache.rahas.StorageImpl&lt;/ramp:tokenStoreClass&gt;
@@ -99,8 +99,6 @@ public class RampartConfig implements Assertion {
     
     public final static String STS_CRYPTO_LN = "stsCrypto";
 
-    public final static String TS_PRECISION_IN_MS_LN = "timestampPrecisionInMilliseconds";
-    
     public final static String TS_TTL_LN = "timestampTTL";
 
     public final static String TS_MAX_SKEW_LN = "timestampMaxSkew";
@@ -108,6 +106,8 @@ public class RampartConfig implements Assertion {
     public final static String TOKEN_STORE_CLASS_LN = "tokenStoreClass";
 
     public final static String TIMESTAMP_STRICT_LN = "timestampStrict";
+
+    public final static String TIMESTAMP_PRECISION_IN_MS_LN = "timestampPrecisionInMs";
 
     public final static String NONCE_LIFE_TIME = "nonceLifeTime";
     
@@ -122,7 +122,7 @@ public class RampartConfig implements Assertion {
 
     public final static String ALLOW_USERNAME_TOKEN_NO_PASSWORD_LN = "allowUsernameTokenNoPassword";
 
-    public final static String TIMESTAMP_FUTURE_TTL_LN = "timeStampFutureTTL";
+    public final static String TIMESTAMP_FUTURE_TTL_LN = "timestampFutureTTL";
 
     public final static String UT_TTL_LN = "utTTL";
 
@@ -159,7 +159,8 @@ public class RampartConfig implements Assertion {
     
     private CryptoConfig stsCryptoConfig;
 
-    private String timestampPrecisionInMilliseconds = Boolean.toString(DEFAULT_TIMESTAMP_PRECISION_IN_MS);
+    private String timestampPrecisionInMs = Boolean.toString(DEFAULT_TIMESTAMP_PRECISION_IN_MS);
+
     private boolean isTimestampPrecisionInMs = DEFAULT_TIMESTAMP_PRECISION_IN_MS;
     
     private String timestampTTL = Integer.toString(DEFAULT_TIMESTAMP_TTL);
@@ -184,15 +185,15 @@ public class RampartConfig implements Assertion {
         this.kerberosConfig = kerberosConfig;
     }
     
-    /*To set timeStampStrict in WSS4J RequestData through rampartConfig - default value is false*/
-    private boolean timeStampStrict = false;
+    /*To set timestampStrict in WSS4J RequestData through rampartConfig - default value is false*/
+    private boolean timestampStrict = false;
 
     /* As of 1.8.0, the following params can also be overridden to set on RequestData */
     private boolean disableBSPEnforcement = false;
 
     private boolean allowUsernameTokenNoPassword = false;
 
-    private int timeStampFutureTTL = 60;
+    private int timestampFutureTTL = 60;
 
     private int utTTL = 300;
 
@@ -390,8 +391,8 @@ public class RampartConfig implements Assertion {
             writer.writeEndElement();
         }
 
-        writer.writeStartElement(NS, TS_PRECISION_IN_MS_LN);
-        writer.writeCharacters(Boolean.toString(isDefaultTimestampPrecisionInMs()));
+        writer.writeStartElement(NS, TIMESTAMP_PRECISION_IN_MS_LN);
+        writer.writeCharacters(Boolean.toString(isTimestampPrecisionInMs()));
         writer.writeEndElement();
 
         if (getTimestampTTL() != null) {
@@ -505,28 +506,25 @@ public class RampartConfig implements Assertion {
         return Constants.TYPE_ASSERTION;
     }
 
-    /**
-     * @deprecated  As of version 1.7.0, replaced by isDefaultTimestampPrecisionInMs
-     * @see #isDefaultTimestampPrecisionInMs()
-     * @return Returns "true" or "false".
-     */
-    @Deprecated
-    public String getTimestampPrecisionInMilliseconds() {
-    	return timestampPrecisionInMilliseconds;
-    }
-
-    public boolean isDefaultTimestampPrecisionInMs() {
+    public boolean isTimestampPrecisionInMs() {
     	return this.isTimestampPrecisionInMs;
     }
     
-    public void setTimestampPrecisionInMilliseconds(String timestampPrecisionInMilliseconds) {
+    public boolean isDefaultTimestampPrecisionInMs() {
+    	return this.isTimestampPrecisionInMs;
+    }
 
-        if (timestampPrecisionInMilliseconds != null) {
-            this.timestampPrecisionInMilliseconds = timestampPrecisionInMilliseconds;
-            this.isTimestampPrecisionInMs = Boolean.valueOf(timestampPrecisionInMilliseconds);
+    public void setTimestampPrecisionInMs(String timestampPrecisionInMs) {
+
+        if (timestampPrecisionInMs != null) {
+            this.isTimestampPrecisionInMs = Boolean.valueOf(timestampPrecisionInMs);
         }
     }
-    
+
+    public void setDefaultTimestampPrecisionInMs(boolean isTimestampPrecisionInMs) {
+    	this.isTimestampPrecisionInMs = isTimestampPrecisionInMs;
+    }
+
     /**
      * @return Returns the timestampTTL.
      */
@@ -582,13 +580,17 @@ public class RampartConfig implements Assertion {
     }
 
     public boolean isTimeStampStrict() {
-        return timeStampStrict;
+        return timestampStrict;
     }
 
-    public void setTimeStampStrict(String timeStampStrict) {
-        this.timeStampStrict = Boolean.valueOf(timeStampStrict);
+    public void setTimeStampStrict(String timestampStrict) {
+        this.timestampStrict = Boolean.valueOf(timestampStrict);
     }
     
+    public void setTimeStampStrict(boolean timestampStrict) {
+        this.timestampStrict = timestampStrict;
+    }
+
     // The vars below are 1.8.0 and after 
 
     public boolean isDisableBSPEnforcement() {
@@ -599,6 +601,10 @@ public class RampartConfig implements Assertion {
         this.disableBSPEnforcement = Boolean.valueOf(disableBSPEnforcement);
     }
 
+    public void setDisableBSPEnforcement(boolean disableBSPEnforcement) {
+        this.disableBSPEnforcement = disableBSPEnforcement;
+    }
+
     public boolean isAllowUsernameTokenNoPassword() {
         return allowUsernameTokenNoPassword;
     }
@@ -607,12 +613,20 @@ public class RampartConfig implements Assertion {
         this.allowUsernameTokenNoPassword = Boolean.valueOf(allowUsernameTokenNoPassword);
     }
 
-    public int getTimeStampFutureTTL() {
-        return timeStampFutureTTL;
+    public void setAllowUsernameTokenNoPassword(boolean allowUsernameTokenNoPassword) {
+        this.allowUsernameTokenNoPassword = allowUsernameTokenNoPassword;
     }
 
-    public void setTimeStampFutureTTL(String timeStampFutureTTL) {
-        this.timeStampFutureTTL = Integer.valueOf(timeStampFutureTTL);
+    public int getTimeStampFutureTTL() {
+        return timestampFutureTTL;
+    }
+
+    public void setTimeStampFutureTTL(String timestampFutureTTL) {
+        this.timestampFutureTTL = Integer.valueOf(timestampFutureTTL);
+    }
+
+    public void setTimeStampFutureTTL(int timestampFutureTTL) {
+        this.timestampFutureTTL = timestampFutureTTL;
     }
 
     public int getUtTTL() {
@@ -623,12 +637,20 @@ public class RampartConfig implements Assertion {
         this.utTTL = Integer.valueOf(utTTL);
     }
 
+    public void setUtTTL(int utTTL) {
+        this.utTTL = utTTL;
+    }
+
     public int getUtFutureTTL() {
         return utFutureTTL;
     }
 
     public void setUtFutureTTL(String utFutureTTL) {
         this.utFutureTTL = Integer.valueOf(utFutureTTL);
+    }
+
+    public void setUtFutureTTL(int utFutureTTL) {
+        this.utFutureTTL = utFutureTTL;
     }
 
     public boolean isHandleCustomPasswordTypes() {
@@ -639,12 +661,20 @@ public class RampartConfig implements Assertion {
         this.handleCustomPasswordTypes = Boolean.valueOf(handleCustomPasswordTypes);
     }
 
+    public void setHandleCustomPasswordTypes(boolean handleCustomPasswordTypes) {
+        this.handleCustomPasswordTypes = handleCustomPasswordTypes;
+    }
+
     public boolean isAllowNamespaceQualifiedPasswordTypes() {
         return allowNamespaceQualifiedPasswordTypes;
     }
 
     public void setAllowNamespaceQualifiedPasswordTypes(String allowNamespaceQualifiedPasswordTypes) {
         this.allowNamespaceQualifiedPasswordTypes = Boolean.valueOf(allowNamespaceQualifiedPasswordTypes);
+    }
+
+    public void setAllowNamespaceQualifiedPasswordTypes(boolean allowNamespaceQualifiedPasswordTypes) {
+        this.allowNamespaceQualifiedPasswordTypes = allowNamespaceQualifiedPasswordTypes;
     }
 
     public boolean isEncodePasswords() {
@@ -655,6 +685,10 @@ public class RampartConfig implements Assertion {
         this.encodePasswords = Boolean.valueOf(encodePasswords);
     }
 
+    public void setEncodePasswords(boolean encodePasswords) {
+        this.encodePasswords = encodePasswords;
+    }
+
     public boolean isValidateSamlSubjectConfirmation() {
         return validateSamlSubjectConfirmation;
     }
@@ -663,12 +697,20 @@ public class RampartConfig implements Assertion {
         this.validateSamlSubjectConfirmation = Boolean.valueOf(validateSamlSubjectConfirmation);
     }
 
+    public void setValidateSamlSubjectConfirmation(boolean validateSamlSubjectConfirmation) {
+        this.validateSamlSubjectConfirmation = validateSamlSubjectConfirmation;
+    }
+
     public boolean isAllowRSA15KeyTransportAlgorithm() {
         return allowRSA15KeyTransportAlgorithm;
     }
 
     public void setAllowRSA15KeyTransportAlgorithm(String allowRSA15KeyTransportAlgorithm) {
         this.allowRSA15KeyTransportAlgorithm = Boolean.valueOf(allowRSA15KeyTransportAlgorithm);
+    }
+
+    public void setAllowRSA15KeyTransportAlgorithm(boolean allowRSA15KeyTransportAlgorithm) {
+        this.allowRSA15KeyTransportAlgorithm = allowRSA15KeyTransportAlgorithm;
     }
 
 }

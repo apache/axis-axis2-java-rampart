@@ -150,7 +150,10 @@ public class RahasConstants {
     public static final String DISABLE_BSP_ENFORCEMENT = "disableBSPEnforcement";
     public final static String ALLOW_USERNAME_TOKEN_NO_PASSWORD = "allowUsernameTokenNoPassword";
 
-    public final static String TIMESTAMP_FUTURE_TTL = "timeStampFutureTTL";
+    public final static String TIMESTAMP_STRICT_LN = "timestampStrict";
+
+    public final static String TIMESTAMP_PRECISION_IN_MS_LN = "timestampPrecisionInMs";
+    public final static String TIMESTAMP_FUTURE_TTL = "timestampFutureTTL";
 
     public final static String UT_TTL = "utTTL";
 

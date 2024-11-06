@@ -2,11 +2,11 @@
     <wsp:ExactlyOne>
         <wsp:All>
             <rampart:RampartConfig xmlns:rampart="http://ws.apache.org/rampart/policy">
-                <rampart:timestampPrecisionInMilliseconds>true</rampart:timestampPrecisionInMilliseconds>
+                <rampart:timestampPrecisionInMs>true</rampart:timestampPrecisionInMs>
                 <rampart:timestampTTL>300</rampart:timestampTTL>
                 <rampart:timestampMaxSkew>300</rampart:timestampMaxSkew>
                 <rampart:timestampStrict>false</rampart:timestampStrict>
-                <rampart:timeStampFutureTTL>60</rampart:timeStampFutureTTL>
+                <rampart:timestampFutureTTL>60</rampart:timestampFutureTTL>
                 <rampart:utTTL>300</rampart:utTTL>
                 <rampart:utFutureTTL>60</rampart:utFutureTTL>
                 <rampart:disableBSPEnforcement>false</rampart:disableBSPEnforcement>

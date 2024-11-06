@@ -541,6 +541,18 @@ public class STSClient {
                         requestData.setAllowRSA15KeyTransportAlgorithm(allowRSA15KeyTransportAlgorithm);
 		    }
 
+                    boolean timestampStrict = false;
+                    if (this.options != null && this.options.getProperty(RahasConstants.TIMESTAMP_STRICT_LN) != null) {
+	                timestampStrict = Boolean.valueOf((String) this.options.getProperty(RahasConstants.TIMESTAMP_STRICT_LN));
+                        requestData.setTimeStampStrict(timestampStrict);
+		    }
+
+                    boolean timestampPrecisionInMs = false;
+                    if (this.options != null && this.options.getProperty(RahasConstants.TIMESTAMP_STRICT_LN) != null) {
+	                timestampPrecisionInMs = Boolean.valueOf((String) this.options.getProperty(RahasConstants.TIMESTAMP_PRECISION_IN_MS_LN));
+                        requestData.setPrecisionInMilliSeconds(timestampPrecisionInMs);
+		    }
+
                     secret = CommonUtil.getDecryptedBytes(this.cbHandler, this.crypto, domChild, requestData);
                 } catch (WSSecurityException e) {
                     log.error("Error decrypting encrypted key element", e);

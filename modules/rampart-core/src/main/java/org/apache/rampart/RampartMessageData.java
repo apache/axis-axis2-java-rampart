@@ -52,6 +52,7 @@ import org.apache.wss4j.dom.engine.WSSConfig;
 import org.apache.wss4j.common.derivedKey.ConversationConstants;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.common.util.Loader;
+import org.apache.wss4j.common.util.WSTimeSource;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.apache.wss4j.dom.handler.WSHandlerResult;
 import org.apache.wss4j.dom.message.WSSecHeader;
@@ -105,6 +106,37 @@ public class RampartMessageData {
     public final static String KEY_WST_VERSION = "wstVersion";
     
     public final static String PARAM_CLIENT_SIDE = "CLIENT_SIDE";
+
+    /**
+     * Key to hold the WSTimeSource
+     */
+    public final static String CUSTOM_WS_TIME_SOURCE = "wsTimeSource";
+
+    /**
+     * Key to hold the BSP compliance
+     */
+    public static final String DISABLE_BSP_ENFORCEMENT = "disableBSPEnforcement";
+
+    public static final String TIMESTAMP_STRICT = "timestampStrict";
+
+    public static final String TIMESTAMP_PRECISION_IN_MS = "timestampPrecisionInMs";
+
+    public final static String ALLOW_USERNAME_TOKEN_NO_PASSWORD = "allowUsernameTokenNoPassword";
+
+    public final static String TIMESTAMP_FUTURE_TTL = "timeStampFutureTTL";
+
+    public final static String UT_TTL = "utTTL";
+
+    public final static String UT_FUTURE_TTL = "utFutureTTL";
+
+    public final static String HANDLE_CUSTOM_PASSWORD_TYPES = "handleCustomPasswordTypes";
+
+    public final static String ALLOW_NAMESPACE_QUALIFIED_PASSWORDTYPES = "allowNamespaceQualifiedPasswordTypes";
+    public final static String ENCODE_PASSWORDS = "encodePasswords";
+
+    public final static String VALIDATE_SAML_SUBJECT_CONFIRMATION = "validateSamlSubjectConfirmation";
+
+    public final static String ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM = "allowRSA15KeyTransportAlgorithm";
 
     /**
      * Key to hold the WS-SecConv version
@@ -183,6 +215,12 @@ public class RampartMessageData {
             //Update the UsernameToken validator
             this.config.setValidator(WSConstants.USERNAME_TOKEN, RampartUsernameTokenValidator.class);
             
+	    // set the Time Source
+            WSTimeSource wsTimeSource = (WSTimeSource)msgCtx.getProperty(CUSTOM_WS_TIME_SOURCE);
+            if (wsTimeSource != null) {
+                this.config.setCurrentTime(wsTimeSource);
+            }
+
             // First obtain the axis service as we have to do a null check, there can be situations 
             // where Axis Service is null
             AxisService axisService = msgCtx.getAxisService();            
@@ -352,42 +390,58 @@ public class RampartMessageData {
                 }
             }
 
-            RequestData requestData = new RequestData();
             // Check whether RampartConfig is present
             if (this.policyData != null && this.policyData.getRampartConfig() != null) {
 
-                boolean timestampPrecisionInMilliseconds = this.policyData
-                        .getRampartConfig().isDefaultTimestampPrecisionInMs();
-                boolean timestampStrict = this.policyData.getRampartConfig().isTimeStampStrict();
-
 		// set some vars on WSS4J class RequestData via RamparConfig as desired in 
 		// Jira issues RAMPART-205, RAMPART-361, RAMPART-432, RAMPART-435
-                boolean disableBSPEnforcement = this.policyData.getRampartConfig().isDisableBSPEnforcement();
-                boolean handleCustomPasswordTypes = this.policyData.getRampartConfig().isHandleCustomPasswordTypes();
-                boolean allowNamespaceQualifiedPasswordTypes = this.policyData.getRampartConfig().isAllowNamespaceQualifiedPasswordTypes();
-                boolean allowUsernameTokenNoPassword = this.policyData.getRampartConfig().isAllowUsernameTokenNoPassword();
-                boolean allowRSA15KeyTransportAlgorithm = this.policyData.getRampartConfig().isAllowRSA15KeyTransportAlgorithm();
-                int timeStampFutureTTL = this.policyData.getRampartConfig().getTimeStampFutureTTL();
-                int utTTL = this.policyData.getRampartConfig().getUtTTL();
-                int utFutureTTL = this.policyData.getRampartConfig().getUtFutureTTL();
+	        // The precedence is MessageContext wins
 
-                // We do not need earlier logic as now WSS4J returns a new instance of WSSConfig, rather
-                // than a singleton instance. Therefore modifying logic as follows,
-                requestData.setTimeStampStrict(timestampStrict);
-                requestData.setPrecisionInMilliSeconds(timestampPrecisionInMilliseconds);
+                Boolean timestampPrecisionInMsInput = (Boolean)msgCtx.getProperty(TIMESTAMP_PRECISION_IN_MS);
+                if (timestampPrecisionInMsInput != null) {
+                    this.policyData.getRampartConfig().setDefaultTimestampPrecisionInMs(timestampPrecisionInMsInput);
+                }
+
+                Boolean timestampStrictInput = (Boolean)msgCtx.getProperty(TIMESTAMP_STRICT);
+                if (timestampStrictInput != null) {
+                    this.policyData.getRampartConfig().setTimeStampStrict(timestampStrictInput);
+                }
+
 		// 1.8.0 and later
-                requestData.setDisableBSPEnforcement(disableBSPEnforcement);
-                requestData.setHandleCustomPasswordTypes(handleCustomPasswordTypes);
-                requestData.setAllowNamespaceQualifiedPasswordTypes(allowNamespaceQualifiedPasswordTypes);
-                requestData.setAllowUsernameTokenNoPassword(allowUsernameTokenNoPassword);
-                requestData.setTimeStampFutureTTL(timeStampFutureTTL);
-                requestData.setUtTTL(utTTL);
-                requestData.setUtFutureTTL(utFutureTTL);
-                requestData.setAllowRSA15KeyTransportAlgorithm(allowRSA15KeyTransportAlgorithm); // backward compatibility as true
-            } else {
-                // To handle scenarios where password type is not set by default.
-                requestData.setHandleCustomPasswordTypes(true);
-	    }
+                Boolean disableBSPEnforcementInput = (Boolean)msgCtx.getProperty(DISABLE_BSP_ENFORCEMENT);
+                if (disableBSPEnforcementInput != null) {
+                    this.policyData.getRampartConfig().setDisableBSPEnforcement(disableBSPEnforcementInput);
+                }
+                Boolean handleCustomPasswordTypesInput = (Boolean)msgCtx.getProperty(HANDLE_CUSTOM_PASSWORD_TYPES);
+                if (handleCustomPasswordTypesInput != null) {
+                    this.policyData.getRampartConfig().setHandleCustomPasswordTypes(handleCustomPasswordTypesInput);
+                }
+                Boolean allowNamespaceQualifiedPasswordTypesInput = (Boolean)msgCtx.getProperty(ALLOW_NAMESPACE_QUALIFIED_PASSWORDTYPES);
+                if (allowNamespaceQualifiedPasswordTypesInput != null) {
+                    this.policyData.getRampartConfig().setAllowNamespaceQualifiedPasswordTypes(allowNamespaceQualifiedPasswordTypesInput);
+                }
+                Boolean allowUsernameTokenNoPasswordInput = (Boolean)msgCtx.getProperty(ALLOW_USERNAME_TOKEN_NO_PASSWORD);
+                if (allowUsernameTokenNoPasswordInput != null) {
+                    this.policyData.getRampartConfig().setAllowUsernameTokenNoPassword(allowUsernameTokenNoPasswordInput);
+                }
+                Boolean allowRSA15KeyTransportAlgorithmInput = (Boolean)msgCtx.getProperty(ALLOW_RSA15_KEY_TRANSPORT_ALGORITHM);
+                if (allowRSA15KeyTransportAlgorithmInput != null) {
+                    this.policyData.getRampartConfig().setAllowRSA15KeyTransportAlgorithm(allowRSA15KeyTransportAlgorithmInput);
+                }
+                Integer timeStampFutureTTLInput = (Integer)msgCtx.getProperty(TIMESTAMP_FUTURE_TTL);
+                if (timeStampFutureTTLInput != null) {
+                    this.policyData.getRampartConfig().setTimeStampFutureTTL(timeStampFutureTTLInput);
+                }
+                Integer utTTLInput = (Integer)msgCtx.getProperty(UT_TTL);
+                if (utTTLInput != null) {
+                    this.policyData.getRampartConfig().setUtTTL(utTTLInput);
+                }
+                Integer utFutureTTLInput = (Integer)msgCtx.getProperty(UT_FUTURE_TTL);
+                if (utFutureTTLInput != null) {
+                    this.policyData.getRampartConfig().setUtFutureTTL(utFutureTTLInput);
+                }
+
+            } 
 
             if (axisService != null) { 
                 this.customClassLoader = axisService.getClassLoader(); 
@@ -397,9 +451,6 @@ public class RampartMessageData {
                 this.secHeader = new WSSecHeader(this.document);
                 secHeader.insertSecurityHeader();
             }
-
-            //WSSecurityEngine secEngine = new WSSecurityEngine();
-            //secEngine.processSecurityHeader(this.document, requestData);
             
         } catch (AxisFault e) {
             throw new RampartException("errorInExtractingMsgProps", e);
