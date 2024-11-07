@@ -208,6 +208,7 @@ public class RampartEngine {
             requestData.setUtTTL(rampartConfig.getUtTTL());
             requestData.setUtFutureTTL(rampartConfig.getUtFutureTTL());
             requestData.setAllowRSA15KeyTransportAlgorithm(rampartConfig.isAllowRSA15KeyTransportAlgorithm()); // backward compatibility as true
+            requestData.setEncodePasswords(rampartConfig.isEncodePasswords());
         
 	} else {
             requestData.setAllowRSA15KeyTransportAlgorithm(true); // backward compatibility
@@ -295,8 +296,7 @@ public class RampartEngine {
                                             Date.from(samlAssertionHandler.getDateNotBefore()),
                                             Date.from(samlAssertionHandler.getDateNotOnOrAfter()));
         
-				    // FIXME
-                                    token.setSecret(samlAssertionHandler.getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler, new RequestData()));
+                                    token.setSecret(samlAssertionHandler.getAssertionKeyInfoSecret(signatureCrypto, tokenCallbackHandler, requestData));
                                     store.add(token);
                                 }
                             } catch (Exception e) {
