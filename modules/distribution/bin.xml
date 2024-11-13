@@ -15,8 +15,10 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>org.apache.santuario:xmlsec:jar</include>
-                <include>org.apache.ws.security:wss4j:jar</include>
+                <include>org.apache.wss4j:wss4j:jar</include>
+                <include>org.apache.wss4j:wss4j-ws-security-common:jar</include>
+                <include>org.apache.wss4j:wss4j-ws-security-dom:jar</include>
+                <include>org.apache.wss4j:wss4j-policy:jar</include>
                 <include>org.bouncycastle:bcprov-jdk18on:jar</include>
                 <include>org.apache.rampart:rampart-core:jar</include>
                 <include>org.apache.rampart:rampart-policy:jar</include>
@@ -26,21 +28,13 @@
                 <include>org.opensaml:opensaml-soap-api:jar</include>
                 <include>org.opensaml:opensaml-xacml-impl:jar</include>
                 <include>org.opensaml:opensaml-xacml-api:jar</include>
+                <include>org.apache.santuario:xmlsec:jar</include>
                 <include>org.owasp.esapi:esapi:jar</include>
                 <include>org.slf4j:slf4j-api:jar</include>
-                <include>org.slf4j:slf4j-jcl:jar</include>
+                <include>org.slf4j:jcl-over-slf4j:jar</include>
                 <include>velocity:velocity:jar</include>
-                <include>commons-collections:commons-collections:jar</include>
                 <include>commons-lang:commons-lang:jar</include>
             </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>docs/apidocs</outputDirectory>
-            <includes>
-                <include>*:apidocs:zip</include>
-            </includes>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
         </dependencySet>
     </dependencySets>
     <fileSets>
