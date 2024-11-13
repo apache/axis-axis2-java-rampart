@@ -26,17 +26,12 @@ Stack</em></strong></p>
 
 <h3>Building Rampart</h3>
 <ol>
-  <li>Install maven2. Refer to the <a
+  <li>Install maven3. Refer to the <a
     href="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">Installation
     guide</a>.</li>
-  <li>Install SVN on your machine. (The Rampart repository uses SVN.) Please
-    read the ASF <a
-    href="http://www.apache.org/dev/version-control.html">Source Code
-    Repositories page.</a></li>
   <li>Download the source code.
     <ul>
-      <li>Anon Checkout <a
-	      href="https://github.com/apache/axis-axis2-java-rampart">https://github.com/apache/axis-axis2-java-rampart/</a></li>
+      <li>Checkout <a href="https://github.com/apache/axis-axis2-java-rampart">https://github.com/apache/axis-axis2-java-rampart/</a></li>
     </ul>
   </li>
   <li>The Rampart project has 8 modules under it. They are:
@@ -186,5 +181,125 @@ align="middle" />
 <p></p>
 
 <p></p>
-  </body>
+
+<h3>Release process and release preparation</h3>
+<p>Check that all dependencies and plugins are available from standard repositories. To do this, clean the local repository and execute 'mvn clean install followed by 'mvn site'</p>
+
+<p>Check that the set of license files in the legal directory is complete and accurate (by checking that in the binary distribution for every third party JAR in the lib directory. </p>
+
+<p>Check that the apache-release profile can be executed properly. To do this, issue the following command: mvn clean install -Papache-release -DskipTests=true</p>
+
+<p>You may also execute a dry run of the release process: mvn release:prepare -DdryRun=true. After this, you need to clean up using the following command: mvn release:clean</p>
+
+<p>Check that the Maven site can be generated and deployed successfully, and that it has the expected content.</p>
+
+<p>To generate the entire documentation in one place, complete with working inter-module links, execute the site-deploy phase (and check the files under target/staging). A quick and reliable way of doing that is to use the following command: mvn -Dmaven.test.skip=true clean package site-deploy</p>
+
+<p>Complete the release notes in the new src/site/markdown/release-notes .md file, i.e. 2.0.0.md.  It should include a description of the major changes in the release as well as a list of resolved JIRA issues.</p>
+
+<h3>Prerequisites</h3>
+
+<p>The following things are required to perform the actual release:</p>
+
+<p>A PGP key that conforms to the <a href="http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf"> requirement for Apache release signing</a></p>
+
+<p>To make the release process easier, the passphrase for the code signing key should be configured in ~/.m2/settings.xml</p>
+
+<code><![CDATA[<settings>
+  ...
+  <profiles>
+    <profile>
+      <id>apache-release</id>
+      <properties>
+        <gpg.passphrase><!-- KEY PASSPHRASE --></gpg.passphrase>
+      </properties>
+    </profile>
+  </profiles>
+  ...
+</settings>]]>
+
+</code>
+
+<p>To make the release process easier, the passphrase for the code signing key should be configured in ~/.m2/settings.xml</p>
+
+<p>The release process uses a Nexus staging repository. Every committer should have access to the corresponding staging profile in Nexus. To validate this, login to repository.apache.org and check that you can see the org.apache.axis staging profile. The credentials used to deploy to Nexus should be added to settings.xml</p>
+                        
+<h3>Release</h3>
+
+<p>In order to prepare the release artifacts for vote, execute the following steps:</p>
+
+<p>If necessary, update the copyright date in the top level NOTICE file.</p>
+
+<p>Start the release process with the following command:</p>
+
+<code>mvn release:prepare</code>
+
+<p>When asked for the "SCM release tag or label", keep the default value (x.y.z) </p>
+
+<p>The above command will create a tag in Subversion and increment the version number of the trunk to the next development version. It will also create a release.properties file that will be used in the next step.</p>
+
+<p>Perform the release using the following command: </p>
+
+<code>mvn release:perform</code>
+
+<p>This will upload the release artifacts to the Nexus staging repository.</p>
+
+<p>Close the staging repository. The name of the staging profile is org.apache.axis. See <a href="https://maven.apache.org/developers/release/maven-project-release-procedure.html"> for a more thorough description of this step. </a></p>
+
+<p>Execute the target/checkout/etc/dist.py script to upload the source and binary distributions to the development area of the <a href="https://dist.apache.org/repos/dist/"> repository. </a></p>
+
+<p>If not yet done, export your public key and <a href="https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart/KEYS"> append it here. </a></p>
+
+<p>The command to export a public key is as follows:</p>
+
+<code>gpg --armor --export key_id</code>
+
+<p>Delete <a href="https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart/KEYS"> if it exists. </a></p>
+
+<p>Create a new staging area for the site:</p>
+
+<code>svn copy https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart-staging</code>
+
+<p>This step can be skipped if the staging area has already been created earlier (e.g. to test a snapshot version of the site).</p>
+
+<p>Change to the target/checkout directory and prepare the site using the following commands:</p>
+
+<code>mvn site-deploy ; mvn scm-publish:publish-scm -Dscmpublish.skipCheckin=true</code>
+
+<p>The staging area will be checked out to target/scmpublish-checkout (relative to target/checkout). Do a sanity check on the changes and then commit them.</p>
+
+<p>Start the release vote by sending a mail to java-dev@axis.apache.org . The mail should mention the list of issues solved in the release (by linking to the relevant JIRA view).</p>
+                            
+<p>Include a link to the location of the Nexus staging repository, and a link to the <a href="https://dist.apache.org/repos/dist/dev/axis/axis2/java/rampart/"> source and binary distributions. </a></p>
+
+<p>A link to the preview of the <a href="https://axis.apache.org/axis2/java/rampart-staging/"> Maven site. </a></p>
+
+<p>If the vote passes, execute the following steps:</p>
+
+<p>Promote the artifacts in the staging repository. See<a href="https://central.sonatype.org/publish/release/#close-and-drop-or-release-your-staging-repository"> for detailed instructions for this step.</a></p>
+
+<p>Publish the distributions:</p>
+
+<!-- version? -->
+<code>svn mv https://dist.apache.org/repos/dist/dev/axis/axis2/java/rampart/ https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart</code>
+
+<p>Publish the site:</p>
+
+<code>svn co --depth=immediates https://svn.apache.org/repos/asf/axis/site/ site ; cd site/axis2/java ; svn rm rampart ; svn mv rampart-staging rampart ; svn commit</code>
+
+<p>It may take several hours before all the updates have been synchronized to the relevant ASF systems. Before proceeding, check that the Maven artifacts for the release are available from the Maven central repository, and the <a href="https://axis.apache.org/axis2/java/rampart/"> Rampart Maven site has been synchronized.</a></p>
+
+<p>Verify the binary and source distributions can be downloaded from the<a href="https://axis.apache.org/axis2/java/rampart/download.html"> Rampart download page.</a></p>
+
+<p>Once everything is in place, send announcements to java-dev@axis.apache.org and announce@apache.org. Since the two lists have different conventions, audiences and moderation policies, to send the announcement separately to the two lists.</p>
+
+<p>Sample announcement:</p>
+
+<p>Apache Rampart Team is pleased to announce the release of Rampart x.y.z. The release is available for download at:</p>
+
+<p>https://axis.apache.org/axis2/java/rampart/download.html</p>
+
+<p>Apache Rampart provides implementations of the WS-Sec* specifications for Apache Axis2, based on Apache WSS4J and the Apache Axiom DOOM implementation.</p>
+
+</body>
 </html>

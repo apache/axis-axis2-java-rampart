@@ -17,25 +17,21 @@
             <includes>
                 <include>org.apache.santuario:xmlsec:jar</include>
                 <include>org.apache.ws.security:wss4j:jar</include>
-                <include>org.bouncycastle:bcprov-jdk15on:jar</include>
+                <include>org.bouncycastle:bcprov-jdk18on:jar</include>
                 <include>org.apache.rampart:rampart-core:jar</include>
                 <include>org.apache.rampart:rampart-policy:jar</include>
                 <include>org.apache.rampart:rampart-trust:jar</include>
                 <include>org.opensaml:opensaml:jar</include>
-                <include>org.opensaml:xmltooling:jar</include>
+                <include>org.opensaml:opensaml-soap-impl:jar</include>
+                <include>org.opensaml:opensaml-soap-api:jar</include>
+                <include>org.opensaml:opensaml-xacml-impl:jar</include>
+                <include>org.opensaml:opensaml-xacml-api:jar</include>
                 <include>org.owasp.esapi:esapi:jar</include>
-                <include>joda-time:joda-time:jar</include>
                 <include>org.slf4j:slf4j-api:jar</include>
                 <include>org.slf4j:slf4j-jcl:jar</include>
                 <include>velocity:velocity:jar</include>
                 <include>commons-collections:commons-collections:jar</include>
-                <include>org.opensaml:openws:jar</include>
                 <include>commons-lang:commons-lang:jar</include>
-                <include>org.apache.xerces:xercesImpl:jar</include>
-                <include>org.apache.xerces:resolver:jar</include>
-                <include>org.apache.xerces:serializer:jar</include>
-                <include>org.owasp.esapi:esapi:jar</include>
-                <include>ca.juliusdavies:not-yet-commons-ssl</include>
             </includes>
         </dependencySet>
         <dependencySet>
