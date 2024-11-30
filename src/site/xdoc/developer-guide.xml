@@ -228,7 +228,7 @@ align="middle" />
 
 <p>If necessary, update the copyright date in the top level NOTICE file.</p>
 
-<p>Start the release process with the following command:</p>
+<p>Start the release process with the following command - use 'mvn release:rollback' to undo:</p>
 
 <code>mvn release:prepare</code>
 
