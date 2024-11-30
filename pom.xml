@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>20</version>
+        <version>33</version>
     </parent>
 
     <groupId>org.apache.rampart</groupId>
@@ -105,6 +105,12 @@
             <id>thilinamb</id>
             <email>thilinamb AT apache.org</email>
             <organization>WSO2</organization>
+        </developer>
+        <developer>
+            <name>Robert Lazarski</name>
+            <id>robertlazarski</id>
+            <email>robertlazarski AT gmail.com</email>
+            <organization>Alpha Theory</organization>
         </developer>
     </developers>
 
@@ -763,6 +769,8 @@
 
         <jacoco.version>0.8.12</jacoco.version>
         <slf4j.version>2.0.16</slf4j.version>
+	<!-- see the parent artifact 'apache' i.e 33, it defaults to a older version--> 
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
     <pluginRepositories>

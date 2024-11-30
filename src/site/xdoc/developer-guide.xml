@@ -220,8 +220,6 @@ align="middle" />
 
 </code>
 
-<p>To make the release process easier, the passphrase for the code signing key should be configured in ~/.m2/settings.xml</p>
-
 <p>The release process uses a Nexus staging repository. Every committer should have access to the corresponding staging profile in Nexus. To validate this, login to repository.apache.org and check that you can see the org.apache.axis staging profile. The credentials used to deploy to Nexus should be added to settings.xml</p>
                         
 <h3>Release</h3>
@@ -253,8 +251,6 @@ align="middle" />
 <p>The command to export a public key is as follows:</p>
 
 <code>gpg --armor --export key_id</code>
-
-<p>Delete <a href="https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart/KEYS"> if it exists. </a></p>
 
 <p>Create a new staging area for the site:</p>
 
