@@ -189,7 +189,7 @@ align="middle" />
 
 <p>Check that the apache-release profile can be executed properly. To do this, issue the following command: mvn clean install -Papache-release -DskipTests=true</p>
 
-<p>You may also execute a dry run of the release process: mvn release:prepare -DdryRun=true. After this, you need to clean up using the following command: mvn release:clean</p>
+<p>You may also execute a dry run of the release process: mvn release:prepare -DdryRun=true. In a dry run, the generated zip files will still be labled as SNAPSHOT. After this, you need to clean up using the following command: mvn release:clean</p>
 
 <p>Check that the Maven site can be generated and deployed successfully, and that it has the expected content.</p>
 
