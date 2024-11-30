@@ -187,7 +187,7 @@ align="middle" />
 
 <p>Check that the set of license files in the legal directory is complete and accurate (by checking that in the binary distribution for every third party JAR in the lib directory. </p>
 
-<p>Check that the apache-release profile can be executed properly. To do this, issue the following command: mvn clean install -Papache-release -DskipTests=true</p>
+<p>Check that the apache-release profile (see the 'parent' reference in the top level pom.xml, and https://maven.apache.org/pom/asf/) can be executed properly. To do this, issue the following command: mvn clean install -Papache-release -DskipTests=true</p>
 
 <p>You may also execute a dry run of the release process: mvn release:prepare -DdryRun=true. In a dry run, the generated zip files will still be labled as SNAPSHOT. After this, you need to clean up using the following command: mvn release:clean</p>
 
