@@ -226,15 +226,29 @@ align="middle" />
 
 <p>In order to prepare the release artifacts for vote, execute the following steps:</p>
 
+<p>If not yet done, export your public key and <a href="https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart/KEYS"> append it there. </a></p>
+
+<p>If not yet done, also export your public key to the dev area and <a href="https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart/KEYS"> append it there. </a></p>
+
+<p>The command to export a public key is as follows:</p>
+
+<code>gpg --armor --export key_id</code>
+
+<p>If you have multiple keys, you can define a ~/.gnupg/gpg.conf file for a default. Note that while 'gpg --list-keys' will show your public keys, using maven-release-plugin with the command 'release:perform' below requires 'gpg --list-secret-keys' to have a valid entry that matches your public key, in order to create 'asc' files that are used to verify the release artifcats. 'release:prepare' creates the sha512 checksum files.</p>
+
+<p>The created artifacts i.e. zip files can be checked with, for example, sha512sum 'rampart-dist-1.8.0-bin.zip' which should match the generated sha512 files. In that example, use 'gpg --verify rampart-dist-1.8.0-bin.zip.asc rampart-dist-1.8.0-bin.zip' to verify the artifacts were signed correctly</p>
+
 <p>If necessary, update the copyright date in the top level NOTICE file.</p>
 
-<p>Start the release process with the following command - use 'mvn release:rollback' to undo:</p>
+<p>Start the release process with the following command - use 'mvn release:rollback' to undo and be aware that in the main pom.xml there is an apache parent that defines some plugin versions, documented at https://maven.apache.org/pom/asf/:</p>
+
+<p>Start the release process with the following command - use 'mvn release:rollback' to undo and be aware that in the main pom.xml there is an apache parent that defines some plugin versions<a href="https://maven.apache.org/pom/asf/"> documented here. </a></p>
 
 <code>mvn release:prepare</code>
 
 <p>When asked for the "SCM release tag or label", keep the default value (x.y.z) </p>
 
-<p>The above command will create a tag in Subversion and increment the version number of the trunk to the next development version. It will also create a release.properties file that will be used in the next step.</p>
+<p>The above command will create a tag in Git and increment the version number of the trunk to the next development version. It will also create a release.properties file that will be used in the next step.</p>
 
 <p>Perform the release using the following command: </p>
 
@@ -246,23 +260,17 @@ align="middle" />
 
 <p>Execute the target/checkout/etc/dist.py script to upload the source and binary distributions to the development area of the <a href="https://dist.apache.org/repos/dist/"> repository. </a></p>
 
-<p>If not yet done, export your public key and <a href="https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart/KEYS"> append it here. </a></p>
+https://dist.apache.org/repos/dist/dev/axis/axis2/java/rampart/
 
-<p>The command to export a public key is as follows:</p>
-
-<code>gpg --armor --export key_id</code>
-
-<p>Create a new staging area for the site:</p>
-
-<code>svn copy https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart https://svn.apache.org/repos/asf/axis/site/axis2/java/rampart-staging</code>
-
-<p>This step can be skipped if the staging area has already been created earlier (e.g. to test a snapshot version of the site).</p>
+<p>Create a new staging area for the site, clone from https://github.com/apache/axis-site and commit a copy of the dir axis2/java/rampart to axis2/java/rampart-staging.</p>
 
 <p>Change to the target/checkout directory and prepare the site using the following commands:</p>
 
 <code>mvn site-deploy ; mvn scm-publish:publish-scm -Dscmpublish.skipCheckin=true</code>
 
 <p>The staging area will be checked out to target/scmpublish-checkout (relative to target/checkout). Do a sanity check on the changes and then commit them.</p>
+
+<p>The root dir of axis-site has a .asf.yaml file, referenced here at target/scmpublish-checkout/.asf.yaml, that is  <a href="https://github.com/apache/infrastructure-asfyaml/blob/main/README.md"> documented here. </a></p>
 
 <p>Start the release vote by sending a mail to java-dev@axis.apache.org . The mail should mention the list of issues solved in the release (by linking to the relevant JIRA view).</p>
                             
@@ -276,12 +284,11 @@ align="middle" />
 
 <p>Publish the distributions:</p>
 
-<!-- version? -->
-<code>svn mv https://dist.apache.org/repos/dist/dev/axis/axis2/java/rampart/ https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart</code>
+<code>svn mv https://dist.apache.org/repos/dist/dev/axis/axis2/java/rampart/x.x.x https://dist.apache.org/repos/dist/release/axis/axis2/java/rampart</code>
 
 <p>Publish the site:</p>
 
-<code>svn co --depth=immediates https://svn.apache.org/repos/asf/axis/site/ site ; cd site/axis2/java ; svn rm rampart ; svn mv rampart-staging rampart ; svn commit</code>
+<code>git clone https://github.com/apache/axis-site ; cd axis-site ; git rm -r rampart ; git mv rampart-staging rampart ; git commit -am "Release Rampart x.x.x"</code>
 
 <p>It may take several hours before all the updates have been synchronized to the relevant ASF systems. Before proceeding, check that the Maven artifacts for the release are available from the Maven central repository, and the <a href="https://axis.apache.org/axis2/java/rampart/"> Rampart Maven site has been synchronized.</a></p>
 
