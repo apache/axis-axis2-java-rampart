@@ -240,8 +240,6 @@ align="middle" />
 
 <p>If necessary, update the copyright date in the top level NOTICE file.</p>
 
-<p>Start the release process with the following command - use 'mvn release:rollback' to undo and be aware that in the main pom.xml there is an apache parent that defines some plugin versions, documented at https://maven.apache.org/pom/asf/:</p>
-
 <p>Start the release process with the following command - use 'mvn release:rollback' to undo and be aware that in the main pom.xml there is an apache parent that defines some plugin versions<a href="https://maven.apache.org/pom/asf/"> documented here. </a></p>
 
 <code>mvn release:prepare</code>
