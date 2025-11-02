@@ -72,11 +72,29 @@ public class RampartEngine {
 	private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);
     private static ServiceNonceCache serviceNonceCache = new ServiceNonceCache();
 
+
 	public List<WSSecurityEngineResult> process(MessageContext msgCtx) throws WSSPolicyException,
 	RampartException, WSSecurityException, AxisFault {
 
+		if (log.isDebugEnabled()) {
+			log.debug("RampartEngine: Processing incoming message");
+			log.debug("RampartEngine: Initial SOAP envelope received:");
+			try {
+				log.debug(msgCtx.getEnvelope().toString());
+			} catch (Exception e) {
+				log.debug("RampartEngine: Could not log initial envelope: " + e.getMessage());
+			}
+		}
+
+		if (log.isDebugEnabled()) {
+			String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+			log.debug("Processing message - timestamp: " + timestamp);
+			log.debug("Action = " + (msgCtx.getOptions() != null ? msgCtx.getOptions().getAction() : "null"));
+			log.debug("To = " + (msgCtx.getOptions() != null ? msgCtx.getOptions().getTo() : "null"));
+		}
+
 		boolean dotDebug = tlog.isDebugEnabled();
-		
+
 		log.debug("Enter process(MessageContext msgCtx)");
 
 		RampartMessageData rmd = new RampartMessageData(msgCtx, false);
@@ -238,6 +256,15 @@ public class RampartEngine {
 		}
 		
 		if(secHeader == null) {
+		    if (log.isDebugEnabled()) {
+		        log.debug("RampartEngine: No security header found in received message");
+		        log.debug("RampartEngine: Received SOAP envelope:");
+		        try {
+		            log.debug(msgCtx.getEnvelope().toString());
+		        } catch (Exception e) {
+		            log.debug("RampartEngine: Could not log envelope: " + e.getMessage());
+		        }
+		    }
 		    throw new RampartException("missingSecurityHeader");
 		}
 		
@@ -417,7 +444,90 @@ public class RampartEngine {
 		    }
 		}
 
-        return engine.processSecurityHeader(rmd.getDocument(), requestData);
+        // CRITICAL FIX: Ensure WSS4J OpenSAML is initialized right before SAML processing
+        // This addresses timing issues where initialization in RampartMessageData isn't sufficient
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Ensuring WSS4J OpenSAML initialization before processSecurityHeader");
+            }
+            Class<?> openSAMLUtilClass = Class.forName("org.apache.wss4j.common.saml.OpenSAMLUtil");
+
+            // Check state BEFORE initialization
+            java.lang.reflect.Field factoryField = openSAMLUtilClass.getDeclaredField("unmarshallerFactory");
+            factoryField.setAccessible(true);
+            Object factoryBefore = factoryField.get(null);
+            if (log.isDebugEnabled()) {
+                log.debug("OpenSAMLUtil.unmarshallerFactory BEFORE init: " + factoryBefore);
+            }
+
+            try {
+                java.lang.reflect.Method initMethod = openSAMLUtilClass.getDeclaredMethod("initSamlEngine");
+                initMethod.setAccessible(true);
+                initMethod.invoke(null);
+            } catch (NoSuchMethodException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("initSamlEngine method not found, will use manual initialization");
+                }
+            }
+
+            // Check state AFTER initSamlEngine attempt
+            Object factoryAfter = factoryField.get(null);
+            if (log.isDebugEnabled()) {
+                log.debug("OpenSAMLUtil.unmarshallerFactory AFTER initSamlEngine: " + factoryAfter);
+            }
+
+            if (factoryAfter == null) {
+                log.info("initSamlEngine failed, performing manual factory initialization");
+
+                // Manual initialization: Get factories from properly initialized OpenSAML and set them directly
+                org.opensaml.core.xml.io.UnmarshallerFactory unmarshallerFactory = org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
+                org.opensaml.core.xml.io.MarshallerFactory marshallerFactory = org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport.getMarshallerFactory();
+
+                // Set the factories directly in OpenSAMLUtil static fields
+                java.lang.reflect.Field unmarshallerFactoryField = openSAMLUtilClass.getDeclaredField("unmarshallerFactory");
+                unmarshallerFactoryField.setAccessible(true);
+                unmarshallerFactoryField.set(null, unmarshallerFactory);
+
+                java.lang.reflect.Field marshallerFactoryField = openSAMLUtilClass.getDeclaredField("marshallerFactory");
+                marshallerFactoryField.setAccessible(true);
+                marshallerFactoryField.set(null, marshallerFactory);
+
+                // Verify manual initialization worked
+                Object factoryFinal = factoryField.get(null);
+                if (log.isDebugEnabled()) {
+                    log.debug("OpenSAMLUtil.unmarshallerFactory AFTER manual init: " + factoryFinal);
+                }
+
+                if (factoryFinal != null) {
+                    log.info("Manual WSS4J OpenSAML factory initialization successful");
+                } else {
+                    log.warn("Manual factory initialization failed - OpenSAMLUtil.unmarshallerFactory is still null");
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("initSamlEngine worked properly");
+                }
+            }
+        } catch (Exception e) {
+            log.warn("WSS4J OpenSAML initialization failed: " + e.getMessage(), e);
+        }
+
+        WSHandlerResult result = engine.processSecurityHeader(rmd.getDocument(), requestData);
+
+        // DEBUG: Check OpenSAMLUtil state AFTER processSecurityHeader to see if it gets corrupted
+        if (log.isDebugEnabled()) {
+            try {
+                Class<?> openSAMLUtilClass = Class.forName("org.apache.wss4j.common.saml.OpenSAMLUtil");
+                java.lang.reflect.Field factoryField = openSAMLUtilClass.getDeclaredField("unmarshallerFactory");
+                factoryField.setAccessible(true);
+                Object factoryAfterProcessing = factoryField.get(null);
+                log.debug("OpenSAMLUtil.unmarshallerFactory AFTER processSecurityHeader: " + factoryAfterProcessing);
+            } catch (Exception e) {
+                log.debug("Error checking factory after processing: " + e.getMessage());
+            }
+        }
+
+        return result;
     }
 	
 	// Check whether this a soap fault because of failure in processing the security header 

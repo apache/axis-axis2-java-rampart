@@ -47,7 +47,11 @@ import org.opensaml.core.xml.XMLObjectBuilder;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.soap.wssecurity.KeyIdentifier;
+import org.opensaml.soap.wssecurity.SecurityTokenReference;
 import org.opensaml.soap.wssecurity.impl.SecurityTokenReferenceBuilder;
+import org.opensaml.soap.wssecurity.impl.SecurityTokenReferenceMarshaller;
+import org.opensaml.soap.wssecurity.impl.KeyIdentifierBuilder;
+import org.opensaml.soap.wssecurity.impl.KeyIdentifierMarshaller;
 import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.xmlsec.encryption.EncryptedKey;
 import org.opensaml.xmlsec.signature.KeyInfo;
@@ -362,12 +366,70 @@ public class CommonUtil {
      */
     public static XMLObject buildXMLObject(QName objectQName) throws TrustException {
 
+        if (log.isDebugEnabled()) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+            log.debug("CommonUtil.buildXMLObject TIMESTAMP: " + timestamp);
+            log.debug("CommonUtil.buildXMLObject() starting on QName: " + objectQName);
+        }
         log.debug("buildXMLObject() is starting on QName: " + objectQName);
         XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
+
+        // CRITICAL FIX: Proactively register both builders to prevent WSS4J ClassCastExceptions
+        // This ensures builders are available for all WSS4J operations, not just explicit requests
+        if (builderFactory.getBuilder(KeyIdentifier.ELEMENT_NAME) == null) {
+            builderFactory.registerBuilder(KeyIdentifier.ELEMENT_NAME, new KeyIdentifierBuilder());
+            if (log.isDebugEnabled()) {
+                log.debug("CommonUtil: Proactively registered KeyIdentifierBuilder");
+            }
+            org.opensaml.core.xml.io.MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+            marshallerFactory.registerMarshaller(KeyIdentifier.ELEMENT_NAME, new KeyIdentifierMarshaller());
+            if (log.isDebugEnabled()) {
+                log.debug("CommonUtil: Proactively registered KeyIdentifierMarshaller");
+            }
+        }
+
+        if (builderFactory.getBuilder(SecurityTokenReference.ELEMENT_NAME) == null) {
+            builderFactory.registerBuilder(SecurityTokenReference.ELEMENT_NAME, new SecurityTokenReferenceBuilder());
+            if (log.isDebugEnabled()) {
+                log.debug("CommonUtil: Proactively registered SecurityTokenReferenceBuilder");
+            }
+            org.opensaml.core.xml.io.MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+            marshallerFactory.registerMarshaller(SecurityTokenReference.ELEMENT_NAME, new SecurityTokenReferenceMarshaller());
+            if (log.isDebugEnabled()) {
+                log.debug("CommonUtil: Proactively registered SecurityTokenReferenceMarshaller");
+            }
+        }
         if (builderFactory.getBuilder(objectQName) == null) {
             if (KeyIdentifier.ELEMENT_NAME == objectQName) {
-                builderFactory.registerBuilder(KeyIdentifier.ELEMENT_NAME, new SecurityTokenReferenceBuilder());
-                log.warn("An opensaml SecurityTokenReferenceBuilder was added to the opensaml registry for QName key: " + KeyIdentifier.ELEMENT_NAME);
+                builderFactory.registerBuilder(KeyIdentifier.ELEMENT_NAME, new KeyIdentifierBuilder());
+                if (log.isDebugEnabled()) {
+                    log.debug("CommonUtil: Registered KeyIdentifierBuilder for " + KeyIdentifier.ELEMENT_NAME);
+                }
+                log.warn("An opensaml KeyIdentifierBuilder was added to the opensaml registry for QName key: " + KeyIdentifier.ELEMENT_NAME);
+
+                // Also register the marshaller
+                org.opensaml.core.xml.io.MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+                marshallerFactory.registerMarshaller(KeyIdentifier.ELEMENT_NAME, new KeyIdentifierMarshaller());
+                if (log.isDebugEnabled()) {
+                    log.debug("CommonUtil: Registered KeyIdentifierMarshaller for " + KeyIdentifier.ELEMENT_NAME);
+                }
+                log.warn("An opensaml KeyIdentifierMarshaller was added to the opensaml registry for QName key: " + KeyIdentifier.ELEMENT_NAME);
+
+            } else if (SecurityTokenReference.ELEMENT_NAME == objectQName) {
+                builderFactory.registerBuilder(SecurityTokenReference.ELEMENT_NAME, new SecurityTokenReferenceBuilder());
+                if (log.isDebugEnabled()) {
+                    log.debug("CommonUtil: Registered SecurityTokenReferenceBuilder for " + SecurityTokenReference.ELEMENT_NAME);
+                }
+                log.warn("An opensaml SecurityTokenReferenceBuilder was added to the opensaml registry for QName key: " + SecurityTokenReference.ELEMENT_NAME);
+
+                // Also register the marshaller
+                org.opensaml.core.xml.io.MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+                marshallerFactory.registerMarshaller(SecurityTokenReference.ELEMENT_NAME, new SecurityTokenReferenceMarshaller());
+                if (log.isDebugEnabled()) {
+                    log.debug("CommonUtil: Registered SecurityTokenReferenceMarshaller for " + SecurityTokenReference.ELEMENT_NAME);
+                }
+                log.warn("An opensaml SecurityTokenReferenceMarshaller was added to the opensaml registry for QName key: " + SecurityTokenReference.ELEMENT_NAME);
+
             } else {
                 log.error("No opensaml builders found for QName key: " + objectQName);
             }

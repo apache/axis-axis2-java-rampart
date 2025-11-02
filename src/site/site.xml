@@ -25,8 +25,8 @@
     </bannerLeft>
 
     <bannerRight>
-        <src>http://www.apache.org/images/asf_logo_wide.png</src>
-        <href>http://www.apache.org</href>
+        <src>https://www.apache.org/images/asf_logo_wide.png</src>
+        <href>https://www.apache.org</href>
     </bannerRight>
 
     <skin>
@@ -39,7 +39,7 @@
 
     <body>
         <links>
-            <item name="Apache Axis2/Java" href="http://axis.apache.org/axis2/java/core/" />
+            <item name="Apache Axis2/Java" href="https://axis.apache.org/axis2/java/core/" />
         </links>
         
         <menu name="Apache Rampart">
@@ -59,7 +59,8 @@
         <menu name="Documentation">
             <item name="Getting Started" href="quick-start.html"/>
             <item name="Samples" href="samples.html"/>
-            <item name="FAQ" href="http://wiki.apache.org/ws/FrontPage/Rampart/FAQ"/>
+<!-- Removing broken wiki link - wiki.apache.org/ws no longer exists -->
+            <!-- <item name="FAQ" href="http://wiki.apache.org/ws/FrontPage/Rampart/FAQ"/> -->
             <item name="Rampart Configuration" href="rampartconfig-guide.html"/>
             <item name="STS Configuration" href="setting-up-sts.html"/>
             <item name="Developer Guide" href="developer-guide.html"/>
@@ -71,13 +72,13 @@
         </menu>
         <menu name="Project Information">
             <item name="Project Team" href="team.html" />
-            <item name="Issue Tracking" href="http://issues.apache.org/jira/browse/Rampart" />
+            <item name="Issue Tracking" href="https://issues.apache.org/jira/browse/Rampart" />
             <item name="Mailing Lists" href="mail-lists.html"/>
             <item name="Source Code" href="https://github.com/apache/axis-axis2-java-rampart" />
-            <item name="License" href="http://www.apache.org/licenses/"/>
-            <item name="Sponsorship" href="http://www.apache.org/foundation/sponsorship.html"/>
-            <item name="Thanks" href="http://www.apache.org/foundation/thanks.html"/>
-            <item name="Security" href="http://www.apache.org/security/"/>
+            <item name="License" href="https://www.apache.org/licenses/"/>
+            <item name="Sponsorship" href="https://www.apache.org/foundation/sponsorship.html"/>
+            <item name="Thanks" href="https://www.apache.org/foundation/thanks.html"/>
+            <item name="Security" href="https://www.apache.org/security/"/>
         </menu>
     </body>
 </project>

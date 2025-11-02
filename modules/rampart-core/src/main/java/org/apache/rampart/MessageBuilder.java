@@ -29,6 +29,8 @@ import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
+import org.apache.rahas.Token;
+import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustUtil;
 import org.apache.rampart.builder.AsymmetricBindingBuilder;
 import org.apache.rampart.builder.SymmetricBindingBuilder;
@@ -50,28 +52,110 @@ import org.w3c.dom.Node;
 import javax.xml.namespace.QName;
 
 public class MessageBuilder {
-    
+
     private static Log log = LogFactory.getLog(MessageBuilder.class);
+    private static final String VERSION_ID = "2025-11-01-MESSAGEBUILDER-DEBUG-v2";
 
     public void build(MessageContext msgCtx) throws WSSPolicyException,
             RampartException, WSSecurityException, AxisFault {
 
+        // Log key message context properties that affect security header creation
+        Object rampartPolicy = msgCtx.getOptions().getProperty(RampartMessageData.KEY_RAMPART_POLICY);
+        Object customToken = msgCtx.getOptions().getProperty(RampartMessageData.KEY_CUSTOM_ISSUED_TOKEN);
+
+        if (log.isDebugEnabled()) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+            log.debug("=== MESSAGEBUILDER: Starting build for message ===");
+            log.debug("MessageBuilder TIMESTAMP: " + timestamp);
+            log.debug("MessageBuilder VERSION: " + VERSION_ID);
+            log.debug("MessageBuilder: Action = " + msgCtx.getOptions().getAction());
+            log.debug("MessageBuilder: To = " + msgCtx.getOptions().getTo());
+            log.debug("MessageBuilder: Message flow = " + (msgCtx.getFLOW() == MessageContext.IN_FLOW ? "IN_FLOW" :
+                                                               msgCtx.getFLOW() == MessageContext.OUT_FLOW ? "OUT_FLOW" :
+                                                               msgCtx.getFLOW() == MessageContext.IN_FAULT_FLOW ? "IN_FAULT_FLOW" :
+                                                               msgCtx.getFLOW() == MessageContext.OUT_FAULT_FLOW ? "OUT_FAULT_FLOW" : "UNKNOWN"));
+
+            log.debug("MessageBuilder: RampartPolicy property = " + (rampartPolicy != null ? "present" : "null"));
+            log.debug("MessageBuilder: CustomIssuedToken property = " + (customToken != null ? customToken : "null"));
+        }
+
         Axis2Util.useDOOM(true);
-        
+
         RampartMessageData rmd = new RampartMessageData(msgCtx, true);
-        
-        
+
+
         RampartPolicyData rpd = rmd.getPolicyData();
-        if(rpd == null || isSecurityValidationFault(msgCtx) || 
-                !RampartUtil.isSecHeaderRequired(rpd, rmd.isInitiator(),false)) {
-            
+        log.debug("MessageBuilder: PolicyData available = " + (rpd != null));
+        if (rpd != null) {
+            log.debug("MessageBuilder: Policy has SupportingTokens = " + (rpd.getSupportingTokens() != null));
+            log.debug("MessageBuilder: Policy binding type = " +
+                (rpd.isTransportBinding() ? "Transport" :
+                 rpd.isSymmetricBinding() ? "Symmetric" :
+                 rpd.isAsymmetricBinding() ? "Asymmetric" : "Unknown"));
+            log.debug("MessageBuilder: EncryptionToken = " + (rpd.getEncryptionToken() != null ? rpd.getEncryptionToken().getClass().getSimpleName() : "null"));
+            log.debug("MessageBuilder: SignatureToken = " + (rpd.getSignatureToken() != null ? rpd.getSignatureToken().getClass().getSimpleName() : "null"));
+
+            // Log additional custom issued token details
+            log.debug("MessageBuilder: Custom issued token present = " + (customToken != null));
+            if (customToken != null) {
+                log.debug("MessageBuilder: Custom issued token value = " + customToken);
+            }
+
+            // Check token storage
+            try {
+                TokenStorage tokenStorage = rmd.getTokenStorage();
+                log.debug("MessageBuilder: TokenStorage available = " + (tokenStorage != null));
+                if (tokenStorage != null && customToken != null) {
+                    Token token = tokenStorage.getToken((String)customToken);
+                    log.debug("MessageBuilder: Token found in storage = " + (token != null));
+                    if (token != null) {
+                        log.debug("MessageBuilder: Token ID = " + token.getId());
+                        log.debug("MessageBuilder: Token has secret = " + (token.getSecret() != null));
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("MessageBuilder: Error checking token storage: " + e.getMessage());
+            }
+        }
+        log.debug("MessageBuilder: isInitiator = " + rmd.isInitiator());
+        log.debug("MessageBuilder: isSecurityValidationFault = " + isSecurityValidationFault(msgCtx));
+
+        boolean secHeaderRequired = rpd != null ? RampartUtil.isSecHeaderRequired(rpd, rmd.isInitiator(),false) : false;
+        if (log.isDebugEnabled()) {
+            log.debug("MessageBuilder: isSecHeaderRequired = " + secHeaderRequired);
+        }
+
+        if(rpd == null || isSecurityValidationFault(msgCtx) || !secHeaderRequired) {
+            log.warn("MessageBuilder: EARLY RETURN - No security header will be added");
+            log.warn("MessageBuilder: rpd null = " + (rpd == null));
+            log.warn("MessageBuilder: validation fault = " + isSecurityValidationFault(msgCtx));
+            log.warn("MessageBuilder: sec header not required = " + !secHeaderRequired);
+            if (rpd != null && !secHeaderRequired) {
+                log.warn("MessageBuilder: Policy exists but sec header not required - diagnosing policy");
+                log.warn("MessageBuilder: isInitiator = " + rmd.isInitiator());
+                log.warn("MessageBuilder: Policy binding type = " +
+                    (rpd.isTransportBinding() ? "Transport" :
+                     rpd.isSymmetricBinding() ? "Symmetric" :
+                     rpd.isAsymmetricBinding() ? "Asymmetric" : "Unknown"));
+                log.warn("MessageBuilder: Policy includeTimestamp = " + rpd.isIncludeTimestamp());
+            }
+
             WSSecHeader secHeader = rmd.getSecHeader();
-            
+
             if ( secHeader != null && secHeader.isEmpty() ) {
                 secHeader.removeSecurityHeader();
             }
-            
+
             return;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("MessageBuilder: PROCEEDING to add security header");
+            log.debug("MessageBuilder: isInitiator = " + rmd.isInitiator());
+            log.debug("MessageBuilder: Policy binding type = " +
+                (rpd.isTransportBinding() ? "Transport" :
+                 rpd.isSymmetricBinding() ? "Symmetric" :
+                 rpd.isAsymmetricBinding() ? "Asymmetric" : "Unknown"));
         }
         
         //Copy the RECV_RESULTS if available
@@ -134,27 +218,68 @@ public class MessageBuilder {
         }
         
        if(rpd.isTransportBinding()) {
-           log.debug("Building transport binding");
+           log.debug("MessageBuilder: Building transport binding");
            TransportBindingBuilder building = new TransportBindingBuilder();
            building.build(rmd);
+           log.debug("MessageBuilder: TransportBinding build completed");
         } else if(rpd.isSymmetricBinding()) {
-           log.debug("Building SymmetricBinding");
+           log.debug("MessageBuilder: Building SymmetricBinding");
            SymmetricBindingBuilder builder = new SymmetricBindingBuilder();
-           builder.build(rmd);
+           try {
+               builder.build(rmd);
+               log.debug("MessageBuilder: SymmetricBinding build completed successfully");
+           } catch (Exception e) {
+               log.debug("MessageBuilder: SymmetricBinding build FAILED: " + e.getMessage());
+               e.printStackTrace();
+               throw e;
+           }
         } else {
+            log.debug("MessageBuilder: Building AsymmetricBinding");
             AsymmetricBindingBuilder builder = new AsymmetricBindingBuilder();
-            builder.build(rmd);
+            try {
+                builder.build(rmd);
+                log.debug("MessageBuilder: AsymmetricBinding build completed successfully");
+            } catch (Exception e) {
+                log.debug("MessageBuilder: AsymmetricBinding build FAILED: " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
         }
        
        //TODO remove following check, we don't need this check here as we do a check to see whether 
        // security header required 
        
        WSSecHeader secHeader = rmd.getSecHeader();
-       
-       if ( secHeader != null && secHeader.isEmpty() ) {
-           secHeader.removeSecurityHeader();
+       if (log.isDebugEnabled()) {
+           log.debug("MessageBuilder: Final security header check");
+           log.debug("MessageBuilder: Security header present = " + (secHeader != null));
+           if (secHeader != null) {
+               boolean isEmpty = secHeader.isEmpty();
+               log.debug("MessageBuilder: Security header empty = " + isEmpty);
+               if (isEmpty) {
+                   log.debug("MessageBuilder: REMOVING empty security header");
+               } else {
+                   log.debug("MessageBuilder: Security header retained (has content)");
+               }
+           } else {
+               log.debug("MessageBuilder: No security header was created!");
+           }
        }
-        
+
+
+       // Log the final envelope being built
+       if (log.isDebugEnabled()) {
+           try {
+               log.debug("=== MESSAGEBUILDER: Final SOAP envelope being sent ===");
+               log.debug("MessageBuilder: Action = " + msgCtx.getWSAAction());
+               log.debug("MessageBuilder: Final envelope content:");
+               log.debug(msgCtx.getEnvelope().toString());
+               log.debug("=== END SOAP envelope ===");
+           } catch (Exception e) {
+               log.debug("MessageBuilder: Could not log envelope: " + e.getMessage());
+           }
+       }
+
        /*
         * Checking whether MTOMSerializable is there. If so set optimizeElement.
         * */

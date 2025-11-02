@@ -93,16 +93,17 @@ public abstract class BindingBuilder {
      * @param rmd RampartMessageData
      */
     protected void addTimestamp(RampartMessageData rmd) {
-        log.debug("Adding timestamp");
+        log.debug("BindingBuilder: Adding timestamp");
 
         WSSecTimestamp timestampBuilder = new WSSecTimestamp(rmd.getSecHeader());
 
         timestampBuilder.setTimeToLive(RampartUtil.getTimeToLive(rmd));
-        
+
         // add the Timestamp to the SOAP Enevelope
 
         timestampBuilder.build();
 
+        log.info("BindingBuilder: Timestamp added with id: " + timestampBuilder.getId());
         if (log.isDebugEnabled()) {
             log.debug("Timestamp id: " + timestampBuilder.getId());
         }

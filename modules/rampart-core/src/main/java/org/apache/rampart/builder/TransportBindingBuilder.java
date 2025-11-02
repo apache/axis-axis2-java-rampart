@@ -73,11 +73,15 @@ public class TransportBindingBuilder extends BindingBuilder {
     	if(tlog.isDebugEnabled()){
     		t1 = System.currentTimeMillis();
     	}
-        
+
         RampartPolicyData rpd = rmd.getPolicyData();
-        
+
         if (rpd.isIncludeTimestamp()) {
+            log.info("TransportBindingBuilder: Adding timestamp");
         	addTimestamp(rmd);
+            log.info("TransportBindingBuilder: Timestamp added successfully");
+        } else {
+            log.info("TransportBindingBuilder: No timestamp required");
         }
        
         /*
@@ -164,7 +168,9 @@ public class TransportBindingBuilder extends BindingBuilder {
         } else {
             addSignatureConfirmation(rmd, null);
         }
-        
+
+        log.debug("TransportBindingBuilder: Build completed successfully");
+
     	if(tlog.isDebugEnabled()){
     		t1 = System.currentTimeMillis();
     		tlog.debug("Transport binding build took "+ (t1 - t0));

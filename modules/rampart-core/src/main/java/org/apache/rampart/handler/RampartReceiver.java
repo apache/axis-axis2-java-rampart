@@ -79,9 +79,20 @@ public class RampartReceiver implements Handler {
     }
 
     public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
-        
+
+        if (mlog.isDebugEnabled()) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+            mlog.debug("=== RAMPARTRECEIVER: Processing incoming request ===");
+            mlog.debug("RampartReceiver TIMESTAMP: " + timestamp);
+            mlog.debug("RampartReceiver: Action = " + (msgContext.getOptions() != null ? msgContext.getOptions().getAction() : "null"));
+            mlog.debug("RampartReceiver: To = " + (msgContext.getOptions() != null ? msgContext.getOptions().getTo() : "null"));
+        }
+
         if (!msgContext.isEngaged(WSSHandlerConstants.SECURITY_MODULE_NAME)) {
-          return InvocationResponse.CONTINUE;        
+            if (mlog.isDebugEnabled()) {
+                mlog.debug("RampartReceiver: Security module not engaged, continuing");
+            }
+            return InvocationResponse.CONTINUE;
         }
         
         if(mlog.isDebugEnabled()){
@@ -89,16 +100,50 @@ public class RampartReceiver implements Handler {
                     + msgContext.getEnvelope());
         }
         
+        if(mlog.isDebugEnabled()){
+            mlog.debug("RampartReceiver: Processing incoming message");
+            mlog.debug("RampartReceiver: Action = " + msgContext.getOptions().getAction());
+            mlog.debug("RampartReceiver: To = " + msgContext.getOptions().getTo());
+            mlog.debug("RampartReceiver: Message flow = " + (msgContext.getFLOW() == MessageContext.IN_FLOW ? "IN_FLOW" :
+                                                                     msgContext.getFLOW() == MessageContext.OUT_FLOW ? "OUT_FLOW" :
+                                                                     msgContext.getFLOW() == MessageContext.IN_FAULT_FLOW ? "IN_FAULT_FLOW" :
+                                                                     msgContext.getFLOW() == MessageContext.OUT_FAULT_FLOW ? "OUT_FAULT_FLOW" : "UNKNOWN"));
+            try {
+                mlog.debug("RampartReceiver: Incoming envelope:");
+                mlog.debug(msgContext.getEnvelope().toString());
+            } catch (Exception e) {
+                mlog.debug("RampartReceiver: Could not log envelope: " + e.getMessage());
+            }
+        }
+
         RampartEngine engine = new RampartEngine();
         List<WSSecurityEngineResult> wsResult = null;
         try {
+            if(mlog.isDebugEnabled()){
+                mlog.debug("RampartReceiver: About to call RampartEngine.process()");
+            }
             wsResult = engine.process(msgContext);
+            if(mlog.isDebugEnabled()){
+                mlog.debug("RampartReceiver: RampartEngine.process() completed successfully");
+            }
             
         } catch (WSSecurityException e) {
+            if(mlog.isDebugEnabled()){
+                mlog.debug("RampartReceiver: WSSecurityException in RampartEngine.process(): " + e.getMessage());
+                e.printStackTrace();
+            }
             setFaultCodeAndThrowAxisFault(msgContext, e);
         } catch (WSSPolicyException e) {
+            if(mlog.isDebugEnabled()){
+                mlog.debug("RampartReceiver: WSSPolicyException in RampartEngine.process(): " + e.getMessage());
+                e.printStackTrace();
+            }
             setFaultCodeAndThrowAxisFault(msgContext, e);
         } catch (RampartException e) {
+            if(mlog.isDebugEnabled()){
+                mlog.debug("RampartReceiver: RampartException in RampartEngine.process(): " + e.getMessage());
+                e.printStackTrace();
+            }
             setFaultCodeAndThrowAxisFault(msgContext, e);
         } 
         

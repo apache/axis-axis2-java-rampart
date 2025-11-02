@@ -15,23 +15,37 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>org.apache.wss4j:wss4j:jar</include>
                 <include>org.apache.wss4j:wss4j-ws-security-common:jar</include>
                 <include>org.apache.wss4j:wss4j-ws-security-dom:jar</include>
+                <include>org.apache.wss4j:wss4j-ws-security-stax:jar</include>
                 <include>org.apache.wss4j:wss4j-policy:jar</include>
+                <include>org.apache.wss4j:wss4j-bindings:jar</include>
                 <include>org.bouncycastle:bcprov-jdk18on:jar</include>
                 <include>org.apache.rampart:rampart-core:jar</include>
                 <include>org.apache.rampart:rampart-policy:jar</include>
                 <include>org.apache.rampart:rampart-trust:jar</include>
-                <include>org.opensaml:opensaml:jar</include>
+                <include>org.opensaml:opensaml-core:jar</include>
+                <include>org.opensaml:opensaml-saml-api:jar</include>
+                <include>org.opensaml:opensaml-saml-impl:jar</include>
                 <include>org.opensaml:opensaml-soap-impl:jar</include>
                 <include>org.opensaml:opensaml-soap-api:jar</include>
                 <include>org.opensaml:opensaml-xacml-impl:jar</include>
                 <include>org.opensaml:opensaml-xacml-api:jar</include>
+                <include>org.opensaml:opensaml-xmlsec-api:jar</include>
+                <include>org.opensaml:opensaml-xmlsec-impl:jar</include>
+                <include>org.opensaml:opensaml-security-api:jar</include>
+                <include>org.opensaml:opensaml-security-impl:jar</include>
+                <include>net.shibboleth.utilities:java-support:jar</include>
+                <include>net.shibboleth:cryptography-api:jar</include>
+                <include>io.dropwizard.metrics:metrics-core:jar</include>
+                <include>org.cryptacular:cryptacular:jar</include>
                 <include>org.apache.santuario:xmlsec:jar</include>
                 <include>org.owasp.esapi:esapi:jar</include>
                 <include>org.slf4j:slf4j-api:jar</include>
-                <include>org.slf4j:jcl-over-slf4j:jar</include>
+                <include>org.apache.logging.log4j:log4j-jcl:jar</include>
+                <include>org.apache.logging.log4j:log4j-slf4j-impl:jar</include>
+                <include>org.apache.logging.log4j:log4j-core:jar</include>
+                <include>org.apache.logging.log4j:log4j-api:jar</include>
                 <include>velocity:velocity:jar</include>
                 <include>commons-lang:commons-lang:jar</include>
             </includes>
@@ -53,6 +67,22 @@
         <fileSet>
             <directory>src/main/files</directory>
             <outputDirectory>.</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>log4j2.xml</include>
+                <include>commons-logging.properties</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory>conf</outputDirectory>
+            <includes>
+                <include>log4j2.xml</include>
+                <include>commons-logging.properties</include>
+            </includes>
         </fileSet>
     </fileSets>
 

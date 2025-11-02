@@ -19,5 +19,5 @@ Rampart implements the following specifications:
 
 Apache Rampart, Rampart, Apache, the Apache feather logo, and the Apache Rampart project logo are trademarks of The Apache Software Foundation.
 
-[1]: http://ws.apache.org/wss4j/
-[2]: http://ws.apache.org/axiom/implementations/axiom-dom/
+[1]: https://wss4j.apache.org/
+[2]: https://ws.apache.org/axiom/implementations/axiom-dom/

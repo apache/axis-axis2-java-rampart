@@ -24,51 +24,46 @@
 </head>
 <body>
 <h1>Apache Rampart Knowledge Base</h1>
-<p>This page contains articles, tutorials, presentations and
-question and answers published on various Web sites on the Apache
-Rampart. </p>
-<h2>Articles:</h2>
+<p>This page contains information about articles, tutorials, and presentations related to Apache Rampart.</p>
+
+<h2>External Articles:</h2>
 <ul>
-<li><a href="http://wso2.org/library/240">
-UsernameToken Authentication with Rampart</a>- By Ruchith Ferenando</li>
-<li><a href="http://www.xml.com/pub/a/2007/05/02/sure-reliable-web-services-with-apache.html">
-Secure, Reliable Web Services with Apache</a>- By Kyle Gabhart</li>
-<li><a href="http://wso2.org/library/3132">
-Understanding WS - Security Policy Language</a>- By Nandana Mihindukulasooriya</li>
-<li><a href="http://wso2.org/library/1027">
-Integrating WS-Security and WS-SecureConversation Implementations with Apache Sandesha2 </a>- By Chamikara Jayalath</li>
+<li><a href="https://www.xml.com/pub/a/2007/05/02/sure-reliable-web-services-with-apache.html">
+Secure, Reliable Web Services with Apache</a> - By Kyle Gabhart</li>
 </ul>
 
-<h2>Tutorials</h2>
+<h2>Historical Articles (WSO2 Library)</h2>
+<p>The following articles were originally published on WSO2's library. While the original http://wso2.org/library/ links are no longer accessible,
+the content may be available through:</p>
 <ul>
-<li><a href="http://wso2.org/library/140">Secure Message Exchanges with Multiple Users</a>- By
-Ruchith Fernando</li>
-<li><a href="http://wso2.org/library/174">Setting Up Keystores for a Client and a Service</a>- By
-Ruchith Fernando</li>
-<li><a href="http://wso2.org/library/3190">Web Services Security with Apache Rampart - Part 1 (Transport Level Security)</a>- By
-Nandana Mihindukulasooriya</li>
-<li><a href="http://wso2.org/library/3415">Web Services Security with Apache Rampart - Part 2 (Message-Level Security)</a>- By
-Nandana Mihindukulasooriya</li>
+<li><a href="https://wso2.com/documentation/">WSO2 Current Documentation</a></li>
+<li><a href="https://docs.wso2.com/">WSO2 Technical Documentation</a></li>
+<li><a href="https://github.com/wso2">WSO2 GitHub Repositories</a> (may contain samples and tutorials)</li>
+</ul>
+<p>Original articles that may be available in updated form:</p>
+
+<ul>
+<li>UsernameToken Authentication with Rampart - By Ruchith Fernando</li>
+<li>Understanding WS-Security Policy Language - By Nandana Mihindukulasooriya</li>
+<li>Integrating WS-Security and WS-SecureConversation Implementations with Apache Sandesha2 - By Chamikara Jayalath</li>
+<li>Secure Message Exchanges with Multiple Users - By Ruchith Fernando</li>
+<li>Setting Up Keystores for a Client and a Service - By Ruchith Fernando</li>
+<li>Web Services Security with Apache Rampart - Part 1 (Transport Level Security) - By Nandana Mihindukulasooriya</li>
+<li>Web Services Security with Apache Rampart - Part 2 (Message-Level Security) - By Nandana Mihindukulasooriya</li>
+<li>Secure Web Services with Apache Rampart - By Ruchith Fernando</li>
+<li>Apache Rahas - By Ruchith Fernando</li>
+<li>Secure Messaging with Apache Rampart/Java - By Ruchith Fernando</li>
 </ul>
 
-<h2>Presentations</h2>
+<h2>Current Documentation</h2>
+<p>For current tutorials and documentation, please refer to:</p>
 <ul>
-<li><a href="http://wso2.org/library/136">Secure Web Services with Apache Rampart</a>- By
-Ruchith Fernando</li>
-<li><a href="http://wso2.org/library/2534">Apache Rahas</a>- By
-Ruchith Fernando</li>
-</ul>
-<h2>Interviews</h2>
-<ul>
-<li><a href="http://wso2.org/library/695">Secure Messaging with Apache Rampart/Java</a>- By
-Ruchith Fernando</li>
-</ul>
-<h2>Questions and Answers</h2>
-<ul>
-<li><a href="http://wso2.org/library/2507">Timestamp validation fails! Why?</a></li>
-<li><a href="http://wso2.org/library/2506">How can I convert an LLOM AXIOM tree into a DOOM AXIOM tree?</a></li>
-<li><a href="http://wso2.org/library/169">How can I obtain UsernameToken information at the service?</a></li>
-<li><a href="http://wso2.org/library/116">Unexpected number of X509Data: for Signature. Why?</a></li>
+<li><a href="quick-start.html">Getting Started Guide</a></li>
+<li><a href="samples.html">Rampart Samples</a></li>
+<li><a href="rampartconfig-guide.html">Rampart Configuration Guide</a></li>
+<li><a href="developer-guide.html">Developer Guide</a></li>
+<li><a href="https://wss4j.apache.org/">Apache WSS4J Documentation</a></li>
+<li><a href="https://axis.apache.org/axis2/java/core/">Apache Axis2 Documentation</a></li>
 </ul>
 </body>
 </html>

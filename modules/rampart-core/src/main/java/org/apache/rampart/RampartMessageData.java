@@ -18,6 +18,8 @@ package org.apache.rampart;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
@@ -68,7 +70,9 @@ import java.util.Collection;
 import java.util.List;
 
 public class RampartMessageData {
-    
+
+    private static Log log = LogFactory.getLog(RampartMessageData.class);
+
     /**
      * Axis2 parameter name to be used in the client's axis2 xml
      */
@@ -210,6 +214,36 @@ public class RampartMessageData {
         this.msgContext = msgCtx;
         
         try {
+
+            // CRITICAL FIX: Initialize WSS4J before creating WSSConfig to ensure OpenSAML integration works
+            // This prevents OpenSAMLUtil.unmarshallerFactory from being null when processing SAML assertions
+            if (log.isDebugEnabled()) {
+                log.debug("WSS4J initialization starting");
+            }
+            WSSConfig.init();
+            org.apache.xml.security.Init.init();
+            if (log.isDebugEnabled()) {
+                log.debug("Basic WSS4J initialization complete");
+            }
+
+            // Initialize WSS4J's OpenSAML integration specifically
+            try {
+                if (log.isDebugEnabled()) {
+                    log.debug("Starting OpenSAML initialization");
+                }
+                org.opensaml.core.config.InitializationService.initialize();
+
+                // Call WSS4J's OpenSAMLUtil initialization method
+                Class<?> openSAMLUtilClass = Class.forName("org.apache.wss4j.common.saml.OpenSAMLUtil");
+                java.lang.reflect.Method initMethod = openSAMLUtilClass.getDeclaredMethod("initSamlEngine");
+                initMethod.setAccessible(true);
+                initMethod.invoke(null);
+                if (log.isDebugEnabled()) {
+                    log.debug("OpenSAMLUtil.initSamlEngine() called successfully");
+                }
+            } catch (Exception e) {
+                log.warn("WSS4J OpenSAML initialization failed: " + e.getMessage(), e);
+            }
 
             // Set the WSSConfig
             this.config = WSSConfig.getNewInstance();

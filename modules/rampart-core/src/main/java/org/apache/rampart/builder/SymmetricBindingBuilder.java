@@ -34,6 +34,7 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.apache.wss4j.dom.handler.WSHandlerResult;
 import org.apache.wss4j.dom.message.WSSecDKEncrypt;
+import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.apache.wss4j.dom.message.WSSecEncrypt;
 import org.apache.wss4j.dom.message.WSSecEncryptedKey;
@@ -67,23 +68,89 @@ public class SymmetricBindingBuilder extends BindingBuilder {
 
         log.debug("SymmetricBindingBuilder build invoked");
 
-        RampartPolicyData rpd = rmd.getPolicyData();
-        if(rpd.isIncludeTimestamp()) {
-            this.addTimestamp(rmd);
-        }
-        
-        if(rmd.isInitiator()) {
-            //Setup required tokens
-            initializeTokens(rmd);
-        }
-        
-            
-        if(SPConstants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder())) {
-            this.doEncryptBeforeSig(rmd);
-        } else {
-            this.doSignBeforeEncrypt(rmd);
+        if (log.isDebugEnabled()) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+            log.debug("Starting symmetric binding build - timestamp: " + timestamp);
+            log.debug("Action = " + (rmd.getMsgContext().getOptions() != null ? rmd.getMsgContext().getOptions().getAction() : "null"));
+            log.debug("isInitiator = " + rmd.isInitiator());
         }
 
+        RampartPolicyData rpd = rmd.getPolicyData();
+
+        if (log.isDebugEnabled()) {
+            log.debug("ProtectionOrder = " + rpd.getProtectionOrder());
+            log.debug("IncludeTimestamp = " + rpd.isIncludeTimestamp());
+        }
+
+        if(rpd.isIncludeTimestamp()) {
+            if (log.isDebugEnabled()) {
+                log.debug("SymmetricBindingBuilder: Adding timestamp");
+            }
+            this.addTimestamp(rmd);
+            if (log.isDebugEnabled()) {
+                log.debug("SymmetricBindingBuilder: Timestamp added successfully");
+            }
+        }
+
+        if(rmd.isInitiator()) {
+            if (log.isDebugEnabled()) {
+                log.debug("SymmetricBindingBuilder: Initializing tokens (initiator)");
+            }
+            //Setup required tokens
+            initializeTokens(rmd);
+            if (log.isDebugEnabled()) {
+                log.debug("SymmetricBindingBuilder: Token initialization completed");
+            }
+        }
+
+
+        try {
+            if(SPConstants.ENCRYPT_BEFORE_SIGNING.equals(rpd.getProtectionOrder())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("SymmetricBindingBuilder: Doing encrypt before sign");
+                }
+                this.doEncryptBeforeSig(rmd);
+                if (log.isDebugEnabled()) {
+                    log.debug("SymmetricBindingBuilder: Encrypt before sign completed successfully");
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("SymmetricBindingBuilder: Doing sign before encrypt");
+                }
+                this.doSignBeforeEncrypt(rmd);
+                if (log.isDebugEnabled()) {
+                    log.debug("SymmetricBindingBuilder: Sign before encrypt completed successfully");
+                }
+            }
+        } catch (Exception e) {
+            log.error("SymmetricBindingBuilder: ERROR in protection order processing: " + e.getMessage(), e);
+            throw e;
+        }
+
+        // Final security header check
+        if (log.isDebugEnabled()) {
+            log.debug("=== SYMMETRICBINDINGBUILDER: Final security header status ===");
+            WSSecHeader secHeader = rmd.getSecHeader();
+            if (secHeader != null) {
+                log.debug("SymmetricBindingBuilder: Security header exists");
+                try {
+                    log.debug("SymmetricBindingBuilder: Security header isEmpty = " + secHeader.isEmpty());
+                    Element secHeaderElem = secHeader.getSecurityHeaderElement();
+                    if (secHeaderElem != null) {
+                        log.debug("SymmetricBindingBuilder: Security header element exists");
+                        log.debug("SymmetricBindingBuilder: Security header element hasChildNodes = " + secHeaderElem.hasChildNodes());
+                        log.debug("SymmetricBindingBuilder: Security header element childCount = " + secHeaderElem.getChildNodes().getLength());
+                    } else {
+                        log.debug("SymmetricBindingBuilder: Security header element is NULL");
+                    }
+                } catch (Exception e) {
+                    log.debug("SymmetricBindingBuilder: Error checking security header: " + e.getMessage());
+                }
+            } else {
+                log.debug("SymmetricBindingBuilder: Security header is NULL");
+            }
+            log.debug("SymmetricBindingBuilder: Build completed successfully");
+        }
         log.debug("SymmetricBindingBuilder build invoked : DONE");
 
     }
@@ -804,32 +871,80 @@ public class SymmetricBindingBuilder extends BindingBuilder {
      * @throws RampartException
      */
     private void initializeTokens(RampartMessageData rmd) throws RampartException {
-        
+
+        if (log.isDebugEnabled()) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+            log.debug("=== SYMMETRICBINDINGBUILDER: initializeTokens ===");
+            log.debug("initializeTokens TIMESTAMP: " + timestamp);
+        }
+
         RampartPolicyData rpd = rmd.getPolicyData();
-        
+
         MessageContext msgContext = rmd.getMsgContext();
+        if (log.isDebugEnabled()) {
+            log.debug("initializeTokens: isSymmetricBinding = " + rpd.isSymmetricBinding());
+            log.debug("initializeTokens: isServerSide = " + msgContext.isServerSide());
+            log.debug("initializeTokens: Action = " + (msgContext.getOptions() != null ? msgContext.getOptions().getAction() : "null"));
+
+            // Check for custom issued token
+            Object customTokenId = msgContext.getProperty("customIssuedToken");
+            log.debug("initializeTokens: Custom issued token = " + customTokenId);
+        }
+
         if(rpd.isSymmetricBinding() && !msgContext.isServerSide()) {
+            if (log.isDebugEnabled()) {
+                log.debug("initializeTokens: Processing symmetric binding client-side");
+            }
             if (log.isDebugEnabled()) {
                 log.debug("Processing symmetric binding: " +
                         "Setting up encryption token and signature token");
             }
             //Setting up encryption token and signature token
-            
+
             Token sigTok = rpd.getSignatureToken();
             Token encrTok = rpd.getEncryptionToken();
+
+            if (log.isDebugEnabled()) {
+                log.debug("initializeTokens: SignatureToken type = " + (sigTok != null ? sigTok.getClass().getSimpleName() : "null"));
+                log.debug("initializeTokens: EncryptionToken type = " + (encrTok != null ? encrTok.getClass().getSimpleName() : "null"));
+            }
+
             if(sigTok instanceof IssuedToken) {
-                log.debug("SignatureToken is an IssuedToken");
+                if (log.isDebugEnabled()) {
+                    log.debug("initializeTokens: SignatureToken is an IssuedToken");
+                    log.debug("initializeTokens: Current IssuedSignatureTokenId = " + rmd.getIssuedSignatureTokenId());
+                }
+
                 if(rmd.getIssuedSignatureTokenId() == null) {
-                    log.debug("No Issuedtoken found, requesting a new token");
+                    if (log.isDebugEnabled()) {
+                        log.debug("initializeTokens: No existing issued token found, requesting a new token");
+                    }
 
                     IssuedToken issuedToken = (IssuedToken)sigTok;
-                    
-                    String id = RampartUtil.getIssuedToken(rmd, 
-                            issuedToken);
-                    rmd.setIssuedSignatureTokenId(id);
-                    
+                    if (log.isDebugEnabled()) {
+                        log.debug("initializeTokens: About to call RampartUtil.getIssuedToken()");
+                    }
+
+                    try {
+                        String id = RampartUtil.getIssuedToken(rmd, issuedToken);
+                        if (log.isDebugEnabled()) {
+                            log.debug("initializeTokens: RampartUtil.getIssuedToken() returned id = " + id);
+                        }
+                        rmd.setIssuedSignatureTokenId(id);
+                        if (log.isDebugEnabled()) {
+                            log.debug("initializeTokens: Set IssuedSignatureTokenId = " + id);
+                        }
+                    } catch (Exception e) {
+                        log.error("initializeTokens: ERROR in getIssuedToken: " + e.getMessage(), e);
+                        throw e;
+                    }
+
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("initializeTokens: Using existing IssuedSignatureTokenId = " + rmd.getIssuedSignatureTokenId());
+                    }
                 }
-                
+
             } else if(sigTok instanceof SecureConversationToken) {
 
                 log.debug("SignatureToken is a SecureConversationToken");

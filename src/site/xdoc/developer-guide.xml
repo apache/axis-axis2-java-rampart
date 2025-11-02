@@ -27,7 +27,7 @@ Stack</em></strong></p>
 <h3>Building Rampart</h3>
 <ol>
   <li>Install maven3. Refer to the <a
-    href="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">Installation
+    href="https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">Installation
     guide</a>.</li>
   <li>Download the source code.
     <ul>
@@ -86,12 +86,12 @@ are included according to the security policy.</p>
 
 <p>Rampart uses WSS4J for securing SOAP messages. WSS4J is an Apache project
 which implements the WS-Security specification. SOAP messages are signed and
-encrypted according to the <a href="http://www.w3.org/TR/xmlenc-core/">XML
-Encryption</a> and <a href="http://www.w3.org/TR/xmldsig-core/">XML Digital
+encrypted according to the <a href="https://www.w3.org/TR/xmlenc-core/">XML
+Encryption</a> and <a href="https://www.w3.org/TR/xmldsig-core/">XML Digital
 Signature</a> specifications, but the WS-Security specification introduces an
 additional set of rules. Therefore WSS4J ensures that SOAP messages are
 singed according to all the rules defined in the specifications. WSS4J uses
-Apache's <a href="http://santuario.apache.org/Java/index.html">xmlsec
+Apache's <a href="https://santuario.apache.org/Java/index.html">xmlsec
 libraries</a> for XML Encryption and XML Digital Signature.</p>
 
 <p>Rather than re-inventing the wheel, it was decided to use WSS4J for SOAP
@@ -201,7 +201,8 @@ align="middle" />
 
 <p>The following things are required to perform the actual release:</p>
 
-<p>A PGP key that conforms to the <a href="http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf"> requirement for Apache release signing</a></p>
+<!-- Removing broken specs.xmlsoap.org link - domain no longer exists -->
+<p>A PGP key that conforms to the requirement for Apache release signing</p>
 
 <p>To make the release process easier, the passphrase for the code signing key should be configured in ~/.m2/settings.xml</p>
 
@@ -236,7 +237,7 @@ align="middle" />
 
 <p>If you have multiple keys, you can define a ~/.gnupg/gpg.conf file for a default. Note that while 'gpg --list-keys' will show your public keys, using maven-release-plugin with the command 'release:perform' below requires 'gpg --list-secret-keys' to have a valid entry that matches your public key, in order to create 'asc' files that are used to verify the release artifcats. 'release:prepare' creates the sha512 checksum files.</p>
 
-<p>The created artifacts i.e. zip files can be checked with, for example, sha512sum 'rampart-dist-1.8.0-bin.zip' which should match the generated sha512 files. In that example, use 'gpg --verify rampart-dist-1.8.0-bin.zip.asc rampart-dist-1.8.0-bin.zip' to verify the artifacts were signed correctly</p>
+<p>The created artifacts i.e. zip files can be checked with, for example, sha512sum 'rampart-dist-2.0.0-bin.zip' which should match the generated sha512 files. In that example, use 'gpg --verify rampart-dist-2.0.0-bin.zip.asc rampart-dist-2.0.0-bin.zip' to verify the artifacts were signed correctly</p>
 
 <p>If necessary, update the copyright date in the top level NOTICE file.</p>
 

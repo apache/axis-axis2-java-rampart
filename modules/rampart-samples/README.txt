@@ -12,10 +12,19 @@ This directory contains three sub directories:
     - keys   - The keystore files that contains the keys used by the samples
 
 Please use Apache Ant with the build.xml file available in the top level directory
-to copy all jars and mars to required places.
+to copy all jars and mars to required places. Simply execute the ant command with 
+no arguments.
 
-    - Please copy log4j.jar to AXIS2_HOME/lib directory before trying out samples.
+AXIS2_HOME must be set as an environment variable for the ant command to copy the 
+Rampart jars to AXIS2_HOME/lib. 
 
-    - Please follow the instructions on endorsing the default JAXP implementation
-      available in README.txt of this distribution before invoking 
-      Sample 08.(Issuing a SAML 2.0 Token)
+The policy samples each have an Ant target for both the client and server 
+(SimpleHTTPServer from the Axis2 test suite) i.e. they need to run in separate shells from the samples dir. 
+
+For example, in one shell (repeat for samples 1-9): 
+
+ant -buildfile policy/build.xml service.01
+
+Then in another shell:
+
+ant -buildfile policy/build.xml client.01

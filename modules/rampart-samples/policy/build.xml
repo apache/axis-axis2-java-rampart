@@ -32,18 +32,22 @@
 	<property name="sample.services.url" value="http://localhost:${client.port}/axis2/services"/>
 	
     <property environment="env"/>
-    
+
     <property name="lib.dir" value="${env.AXIS2_HOME}/lib"/>
-    
+
     <property name="vmargs" value=""/>
-    
+
     <path id="runtime.classpath">
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
         </fileset>
+        <!-- Include distribution lib directory if it exists (when running from distribution) -->
+        <fileset dir="../../lib" erroronmissingdir="false">
+            <include name="**/*.jar"/>
+        </fileset>
         <pathelement location="${env.AXIS2_HOME}/conf"/>
     </path>
-    
+
 	<target name="check.dependency" unless="env.AXIS2_HOME">
         <echo message="AXIS2_HOME must be set"/>
     </target>

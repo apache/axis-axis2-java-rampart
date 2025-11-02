@@ -60,11 +60,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.wss4j</groupId>
-            <artifactId>wss4j</artifactId>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.wss4j</groupId>
             <artifactId>wss4j-ws-security-common</artifactId>
         </dependency>
         <dependency>

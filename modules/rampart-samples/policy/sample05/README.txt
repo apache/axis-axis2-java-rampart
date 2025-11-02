@@ -3,9 +3,12 @@ WS-Trust - RST - Resquest Security Token Service - Issuing a SAML token - issuin
 When using this sample with the TCPMon to monitor the soap messages, you have to use the 
 correct URL in the client code before build the sample 05.
 
-There is a known bug in OpenSAML-1.1.jar, which is used for implementing SAML 1.1 support in Rampart.
-So before you run this sample, please download the patched OpenSAML jar from here[1], and replace it 
-with the OpenSAML-1.1.jar in your $AXIS2_HOME/lib.
+This sample demonstrates WS-Trust RST (Request Security Token) for issuing SAML tokens.
 
-[1] - http://dist.wso2.org/maven2/opensaml/opensaml/1.1.406/opensaml-1.1.406.jar  
+Note: This sample now uses OpenSAML 4.3.2 which is included with the current Rampart distribution.
+The historical reference to OpenSAML 1.1.406 from WSO2's Maven repository is no longer needed
+as the OpenSAML library has been significantly updated and the old bug has been resolved.
+
+For current OpenSAML documentation, please refer to:
+- OpenSAML Documentation: https://wiki.shibboleth.net/confluence/display/OS30/Home  
 

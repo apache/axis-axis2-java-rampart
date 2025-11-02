@@ -43,6 +43,26 @@ import java.net.URL;
 
 import javax.xml.namespace.QName;
 
+/*
+  sample 05 uses SAML token processing, unlike others such as sample 01 that uses username token processing
+
+  1. Unit Tests that use Sample05, use in-memory objects, minimal XML marshalling → only Builder required
+  2. Sample05: Full end-to-end SAML token creation with XML marshalling → Both builder AND marshaller required
+
+  Sample05 calls this path:
+  1. Client requests SAML token from STS
+  2. → SAMLTokenIssuer.createAttributeAssertion()
+  3. → CommonUtil.getSymmetricKeyBasedKeyInfo()
+  4. → SAMLUtils.createEncryptedKey()
+  5. → CommonUtil.buildXMLObject(SecurityTokenReference.ELEMENT_NAME)
+  6. → OpenSAML tries to marshall the SecurityTokenReference to actual XML
+
+  In the unit test, when KeyInfo is marshalled, OpenSAML handles the EncryptedKey as a
+  child element and doesn't require the SecurityTokenReference to be independently
+  marshallable. However, in sample05's STS token issuance process, the
+  SecurityTokenReference objects need to be marshalled as standalone elements in the XML security header.
+
+*/
 public class Client {
 
 	public static void main(String[] args) throws Exception {
@@ -51,35 +71,46 @@ public class Client {
 			System.out.println("Usage: $java Client endpoint_address client_repo_path policy_xml_path");
 		}
 
-		ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(args[1], null);		
-		
-		STSClient stsClient = new STSClient(ctx);		
-		
+		ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(args[1], null);
+
+		STSClient stsClient = new STSClient(ctx);
+
 		stsClient.setRstTemplate(getRSTTemplate());
 		String action = TrustUtil.getActionValue(RahasConstants.VERSION_05_02, RahasConstants.RST_ACTION_ISSUE);
 		stsClient.setAction(action);
-		
-		Token responseToken = stsClient.requestSecurityToken(loadPolicy("sample05/policy.xml"), new URL(new URL(args[0]), "/axis2/services/STS").toString(), loadPolicy("sample05/sts_policy.xml"), null);
-		
+
+		// Use the policy file path passed as argument
+		String policyPath = args[2];
+		String stsPolicyPath = policyPath.replace("policy.xml", "sts_policy.xml");
+
+		String stsUrl = new URL(new URL(args[0]), "/axis2/services/STS").toString();
+
+		Token responseToken = stsClient.requestSecurityToken(loadPolicy(policyPath), stsUrl, loadPolicy(stsPolicyPath), null);
+
 	        System.out.println("\n############################# Requested Token ###################################\n");
 	        System.out.println(responseToken.getToken().toString());
-		
+	        System.out.println("Token successfully received! Token ID: " + responseToken.getId());
+
 	        TokenStorage store = TrustUtil.getTokenStore(ctx);
 	        store.add(responseToken);
-		
-		
+
 	        ServiceClient client = new ServiceClient(ctx, null);
-		
+
 	        Options options = new Options();
 	        options.setAction("urn:echo");
 	        options.setTo(new EndpointReference(args[0]));
-	        options.setProperty(RampartMessageData.KEY_RAMPART_POLICY,  loadPolicy("sample05/policy.xml"));
+	        // Force SOAP 1.2 to match STS call
+	        options.setSoapVersionURI(org.apache.axiom.soap.SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI);
+
+	        Policy servicePolicy = loadPolicy(policyPath);
+	        options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, servicePolicy);
 	        options.setProperty(RampartMessageData.KEY_CUSTOM_ISSUED_TOKEN, responseToken.getId());
+
 	        client.setOptions(options);
-	        
+
 	        client.engageModule("addressing");
                 client.engageModule("rampart");
-                
+
                 OMElement response = client.sendReceive(getPayload("Hello world1"));
                 System.out.println("Response  : " + response);
 	        
@@ -87,8 +118,15 @@ public class Client {
 	}
 
 	private static Policy loadPolicy(String xmlPath) throws Exception {
+		java.io.File policyFile = new java.io.File(xmlPath);
+
+		if (!policyFile.exists()) {
+			throw new Exception("Policy file not found: " + xmlPath);
+		}
+
         OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileInputStream(xmlPath));
-		return PolicyEngine.getPolicy(builder.getDocumentElement());
+        Policy policy = PolicyEngine.getPolicy(builder.getDocumentElement());
+		return policy;
 	}
 	
     private static OMElement getSAMLToken(OMElement resp) {
