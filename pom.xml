@@ -696,23 +696,10 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-jul</artifactId>
-                <version>2.24.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>2.24.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>2.24.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-jcl</artifactId>
-                <version>2.24.1</version>
+                <artifactId>log4j-bom</artifactId>
+                <version>${log4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -857,6 +844,7 @@
 
         <jacoco.version>0.8.12</jacoco.version>
         <slf4j.version>2.0.16</slf4j.version>
+        <log4j.version>2.25.4</log4j.version>
 	<!-- see the parent artifact 'apache' i.e 33, it defaults to a older version--> 
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
