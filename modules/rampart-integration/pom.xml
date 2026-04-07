@@ -582,25 +582,21 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-	<dependency>
+	    <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jul</artifactId>
-            <version>2.24.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.25.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.24.1</version>
         </dependency>
-	<dependency>
+	    <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>2.24.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
