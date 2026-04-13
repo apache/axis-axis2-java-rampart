@@ -50,6 +50,14 @@
             <artifactId>rampart-trust</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- rampart-core references jakarta.servlet.http.HttpServletRequest.
+             The servlet API is declared 'provided' in rampart-core so it is
+             not transitively visible; make it available on the Javadoc
+             classpath explicitly. -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
