@@ -3,6 +3,11 @@ Welcome to Apache Rampart
 
 Apache Rampart&#x2122; provides implementations of the WS-Sec* specifications for
 Apache Axis2, based on [Apache WSS4J][1] and the [Apache Axiom DOOM implementation][2].
+
+The current release, Apache Rampart 2.0.0, runs on top of Apache Axis2 2.0.1
+(Jakarta-based) and requires OpenJDK 17 as the minimum runtime. It has also been
+tested on OpenJDK 21 and OpenJDK 25.
+
 Rampart implements the following specifications:
 
 * WS - Security 1.0
