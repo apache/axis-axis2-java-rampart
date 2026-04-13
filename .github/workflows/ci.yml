@@ -22,20 +22,21 @@ on:
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 -Dmaven.wagon.http.retryHandler.count=3
-
+  BASE_JAVA_VERSION: 17
+  DEFAULT_JAVA_DISTRIBUTION: 'temurin'
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        java: [ 17, 19 ]
+        java: [ 17, 21, 25 ]
     name: "Java ${{ matrix.java }}"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Cache Maven Repository
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.m2/repository
         key: maven-java-${{ matrix.java }}-${{ hashFiles('**/pom.xml') }}
@@ -43,11 +44,67 @@ jobs:
           maven-java-${{ matrix.java }}-
           maven-
     - name: Set up Java
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
-        distribution: 'zulu'
         java-version: ${{ matrix.java }}
+        distribution: ${{ env.DEFAULT_JAVA_DISTRIBUTION }}
     - name: Build
-      run: mvn -B -e -Papache-release -Dgpg.skip=true verify
+      run: mvn -B -e -Papache-release -Dgpg.skip=true -Dmaven.compiler.release=${{ matrix.java }} verify
+    - name: Remove Snapshots
+      run: find ~/.m2/repository -name '*-SNAPSHOT' -a -type d -print0 | xargs -0 rm -rf
+  site:
+    name: Site
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Cache Maven Repository
+      uses: actions/cache@v5
+      with:
+        path: ~/.m2/repository
+        key: maven-site-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          maven-site-
+          maven-
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        java-version: ${{ env.BASE_JAVA_VERSION }}
+        distribution: ${{ env.DEFAULT_JAVA_DISTRIBUTION }}
+    - name: Build
+      run: mvn -B -e -Dmaven.test.skip=true -Dmaven.compiler.release=${{ env.BASE_JAVA_VERSION }} package site-deploy
+    - name: Remove Snapshots
+      run: find ~/.m2/repository -name '*-SNAPSHOT' -a -type d -print0 | xargs -0 rm -rf
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'apache/axis-axis2-java-rampart'
+    name: Deploy
+    runs-on: ubuntu-24.04
+    needs:
+      - build
+      - site
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Cache Maven Repository
+      uses: actions/cache@v5
+      with:
+        path: ~/.m2/repository
+        key: maven-deploy-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          maven-deploy-
+          maven-
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        java-version: ${{ env.BASE_JAVA_VERSION }}
+        distribution: ${{ env.DEFAULT_JAVA_DISTRIBUTION }}
+        server-id: apache.snapshots.https
+        server-username: NEXUS_USER
+        server-password: NEXUS_PW
+    - name: Deploy
+      run: mvn -B -e -Papache-release -Dgpg.skip=true -Dmaven.test.skip=true -Dmaven.compiler.release=${{ env.BASE_JAVA_VERSION }} deploy
+      env:
+        NEXUS_USER: ${{ secrets.NEXUS_USER }}
+        NEXUS_PW: ${{ secrets.NEXUS_PW }}
     - name: Remove Snapshots
       run: find ~/.m2/repository -name '*-SNAPSHOT' -a -type d -print0 | xargs -0 rm -rf
