@@ -820,6 +820,29 @@
     </modules>
 
     <properties>
+        <!--
+          SECURITY NOTE
+          =============
+          Rampart sits directly on top of the WS-Security / SAML stack: WSS4J
+          handles signing/encryption/UsernameToken, Santuario XMLSec handles
+          XML DSig/XML Enc primitives, OpenSAML handles assertion processing,
+          and Bouncy Castle supplies the crypto providers. Any CVE in those
+          libraries is effectively a Rampart CVE as far as downstream users
+          are concerned.
+
+          When bumping any of the versions below (wss4j, opensaml, xmlsec,
+          bcprov/bcpkix) the reviewer must:
+
+            1. Read the upstream release notes / CVE feed for every version
+               skipped (not just the newest one) and note any fixes that
+               affect the code paths Rampart exercises (signing, encryption,
+               SAML issuance/validation, STS, policy processing).
+            2. Ensure no deprecated/weak algorithms (SHA-1, MD5, RSA-1.5,
+               3DES, < 2048-bit keys) are re-introduced as defaults through
+               the upgrade.
+            3. Re-run the full reactor plus the nine policy samples before
+               pushing.
+        -->
         <axis2.version>2.0.1-SNAPSHOT</axis2.version>
         <axiom.version>2.0.0</axiom.version>
 

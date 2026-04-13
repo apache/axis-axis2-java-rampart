@@ -1,3 +1,27 @@
+<!--
+  MAINTENANCE NOTE
+  ================
+  The <excludes> list on the lib/ dependencySet below is version-coupled to
+  the contents of the Axis2 binary distribution we install into. Its purpose
+  is to avoid shipping jars that Axis2 already provides; otherwise two copies
+  at different versions end up on the Axis2 runtime classpath (for example
+  httpcore5 5.2.5 alongside Axis2's 5.4.2) and the first one found wins,
+  which silently breaks HTTPClient5 transport and other components.
+
+  When bumping ${axis2.version} (or any transitive dependency in the lib/
+  set) the excludes MUST be re-reviewed:
+
+    1. Build the matching axis2 distribution (or unzip axis2-*-bin.zip).
+    2. Diff the jars in axis2/lib against this pom's effective dependency
+       list (mvn -pl modules/distribution dependency:list), comparing by
+       artifactId prefix.
+    3. Add any new overlaps as <exclude>group:artifact</exclude> entries.
+    4. Drop entries for artifacts Axis2 no longer ships.
+    5. Re-run the nine policy samples against the fresh rampart-dist to
+       confirm no sealing violations or NoSuchMethodErrors.
+
+  See the rampart-dist README / release checklist for the exact commands.
+-->
 <assembly>
     <id>bin</id>
     <baseDirectory>rampart-${version}</baseDirectory>

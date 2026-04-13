@@ -1943,6 +1943,14 @@ public class RampartUtil {
                         Object requestProperty = msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
                         if (requestProperty instanceof HttpServletRequest) {
 		            HttpServletRequest request = (HttpServletRequest)requestProperty;
+                            // Per the Jakarta Servlet specification (section on SSL attributes),
+                            // a servlet container performing TLS client authentication MUST
+                            // expose the validated chain on the request under this attribute
+                            // name. Rampart relies on that contract: if the container is not
+                            // configured for client auth, or does not populate the attribute,
+                            // this lookup returns null and the check below fails the request.
+                            // We deliberately do not attempt to re-validate the chain here --
+                            // that is the transport listener's responsibility.
                             Object certificateChain = request.getAttribute("jakarta.servlet.request.X509Certificate"); //$NON-NLS-1$
                             if (certificateChain instanceof X509Certificate[]) {
                                 // HTTPS client certificate chain found
