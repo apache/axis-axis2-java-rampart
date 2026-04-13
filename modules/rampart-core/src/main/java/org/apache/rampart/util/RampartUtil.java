@@ -100,7 +100,7 @@ import javax.crypto.KeyGenerator;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.xml.namespace.QName;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -1880,7 +1880,7 @@ public class RampartUtil {
      * and, if the property is not available, will try to get the HttpsServletRequest from the 
      * message context properties (populated there by the AxisServlet if axis2 is running inside a servlet
      * engine) and retrieve the https client certificate chain from its attributes. The client certificate
-     * chain is expected to be available under the <code>javax.servlet.request.X509Certificate</code>
+     * chain is expected to be available under the <code>jakarta.servlet.request.X509Certificate</code>
      * attribute of the servlet request. No further trust verification is done for the client
      * certificate - the transport listener should have already verified this.
      * 
@@ -1943,7 +1943,7 @@ public class RampartUtil {
                         Object requestProperty = msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
                         if (requestProperty instanceof HttpServletRequest) {
 		            HttpServletRequest request = (HttpServletRequest)requestProperty;
-                            Object certificateChain = request.getAttribute("javax.servlet.request.X509Certificate"); //$NON-NLS-1$
+                            Object certificateChain = request.getAttribute("jakarta.servlet.request.X509Certificate"); //$NON-NLS-1$
                             if (certificateChain instanceof X509Certificate[]) {
                                 // HTTPS client certificate chain found
                                 return;

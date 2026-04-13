@@ -514,6 +514,22 @@
                 <artifactId>axiom-truth</artifactId>
                 <version>${axiom.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-jakarta-activation</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>6.0.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-jakarta-jaxb</artifactId>
+                <version>${axiom.version}</version>
+            </dependency>
 
             <!-- Other Rampart Dependencies -->
             <dependency>
@@ -829,8 +845,8 @@
     </modules>
 
     <properties>
-        <axis2.version>1.8.2</axis2.version>
-        <axiom.version>1.4.0</axiom.version>
+        <axis2.version>2.0.1-SNAPSHOT</axis2.version>
+        <axiom.version>2.0.0</axiom.version>
 
         <wss4j.version>3.0.3</wss4j.version>
         <opensaml.version>4.3.2</opensaml.version>
