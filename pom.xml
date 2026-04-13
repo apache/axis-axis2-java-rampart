@@ -568,7 +568,7 @@
             </dependency>
             <dependency>
                 <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-core</artifactId>
+                <artifactId>opensaml-core-api</artifactId>
                 <version>${opensaml.version}</version>
                 <scope>compile</scope>
             </dependency>
@@ -849,7 +849,7 @@
         <axiom.version>2.0.0</axiom.version>
 
         <wss4j.version>3.0.3</wss4j.version>
-        <opensaml.version>4.3.2</opensaml.version>
+        <opensaml.version>5.2.1</opensaml.version>
         <shibboleth.utilities.version>8.4.2</shibboleth.utilities.version>
         <dropwizard.metrics.version>4.2.19</dropwizard.metrics.version>
         <cryptacular.version>1.2.4</cryptacular.version>

@@ -188,7 +188,7 @@ public class SAMLUtils {
                     List<ConfirmationMethod> confirmationMethods = subjectConfirmation.getConfirmationMethods();
 
                     if (!confirmationMethods.isEmpty()) {
-                        subjectConfirmationMethod = confirmationMethods.get(0).getConfirmationMethod();
+                        subjectConfirmationMethod = confirmationMethods.get(0).getURI();
                     }
                 }
             }
@@ -232,7 +232,7 @@ public class SAMLUtils {
 
         ConfirmationMethod confirmationMethodObject
                 = (ConfirmationMethod)CommonUtil.buildXMLObject(ConfirmationMethod.DEFAULT_ELEMENT_NAME);
-        confirmationMethodObject.setConfirmationMethod(confirmationMethod);
+        confirmationMethodObject.setURI(confirmationMethod);
 
         return confirmationMethodObject;
     }
