@@ -169,17 +169,17 @@
                 <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-surefire-plugin</artifactId>
-                  <version>3.5.2</version>
+                  <version>3.5.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.gmavenplus</groupId>
                     <artifactId>gmavenplus-plugin</artifactId>
-                    <version>4.0.1</version>
+                    <version>4.3.1</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.groovy</groupId>
@@ -191,11 +191,11 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>3.10.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.2.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.axis2</groupId>
@@ -212,11 +212,11 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.7.1</version>
+                    <version>3.8.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.11.1</version>
+                    <version>3.12.0</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.veithen.alta</groupId>
@@ -228,7 +228,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -245,6 +245,9 @@
                                     <allowSnapshotRepositories>true</allowSnapshotRepositories>
                                     <allowSnapshotPluginRepositories>true</allowSnapshotPluginRepositories>
                                 </requireNoRepositories>
+                                <requireJavaVersion>
+                                    <version>[17,)</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -308,7 +311,7 @@
             <plugin>
               <groupId>org.jacoco</groupId>
               <artifactId>jacoco-maven-plugin</artifactId>
-              <version>0.8.12</version>
+              <version>${jacoco.version}</version>
               <configuration>
                 <skip>${skipJacoco}</skip>
               </configuration>
@@ -348,34 +351,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.15.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <release>17</release>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.24</version>
-                <executions>
-                    <execution>
-                        <id>check</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <signature>
-                                <groupId>org.codehaus.mojo.signature</groupId>
-                                <artifactId>java18</artifactId>
-                                <version>1.0</version>
-                            </signature>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
                 <executions>
@@ -441,7 +421,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.9.0</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -571,6 +551,22 @@
                 <artifactId>opensaml-core-api</artifactId>
                 <version>${opensaml.version}</version>
                 <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-core-impl</artifactId>
+                <version>${opensaml.version}</version>
+            </dependency>
+            <!-- Override stale 4.x transitive deps pulled by WSS4J 3.0.3 -->
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-xacml-saml-impl</artifactId>
+                <version>${opensaml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-xacml-saml-api</artifactId>
+                <version>${opensaml.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opensaml</groupId>
@@ -735,7 +731,7 @@
             <dependency>
                 <groupId>org.apache.santuario</groupId>
                 <artifactId>xmlsec</artifactId>
-                <version>4.0.3</version>
+                <version>4.0.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.sun.activation</groupId>
@@ -751,39 +747,17 @@
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjrt</artifactId>
-                <version>1.9.22.1</version>
+                <version>1.9.25.1</version>
             </dependency>
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
-                <version>1.9.22.1</version>
+                <version>1.9.25.1</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>4.0.2</version>
-            </dependency>
-
-            <!-- WSS4J dependency management -->
-            <dependency>
-                <groupId>org.apache.wss4j</groupId>
-                <artifactId>wss4j-ws-security-common</artifactId>
-                <version>${wss4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wss4j</groupId>
-                <artifactId>wss4j-ws-security-dom</artifactId>
-                <version>${wss4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wss4j</groupId>
-                <artifactId>wss4j-policy</artifactId>
-                <version>${wss4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wss4j</groupId>
-                <artifactId>wss4j-bindings</artifactId>
-                <version>${wss4j.version}</version>
+                <version>4.0.5</version>
             </dependency>
 
         </dependencies>
@@ -848,21 +822,21 @@
         <axis2.version>2.0.1-SNAPSHOT</axis2.version>
         <axiom.version>2.0.0</axiom.version>
 
-        <wss4j.version>3.0.3</wss4j.version>
+        <wss4j.version>4.0.1</wss4j.version>
         <opensaml.version>5.2.1</opensaml.version>
         <shibboleth.utilities.version>8.4.2</shibboleth.utilities.version>
-        <dropwizard.metrics.version>4.2.19</dropwizard.metrics.version>
-        <cryptacular.version>1.2.4</cryptacular.version>
+        <dropwizard.metrics.version>4.2.38</dropwizard.metrics.version>
+        <cryptacular.version>1.3.0</cryptacular.version>
 
-        <bcprov.jdk18.version>1.79</bcprov.jdk18.version>
+        <bcprov.jdk18.version>1.83</bcprov.jdk18.version>
 
         <failIfNoTests>false</failIfNoTests>
 
-        <jacoco.version>0.8.12</jacoco.version>
+        <jacoco.version>0.8.14</jacoco.version>
         <slf4j.version>2.0.16</slf4j.version>
         <log4j.version>2.25.4</log4j.version>
-	<!-- see the parent artifact 'apache' i.e 33, it defaults to a older version--> 
-        <maven.compiler.target>11</maven.compiler.target>
+	<!-- see the parent artifact 'apache' i.e 33, it defaults to a older version-->
+        <maven.compiler.release>17</maven.compiler.release>
     </properties>
 
     <pluginRepositories>
