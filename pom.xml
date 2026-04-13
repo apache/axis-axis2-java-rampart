@@ -557,7 +557,8 @@
                 <artifactId>opensaml-core-impl</artifactId>
                 <version>${opensaml.version}</version>
             </dependency>
-            <!-- Override stale 4.x transitive deps pulled by WSS4J 3.0.3 -->
+            <!-- Pin the OpenSAML xacml-saml artifacts to the same version
+                 as the rest of the OpenSAML 5.x set. -->
             <dependency>
                 <groupId>org.opensaml</groupId>
                 <artifactId>opensaml-xacml-saml-impl</artifactId>
