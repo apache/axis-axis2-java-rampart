@@ -94,7 +94,7 @@ public class RahasSAMLTokenUTForBearerTest extends TestClient {
                    subConfirmationMethods.get(0));
         assertEquals("Subject Confirmation should be BEARER : urn:oasis:names:tc:SAML:1.0:cm:bearer",
                          RahasConstants.SAML11_SUBJECT_CONFIRMATION_BEARER,
-                         subConfirmationMethods.get(0).getConfirmationMethod());
+                         subConfirmationMethods.get(0).getURI());
     }
 
     /* (non-Javadoc)

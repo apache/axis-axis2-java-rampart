@@ -448,7 +448,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
     }
 
     private KeyInfoConfirmationDataType createKeyInfoConfirmationDataType() {
-        SAMLObjectBuilder<KeyInfoConfirmationDataType> keyInfoSubjectConfirmationDataBuilder = (SAMLObjectBuilder<KeyInfoConfirmationDataType>) XMLObjectProviderRegistrySupport.getBuilderFactory().<KeyInfoConfirmationDataType>getBuilderOrThrow(KeyInfoConfirmationDataType.TYPE_NAME);
+        SAMLObjectBuilder<KeyInfoConfirmationDataType> keyInfoSubjectConfirmationDataBuilder = (SAMLObjectBuilder<KeyInfoConfirmationDataType>) XMLObjectProviderRegistrySupport.getBuilderFactory().<KeyInfoConfirmationDataType>ensureBuilder(KeyInfoConfirmationDataType.TYPE_NAME);
 
         //Build the subject confirmation data element
         return keyInfoSubjectConfirmationDataBuilder.

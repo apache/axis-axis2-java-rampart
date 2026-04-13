@@ -26,8 +26,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.dom.DOMMetaFactory;
-import net.shibboleth.utilities.java.support.xml.ParserPool;
-import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import net.shibboleth.shared.xml.ParserPool;
+import net.shibboleth.shared.xml.impl.BasicParserPool;
 
 /**
  * Custom OpenSAML {@link ParserPool} implementation that uses a DOM aware Axiom implementation

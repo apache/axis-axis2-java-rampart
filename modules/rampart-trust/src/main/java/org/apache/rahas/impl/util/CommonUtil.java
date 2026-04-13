@@ -435,7 +435,7 @@ public class CommonUtil {
             }
 
         }
-        XMLObjectBuilder builder = builderFactory.getBuilderOrThrow(objectQName);
+        XMLObjectBuilder builder = builderFactory.ensureBuilder(objectQName);
         if (builder == null) {
             log.error("Unable to find OpenSAML builder for object " + objectQName);
             throw new TrustException("builderNotFound",new Object[]{objectQName});

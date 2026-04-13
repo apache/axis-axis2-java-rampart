@@ -85,7 +85,7 @@ public class SAMLUtils {
      */
     public static Assertion buildAssertion(Element assertionElement) {
 
-       final SAMLObjectBuilder<Assertion> assertionBuilder = (SAMLObjectBuilder<Assertion>) XMLObjectProviderRegistrySupport.getBuilderFactory().<Assertion>getBuilderOrThrow(Assertion.DEFAULT_ELEMENT_NAME);
+       final SAMLObjectBuilder<Assertion> assertionBuilder = (SAMLObjectBuilder<Assertion>) XMLObjectProviderRegistrySupport.getBuilderFactory().<Assertion>ensureBuilder(Assertion.DEFAULT_ELEMENT_NAME);
 
        return assertionBuilder.buildObject();
     }
@@ -484,7 +484,7 @@ public class SAMLUtils {
 
         XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
 
-        XMLObjectBuilder<XSString> builder = builderFactory.getBuilderOrThrow(XSString.TYPE_NAME);
+        XMLObjectBuilder<XSString> builder = builderFactory.ensureBuilder(XSString.TYPE_NAME);
 
         XSString stringValue = builder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
         stringValue.setValue(value);
