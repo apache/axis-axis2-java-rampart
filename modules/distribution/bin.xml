@@ -14,41 +14,55 @@
         </dependencySet>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
-            <includes>
-                <include>org.apache.wss4j:wss4j-ws-security-common:jar</include>
-                <include>org.apache.wss4j:wss4j-ws-security-dom:jar</include>
-                <include>org.apache.wss4j:wss4j-ws-security-stax:jar</include>
-                <include>org.apache.wss4j:wss4j-policy:jar</include>
-                <include>org.apache.wss4j:wss4j-bindings:jar</include>
-                <include>org.bouncycastle:bcprov-jdk18on:jar</include>
-                <include>org.apache.rampart:rampart-core:jar</include>
-                <include>org.apache.rampart:rampart-policy:jar</include>
-                <include>org.apache.rampart:rampart-trust:jar</include>
-                <include>org.opensaml:opensaml-core:jar</include>
-                <include>org.opensaml:opensaml-saml-api:jar</include>
-                <include>org.opensaml:opensaml-saml-impl:jar</include>
-                <include>org.opensaml:opensaml-soap-impl:jar</include>
-                <include>org.opensaml:opensaml-soap-api:jar</include>
-                <include>org.opensaml:opensaml-xacml-impl:jar</include>
-                <include>org.opensaml:opensaml-xacml-api:jar</include>
-                <include>org.opensaml:opensaml-xmlsec-api:jar</include>
-                <include>org.opensaml:opensaml-xmlsec-impl:jar</include>
-                <include>org.opensaml:opensaml-security-api:jar</include>
-                <include>org.opensaml:opensaml-security-impl:jar</include>
-                <include>net.shibboleth.utilities:java-support:jar</include>
-                <include>net.shibboleth:cryptography-api:jar</include>
-                <include>io.dropwizard.metrics:metrics-core:jar</include>
-                <include>org.cryptacular:cryptacular:jar</include>
-                <include>org.apache.santuario:xmlsec:jar</include>
-                <include>org.owasp.esapi:esapi:jar</include>
-                <include>org.slf4j:slf4j-api:jar</include>
-                <include>org.apache.logging.log4j:log4j-jcl:jar</include>
-                <include>org.apache.logging.log4j:log4j-slf4j-impl:jar</include>
-                <include>org.apache.logging.log4j:log4j-core:jar</include>
-                <include>org.apache.logging.log4j:log4j-api:jar</include>
-                <include>velocity:velocity:jar</include>
-                <include>commons-lang:commons-lang:jar</include>
-            </includes>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <excludes>
+                <!-- mar artifacts are placed in modules/ by the preceding dependencySet -->
+                <exclude>org.apache.rampart:rampart:mar</exclude>
+                <exclude>org.apache.rampart:rahas:mar</exclude>
+                <!-- Artifacts already shipped in the Axis2 binary distribution.
+                     Including them here would put duplicate versions on the classpath. -->
+                <exclude>com.fasterxml.woodstox:woodstox-core</exclude>
+                <exclude>com.google.code.findbugs:jsr305</exclude>
+                <exclude>com.google.guava:failureaccess</exclude>
+                <exclude>com.google.guava:guava</exclude>
+                <exclude>com.sun.istack:istack-commons-runtime</exclude>
+                <exclude>commons-io:commons-io</exclude>
+                <exclude>commons-logging:commons-logging</exclude>
+                <exclude>jakarta.activation:jakarta.activation-api</exclude>
+                <exclude>jakarta.mail:jakarta.mail-api</exclude>
+                <exclude>jakarta.transaction:jakarta.transaction-api</exclude>
+                <exclude>jakarta.ws.rs:jakarta.ws.rs-api</exclude>
+                <exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
+                <exclude>jaxen:jaxen</exclude>
+                <exclude>org.apache.axis2:axis2-kernel</exclude>
+                <exclude>org.apache.axis2:axis2-mtompolicy</exclude>
+                <exclude>org.apache.axis2:mex</exclude>
+                <exclude>org.apache.commons:commons-fileupload2-core</exclude>
+                <exclude>org.apache.commons:commons-fileupload2-jakarta-servlet6</exclude>
+                <exclude>org.apache.httpcomponents.client5:httpclient5</exclude>
+                <exclude>org.apache.httpcomponents.core5:httpcore5</exclude>
+                <exclude>org.apache.httpcomponents.core5:httpcore5-h2</exclude>
+                <exclude>org.apache.james:apache-mime4j-core</exclude>
+                <exclude>org.apache.logging.log4j:log4j-api</exclude>
+                <exclude>org.apache.logging.log4j:log4j-core</exclude>
+                <exclude>org.apache.logging.log4j:log4j-jcl</exclude>
+                <exclude>org.apache.neethi:neethi</exclude>
+                <exclude>org.apache.ws.commons.axiom:axiom-api</exclude>
+                <exclude>org.apache.ws.commons.axiom:axiom-dom</exclude>
+                <exclude>org.apache.ws.commons.axiom:axiom-impl</exclude>
+                <exclude>org.apache.ws.commons.axiom:axiom-jakarta-activation</exclude>
+                <exclude>org.apache.ws.commons.axiom:axiom-legacy-attachments</exclude>
+                <exclude>org.apache.ws.xmlschema:xmlschema-core</exclude>
+                <exclude>org.codehaus.woodstox:stax2-api</exclude>
+                <exclude>org.eclipse.angus:angus-activation</exclude>
+                <exclude>org.glassfish.jaxb:jaxb-core</exclude>
+                <exclude>org.glassfish.jaxb:jaxb-runtime</exclude>
+                <exclude>org.glassfish.jaxb:txw2</exclude>
+                <exclude>org.jspecify:jspecify</exclude>
+                <exclude>org.slf4j:slf4j-api</exclude>
+                <exclude>wsdl4j:wsdl4j</exclude>
+            </excludes>
         </dependencySet>
     </dependencySets>
     <fileSets>
