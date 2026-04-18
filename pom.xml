@@ -852,7 +852,7 @@
         <dropwizard.metrics.version>4.2.38</dropwizard.metrics.version>
         <cryptacular.version>1.3.0</cryptacular.version>
 
-        <bcprov.jdk18.version>1.83</bcprov.jdk18.version>
+        <bcprov.jdk18.version>1.84</bcprov.jdk18.version>
 
         <failIfNoTests>false</failIfNoTests>
 
