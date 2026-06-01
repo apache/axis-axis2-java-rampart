@@ -66,7 +66,7 @@ Also check that password callback handlers do not leak credentials
 through logging or error messages.
 
 Key files:
-- `modules/rampart-core/src/main/java/org/apache/rampart/RampartUsernameTokenValidator.java`
+- `modules/rampart-core/src/main/java/org/apache/rampart/handler/RampartUsernameTokenValidator.java`
 - `modules/rampart-core/src/main/java/org/apache/rampart/handler/CertificateValidator.java`
 
 ## Project Structure
