@@ -133,6 +133,7 @@ Axis2 Transport-Out Phase
 | **XML Encryption** (WSS4J/Santuario) | Padding oracle; chosen-ciphertext attacks; CBC mode weaknesses | Algorithm suite enforcement; GCM recommended over CBC |
 | **SAML assertion parsing** (OpenSAML 5.2.1) | XXE in assertion XML; forged assertions; expired/replayed assertions; issuer spoofing | OpenSAML unmarshalling; assertion signature validation; NotBefore/NotOnOrAfter enforcement; issuer certificate pinning |
 | **SAML2Utils.getSAML2KeyInfo()** | XXE — `DocumentBuilderFactory.newInstance()` without explicit XXE hardening flags | Depends on OpenSAML's `AxiomParserPool` configuration; **review needed** |
+| **WS-Trust STS (rahas module)** | Token issuance policy bypass; privilege escalation via crafted RequestSecurityToken (RST); DoS against token issuance | `TokenIssuer` implementations must validate RSTs against policy before issuing tokens |
 | **UsernameToken validation** | Plaintext password interception; weak hashing; brute force | TransportBinding requires HTTPS for plaintext; nonce+created for hashed; callback-based validation |
 | **Kerberos token decoding** | Forged tickets; replay attacks | JDK Kerberos SPI handles validation; keytab/realm configuration is admin responsibility |
 | **Certificate/key management** | Key confusion; expired certificates; revocation bypass | `CertificateValidator` extends WSS4J `SignatureTrustValidator`; chain validation delegated to JDK |
@@ -161,9 +162,10 @@ as a default, and re-run all policy samples to verify no regression.
 Rampart has no independently assigned CVEs. Its security posture depends
 heavily on WSS4J and OpenSAML, which have extensive CVE histories:
 
-- **WSS4J CVEs** include signature wrapping (CVE-2011-2487), HMAC
-  truncation, and various XML signature bypass issues. Rampart 2.0.0
-  uses WSS4J 4.0.1, which addresses all known issues.
+- **WSS4J CVEs** include signature wrapping (CVE-2011-2487), XXE in
+  Kerberos tokens (CVE-2015-0226), timing attacks (CVE-2016-2170),
+  and security processing bypasses (CVE-2018-11775). Rampart 2.0.0
+  uses WSS4J 4.0.1, which addresses these and other known issues.
 - **OpenSAML CVEs** include XXE in SAML assertion parsing and assertion
   replay. Rampart 2.0.0 uses OpenSAML 5.2.1.
 
