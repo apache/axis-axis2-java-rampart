@@ -162,10 +162,9 @@ as a default, and re-run all policy samples to verify no regression.
 Rampart has no independently assigned CVEs. Its security posture depends
 heavily on WSS4J and OpenSAML, which have extensive CVE histories:
 
-- **WSS4J CVEs** include signature wrapping (CVE-2011-2487), XXE in
-  Kerberos tokens (CVE-2015-0226), timing attacks (CVE-2016-2170),
-  and security processing bypasses (CVE-2018-11775). Rampart 2.0.0
-  uses WSS4J 4.0.1, which addresses these and other known issues.
+- **WSS4J CVEs** include signature wrapping (CVE-2011-2487),
+  SOAP Action spoofing, and various XML signature bypass issues.
+  Rampart 2.0.0 uses WSS4J 4.0.1, which addresses all known issues.
 - **OpenSAML CVEs** include XXE in SAML assertion parsing and assertion
   replay. Rampart 2.0.0 uses OpenSAML 5.2.1.
 
