@@ -35,6 +35,11 @@
     <packaging>mar</packaging>
     <name>Rampart - Trust-Mar</name>
 
+    <properties>
+        <!-- Packaging module: assembles the rahas.mar, has no tests of its own. -->
+        <failIfNoTests>false</failIfNoTests>
+    </properties>
+
     <build>
         <plugins>
             <plugin>

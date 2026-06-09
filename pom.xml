@@ -239,6 +239,10 @@
                             <rules>
                                 <requireNoRepositories>
                                     <message>The POM must not include repository definitions since non Apache repositories threaten the build stability.</message>
+                                    <!-- banRepositories is intentionally false: the <repositories> section
+                                         declares the Shibboleth repository, which is required to resolve the
+                                         OpenSAML artifacts (not available from Maven Central). Do not remove
+                                         that repository or set this to true. -->
                                     <banRepositories>false</banRepositories>
                                     <banPluginRepositories>true</banPluginRepositories>
                                     <!-- We still need to allow the Apache snapshot repository -->
@@ -854,7 +858,10 @@
 
         <bcprov.jdk18.version>1.84</bcprov.jdk18.version>
 
-        <failIfNoTests>false</failIfNoTests>
+        <!-- Fail the build if a module expected to have tests suddenly has none
+             (tests deleted or no longer discovered). Surefire reads this property
+             natively; modules that legitimately have no tests override it to false. -->
+        <failIfNoTests>true</failIfNoTests>
 
         <jacoco.version>0.8.15</jacoco.version>
         <slf4j.version>2.0.16</slf4j.version>

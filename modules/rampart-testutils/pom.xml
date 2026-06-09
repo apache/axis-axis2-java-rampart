@@ -30,6 +30,11 @@
     <artifactId>rampart-testutils</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <!-- This module is a test-support library with no tests of its own. -->
+        <failIfNoTests>false</failIfNoTests>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.aspectj</groupId>

@@ -34,6 +34,11 @@
     <packaging>mar</packaging>
     <name>Rampart - Mar</name>
 
+    <properties>
+        <!-- Packaging module: assembles the rampart.mar, has no tests of its own. -->
+        <failIfNoTests>false</failIfNoTests>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
