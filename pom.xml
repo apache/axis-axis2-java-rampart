@@ -184,14 +184,14 @@
                         <dependency>
                             <groupId>org.apache.groovy</groupId>
                             <artifactId>groovy-all</artifactId>
-                            <version>4.0.23</version>
+                            <version>4.0.32</version>
                             <type>pom</type>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.10.0</version>
+                    <version>3.11.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-antrun-plugin</artifactId>
@@ -228,7 +228,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.2</version>
+                <version>3.6.3</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -843,20 +843,20 @@
             3. Re-run the full reactor plus the nine policy samples before
                pushing.
         -->
-        <axis2.version>2.0.1-SNAPSHOT</axis2.version>
+        <axis2.version>2.0.1</axis2.version>
         <axiom.version>2.0.0</axiom.version>
 
         <wss4j.version>4.0.1</wss4j.version>
-        <opensaml.version>5.2.1</opensaml.version>
+        <opensaml.version>5.2.2</opensaml.version>
         <shibboleth.utilities.version>8.4.2</shibboleth.utilities.version>
-        <dropwizard.metrics.version>4.2.38</dropwizard.metrics.version>
+        <dropwizard.metrics.version>4.2.39</dropwizard.metrics.version>
         <cryptacular.version>1.3.0</cryptacular.version>
 
-        <bcprov.jdk18.version>1.83</bcprov.jdk18.version>
+        <bcprov.jdk18.version>1.84</bcprov.jdk18.version>
 
         <failIfNoTests>false</failIfNoTests>
 
-        <jacoco.version>0.8.14</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <slf4j.version>2.0.16</slf4j.version>
         <log4j.version>2.25.4</log4j.version>
 	<!-- see the parent artifact 'apache' i.e 33, it defaults to a older version-->
@@ -866,7 +866,7 @@
     <pluginRepositories>
          <pluginRepository>
              <id>apache.snapshots</id>
-             <url>http://repository.apache.org/snapshots/</url>
+             <url>https://repository.apache.org/snapshots/</url>
              <snapshots>
                  <enabled>true</enabled>
              </snapshots>
