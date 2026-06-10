@@ -590,6 +590,25 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
        
     }
 
+    /**
+     * Returns true only if {@code target} is, by node identity, one of the elements
+     * actually covered by the signature. This is the core of the signature-wrapping
+     * defence (RAMPART-428): an attacker can place an element with the same QName as
+     * a signed element elsewhere in the message, so a name-based check is not enough -
+     * the consumed element itself must be the signed one.
+     */
+    static boolean isElementSigned(Element target, List<Element> signedElements) {
+        if (target == null || signedElements == null) {
+            return false;
+        }
+        for (Element signedElement : signedElements) {
+            if (signedElement != null && signedElement.isSameNode(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected void validateSignedPartsHeaders(ValidatorData data, List<WSEncryptionPart> signatureParts,
                                               List<WSSecurityEngineResult> results)
     throws RampartException {
@@ -599,8 +618,12 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
        
         WSSecurityEngineResult[] actionResults = fetchActionResults(results, WSConstants.SIGN);
 
-        // Find elements that are signed
+        // Find elements that are signed. We keep both the QNames (used for header
+        // checks) and the actual signed DOM elements. The latter lets us verify the
+        // signed element by identity rather than just by name, which is required to
+        // defeat signature-wrapping attacks (RAMPART-428).
         List<QName> actuallySigned = new ArrayList<QName>();
+        List<Element> actuallySignedElements = new ArrayList<Element>();
         if (actionResults != null) {
             for (WSSecurityEngineResult actionResult : actionResults) {
 
@@ -620,6 +643,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                                 String ns = (nodeList.item(x)).getNamespaceURI();
                                 String ln = (nodeList.item(x)).getLocalName();
                                 actuallySigned.add(new QName(ns, ln));
+                                actuallySignedElements.add((Element) nodeList.item(x));
                                 break;
                             }
                         }
@@ -627,6 +651,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                         String ns = protectedElement.getNamespaceURI();
                         String ln = protectedElement.getLocalName();
                         actuallySigned.add(new QName(ns, ln));
+                        actuallySignedElements.add(protectedElement);
                     }
                 }
 
@@ -636,16 +661,19 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         for (WSEncryptionPart wsep : signatureParts) {
             if (wsep.getName().equals(WSConstants.ELEM_BODY)) {
 
-                QName bodyQName;
+                // RAMPART-428: verify the actual SOAP Body element that the
+                // application will consume is the very element that was signed,
+                // not merely that *some* element named "Body" was signed. A
+                // signature-wrapping attack relocates the signed body into a
+                // wrapper and inserts a new, unsigned body in the Body position;
+                // a QName-only check would pass that message. Comparing by node
+                // identity rejects it.
+                Element actualBody = WSSecurityUtil.findBodyElement(rmd.getDocument());
 
-                if (WSConstants.URI_SOAP11_ENV.equals(envelope.getNamespaceURI())) {
-                    bodyQName = new SOAP11Constants().getBodyQName();
-                } else {
-                    bodyQName = new SOAP12Constants().getBodyQName();
-                }
+                boolean bodySigned = isElementSigned(actualBody, actuallySignedElements);
 
-                if (!actuallySigned.contains(bodyQName) && !rmd.getPolicyData().isSignBodyOptional()) {
-                    // soap body is not signed
+                if (!bodySigned && !rmd.getPolicyData().isSignBodyOptional()) {
+                    // soap body is not signed (or a different element was signed)
                     throw new RampartException("bodyNotSigned");
                 }
 
