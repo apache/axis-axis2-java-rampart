@@ -236,8 +236,20 @@ public class RampartMessageData {
         
         try {
 
-            // CRITICAL FIX: Initialize WSS4J before creating WSSConfig to ensure OpenSAML integration works
-            // This prevents OpenSAMLUtil.unmarshallerFactory from being null when processing SAML assertions
+            // PERFORMANCE vs CORRECTNESS:
+            // The WSS4J / Santuario / OpenSAML providers below are one-time, process-wide
+            // initialisers. Invoking them in this per-message constructor is intentional but
+            // is a correctness-over-performance trade-off:
+            //   * Correctness: it guarantees the SAML stack is initialised before any
+            //     assertion is processed. Without it OpenSAMLUtil.unmarshallerFactory could be
+            //     null (an initialisation-ordering problem surfaced during the OpenSAML 5 /
+            //     Jakarta migration), causing SAML processing to fail intermittently.
+            //   * Performance: all of these calls are idempotent guards, so the steady-state
+            //     cost is only the guard checks rather than real re-initialisation - but they
+            //     still run on every message, which is wasteful under high throughput.
+            // The proper fix is to run this once per application lifecycle (e.g. in the
+            // Rampart/Rahas module init), which is tracked separately; do not move it without
+            // re-verifying the unmarshallerFactory ordering issue does not return.
             if (log.isDebugEnabled()) {
                 log.debug("WSS4J initialization starting");
             }
@@ -391,12 +403,22 @@ public class RampartMessageData {
                 if (policyDataRampartConfig != null) {
                     String timeToLiveString = policyDataRampartConfig.getTimestampTTL();
                     if (timeToLiveString != null && !timeToLiveString.equals("")) {
-                        this.setTimeToLive(Integer.parseInt(timeToLiveString));
+                        try {
+                            this.setTimeToLive(Integer.parseInt(timeToLiveString));
+                        } catch (NumberFormatException e) {
+                            throw new RampartException("invalidRampartConfigValue",
+                                    new String[]{"timestampTTL", timeToLiveString}, e);
+                        }
                     }
 
                     String maxSkewString = policyDataRampartConfig.getTimestampMaxSkew();
                     if (maxSkewString != null && !maxSkewString.equals("")) {
-                        this.setTimestampMaxSkew(Integer.parseInt(maxSkewString));
+                        try {
+                            this.setTimestampMaxSkew(Integer.parseInt(maxSkewString));
+                        } catch (NumberFormatException e) {
+                            throw new RampartException("invalidRampartConfigValue",
+                                    new String[]{"timestampMaxSkew", maxSkewString}, e);
+                        }
                     }
                 }
                 
