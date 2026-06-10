@@ -39,8 +39,6 @@ import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.apache.wss4j.common.util.XMLUtils;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSDataRef;
-import org.apache.wss4j.dom.SOAP11Constants;
-import org.apache.wss4j.dom.SOAP12Constants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -618,11 +616,9 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
        
         WSSecurityEngineResult[] actionResults = fetchActionResults(results, WSConstants.SIGN);
 
-        // Find elements that are signed. We keep both the QNames (used for header
-        // checks) and the actual signed DOM elements. The latter lets us verify the
-        // signed element by identity rather than just by name, which is required to
-        // defeat signature-wrapping attacks (RAMPART-428).
-        List<QName> actuallySigned = new ArrayList<QName>();
+        // Collect the actual DOM elements covered by the signature, so signed parts
+        // can be verified by node identity rather than just by element name. A
+        // name-based check can be defeated by signature wrapping (RAMPART-428).
         List<Element> actuallySignedElements = new ArrayList<Element>();
         if (actionResults != null) {
             for (WSSecurityEngineResult actionResult : actionResults) {
@@ -640,17 +636,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                         NodeList nodeList = protectedElement.getChildNodes();
                         for (int x = 0; x < nodeList.getLength(); x++) {
                             if (nodeList.item(x).getNodeType() == Node.ELEMENT_NODE) {
-                                String ns = (nodeList.item(x)).getNamespaceURI();
-                                String ln = (nodeList.item(x)).getLocalName();
-                                actuallySigned.add(new QName(ns, ln));
                                 actuallySignedElements.add((Element) nodeList.item(x));
                                 break;
                             }
                         }
                     } else {
-                        String ns = protectedElement.getNamespaceURI();
-                        String ln = protectedElement.getLocalName();
-                        actuallySigned.add(new QName(ns, ln));
                         actuallySignedElements.add(protectedElement);
                     }
                 }
@@ -692,8 +682,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                     continue;
                 }
 
-                // header or the element present in soap envelope - verify that it is part of signature
-                if (actuallySigned.contains(new QName(element.getNamespaceURI(), element.getLocalName()))) {
+                // header or the element present in soap envelope - verify that the
+                // exact element (by node identity) is part of the signature, so the
+                // same signature-wrapping defence used for the Body applies here too
+                // (RAMPART-428).
+                if (isElementSigned(element, actuallySignedElements)) {
                     continue;
                 }
 
