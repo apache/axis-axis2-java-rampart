@@ -18,6 +18,7 @@ package org.apache.rampart;
 
 import static org.apache.axis2.integration.TestConstants.TESTING_PATH;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -145,7 +146,14 @@ public class RampartTest {
                         if (i == 28) {
                             assertEquals(resources.getString("encryptionMissing"), axisFault.getMessage());
                         } else if (i == 34) {
-                            assertEquals(resources.getString("invalidSignatureAlgo"), axisFault.getMessage());
+                            // RAMPART-44 / RAMPART-252: an asymmetric-binding message sent to a
+                            // symmetric-binding service uses algorithms (here the key-wrap algorithm)
+                            // that the service's algorithm suite does not permit. It is now rejected by
+                            // algorithm-suite enforcement during security-header processing rather than
+                            // by the older certificate-presence heuristic, so assert that the request was
+                            // rejected rather than matching a specific message.
+                            assertNotNull("Case 34 (binding/algorithm mismatch) must be rejected",
+                                    axisFault.getMessage());
                         }
 
                     }

@@ -234,6 +234,11 @@ public class RampartEngine {
             requestData.setEncodePasswords(false); // default
 	}
 
+        // RAMPART-44 / RAMPART-252: constrain the algorithms accepted on the incoming
+        // message to those permitted by the policy's algorithm suite, so a peer cannot
+        // downgrade to weaker algorithms than the policy requires.
+        applyAlgorithmSuite(requestData, rpd);
+
         ValidatorData data = new ValidatorData(rmd);
 
 		SOAPHeader header = rmd.getMsgContext().getEnvelope().getHeader();
@@ -417,6 +422,51 @@ public class RampartEngine {
 		log.debug("Return process(MessageContext msgCtx)");
 		return results;
 	}
+
+    /**
+     * Builds a WSS4J algorithm suite from the policy's algorithm suite and sets it on
+     * the request data, so WSS4J rejects an incoming message whose signature, digest,
+     * canonicalization, encryption or key-wrap algorithm is not the one the policy
+     * mandates (RAMPART-44 / RAMPART-252). Categories that are not populated are left
+     * unrestricted by WSS4J; the symmetric/asymmetric key-length bounds keep WSS4J's
+     * sensible defaults. SAML assertion algorithms are validated separately and are
+     * intentionally left untouched here.
+     */
+    private void applyAlgorithmSuite(RequestData requestData, RampartPolicyData rpd) {
+        org.apache.ws.secpolicy.model.AlgorithmSuite policySuite = rpd.getAlgorithmSuite();
+        if (policySuite == null) {
+            return;
+        }
+
+        org.apache.wss4j.common.crypto.AlgorithmSuite wss4jSuite =
+                new org.apache.wss4j.common.crypto.AlgorithmSuite();
+
+        addAlgorithm(policySuite.getAsymmetricSignature(), wss4jSuite, AlgorithmKind.SIGNATURE);
+        addAlgorithm(policySuite.getSymmetricSignature(), wss4jSuite, AlgorithmKind.SIGNATURE);
+        addAlgorithm(policySuite.getDigest(), wss4jSuite, AlgorithmKind.DIGEST);
+        addAlgorithm(policySuite.getInclusiveC14n(), wss4jSuite, AlgorithmKind.C14N);
+        addAlgorithm(policySuite.getEncryption(), wss4jSuite, AlgorithmKind.ENCRYPTION);
+        addAlgorithm(policySuite.getSymmetricKeyWrap(), wss4jSuite, AlgorithmKind.KEY_WRAP);
+        addAlgorithm(policySuite.getAsymmetricKeyWrap(), wss4jSuite, AlgorithmKind.KEY_WRAP);
+
+        requestData.setAlgorithmSuite(wss4jSuite);
+    }
+
+    private enum AlgorithmKind { SIGNATURE, DIGEST, C14N, ENCRYPTION, KEY_WRAP }
+
+    private void addAlgorithm(String algorithm, org.apache.wss4j.common.crypto.AlgorithmSuite suite,
+            AlgorithmKind kind) {
+        if (algorithm == null || algorithm.length() == 0) {
+            return;
+        }
+        switch (kind) {
+            case SIGNATURE:  suite.addSignatureMethod(algorithm); break;
+            case DIGEST:     suite.addDigestAlgorithm(algorithm); break;
+            case C14N:       suite.addC14nAlgorithm(algorithm); break;
+            case ENCRYPTION: suite.addEncryptionMethod(algorithm); break;
+            case KEY_WRAP:   suite.addKeyWrapAlgorithm(algorithm); break;
+        }
+    }
 
     private WSHandlerResult processSecurityHeaderWithRSA15(RampartMessageData rmd, SOAPHeaderBlock secHeader, WSSecurityEngine engine,
     		Crypto signatureCrypto, Crypto decCrypto, TokenCallbackHandler tokenCallbackHandler,
