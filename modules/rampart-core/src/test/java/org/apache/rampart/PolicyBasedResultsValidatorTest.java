@@ -59,6 +59,12 @@ public class PolicyBasedResultsValidatorTest extends TestCase {
 
     protected void setUp() throws Exception {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        // Secure the parser (OWASP): no DTDs / external entities.
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        dbf.setXIncludeAware(false);
+        dbf.setExpandEntityReferences(false);
         dbf.setNamespaceAware(true);
         DocumentBuilder db = dbf.newDocumentBuilder();
         doc = db.parse(new ByteArrayInputStream(WRAPPED.getBytes(StandardCharsets.UTF_8)));
