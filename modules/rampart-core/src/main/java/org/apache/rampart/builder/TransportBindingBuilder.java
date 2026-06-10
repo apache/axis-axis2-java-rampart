@@ -18,6 +18,7 @@ package org.apache.rampart.builder;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +56,7 @@ import javax.crypto.KeyGenerator;
 import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.SignatureMethod;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
@@ -185,6 +187,33 @@ public class TransportBindingBuilder extends BindingBuilder {
      * @param token
      * @param signdParts 
      */
+    /**
+     * Adds a SignedParts header to the list of signature parts, but only if a matching
+     * header is actually present in the message. Signing a part that is not present
+     * makes WSS4J fail with "Element to encrypt/sign not found" - for example when a
+     * policy lists wsa:To in SignedParts but the WS-Addressing headers are absent, as
+     * happens for an STS bootstrap request (RAMPART-431). This mirrors the inbound
+     * validator, which treats an absent signed-parts header as allowed.
+     */
+    private void addSignedPartHeaderIfPresent(List<WSEncryptionPart> sigParts,
+            SOAPEnvelope envelope, Header header) {
+        SOAPHeader soapHeader = envelope.getHeader();
+        if (soapHeader == null) {
+            return;
+        }
+        boolean present;
+        if (header.getName() == null) {
+            // The policy matches all headers in the namespace.
+            present = !soapHeader.getHeaderBlocksWithNSURI(header.getNamespace()).isEmpty();
+        } else {
+            present = soapHeader.getFirstChildWithName(
+                    new QName(header.getNamespace(), header.getName())) != null;
+        }
+        if (present) {
+            sigParts.add(new WSEncryptionPart(header.getName(), header.getNamespace(), "Content"));
+        }
+    }
+
     private byte[] doX509TokenSignature(RampartMessageData rmd, Token token, SignedEncryptedParts signdParts) throws RampartException {
         
         RampartPolicyData rpd = rmd.getPolicyData();
@@ -205,10 +234,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             ArrayList headers = signdParts.getHeaders();
             for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
                 Header header = (Header) iterator.next();
-                WSEncryptionPart wep = new WSEncryptionPart(header.getName(), 
-                        header.getNamespace(),
-                        "Content");
-                sigParts.add(wep);
+                addSignedPartHeaderIfPresent(sigParts, rmd.getMsgContext().getEnvelope(), header);
             }
         }
         if(token.isDerivedKeys()) {
@@ -345,10 +371,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             ArrayList headers = signdParts.getHeaders();
             for (Iterator iterator = headers.iterator(); iterator.hasNext();) {
                 Header header = (Header) iterator.next();
-                WSEncryptionPart wep = new WSEncryptionPart(header.getName(), 
-                        header.getNamespace(),
-                        "Content");
-                sigParts.add(wep);
+                addSignedPartHeaderIfPresent(sigParts, rmd.getMsgContext().getEnvelope(), header);
             }
         }
 
@@ -457,10 +480,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             ArrayList headers = signdParts.getHeaders();
             for (Object signedHeader : headers) {
                 Header header = (Header) signedHeader;
-                WSEncryptionPart wep = new WSEncryptionPart(header.getName(),
-                        header.getNamespace(),
-                        "Content");
-                sigParts.add(wep);
+                addSignedPartHeaderIfPresent(sigParts, rmd.getMsgContext().getEnvelope(), header);
             }
         }
         
@@ -610,10 +630,7 @@ public class TransportBindingBuilder extends BindingBuilder {
             ArrayList headers = signdParts.getHeaders();
             for (Object objectHeader : headers) {
                 Header header = (Header) objectHeader;
-                WSEncryptionPart wep = new WSEncryptionPart(header.getName(),
-                        header.getNamespace(),
-                        "Content");
-                sigParts.add(wep);
+                addSignedPartHeaderIfPresent(sigParts, rmd.getMsgContext().getEnvelope(), header);
             }
         }
         

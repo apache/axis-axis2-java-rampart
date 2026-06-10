@@ -46,6 +46,29 @@ public class TransportBindingBuilderTest extends MessageBuilderTestBase {
         this.verifySecHeader(list.iterator(), ctx.getEnvelope());
     }
 
+    public void testTransportBindingAbsentSignedHeader() throws Exception {
+        // RAMPART-431: the policy lists a WS-Addressing 2005/08 "To" header in the
+        // endorsing token's SignedParts, but the message does not contain that header.
+        // The build must succeed (the absent header is skipped) rather than fail with
+        // "Element to encrypt/sign not found: http://www.w3.org/2005/08/addressing, To".
+        MessageContext ctx = getMsgCtx();
+
+        String policyXml = "test-resources/policy/rampart-transport-binding-absent-signed-header.xml";
+        Policy policy = this.loadPolicy(policyXml);
+
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+
+        MessageBuilder builder = new MessageBuilder();
+        builder.build(ctx);
+
+        List<QName> list = new ArrayList<QName>();
+        list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
+        list.add(new QName(WSConstants.WSSE_NS, WSConstants.USERNAME_TOKEN_LN));
+        list.add(new QName(WSConstants.WSSE_NS, WSConstants.BINARY_TOKEN_LN));
+        list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
+        this.verifySecHeader(list.iterator(), ctx.getEnvelope());
+    }
+
     public void testTransportBindingNoBST() throws Exception {
         MessageContext ctx = getMsgCtx();
 
