@@ -129,9 +129,12 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
              
         if (token != null && token.getId() != null && token.getId().trim().length() != 0) {
     
-            writeLock.lock();    
-            
+            writeLock.lock();
+
             try {
+                // Retire long-expired tokens on update as well as add, so the
+                // store is bounded even under update/renew-heavy workloads (RAMPART-337).
+                removeExpiredTokens();
                 if (!this.tokens.keySet().contains(token.getId())) {
                     throw new TrustException("noTokenToUpdate", new String[]{token.getId()});
                 }

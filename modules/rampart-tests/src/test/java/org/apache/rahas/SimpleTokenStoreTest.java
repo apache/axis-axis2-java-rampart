@@ -173,6 +173,30 @@ public class SimpleTokenStoreTest extends TestCase {
         }
     }
 
+    public void testUpdateRetiresExpiredTokens() {
+        // RAMPART-337: cleanup must also happen on update(), not just add().
+        SimpleTokenStore store = new SimpleTokenStore();
+        // Large grace so the tokens survive the add() calls below.
+        store.setExpiredTokenGracePeriodMillis(10 * 60 * 1000L);
+        try {
+            store.add(getTestToken("expired-1", new Date(System.currentTimeMillis() - 1000)));
+            Token toUpdate = getTestToken("valid-1", new Date(System.currentTimeMillis() + 60000));
+            store.add(toUpdate);
+            assertEquals("Both tokens should be present before update", 2, store.getTokenIdentifiers().length);
+
+            // Make expired tokens eligible for removal, then update the valid token.
+            store.setExpiredTokenGracePeriodMillis(0);
+            toUpdate.setState(Token.RENEWED);
+            store.update(toUpdate);
+
+            String[] ids = store.getTokenIdentifiers();
+            assertEquals("update() should have retired the expired token", 1, ids.length);
+            assertEquals("Only the updated token should remain", "valid-1", ids[0]);
+        } catch (TrustException e) {
+            fail(e.getMessage());
+        }
+    }
+
     private Token getTestToken(String tokenId)
         throws TrustException {
         return getTestToken(tokenId, new Date());
