@@ -25,6 +25,8 @@ import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
+import org.apache.ws.secpolicy.SP11Constants;
+import org.apache.ws.secpolicy.SP12Constants;
 import org.opensaml.core.config.InitializationException;
 
 public class Rahas implements Module {
@@ -48,7 +50,21 @@ public class Rahas implements Module {
     }
 
     public boolean canSupportAssertion(Assertion assertion) {
-        return false;
+        if (assertion == null || assertion.getName() == null) {
+            return false;
+        }
+
+        String ns = assertion.getName().getNamespaceURI();
+
+        // The rahas module registers (in module.xml) for the WS-SecurityPolicy 1.1
+        // and 1.2 namespaces, so it must report that it can support assertions in
+        // those namespaces. Returning false unconditionally vetoed every
+        // WS-SecurityPolicy assertion when rahas was engaged: Axis2 requires every
+        // module registered for an assertion's namespace to support it, so this
+        // produced "atleast one module can't support ...". For the WS-SP 1.2
+        // (200702) namespace rahas is the only registered module, which made the
+        // veto fatal for generated clients (RAMPART-371).
+        return SP11Constants.SP_NS.equals(ns) || SP12Constants.SP_NS.equals(ns);
     }
 
     public void applyPolicy(Policy policy, AxisDescription axisDescription)
