@@ -55,5 +55,7 @@ public class RahasModuleTest extends TestCase {
                         new QName("http://example.com/unknown", "Foo"))));
         assertFalse("null assertion must not be supported",
                 rahas.canSupportAssertion(null));
+        assertFalse("assertion with a null QName must not be supported",
+                rahas.canSupportAssertion(new PrimitiveAssertion(null)));
     }
 }
