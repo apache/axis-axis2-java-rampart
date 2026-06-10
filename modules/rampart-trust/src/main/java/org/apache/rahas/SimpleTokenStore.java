@@ -47,17 +47,38 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
      */
      protected final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
      
-     protected final Lock readLock = readWriteLock.readLock(); 
-     
+     protected final Lock readLock = readWriteLock.readLock();
+
      protected final Lock writeLock = readWriteLock.writeLock();
 
+    /**
+     * Default grace period (5 minutes) after a token's expiry before it becomes
+     * eligible for removal from the store.
+     */
+    public static final long DEFAULT_EXPIRED_TOKEN_GRACE_PERIOD_MILLIS = 5 * 60 * 1000L;
+
+    /**
+     * Tokens whose expiry time elapsed more than this many milliseconds ago are
+     * purged from the store when a new token is added, so that expired tokens do
+     * not accumulate indefinitely and exhaust the heap (RAMPART-337).
+     * <p>
+     * The grace period deliberately keeps recently-expired tokens around for a
+     * while: removing a token the instant it expires can break an in-flight
+     * message that still references it, which previously surfaced as
+     * "The signature or decryption was invalid (Unsupported key identification)".
+     */
+    private long expiredTokenGracePeriodMillis = DEFAULT_EXPIRED_TOKEN_GRACE_PERIOD_MILLIS;
+
     public void add(Token token) throws TrustException {
-               
+
         if (token != null && !"".equals(token.getId()) && token.getId() != null) {
-            
+
             writeLock.lock();
-            
+
             try {
+                // Opportunistically retire long-expired tokens so the store does
+                // not grow without bound (RAMPART-337).
+                removeExpiredTokens();
                 if (this.tokens.keySet().size() == 0
                     || (this.tokens.keySet().size() > 0 && !this.tokens
                         .keySet().contains(token.getId()))) {
@@ -69,7 +90,39 @@ public class SimpleTokenStore implements TokenStorage, Serializable {
             } finally {
                 writeLock.unlock();
             }
-        }           
+        }
+    }
+
+    /**
+     * Removes tokens whose expiry time elapsed more than
+     * {@link #getExpiredTokenGracePeriodMillis()} milliseconds ago. Tokens with
+     * no expiry time are never removed. Callers must hold the write lock.
+     */
+    private void removeExpiredTokens() {
+        long now = System.currentTimeMillis();
+        for (Iterator iterator = this.tokens.values().iterator(); iterator.hasNext();) {
+            Token token = (Token) iterator.next();
+            if (token.getExpires() != null
+                && token.getExpires().getTime() + expiredTokenGracePeriodMillis < now) {
+                iterator.remove();
+            }
+        }
+    }
+
+    /**
+     * The grace period, in milliseconds, applied after a token's expiry before it
+     * is eligible for removal from the store.
+     */
+    public long getExpiredTokenGracePeriodMillis() {
+        return expiredTokenGracePeriodMillis;
+    }
+
+    /**
+     * Sets the grace period, in milliseconds, applied after a token's expiry
+     * before it is eligible for removal from the store.
+     */
+    public void setExpiredTokenGracePeriodMillis(long expiredTokenGracePeriodMillis) {
+        this.expiredTokenGracePeriodMillis = expiredTokenGracePeriodMillis;
     }
 
     public void update(Token token) throws TrustException {

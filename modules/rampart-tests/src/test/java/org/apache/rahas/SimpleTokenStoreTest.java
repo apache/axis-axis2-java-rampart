@@ -136,6 +136,43 @@ public class SimpleTokenStoreTest extends TestCase {
         }
     }
 
+    public void testExpiredTokensAreRetired() {
+        // RAMPART-337: long-expired tokens must not accumulate in the store.
+        SimpleTokenStore store = new SimpleTokenStore();
+        store.setExpiredTokenGracePeriodMillis(0);
+        try {
+            // Two tokens that expired a minute ago, plus one still valid.
+            Token expired1 = getTestToken("expired-1", new Date(System.currentTimeMillis() - 60000));
+            Token expired2 = getTestToken("expired-2", new Date(System.currentTimeMillis() - 60000));
+            store.add(expired1);
+            store.add(expired2);
+            // Adding a fresh token triggers retirement of the expired ones.
+            Token valid = getTestToken("valid-1", new Date(System.currentTimeMillis() + 60000));
+            store.add(valid);
+
+            String[] ids = store.getTokenIdentifiers();
+            assertEquals("Expired tokens should have been retired from the store", 1, ids.length);
+            assertEquals("Only the valid token should remain", "valid-1", ids[0]);
+        } catch (TrustException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testExpiredTokensWithinGracePeriodAreKept() {
+        // A token that just expired must survive while within the grace period,
+        // so in-flight messages referencing it do not fail.
+        SimpleTokenStore store = new SimpleTokenStore();
+        store.setExpiredTokenGracePeriodMillis(5 * 60 * 1000L);
+        try {
+            store.add(getTestToken("just-expired", new Date(System.currentTimeMillis() - 1000)));
+            store.add(getTestToken("valid", new Date(System.currentTimeMillis() + 60000)));
+            assertEquals("Recently-expired token must be kept within the grace period",
+                         2, store.getTokenIdentifiers().length);
+        } catch (TrustException e) {
+            fail(e.getMessage());
+        }
+    }
+
     private Token getTestToken(String tokenId)
         throws TrustException {
         return getTestToken(tokenId, new Date());
