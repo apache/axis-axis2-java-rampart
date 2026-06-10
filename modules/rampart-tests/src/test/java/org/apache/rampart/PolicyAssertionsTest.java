@@ -159,4 +159,41 @@ public class PolicyAssertionsTest extends MessageBuilderTestBase {
         }
 
     }
+
+    public void testAlgorithmSuiteDowngradeRejected() throws Exception {
+        // RAMPART-44 / RAMPART-252: a message signed with a weaker algorithm suite
+        // (Basic128, SHA-1) must be rejected when the service policy requires a stronger
+        // suite (Basic128Sha256, SHA-256), so a peer cannot downgrade the digest
+        // algorithm. Without algorithm-suite enforcement the SHA-1 signature would verify
+        // and the message would be accepted.
+        MessageContext ctx = getMsgCtx();
+
+        // Build the request with the SHA-1 (Basic128) policy.
+        Policy buildPolicy = loadPolicy("test-resources/policy/rampart-asymm-binding-1.xml");
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, buildPolicy);
+        MessageBuilder builder = new MessageBuilder();
+        builder.build(ctx);
+
+        SOAPBuilder soapBuilder = new SOAPBuilder();
+        SOAPEnvelope env = ctx.getEnvelope();
+        ByteArrayInputStream inStream = new ByteArrayInputStream(env.toString().getBytes());
+        env = (SOAPEnvelope) soapBuilder.processDocument(inStream, "text/xml", ctx);
+        ctx.setEnvelope(env);
+
+        // Validate as the server with the SHA-256 (Basic128Sha256) policy.
+        ctx.setServerSide(true);
+        AxisService axisService = ctx.getAxisService();
+        axisService.removeParameter(axisService.getParameter(RampartMessageData.PARAM_CLIENT_SIDE));
+
+        Policy verifyPolicy = loadPolicy("test-resources/policy/rampart-asymm-binding-1-sha256.xml");
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, verifyPolicy);
+
+        RampartEngine engine = new RampartEngine();
+        try {
+            engine.process(ctx);
+            fail("A message signed with SHA-1 must be rejected when the policy requires SHA-256");
+        } catch (Exception expected) {
+            // Expected: algorithm-suite enforcement rejects the weaker digest algorithm.
+        }
+    }
 }
