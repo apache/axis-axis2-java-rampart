@@ -209,6 +209,27 @@ public class RampartMessageData {
     
     private SOAPConstants soapConstants;
 
+    /**
+     * Adds the locked CLIENT_SIDE marker parameter to the service, once, if it is
+     * not already present. The check-and-add is synchronized on the service so that
+     * concurrent first requests do not race to add it. Without this, the first
+     * thread added and locked the parameter and the remaining threads failed with
+     * "The CLIENT_SIDE parameter is already locked and the value cannot be
+     * overridden" (RAMPART-427). The lock is per-service rather than global, and the
+     * common case (parameter already present) never reaches this method, so there is
+     * no contention once a service has handled its first client request.
+     */
+    static void addClientSideParameterIfAbsent(AxisService axisService) throws AxisFault {
+        synchronized (axisService) {
+            if (axisService.getParameter(PARAM_CLIENT_SIDE) == null) {
+                Parameter clientSideParam = new Parameter();
+                clientSideParam.setName(PARAM_CLIENT_SIDE);
+                clientSideParam.setLocked(true);
+                axisService.addParameter(clientSideParam);
+            }
+        }
+    }
+
     public RampartMessageData(MessageContext msgCtx, boolean sender) throws RampartException {
         
         this.msgContext = msgCtx;
@@ -267,10 +288,7 @@ public class RampartMessageData {
                 this.isInitiator = !msgCtx.isServerSide();
                 //TODO if Axis Service is null at this point, do we have to create a dummy one ??    
                 if(this.isInitiator && axisService != null ) {
-                    Parameter clientSideParam = new Parameter();
-                    clientSideParam.setName(PARAM_CLIENT_SIDE);
-                    clientSideParam.setLocked(true);
-                    msgCtx.getAxisService().addParameter(clientSideParam);
+                    addClientSideParameterIfAbsent(axisService);
                 }
             }
 
