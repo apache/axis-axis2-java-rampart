@@ -79,6 +79,11 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'apache/axis-axis2-java-rampart'
     name: Deploy
     runs-on: ubuntu-24.04
+    # Credentials are exposed as job-level env so the Deploy step can both use
+    # them and skip cleanly (see its `if`) when they are not configured.
+    env:
+      NEXUS_USER: ${{ secrets.NEXUS_USER }}
+      NEXUS_PW: ${{ secrets.NEXUS_PW }}
     needs:
       - build
       - site
@@ -101,10 +106,11 @@ jobs:
         server-id: apache.snapshots.https
         server-username: NEXUS_USER
         server-password: NEXUS_PW
+    # Skip cleanly when Nexus credentials are not configured, so a missing-secret
+    # environment does not turn the whole workflow red. Snapshot deploys resume
+    # automatically once NEXUS_USER/NEXUS_PW are provisioned in the repo secrets.
     - name: Deploy
+      if: ${{ env.NEXUS_USER != '' }}
       run: mvn -B -e -Papache-release -Dgpg.skip=true -Dmaven.test.skip=true -Dmaven.compiler.release=${{ env.BASE_JAVA_VERSION }} deploy
-      env:
-        NEXUS_USER: ${{ secrets.NEXUS_USER }}
-        NEXUS_PW: ${{ secrets.NEXUS_PW }}
     - name: Remove Snapshots
       run: find ~/.m2/repository -name '*-SNAPSHOT' -a -type d -print0 | xargs -0 rm -rf
