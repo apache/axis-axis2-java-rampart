@@ -47,6 +47,30 @@ public class AsymmetricBindingBuilderTest extends MessageBuilderTestBase {
         this.verifySecHeader(list.iterator(), ctx.getEnvelope());
     }
     
+    public void testAsymmBindingProtectTokens() throws Exception {
+        // RAMPART-411: with sp:ProtectTokens the BinarySecurityToken must be signed.
+        // The original failure was during signing ("Element to encrypt/sign not found:
+        // ...BinarySecurityToken"), so a successful build that produces a BST and a
+        // Signature proves the token is now correctly added to the signature (by its
+        // wsu:Id) and signed.
+        MessageContext ctx = getMsgCtx();
+
+        String policyXml = "test-resources/policy/rampart-asymm-binding-protecttokens.xml";
+        Policy policy = this.loadPolicy(policyXml);
+
+        ctx.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+
+        MessageBuilder builder = new MessageBuilder();
+        builder.build(ctx);
+
+        ArrayList<QName> list = new ArrayList<QName>();
+        list.add(new QName(WSConstants.WSU_NS, WSConstants.TIMESTAMP_TOKEN_LN));
+        list.add(new QName(WSConstants.WSSE_NS, WSConstants.BINARY_TOKEN_LN));
+        list.add(new QName(WSConstants.SIG_NS, WSConstants.SIG_LN));
+
+        this.verifySecHeader(list.iterator(), ctx.getEnvelope());
+    }
+
     public void testAsymmBindingServerSide() throws Exception {
         MessageContext ctx = getMsgCtx();
         
