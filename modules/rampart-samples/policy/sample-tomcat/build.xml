@@ -32,6 +32,12 @@
 	<property name="sample.services.url" value="https://127.0.0.1:${ssl.port}/axis2/services/ut-over-https"/>
 	
     	<property environment="env"/>
+
+	<!-- Compile for a fixed release rather than whatever JDK runs the build,
+	     so the class files load on every JDK the project supports and stale
+	     output cannot outlive a JDK change. A value inherited from the Maven
+	     build wins over this default. -->
+	<property name="maven.compiler.release" value="17"/>
     	
 	<target name="check.tomcat" unless="env.CATALINA_HOME">
         	<echo message="CATALINA_HOME must be set"/>
@@ -79,7 +85,7 @@
 	   	<mkdir dir="${service.dir}/META-INF"/>
 	   	
 	   	<!-- Compile service -->
-	        <javac srcdir="src" destdir="${service.dir}">
+	        <javac srcdir="src" destdir="${service.dir}" release="${maven.compiler.release}">
                     <classpath>
                             <fileset dir="${lib.dir}">
                                     <include name="**/*.jar"/>
@@ -115,7 +121,7 @@
 	   	<copy file="${from.modules}/${rampart.mar}" tofile="${client.repos.dir}/modules/${rampart.mar}" overwrite="true"/>
 	   		
 	   	<!-- Compile client -->
-            	<javac srcdir="src" destdir="${temp.client.dir}">
+            	<javac srcdir="src" destdir="${temp.client.dir}" release="${maven.compiler.release}">
                     <classpath>
 	                    <fileset dir="${lib.dir}">
                             <include name="**/*.jar"/>

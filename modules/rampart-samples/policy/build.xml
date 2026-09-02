@@ -37,6 +37,12 @@
 
     <property name="vmargs" value=""/>
 
+    <!-- Compile for a fixed release rather than whatever JDK runs the build,
+         so the class files load on every JDK the project supports and stale
+         output cannot outlive a JDK change. A value inherited from the Maven
+         build wins over this default. -->
+    <property name="maven.compiler.release" value="17"/>
+
     <path id="runtime.classpath">
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
@@ -178,7 +184,7 @@
 	   		<mkdir dir="${temp.dir}/META-INF"/>
 	   		
 	   		<!-- Compile service -->
-            <javac srcdir="sample@{sample.number}/src" destdir="${temp.dir}">
+            <javac srcdir="sample@{sample.number}/src" destdir="${temp.dir}" release="${maven.compiler.release}">
                     <classpath>
                             <fileset dir="${lib.dir}">
                                     <include name="**/*.jar"/>
@@ -237,7 +243,7 @@
             <mkdir dir="${temp.dir}/META-INF"/>
             
             <!-- Compile service -->
-            <javac srcdir="sample@{sample.number}/src" destdir="${temp.dir}">
+            <javac srcdir="sample@{sample.number}/src" destdir="${temp.dir}" release="${maven.compiler.release}">
                     <classpath>
                             <fileset dir="${lib.dir}">
                                     <include name="**/*.jar"/>
@@ -298,7 +304,7 @@
 	   		<mkdir dir="${temp.client.dir}"/>
 	   		
 	   		<!-- Compile client -->
-            <javac srcdir="sample@{sample.number}/src" destdir="${temp.client.dir}">
+            <javac srcdir="sample@{sample.number}/src" destdir="${temp.client.dir}" release="${maven.compiler.release}">
                     <classpath>
 	                    <fileset dir="${lib.dir}">
                             <include name="**/*.jar"/>
