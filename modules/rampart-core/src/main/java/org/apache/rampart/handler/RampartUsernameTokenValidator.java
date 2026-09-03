@@ -17,6 +17,8 @@
  package org.apache.rampart.handler;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -45,12 +47,24 @@ public class RampartUsernameTokenValidator extends UsernameTokenValidator {
 
     /**
      * Verify a UsernameToken containing a plaintext password.
+     * <p>
+     * The callback is handed a <code>null</code> password and is expected to set the
+     * password it holds for the user, which is then compared against the one received
+     * on the wire. Passing the received password into the callback instead, and
+     * returning without comparing anything, means every password authenticates every
+     * user: a callback that follows the documented set-password contract overwrites
+     * nothing and reports nothing, so there is no check left anywhere on this path.
+     * Do not put <code>usernameToken.getPassword()</code> back into the callback.
      */
     @Override
     protected void verifyPlaintextPassword(UsernameToken usernameToken, RequestData data
     ) throws WSSecurityException {
+        if (data.getCallbackHandler() == null) {
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "noCallback");
+        }
+
         WSPasswordCallback pwCb = new WSPasswordCallback(usernameToken.getName(),
-        		usernameToken.getPassword(),
+                null,
                 usernameToken.getPasswordType(), 
                 WSPasswordCallback.USERNAME_TOKEN);
         try {
@@ -59,6 +73,16 @@ public class RampartUsernameTokenValidator extends UsernameTokenValidator {
             throw new WSSecurityException(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION, e);
         }
 
+        String expectedPassword = pwCb.getPassword();
+        String receivedPassword = usernameToken.getPassword();
+        // A callback that neither set a password nor threw has authenticated nobody.
+        if (expectedPassword == null || receivedPassword == null) {
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION);
+        }
+        if (!MessageDigest.isEqual(expectedPassword.getBytes(StandardCharsets.UTF_8),
+                receivedPassword.getBytes(StandardCharsets.UTF_8))) {
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION);
+        }
     }
 
 }

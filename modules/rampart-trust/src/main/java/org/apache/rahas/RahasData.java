@@ -183,12 +183,17 @@ public class RahasData {
                         this.principal = (Principal) principalObject;
                     } else if (act == WSConstants.UT && principalObject != null) {
                         this.principal = (Principal) principalObject;
-                    } else if (act == WSConstants.BST) {
-                        final X509Certificate[] certificates =
-                                (X509Certificate[]) wser
-                                        .get(WSSecurityEngineResult.TAG_X509_CERTIFICATES);
-                        this.clientCert = certificates[0];
-                        this.principal = this.clientCert.getSubjectDN();
+                    // A BinarySecurityToken is deliberately not a principal source.
+                    // Nothing validates a bare BST: it need not be trusted, and the
+                    // sender need not hold its private key, so taking its SubjectDN as
+                    // the principal and its certificate as the proof-key binding let a
+                    // requestor be issued a signed assertion for any identity, bound to
+                    // a certificate of its choosing. Worse, results are walked in
+                    // attacker-controlled order, so a smuggled BST could overwrite a
+                    // principal already established by a verified signature. Identity
+                    // here comes only from the SIGN and UT results above; where no
+                    // client certificate is established the token issuers look one up
+                    // by principal name in the configured keystore, which is trusted.
                     } else if (act == WSConstants.ST_UNSIGNED) {
                         this.assertion = (Assertion) wser
                                 .get(WSSecurityEngineResult.TAG_SAML_ASSERTION);
