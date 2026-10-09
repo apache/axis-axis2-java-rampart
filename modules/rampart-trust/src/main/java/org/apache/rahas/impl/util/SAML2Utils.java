@@ -51,7 +51,6 @@ import org.opensaml.saml.saml2.core.Subject;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.common.SAMLVersion;
-import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.config.InitializationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -109,7 +108,7 @@ public class SAML2Utils {
 
         //build the assertion by unmarhalling the DOM element.
         try {
-            InitializationService.initialize();
+            OpenSAMLInitializer.ensureInitialized();
 
             String keyInfoElementString = elem.toString();
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -124,7 +123,6 @@ public class SAML2Utils {
                     .unmarshall(element);
         }
         catch (InitializationException e) {
-//[ERROR] /home/rlapache/axis-axis2-java-rampart/modules/rampart-trust/src/main/java/org/apache/rahas/impl/util/SAML2Utils.java:[123,60] incompatible types: java.lang.String cannot be converted to java.lang.Exception
             throw new WSSecurityException(
                     WSSecurityException.ErrorCode.FAILURE, e, "Failure in bootstrapping");
         } catch (UnmarshallingException e) {

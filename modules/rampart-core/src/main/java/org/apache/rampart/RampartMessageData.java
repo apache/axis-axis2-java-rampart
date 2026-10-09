@@ -35,6 +35,7 @@ import org.apache.neethi.PolicyEngine;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.SimpleTokenStore;
 import org.apache.rahas.TokenStorage;
+import org.apache.rahas.impl.util.OpenSAMLInitializer;
 import org.apache.rampart.handler.RampartUsernameTokenValidator;
 import org.apache.rampart.handler.WSSHandlerConstants;
 import org.apache.rampart.policy.RampartPolicyBuilder;
@@ -236,44 +237,17 @@ public class RampartMessageData {
         
         try {
 
-            // PERFORMANCE vs CORRECTNESS:
-            // The WSS4J / Santuario / OpenSAML providers below are one-time, process-wide
-            // initialisers. Invoking them in this per-message constructor is intentional but
-            // is a correctness-over-performance trade-off:
-            //   * Correctness: it guarantees the SAML stack is initialised before any
-            //     assertion is processed. Without it OpenSAMLUtil.unmarshallerFactory could be
-            //     null (an initialisation-ordering problem surfaced during the OpenSAML 5 /
-            //     Jakarta migration), causing SAML processing to fail intermittently.
-            //   * Performance: all of these calls are idempotent guards, so the steady-state
-            //     cost is only the guard checks rather than real re-initialisation - but they
-            //     still run on every message, which is wasteful under high throughput.
-            // The proper fix is to run this once per application lifecycle (e.g. in the
-            // Rampart/Rahas module init), which is tracked separately; do not move it without
-            // re-verifying the unmarshallerFactory ordering issue does not return.
-            if (log.isDebugEnabled()) {
-                log.debug("WSS4J initialization starting");
-            }
+            // The WSS4J / Santuario / OpenSAML initialisers below are process-wide. They
+            // stay on the message path so the SAML stack is ready before any assertion is
+            // processed (without it OpenSAMLUtil.unmarshallerFactory could be null), but
+            // every call here must be cheap once initialised: WSSConfig.init() and
+            // Init.init() guard themselves, and OpenSAML goes through OpenSAMLInitializer
+            // because InitializationService.initialize() does not (RAMPART-459). Never
+            // call InitializationService.initialize() directly from this constructor.
             WSSConfig.init();
             org.apache.xml.security.Init.init();
-            if (log.isDebugEnabled()) {
-                log.debug("Basic WSS4J initialization complete");
-            }
-
-            // Initialize WSS4J's OpenSAML integration specifically
             try {
-                if (log.isDebugEnabled()) {
-                    log.debug("Starting OpenSAML initialization");
-                }
-                org.opensaml.core.config.InitializationService.initialize();
-
-                // Call WSS4J's OpenSAMLUtil initialization method
-                Class<?> openSAMLUtilClass = Class.forName("org.apache.wss4j.common.saml.OpenSAMLUtil");
-                java.lang.reflect.Method initMethod = openSAMLUtilClass.getDeclaredMethod("initSamlEngine");
-                initMethod.setAccessible(true);
-                initMethod.invoke(null);
-                if (log.isDebugEnabled()) {
-                    log.debug("OpenSAMLUtil.initSamlEngine() called successfully");
-                }
+                OpenSAMLInitializer.ensureInitialized();
             } catch (Exception e) {
                 log.warn("WSS4J OpenSAML initialization failed: " + e.getMessage(), e);
             }
