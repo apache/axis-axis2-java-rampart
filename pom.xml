@@ -458,6 +458,15 @@
                 <artifactId>commons-fileupload</artifactId>
                 <version>1.6.0</version>
             </dependency>
+            <!-- Required at runtime by Shibboleth's BasicParserPool (via WSS4J), and
+                 shipped in rampart-dist lib/ because Axis2 2.0.2 no longer bundles it.
+                 Pinned to the version Axis2 2.0.1 shipped, so installing into 2.0.1
+                 overwrites that jar rather than adding a second guava. -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.6.0-jre</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2-mtompolicy</artifactId>

@@ -48,8 +48,9 @@
                      Including them here would put duplicate versions on the classpath. -->
                 <exclude>com.fasterxml.woodstox:woodstox-core</exclude>
                 <exclude>com.google.code.findbugs:jsr305</exclude>
-                <exclude>com.google.guava:failureaccess</exclude>
-                <exclude>com.google.guava:guava</exclude>
+                <!-- guava, failureaccess and jspecify are deliberately NOT excluded:
+                     Axis2 2.0.2 stopped shipping them, and without guava OpenSAML
+                     initialisation fails when the rahas module deploys. -->
                 <exclude>com.sun.istack:istack-commons-runtime</exclude>
                 <exclude>commons-io:commons-io</exclude>
                 <exclude>commons-logging:commons-logging</exclude>
@@ -83,7 +84,6 @@
                 <exclude>org.glassfish.jaxb:jaxb-core</exclude>
                 <exclude>org.glassfish.jaxb:jaxb-runtime</exclude>
                 <exclude>org.glassfish.jaxb:txw2</exclude>
-                <exclude>org.jspecify:jspecify</exclude>
                 <exclude>org.slf4j:slf4j-api</exclude>
                 <exclude>wsdl4j:wsdl4j</exclude>
             </excludes>
