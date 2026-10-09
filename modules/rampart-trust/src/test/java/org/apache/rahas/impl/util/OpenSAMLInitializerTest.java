@@ -18,11 +18,15 @@
  */
 package org.apache.rahas.impl.util;
 
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import junit.framework.TestCase;
+
+import org.apache.axis2.AxisFault;
 
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.xmlsec.SecurityConfigurationSupport;
@@ -59,6 +63,21 @@ public class OpenSAMLInitializerTest extends TestCase {
 
         assertSame("OpenSAML must not be re-initialised on later calls", before,
                 SecurityConfigurationSupport.getGlobalSignatureSigningConfiguration());
+    }
+
+    public void testRuntimeDependencyCheckPassesWithGuava() throws Exception {
+        OpenSAMLInitializer.checkRuntimeDependencies();
+    }
+
+    /** A missing guava must fail module init with a message naming the jars to add. */
+    public void testRuntimeDependencyCheckFailsWithoutGuava() throws Exception {
+        ClassLoader withoutGuava = new URLClassLoader(new URL[0], null);
+        try {
+            OpenSAMLInitializer.checkRuntimeDependencies(withoutGuava);
+            fail("a classpath without guava must fail the check");
+        } catch (AxisFault expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("guava"));
+        }
     }
 
     public void testConcurrentCallsSucceed() throws Exception {

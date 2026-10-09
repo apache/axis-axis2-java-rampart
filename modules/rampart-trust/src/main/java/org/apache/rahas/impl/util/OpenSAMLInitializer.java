@@ -18,6 +18,7 @@
  */
 package org.apache.rahas.impl.util;
 
+import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.wss4j.common.saml.OpenSAMLUtil;
@@ -48,6 +49,32 @@ public final class OpenSAMLInitializer {
     private static volatile boolean initialized;
 
     private OpenSAMLInitializer() {
+    }
+
+    /**
+     * Fails module initialisation with a clear message when guava is missing.
+     *
+     * <p>OpenSAML, Shibboleth and WSS4J all need guava at runtime. Axis2 2.0.2 stopped
+     * bundling it, so it now ships in the Rampart distribution's lib/; an installation
+     * assembled by hand can easily miss it. Without this check the failure surfaces as
+     * a NoClassDefFoundError deep inside OpenSAML, and Axis2 logs module init faults
+     * only at INFO, so the reason is logged here at ERROR as well.</p>
+     */
+    public static void checkRuntimeDependencies() throws AxisFault {
+        checkRuntimeDependencies(InitializationService.class.getClassLoader());
+    }
+
+    static void checkRuntimeDependencies(ClassLoader openSAMLLoader) throws AxisFault {
+        try {
+            Class.forName("com.google.common.base.Strings", false, openSAMLLoader);
+        } catch (ClassNotFoundException | LinkageError e) {
+            String message = "Google Guava is not on the classpath, but OpenSAML and WSS4J"
+                    + " require it. Copy the guava and failureaccess jars from the Rampart"
+                    + " distribution's lib/ directory into the Axis2 lib/ (or WEB-INF/lib)"
+                    + " directory alongside the other Rampart dependencies.";
+            log.error(message);
+            throw new AxisFault(message, e);
+        }
     }
 
     /**

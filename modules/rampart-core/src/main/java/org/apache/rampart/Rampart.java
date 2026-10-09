@@ -23,6 +23,7 @@ import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
+import org.apache.rahas.impl.util.OpenSAMLInitializer;
 import org.apache.rampart.policy.model.RampartConfig;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
@@ -31,6 +32,8 @@ public class Rampart implements Module /* , ModulePolicyExtension */  {
 
     public void init(ConfigurationContext configContext, AxisModule module)
             throws AxisFault {
+        // OpenSAML is used on the message path, so check its runtime dependencies here.
+        OpenSAMLInitializer.checkRuntimeDependencies();
     }
 
     public void engageNotify(AxisDescription axisDescription) throws AxisFault {

@@ -25,6 +25,7 @@ import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
+import org.apache.rahas.impl.util.OpenSAMLInitializer;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.opensaml.core.config.InitializationException;
@@ -35,6 +36,8 @@ public class Rahas implements Module {
             throws AxisFault {
         // Set up OpenSAML to use a DOM aware Axiom implementation
         // Axiom Parser pool is also set within the RampartSAMLBootstrap class.
+
+        OpenSAMLInitializer.checkRuntimeDependencies();
 
         try {
             RampartSAMLBootstrap.initialize();
