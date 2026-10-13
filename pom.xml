@@ -865,7 +865,7 @@
         <dropwizard.metrics.version>4.2.39</dropwizard.metrics.version>
         <cryptacular.version>1.3.0</cryptacular.version>
 
-        <bcprov.jdk18.version>1.84</bcprov.jdk18.version>
+        <bcprov.jdk18.version>1.85</bcprov.jdk18.version>
 
         <!-- Fail the build if a module expected to have tests suddenly has none
              (tests deleted or no longer discovered). Surefire reads this property
