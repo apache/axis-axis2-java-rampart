@@ -29,6 +29,16 @@
     org.apache.axis2.security.CustomPolicyValidater
 &lt;/policyValidatorCbClass&gt;
 </pre></td></tr>
+    <tr class="a"><td>usernameTokenValidatorClass</td><td>WSS4J Validator (org.apache.wss4j.dom.validate.Validator)
+        used for inbound UsernameTokens instead of the default RampartUsernameTokenValidator. Use it when the
+        password store can only accept or reject a username/password pair, for example LDAP, and cannot return
+        the stored password to the passwordCallbackClass. The class then performs the whole password check.
+        </td><td>
+<pre>
+&lt;usernameTokenValidatorClass&gt;
+    org.example.LdapUsernameTokenValidator
+&lt;/usernameTokenValidatorClass&gt;
+</pre></td></tr>
     <tr class="a"><td>signatureCrypto</td><td>properties to needed perform signature, such as crypto
         provider, keystore and its password</td><td>
 <pre>

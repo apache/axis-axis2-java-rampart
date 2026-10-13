@@ -35,6 +35,7 @@ import javax.xml.stream.XMLStreamWriter;
  *  &lt;ramp:encryptionUser&gt;bob&lt;/ramp:encryptionUser&gt;
  *  &lt;ramp:passwordCallbackClass&gt;org.apache.axis2.security.PWCallback&lt;/ramp:passwordCallbackClass&gt;
  *  &lt;ramp:policyValidatorCbClass&gt;org.apache.axis2.security.ramp:PolicyValidatorCallbackHandler&lt;/ramp:policyValidatorCbClass&gt;
+ *  &lt;ramp:usernameTokenValidatorClass&gt;org.example.MyUsernameTokenValidator&lt;/ramp:usernameTokenValidatorClass&gt;
  *  &lt;ramp:timestampPrecisionInMs&gt;true&lt;/timestampPrecisionInMs&gt;
  *  &lt;ramp:timestampTTL&gt;300&lt;/ramp:timestampTTL&gt;
  *  &lt;ramp:timestampMaxSkew&gt;0&lt;/ramp:timestampMaxSkew&gt;
@@ -90,6 +91,8 @@ public class RampartConfig implements Assertion {
     public final static String POLICY_VALIDATOR_CB_CLASS_LN = "policyValidatorCbClass";
     
     public final static String RAMPART_CONFIG_CB_CLASS_LN = "rampartConfigCallbackClass";
+
+    public final static String USERNAME_TOKEN_VALIDATOR_CLASS_LN = "usernameTokenValidatorClass";
 
     public final static String SIG_CRYPTO_LN = "signatureCrypto";
 
@@ -151,6 +154,8 @@ public class RampartConfig implements Assertion {
     private String policyValidatorCbClass;
     
     private String rampartConfigCbClass;
+
+    private String usernameTokenValidatorClass;
 
     private CryptoConfig sigCryptoConfig;
 
@@ -292,6 +297,21 @@ public class RampartConfig implements Assertion {
         this.policyValidatorCbClass = policyValidatorCbClass;
     }
 
+    public String getUsernameTokenValidatorClass() {
+        return usernameTokenValidatorClass;
+    }
+
+    /**
+     * @param usernameTokenValidatorClass a WSS4J
+     *            <code>org.apache.wss4j.dom.validate.Validator</code> registered for
+     *            inbound UsernameTokens in place of
+     *            <code>RampartUsernameTokenValidator</code>. It then owns the whole
+     *            password check.
+     */
+    public void setUsernameTokenValidatorClass(String usernameTokenValidatorClass) {
+        this.usernameTokenValidatorClass = usernameTokenValidatorClass;
+    }
+
     public String getRampartConfigCbClass() {
         return rampartConfigCbClass;
     }
@@ -391,6 +411,12 @@ public class RampartConfig implements Assertion {
         if (getRampartConfigCbClass() != null) {
             writer.writeStartElement(NS, RAMPART_CONFIG_CB_CLASS_LN);
             writer.writeCharacters(getRampartConfigCbClass());
+            writer.writeEndElement();
+        }
+
+        if (getUsernameTokenValidatorClass() != null && !getUsernameTokenValidatorClass().isEmpty()) {
+            writer.writeStartElement(NS, USERNAME_TOKEN_VALIDATOR_CLASS_LN);
+            writer.writeCharacters(getUsernameTokenValidatorClass());
             writer.writeEndElement();
         }
 

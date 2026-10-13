@@ -61,6 +61,7 @@ import org.apache.wss4j.dom.handler.WSHandlerResult;
 import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.message.token.SecurityContextToken;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.apache.wss4j.dom.validate.Validator;
 import org.apache.wss4j.dom.engine.WSSecurityEngine;
 import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 
@@ -229,6 +230,34 @@ public class RampartMessageData {
                 axisService.addParameter(clientSideParam);
             }
         }
+    }
+
+    /**
+     * Resolves the WSS4J Validator for inbound UsernameTokens: the
+     * <code>usernameTokenValidatorClass</code> from the RampartConfig when set, otherwise
+     * {@link RampartUsernameTokenValidator}. A custom class is for password stores that can
+     * only accept or reject a username/password pair and so cannot meet the password
+     * callback contract (RAMPART-460). A configured class that cannot be loaded fails the
+     * message rather than falling back, so a typo surfaces instead of being masked.
+     */
+    static Class<?> getUsernameTokenValidatorClass(RampartConfig rampartConfig,
+            ClassLoader classLoader) throws RampartException {
+        String className = rampartConfig == null ? null
+                : rampartConfig.getUsernameTokenValidatorClass();
+        if (className == null || className.isEmpty()) {
+            return RampartUsernameTokenValidator.class;
+        }
+        Class<?> validatorClass;
+        try {
+            validatorClass = Loader.loadClass(classLoader, className);
+        } catch (ClassNotFoundException e) {
+            throw new RampartException("cannotLoadUsernameTokenValidatorClass",
+                    new String[]{className}, e);
+        }
+        if (!Validator.class.isAssignableFrom(validatorClass)) {
+            throw new RampartException("notAUsernameTokenValidator", new String[]{className});
+        }
+        return validatorClass;
     }
 
     public RampartMessageData(MessageContext msgCtx, boolean sender) throws RampartException {
@@ -496,6 +525,13 @@ public class RampartMessageData {
             if (axisService != null) { 
                 this.customClassLoader = axisService.getClassLoader(); 
             } 
+
+            // Replaces the default registered above only once the policy (and any
+            // RampartConfigCallbackHandler update) and the service class loader are known.
+            if (this.policyData != null) {
+                this.config.setValidator(WSConstants.USERNAME_TOKEN, getUsernameTokenValidatorClass(
+                        this.policyData.getRampartConfig(), this.customClassLoader));
+            }
             
             if(this.sender && this.policyData != null) {
                 this.secHeader = new WSSecHeader(this.document);

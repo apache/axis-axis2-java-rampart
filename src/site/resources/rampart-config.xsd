@@ -16,6 +16,7 @@
 					<xs:element name="passwordCallbackClass" type="xs:string" minOccurs="0"/>
 					<xs:element name="policyValidatorCbClass" type="xs:string" minOccurs="0"/>
 					<xs:element name="rampartConfigCallbackClass" type="xs:string" minOccurs="0"/>
+					<xs:element name="usernameTokenValidatorClass" type="xs:string" minOccurs="0"/>
 					<xs:element name="sslConfig" type="ramp:ssl" minOccurs="0"/>
 					<xs:element name="kerberosConfig" type="ramp:ssl" minOccurs="0"/>
 					<xs:element name="signatureCrypto" type="ramp:crypto" minOccurs="0"/>

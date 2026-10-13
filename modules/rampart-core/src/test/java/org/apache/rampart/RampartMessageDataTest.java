@@ -25,6 +25,9 @@ import java.util.concurrent.CountDownLatch;
 import junit.framework.TestCase;
 
 import org.apache.axis2.description.AxisService;
+import org.apache.rampart.handler.RampartUsernameTokenValidator;
+import org.apache.rampart.policy.model.RampartConfig;
+import org.apache.wss4j.dom.validate.UsernameTokenValidator;
 
 /**
  * RAMPART-427: adding the locked CLIENT_SIDE marker parameter to a service must be
@@ -79,5 +82,50 @@ public class RampartMessageDataTest extends TestCase {
                 failures.isEmpty());
         assertNotNull("CLIENT_SIDE parameter should be present",
                 service.getParameter(RampartMessageData.PARAM_CLIENT_SIDE));
+    }
+
+    /** A stand-in for a validator that delegates to an external password store. */
+    public static class ExternalUsernameTokenValidator extends UsernameTokenValidator {
+    }
+
+    /** RAMPART-460: without the setting the default validator stays in place. */
+    public void testDefaultUsernameTokenValidator() throws Exception {
+        assertEquals(RampartUsernameTokenValidator.class,
+                RampartMessageData.getUsernameTokenValidatorClass(null, null));
+        assertEquals(RampartUsernameTokenValidator.class,
+                RampartMessageData.getUsernameTokenValidatorClass(new RampartConfig(), null));
+    }
+
+    /** RAMPART-460: a configured validator replaces the default. */
+    public void testConfiguredUsernameTokenValidator() throws Exception {
+        RampartConfig config = new RampartConfig();
+        config.setUsernameTokenValidatorClass(ExternalUsernameTokenValidator.class.getName());
+        assertEquals(ExternalUsernameTokenValidator.class,
+                RampartMessageData.getUsernameTokenValidatorClass(config, null));
+        assertEquals(ExternalUsernameTokenValidator.class,
+                RampartMessageData.getUsernameTokenValidatorClass(config,
+                        getClass().getClassLoader()));
+    }
+
+    /** A configured class that is missing must fail, not fall back to the default. */
+    public void testMissingUsernameTokenValidatorFails() {
+        RampartConfig config = new RampartConfig();
+        config.setUsernameTokenValidatorClass("org.example.NoSuchValidator");
+        try {
+            RampartMessageData.getUsernameTokenValidatorClass(config, null);
+            fail("a missing validator class must be rejected");
+        } catch (RampartException expected) {
+        }
+    }
+
+    /** A configured class that is not a WSS4J Validator must fail up front. */
+    public void testNonValidatorClassFails() {
+        RampartConfig config = new RampartConfig();
+        config.setUsernameTokenValidatorClass(String.class.getName());
+        try {
+            RampartMessageData.getUsernameTokenValidatorClass(config, null);
+            fail("a class that is not a Validator must be rejected");
+        } catch (RampartException expected) {
+        }
     }
 }

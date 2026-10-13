@@ -77,6 +77,12 @@ public class RampartConfigBuilder implements AssertionBuilder<OMElement> {
         if (childElement != null) {
             rampartConfig.setRampartConfigCbClass(childElement.getText().trim());
         }
+
+        childElement = element.getFirstChildWithName(new QName(
+                RampartConfig.NS, RampartConfig.USERNAME_TOKEN_VALIDATOR_CLASS_LN));
+        if (childElement != null) {
+            rampartConfig.setUsernameTokenValidatorClass(childElement.getText().trim());
+        }
                       
         // handle ssl config	
 		childElement = element.getFirstChildWithName(new QName(
