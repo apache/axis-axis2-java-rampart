@@ -130,6 +130,13 @@ public final class OpenSAMLInitializer {
             } catch (RuntimeException e) {
                 // Module initialisers can fail unchecked; InitializationService does not wrap.
                 throw recordFailure(new InitializationException("OpenSAML initialization failed: " + e, e));
+            } catch (VirtualMachineError e) {
+                throw e;
+            } catch (Error e) {
+                // Classpath faults (NoClassDefFoundError, ServiceConfigurationError,
+                // FactoryConfigurationError) are as permanent as the exceptions above,
+                // and unwrapped they would also fail every non-SAML message.
+                throw recordFailure(new InitializationException("OpenSAML initialization failed: " + e, e));
             }
             initialized = true;
             if (log.isDebugEnabled()) {

@@ -106,11 +106,37 @@ public class OpenSAMLInitializerTest extends TestCase {
     }
 
     public void testUncheckedFailureIsWrappedAndNotRetried() throws Exception {
+        assertWrappedAndNotRetried(new IllegalArgumentException("maxElementDepth"));
+    }
+
+    public void testClasspathErrorIsWrappedAndNotRetried() throws Exception {
+        assertWrappedAndNotRetried(new NoClassDefFoundError("org/apache/xerces/Missing"));
+    }
+
+    public void testVirtualMachineErrorIsNotRecorded() throws Exception {
         final AtomicInteger attempts = new AtomicInteger();
-        final IllegalArgumentException cause = new IllegalArgumentException("maxElementDepth");
+        OpenSAMLInitializer initializer = new OpenSAMLInitializer(() -> {
+            if (attempts.incrementAndGet() == 1) {
+                throw new OutOfMemoryError("transient");
+            }
+        });
+        try {
+            initializer.ensure();
+            fail("OutOfMemoryError must propagate");
+        } catch (OutOfMemoryError expected) {
+        }
+        initializer.ensure();
+        assertEquals("a VirtualMachineError must not be cached as a failure", 2, attempts.get());
+    }
+
+    private static void assertWrappedAndNotRetried(final Throwable cause) throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
         OpenSAMLInitializer initializer = new OpenSAMLInitializer(() -> {
             attempts.incrementAndGet();
-            throw cause;
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw (RuntimeException) cause;
         });
 
         InitializationException first = null;
