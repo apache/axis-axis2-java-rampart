@@ -278,7 +278,11 @@ public class RampartMessageData {
             try {
                 OpenSAMLInitializer.ensureInitialized();
             } catch (Exception e) {
-                log.warn("WSS4J OpenSAML initialization failed: " + e.getMessage(), e);
+                // OpenSAMLInitializer logs the failure once; repeating it per message
+                // would flood the log of a deployment that does not use SAML.
+                if (log.isDebugEnabled()) {
+                    log.debug("OpenSAML is not initialized: " + e.getMessage());
+                }
             }
 
             // Set the WSSConfig

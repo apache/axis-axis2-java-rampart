@@ -46,9 +46,31 @@ public final class OpenSAMLInitializer {
 
     private static final Log log = LogFactory.getLog(OpenSAMLInitializer.class);
 
-    private static volatile boolean initialized;
+    /** The OpenSAML initialisation steps, separable so tests can substitute a failing one. */
+    interface Steps {
+        void run() throws InitializationException;
+    }
 
-    private OpenSAMLInitializer() {
+    private static final OpenSAMLInitializer INSTANCE = new OpenSAMLInitializer(() -> {
+        OpenSAMLUtil.initSamlEngine();
+        InitializationService.initialize();
+    });
+
+    private final Steps steps;
+
+    private volatile boolean initialized;
+
+    /**
+     * The failure of the one initialisation attempt, if it failed. Failures here are
+     * environmental and repeat identically (for example a standalone Xerces on the
+     * classpath rejecting {@code jdk.xml.maxElementDepth} in OpenSAML's parser pool),
+     * so retrying per message would put every thread back on the lock for the same
+     * result. A fix to the environment needs a restart.
+     */
+    private volatile InitializationException failure;
+
+    OpenSAMLInitializer(Steps steps) {
+        this.steps = steps;
     }
 
     /**
@@ -78,23 +100,48 @@ public final class OpenSAMLInitializer {
     }
 
     /**
-     * Initialises OpenSAML once. After the first successful call this is a single
-     * volatile read. A failed attempt is not recorded, so the next call retries.
+     * Initialises OpenSAML once. After the first attempt, successful or not, this never
+     * takes the lock: a success is a volatile read, and a failure is logged once and
+     * then rethrown unchanged on every later call without retrying.
      */
     public static void ensureInitialized() throws InitializationException {
+        INSTANCE.ensure();
+    }
+
+    void ensure() throws InitializationException {
         if (initialized) {
             return;
         }
-        synchronized (OpenSAMLInitializer.class) {
+        InitializationException previous = failure;
+        if (previous != null) {
+            throw previous;
+        }
+        synchronized (this) {
             if (initialized) {
                 return;
             }
-            OpenSAMLUtil.initSamlEngine();
-            InitializationService.initialize();
+            if (failure != null) {
+                throw failure;
+            }
+            try {
+                steps.run();
+            } catch (InitializationException e) {
+                throw recordFailure(e);
+            } catch (RuntimeException e) {
+                // Module initialisers can fail unchecked; InitializationService does not wrap.
+                throw recordFailure(new InitializationException("OpenSAML initialization failed: " + e, e));
+            }
             initialized = true;
             if (log.isDebugEnabled()) {
                 log.debug("OpenSAML initialization complete");
             }
         }
+    }
+
+    private InitializationException recordFailure(InitializationException e) {
+        failure = e;
+        log.error("OpenSAML initialization failed; SAML processing is unavailable until"
+                + " restart. Non-SAML messages are unaffected. Cause: " + e.getMessage(), e);
+        return e;
     }
 }

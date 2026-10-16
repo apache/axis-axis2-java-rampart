@@ -23,11 +23,13 @@ import java.net.URLClassLoader;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
 import org.apache.axis2.AxisFault;
 
+import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.xmlsec.SecurityConfigurationSupport;
 import org.opensaml.xmlsec.SignatureSigningConfiguration;
@@ -78,6 +80,53 @@ public class OpenSAMLInitializerTest extends TestCase {
         } catch (AxisFault expected) {
             assertTrue(expected.getMessage(), expected.getMessage().contains("guava"));
         }
+    }
+
+    /**
+     * A failed attempt must not be retried per message: that put every thread back on
+     * the lock to fail the same way, for deployments that never use SAML.
+     */
+    public void testFailureIsRecordedAndNotRetried() throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
+        final InitializationException cause = new InitializationException("parser pool");
+        OpenSAMLInitializer initializer = new OpenSAMLInitializer(() -> {
+            attempts.incrementAndGet();
+            throw cause;
+        });
+
+        for (int i = 0; i < 3; i++) {
+            try {
+                initializer.ensure();
+                fail("a failed initialisation must keep failing");
+            } catch (InitializationException expected) {
+                assertSame(cause, expected);
+            }
+        }
+        assertEquals("initialisation must be attempted once", 1, attempts.get());
+    }
+
+    public void testUncheckedFailureIsWrappedAndNotRetried() throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
+        final IllegalArgumentException cause = new IllegalArgumentException("maxElementDepth");
+        OpenSAMLInitializer initializer = new OpenSAMLInitializer(() -> {
+            attempts.incrementAndGet();
+            throw cause;
+        });
+
+        InitializationException first = null;
+        for (int i = 0; i < 3; i++) {
+            try {
+                initializer.ensure();
+                fail("a failed initialisation must keep failing");
+            } catch (InitializationException expected) {
+                assertSame(cause, expected.getCause());
+                if (first == null) {
+                    first = expected;
+                }
+                assertSame(first, expected);
+            }
+        }
+        assertEquals("initialisation must be attempted once", 1, attempts.get());
     }
 
     public void testConcurrentCallsSucceed() throws Exception {
