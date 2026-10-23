@@ -931,7 +931,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         // If a certificate has been found, the certificates must be compared
         // to ensure against phony DNs (compare encoded form including signature)
         //
-        if (foundCerts != null && foundCerts[0] != null && foundCerts[0].equals(cert)) {
+        if (foundCerts != null && foundCerts.length > 0 && foundCerts[0] != null && foundCerts[0].equals(cert)) {
             if (log.isDebugEnabled()) {
                 log.debug(
                         "Direct trust for certificate with " + cert.getSubjectX500Principal().getName()
