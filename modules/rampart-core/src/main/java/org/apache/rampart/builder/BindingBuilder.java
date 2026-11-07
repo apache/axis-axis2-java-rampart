@@ -297,9 +297,6 @@ public abstract class BindingBuilder {
                 handler.handle(cb);
                 if(cb[0].getPassword() != null && !"".equals(cb[0].getPassword())) {
                     password = cb[0].getPassword();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Password : " + password);
-                    }
                 } else {
                     //If there's no password then throw an exception
                     throw new RampartException("noPasswordForUser", 

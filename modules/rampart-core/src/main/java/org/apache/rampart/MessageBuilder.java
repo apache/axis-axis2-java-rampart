@@ -267,17 +267,11 @@ public class MessageBuilder {
        }
 
 
-       // Log the final envelope being built
+       // Do not log the secured envelope: its security header can carry a
+       // plaintext UsernameToken password. Envelope tracing belongs to the
+       // opt-in org.apache.rampart.MESSAGE logger only.
        if (log.isDebugEnabled()) {
-           try {
-               log.debug("=== MESSAGEBUILDER: Final SOAP envelope being sent ===");
-               log.debug("MessageBuilder: Action = " + msgCtx.getWSAAction());
-               log.debug("MessageBuilder: Final envelope content:");
-               log.debug(msgCtx.getEnvelope().toString());
-               log.debug("=== END SOAP envelope ===");
-           } catch (Exception e) {
-               log.debug("MessageBuilder: Could not log envelope: " + e.getMessage());
-           }
+           log.debug("MessageBuilder: Action = " + msgCtx.getWSAAction());
        }
 
        /*

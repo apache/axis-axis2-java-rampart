@@ -78,12 +78,6 @@ public class RampartEngine {
 
 		if (log.isDebugEnabled()) {
 			log.debug("RampartEngine: Processing incoming message");
-			log.debug("RampartEngine: Initial SOAP envelope received:");
-			try {
-				log.debug(msgCtx.getEnvelope().toString());
-			} catch (Exception e) {
-				log.debug("RampartEngine: Could not log initial envelope: " + e.getMessage());
-			}
 		}
 
 		if (log.isDebugEnabled()) {
@@ -263,12 +257,6 @@ public class RampartEngine {
 		if(secHeader == null) {
 		    if (log.isDebugEnabled()) {
 		        log.debug("RampartEngine: No security header found in received message");
-		        log.debug("RampartEngine: Received SOAP envelope:");
-		        try {
-		            log.debug(msgCtx.getEnvelope().toString());
-		        } catch (Exception e) {
-		            log.debug("RampartEngine: Could not log envelope: " + e.getMessage());
-		        }
 		    }
 		    throw new RampartException("missingSecurityHeader");
 		}
