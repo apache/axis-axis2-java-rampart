@@ -757,12 +757,13 @@ public class SymmetricBindingBuilder extends BindingBuilder {
     throws RampartException {
         try {
             KeyGenerator keyGen;
-			try {
-				keyGen = KeyUtils.getKeyGenerator(WSConstants.AES_128);
-			} catch (WSSecurityException e) {
-				e.printStackTrace();
-				return null;
-			}
+            try {
+                String encrAlgo = rmd.getPolicyData().getAlgorithmSuite().getEncryption();
+                keyGen = KeyUtils.getKeyGenerator(encrAlgo != null ? encrAlgo : WSConstants.AES_128);
+            } catch (WSSecurityException e) {
+                e.printStackTrace();
+                return null;
+            }
             SecretKey symmetricKey = keyGen.generateKey();
             WSSecEncryptedKey encrKey = this.getEncryptedKeyBuilder(rmd, 
                                                                 sigToken,
