@@ -697,12 +697,6 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>net.shibboleth.utilities</groupId>
-                <artifactId>java-support</artifactId>
-                <version>${shibboleth.utilities.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
                 <groupId>net.shibboleth</groupId>
                 <artifactId>cryptography-api</artifactId>
                 <version>1.0.0</version>
@@ -861,7 +855,6 @@
 
         <wss4j.version>4.0.1</wss4j.version>
         <opensaml.version>5.2.2</opensaml.version>
-        <shibboleth.utilities.version>8.4.2</shibboleth.utilities.version>
         <dropwizard.metrics.version>4.2.40</dropwizard.metrics.version>
         <cryptacular.version>1.3.0</cryptacular.version>
 
