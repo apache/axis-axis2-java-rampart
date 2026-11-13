@@ -169,12 +169,12 @@
                 <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-surefire-plugin</artifactId>
-                  <version>3.5.5</version>
+                  <version>3.6.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.8.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.gmavenplus</groupId>
@@ -204,7 +204,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.21.0</version>
+                    <version>3.22.0</version>
                     <configuration>
                         <!-- Required by maven-scm-publish-plugin -->
                         <skipDeploy>true</skipDeploy>
@@ -228,7 +228,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.3</version>
+                <version>3.7.0</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -355,7 +355,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.15.0</version>
+                <version>3.16.0</version>
                 <configuration>
                     <release>17</release>
                 </configuration>
@@ -465,7 +465,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>33.7.2-jre</version>
+                <version>33.8.0-jre</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.axis2</groupId>
@@ -515,7 +515,7 @@
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
-                <version>6.0.0</version>
+                <version>6.1.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -761,12 +761,12 @@
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjrt</artifactId>
-                <version>1.9.25.1</version>
+                <version>1.9.27</version>
             </dependency>
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
-                <version>1.9.25.1</version>
+                <version>1.9.27</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
@@ -862,7 +862,7 @@
         <wss4j.version>4.0.1</wss4j.version>
         <opensaml.version>5.2.2</opensaml.version>
         <shibboleth.utilities.version>8.4.2</shibboleth.utilities.version>
-        <dropwizard.metrics.version>4.2.39</dropwizard.metrics.version>
+        <dropwizard.metrics.version>4.2.40</dropwizard.metrics.version>
         <cryptacular.version>1.3.0</cryptacular.version>
 
         <bcprov.jdk18.version>1.85</bcprov.jdk18.version>
@@ -872,9 +872,9 @@
              natively; modules that legitimately have no tests override it to false. -->
         <failIfNoTests>true</failIfNoTests>
 
-        <jacoco.version>0.8.15</jacoco.version>
-        <slf4j.version>2.0.16</slf4j.version>
-        <log4j.version>2.25.4</log4j.version>
+        <jacoco.version>0.8.16</jacoco.version>
+        <slf4j.version>2.0.20</slf4j.version>
+        <log4j.version>2.26.1</log4j.version>
 	<!-- see the parent artifact 'apache' i.e 33, it defaults to a older version-->
         <maven.compiler.release>17</maven.compiler.release>
     </properties>
