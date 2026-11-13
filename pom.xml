@@ -459,9 +459,9 @@
                 <version>1.6.0</version>
             </dependency>
             <!-- Required at runtime by Shibboleth's BasicParserPool (via WSS4J), and
-                 shipped in rampart-dist lib/ because Axis2 2.0.2 no longer bundles it.
-                 Pinned to the version Axis2 2.0.1 shipped, so installing into 2.0.1
-                 overwrites that jar rather than adding a second guava. -->
+                 shipped in rampart-dist lib/ because Axis2 2.0.2 does not bundle it
+                 (Axis2 only uses guava in its own tests). Rampart is the sole owner
+                 of this jar on the classpath, so it can track the latest release. -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -856,7 +856,7 @@
             3. Re-run the full reactor plus the nine policy samples before
                pushing.
         -->
-        <axis2.version>2.0.1</axis2.version>
+        <axis2.version>2.0.2</axis2.version>
         <axiom.version>2.0.0</axiom.version>
 
         <wss4j.version>4.0.1</wss4j.version>
