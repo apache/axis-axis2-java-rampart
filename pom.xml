@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>33</version>
+        <version>40</version>
     </parent>
 
     <groupId>org.apache.rampart</groupId>
@@ -875,8 +875,9 @@
         <jacoco.version>0.8.16</jacoco.version>
         <slf4j.version>2.0.20</slf4j.version>
         <log4j.version>2.26.1</log4j.version>
-	<!-- see the parent artifact 'apache' i.e 33, it defaults to a older version-->
-        <maven.compiler.release>17</maven.compiler.release>
+        <!-- The apache parent pom derives maven.compiler.release and its
+             enforce-java-version rule from this; its own default is 8. -->
+        <javaVersion>17</javaVersion>
     </properties>
 
     <pluginRepositories>
