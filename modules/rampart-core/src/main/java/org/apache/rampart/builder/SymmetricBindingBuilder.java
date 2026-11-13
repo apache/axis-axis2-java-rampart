@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.EncryptedKeyToken;
 import org.apache.rahas.RahasConstants;
+import org.apache.rahas.TokenStorage;
 import org.apache.rahas.TrustException;
 import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartException;
@@ -62,7 +63,27 @@ import javax.crypto.spec.SecretKeySpec;
 public class SymmetricBindingBuilder extends BindingBuilder {
 
     private static Log log = LogFactory.getLog(SymmetricBindingBuilder.class);
-    private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);	
+    private static Log tlog = LogFactory.getLog(RampartConstants.TIME_LOG);
+
+    /**
+     * On the service side, the session key of the request's EncryptedKey, kept
+     * for building this one response. See {@link #getEncryptedKey}.
+     */
+    private EncryptedKeyToken requestEncryptedKeyToken;
+
+    /**
+     * Serves the request's own EncryptedKey token for the response being built,
+     * so that the response never depends on what the shared store holds under
+     * that Id (RAMPART-329). Everything else comes from the store as before.
+     */
+    @Override
+    protected org.apache.rahas.Token getToken(RampartMessageData rmd, String tokenId)
+            throws RampartException {
+        if (requestEncryptedKeyToken != null && requestEncryptedKeyToken.getId().equals(tokenId)) {
+            return requestEncryptedKeyToken;
+        }
+        return super.getToken(rmd, tokenId);
+    }
 
     public void build(RampartMessageData rmd) throws RampartException {
 
@@ -850,12 +871,27 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                             tempTok.setSecret((byte[]) wsSecEngineResult.get(WSSecurityEngineResult.TAG_SECRET));
                             tempTok.setSHA1(getSHA1((byte[]) wsSecEngineResult.
                                     get(WSSecurityEngineResult.TAG_ENCRYPTED_EPHEMERAL_KEY)));
-                            rmd.getTokenStorage().add(tempTok);
+
+                            // The response is built from this token directly (see
+                            // getToken). It also goes into the shared store so that a
+                            // later request may reference the key by EncryptedKeySHA1.
+                            // The Id is only unique within the request's own message
+                            // (RAMPART-329): a client may send "_1" on every call, so
+                            // an entry already there is replaced, not refused. The Id
+                            // itself is kept, since a Rampart client resolves a
+                            // derived-key reference in the response by it.
+                            requestEncryptedKeyToken = tempTok;
+                            TokenStorage store = rmd.getTokenStorage();
+                            if (store.getToken(encryptedKeyID) == null) {
+                                store.add(tempTok);
+                            } else {
+                                store.update(tempTok);
+                            }
 
                             return encryptedKeyID;
 
                         } catch (TrustException e) {
-                            throw new RampartException("errorInAddingTokenIntoStore");
+                            throw new RampartException("errorInAddingTokenIntoStore", e);
                         }
 
                     }
