@@ -853,12 +853,14 @@
         <axis2.version>2.0.2</axis2.version>
         <axiom.version>2.0.0</axiom.version>
 
-        <wss4j.version>4.0.1</wss4j.version>
-        <opensaml.version>5.2.2</opensaml.version>
+        <!-- WSS4J 4.0.2 is built against OpenSAML 5.2.3, xmlsec 4.0.4 and
+             cryptacular 1.3.0; keep those aligned when bumping wss4j. -->
+        <wss4j.version>4.0.2</wss4j.version>
+        <opensaml.version>5.2.3</opensaml.version>
         <dropwizard.metrics.version>4.2.40</dropwizard.metrics.version>
         <cryptacular.version>1.3.0</cryptacular.version>
 
-        <bcprov.jdk18.version>1.85</bcprov.jdk18.version>
+        <bcprov.jdk18.version>1.87</bcprov.jdk18.version>
 
         <!-- Fail the build if a module expected to have tests suddenly has none
              (tests deleted or no longer discovered). Surefire reads this property

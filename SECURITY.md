@@ -10,8 +10,8 @@ WS-SecureConversation. Rampart is deployed as an Axis2 module (MAR) that
 adds inbound and outbound security handlers to the Axis2 message
 processing pipeline.
 
-Rampart delegates cryptographic operations to Apache WSS4J (4.0.1) and
-SAML processing to OpenSAML (5.2.1). It is the security enforcement
+Rampart delegates cryptographic operations to Apache WSS4J (4.0.2) and
+SAML processing to OpenSAML (5.2.3). It is the security enforcement
 layer — if Rampart is bypassed or misconfigured, Axis2 services have no
 message-level security.
 
@@ -95,11 +95,11 @@ RampartEngine.process(MessageContext)
 Extract WS-Security header
     |
     v
-WSSecurityEngine (WSS4J 4.0.1)
+WSSecurityEngine (WSS4J 4.0.2)
   - Validate signatures (XML-DSIG via Apache Santuario)
   - Decrypt encrypted parts (XML-ENC)
   - Validate UsernameToken (password callback)
-  - Validate SAML assertions (OpenSAML 5.2.1)
+  - Validate SAML assertions (OpenSAML 5.2.3)
   - Validate Kerberos tokens (JDK JAAS/GSS)
   - Validate timestamps (clock skew tolerance)
     |
@@ -129,9 +129,9 @@ Axis2 Transport-Out Phase
 
 | Component | Threats | Mitigations |
 |-----------|---------|-------------|
-| **XML Signature validation** (WSS4J/Santuario) | Signature wrapping; reference manipulation; HMAC truncation | WSS4J 4.0.1 signature reference validation; Santuario's strict reference processing |
+| **XML Signature validation** (WSS4J/Santuario) | Signature wrapping; reference manipulation; HMAC truncation | WSS4J 4.0.2 signature reference validation; Santuario's strict reference processing |
 | **XML Encryption** (WSS4J/Santuario) | Padding oracle; chosen-ciphertext attacks; CBC mode weaknesses | Algorithm suite enforcement; GCM recommended over CBC |
-| **SAML assertion parsing** (OpenSAML 5.2.1) | XXE in assertion XML; forged assertions; expired/replayed assertions; issuer spoofing | OpenSAML unmarshalling; assertion signature validation; NotBefore/NotOnOrAfter enforcement; issuer certificate pinning |
+| **SAML assertion parsing** (OpenSAML 5.2.3) | XXE in assertion XML; forged assertions; expired/replayed assertions; issuer spoofing | OpenSAML unmarshalling; assertion signature validation; NotBefore/NotOnOrAfter enforcement; issuer certificate pinning |
 | **SAML2Utils.getSAML2KeyInfo()** | XXE — `DocumentBuilderFactory.newInstance()` without explicit XXE hardening flags | Depends on OpenSAML's `AxiomParserPool` configuration; **review needed** |
 | **WS-Trust STS (rahas module)** | Token issuance policy bypass; privilege escalation via crafted RequestSecurityToken (RST); DoS against token issuance | `TokenIssuer` implementations must validate RSTs against policy before issuing tokens |
 | **UsernameToken validation** | Plaintext password interception; weak hashing; brute force | TransportBinding requires HTTPS for plaintext; nonce+created for hashed; callback-based validation |
@@ -147,8 +147,8 @@ Axis2 Transport-Out Phase
 
 | Dependency | Version | Security Role |
 |-----------|---------|---------------|
-| **WSS4J** | 4.0.1 | Core WS-Security processing — signatures, encryption, token validation |
-| **OpenSAML** | 5.2.1 | SAML assertion parsing, validation, and issuance |
+| **WSS4J** | 4.0.2 | Core WS-Security processing — signatures, encryption, token validation |
+| **OpenSAML** | 5.2.3 | SAML assertion parsing, validation, and issuance |
 | **Apache Santuario** (xmlsec) | via WSS4J | XML Signature and XML Encryption implementation |
 | **Bouncy Castle** | runtime dependency | JCE provider for advanced crypto algorithms |
 
@@ -164,9 +164,9 @@ heavily on WSS4J and OpenSAML, which have extensive CVE histories:
 
 - **WSS4J CVEs** include signature wrapping (CVE-2011-2487),
   SOAP Action spoofing, and various XML signature bypass issues.
-  Rampart 2.0.0 uses WSS4J 4.0.1, which addresses all known issues.
+  Rampart 2.0.0 uses WSS4J 4.0.2, which addresses all known issues.
 - **OpenSAML CVEs** include XXE in SAML assertion parsing and assertion
-  replay. Rampart 2.0.0 uses OpenSAML 5.2.1.
+  replay. Rampart 2.0.0 uses OpenSAML 5.2.3.
 
 The scan should verify that Rampart's integration with these libraries
 does not reintroduce vulnerabilities that the libraries themselves have

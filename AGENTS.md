@@ -8,7 +8,7 @@ See [SECURITY.md](SECURITY.md) for the full threat model, including:
 - Roles and trust levels
 - Security boundaries: what is and is not a security issue
 - Attack surface by component (signatures, encryption, SAML, Kerberos, UsernameToken)
-- Critical dependency versions (WSS4J 4.0.1, OpenSAML 5.2.1)
+- Critical dependency versions (WSS4J 4.0.2, OpenSAML 5.2.3)
 - CVE history context
 
 ## High-Priority Scan Areas
@@ -26,7 +26,7 @@ Key files:
 
 ### 2. Signature Wrapping
 
-Rampart relies on WSS4J 4.0.1 for signature reference validation. Verify
+Rampart relies on WSS4J 4.0.2 for signature reference validation. Verify
 that Rampart's preprocessing in `Axis2Util.getDocumentFromSOAPEnvelope()`
 (which converts Axiom to DOM and normalizes namespaces) does not create
 opportunities for signature wrapping attacks.
