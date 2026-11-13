@@ -20,17 +20,16 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
-import org.apache.neethi.Constants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.AlgorithmSuite;
+import org.apache.ws.secpolicy.model.AbstractSecurityAssertion;
 import org.apache.ws.secpolicy.model.SignedEncryptedElements;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 import org.apache.ws.secpolicy.model.SupportingToken;
@@ -53,11 +52,7 @@ public class SupportingTokensBuilder implements AssertionBuilder<OMElement> {
             supportingToken = new SupportingToken(SPConstants.SUPPORTING_TOKEN_SIGNED_ENDORSING, SPConstants.SP_V11);
         }
         
-        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
-		if (isOptional != null) {
-			supportingToken.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
-		}
+        supportingToken.setOptional(AbstractSecurityAssertion.readOptionalAttribute(element));
    
         Policy policy = PolicyEngine.getPolicy(element.getFirstElement());
         policy = (Policy) policy.normalize(false);

@@ -31,6 +31,7 @@ import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.UsernameToken;
+import org.apache.ws.secpolicy.model.AbstractSecurityAssertion;
 
 public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
 
@@ -45,11 +46,7 @@ public class UsernameTokenBuilder implements AssertionBuilder<OMElement> {
             usernameToken.setInclusion(inclusion);
         }
         
-        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
-		if (isOptional != null) {
-			usernameToken.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
-		}
+        usernameToken.setOptional(AbstractSecurityAssertion.readOptionalAttribute(element));
         
         OMElement policyElement = element.getFirstElement();
         

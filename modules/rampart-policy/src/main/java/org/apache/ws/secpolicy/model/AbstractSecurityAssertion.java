@@ -15,28 +15,52 @@
  */
 package org.apache.ws.secpolicy.model;
 
+import java.util.Iterator;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.apache.axiom.om.OMAttribute;
+import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
+import org.apache.neethi.Constants;
 import org.apache.neethi.PolicyComponent;
 
 public abstract class AbstractSecurityAssertion implements Assertion {
 
     private boolean isOptional;
     private boolean isIgnorable;
-    
-    private boolean normalized = true; 
-    
+
+    private boolean normalized = true;
+
     protected int version;
 
     public boolean isOptional() {
         return isOptional;
     }
-    
+
     public void setOptional(boolean isOptional) {
         this.isOptional = isOptional;
+    }
+
+    /**
+     * Reads the wsp:Optional attribute of a policy assertion element, in any of
+     * the WS-Policy namespaces Neethi recognises, so that a builder does not have
+     * to know which one the policy document used.
+     *
+     * @param element the assertion element as it appears in the policy
+     * @return true if the element declares itself optional
+     */
+    public static boolean readOptionalAttribute(OMElement element) {
+        for (Iterator<OMAttribute> it = element.getAllAttributes(); it.hasNext();) {
+            OMAttribute attribute = it.next();
+            if (Constants.isOptionalAttribute(attribute.getQName())) {
+                String value = attribute.getAttributeValue().trim();
+                return "true".equalsIgnoreCase(value) || "1".equals(value);
+            }
+        }
+        return false;
     }
     public boolean isIgnorable() {
         return isIgnorable;

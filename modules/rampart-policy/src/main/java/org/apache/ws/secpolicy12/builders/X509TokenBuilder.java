@@ -24,13 +24,13 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
-import org.apache.neethi.Constants;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.X509Token;
+import org.apache.ws.secpolicy.model.AbstractSecurityAssertion;
 
 public class X509TokenBuilder implements AssertionBuilder<OMElement> {
 	
@@ -60,11 +60,7 @@ public class X509TokenBuilder implements AssertionBuilder<OMElement> {
             x509Token.setInclusion(inclusion);
         }
         
-        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
-		if (isOptional != null) {
-			x509Token.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
-		}
+        x509Token.setOptional(AbstractSecurityAssertion.readOptionalAttribute(element));
 
         if (policyElement != null) {
             

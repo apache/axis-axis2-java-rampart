@@ -120,23 +120,41 @@ public abstract class BindingBuilder {
      * @return The <code>WSSecUsernameToken</code> instance
      * @throws RampartException If an error occurred during the addition of a UsernameToken Object
      */
+    /**
+     * RAMPART-286: an optional UsernameToken is only sent when a user is configured.
+     * With none, leaving the token out is the alternative the policy itself permits,
+     * not an error, so callers skip the token when this returns true.
+     */
+    protected static boolean isOptionalUsernameTokenWithoutUser(RampartMessageData rmd, Token token) {
+        if (token.isOptional() && getUsernameTokenUser(rmd) == null) {
+            log.debug("No user configured; skipping the optional UsernameToken");
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * The user a UsernameToken would be built for: the client Options first, then
+     * the RampartConfig; null when neither names one.
+     */
+    private static String getUsernameTokenUser(RampartMessageData rmd) {
+        String user = rmd.getMsgContext().getOptions().getUserName();
+        if (user == null || user.length() == 0) {
+            RampartPolicyData rpd = rmd.getPolicyData();
+            if (rpd.getRampartConfig() != null) {
+                user = rpd.getRampartConfig().getUser();
+            }
+        }
+        return user == null || user.length() == 0 ? null : user;
+    }
+
     protected WSSecUsernameToken addUsernameToken(RampartMessageData rmd, UsernameToken token) throws RampartException {
 
         log.debug("Adding a UsernameToken");
 
-        RampartPolicyData rpd = rmd.getPolicyData();
-        
-        //Get the user
-        //First try options
         Options options = rmd.getMsgContext().getOptions();
-        String user = options.getUserName();
-        if(user == null || user.length() == 0) {
-            //Then try RampartConfig
-            if(rpd.getRampartConfig() != null) {
-                user = rpd.getRampartConfig().getUser();
-            }
-        }
-        
+        String user = getUsernameTokenUser(rmd);
+
         if(user != null && !"".equals(user)) {
             if (log.isDebugEnabled()) {
                 log.debug("User : " + user);
@@ -400,6 +418,9 @@ public abstract class BindingBuilder {
                     endSuppTokMap.put(token, sig);
 
                 } else if (token instanceof UsernameToken) {
+                    if (isOptionalUsernameTokenWithoutUser(rmd, token)) {
+                        continue;
+                    }
                     WSSecUsernameToken utBuilder = addUsernameToken(rmd, (UsernameToken) token);
 
                     utBuilder.prepare();

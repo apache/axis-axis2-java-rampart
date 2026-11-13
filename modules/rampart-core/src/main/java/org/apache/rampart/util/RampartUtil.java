@@ -1666,6 +1666,29 @@ public class RampartUtil {
     }
     
     /**
+     * Whether a supporting token group demands a token in the message: it has tokens
+     * and, unless optional ones count, neither the group nor every token in it is
+     * marked wsp:Optional.
+     */
+    private static boolean hasTokens(SupportingToken group, boolean countOptional) {
+        if (group == null || group.getTokens().isEmpty()) {
+            return false;
+        }
+        if (countOptional) {
+            return true;
+        }
+        if (group.isOptional()) {
+            return false;
+        }
+        for (org.apache.ws.secpolicy.model.Token token : group.getTokens()) {
+            if (!token.isOptional()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Method to check whether security header is required in incoming message
      * @param rpd RampartPolicyData
      * @param initiator defines precendence
@@ -1673,15 +1696,29 @@ public class RampartUtil {
      * @return boolean true if a security header is required in the incoming message
      */
     public static boolean isSecHeaderRequired(RampartPolicyData rpd, boolean initiator, boolean inflow ) {
+        return isSecHeaderRequired(rpd, initiator, inflow, true);
+    }
+
+    /**
+     * As {@link #isSecHeaderRequired(RampartPolicyData, boolean, boolean)}, but with
+     * {@code countOptional} false an assertion marked wsp:Optional does not make the
+     * header required. A policy whose every requirement is optional then permits a
+     * message with no security header at all (RAMPART-286).
+     *
+     * @param countOptional whether optional assertions count as requirements
+     */
+    public static boolean isSecHeaderRequired(RampartPolicyData rpd, boolean initiator,
+                                              boolean inflow, boolean countOptional) {
 
         if (log.isDebugEnabled()) {
             String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
             log.debug("RampartUtil.isSecHeaderRequired TIMESTAMP: " + timestamp);
-            log.debug("RampartUtil.isSecHeaderRequired: initiator=" + initiator + ", inflow=" + inflow);
+            log.debug("RampartUtil.isSecHeaderRequired: initiator=" + initiator + ", inflow=" + inflow
+                    + ", countOptional=" + countOptional);
         }
 
         // Checking for time stamp
-        if ( rpd.isIncludeTimestamp() ) {
+        if ( rpd.isIncludeTimestamp() && (countOptional || !rpd.isIncludeTimestampOptional()) ) {
             if (log.isDebugEnabled()) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - timestamp required");
             }
@@ -1693,8 +1730,8 @@ public class RampartUtil {
         }
 
         // Checking for signed parts and elements
-        if (rpd.isSignBody() || rpd.getSignedParts().size() != 0 ||
-                                    rpd.getSignedElements().size() != 0) {
+        if ((rpd.isSignBody() && (countOptional || !rpd.isSignBodyOptional()))
+                || rpd.getSignedParts().size() != 0 || rpd.getSignedElements().size() != 0) {
             if (log.isDebugEnabled()) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - signing required (signBody=" + rpd.isSignBody() +
                           ", signedParts=" + rpd.getSignedParts().size() + ", signedElements=" + rpd.getSignedElements().size() + ")");
@@ -1705,8 +1742,8 @@ public class RampartUtil {
         }
 
         // Checking for encrypted parts and elements
-        if (rpd.isEncryptBody() || rpd.getEncryptedParts().size() != 0 ||
-                                    rpd.getEncryptedElements().size() != 0 ) {
+        if ((rpd.isEncryptBody() && (countOptional || !rpd.isEncryptBodyOptional()))
+                || rpd.getEncryptedParts().size() != 0 || rpd.getEncryptedElements().size() != 0 ) {
             log.debug("RampartUtil.isSecHeaderRequired: TRUE - encryption required (encryptBody=" + rpd.isEncryptBody() +
                       ", encryptedParts=" + rpd.getEncryptedParts().size() + ", encryptedElements=" + rpd.getEncryptedElements().size() + ")");
             return true;
@@ -1726,50 +1763,50 @@ public class RampartUtil {
             List<SupportingToken> supportingToks = rpd.getSupportingTokensList();
             log.debug("RampartUtil.isSecHeaderRequired: SupportingTokensList size = " + (supportingToks != null ? supportingToks.size() : "null"));
             for (SupportingToken supportingTok : supportingToks) {
-                if (supportingTok != null && supportingTok.getTokens().size() != 0) {
+                if (hasTokens(supportingTok, countOptional)) {
                     log.debug("RampartUtil.isSecHeaderRequired: TRUE - supporting tokens found");
                     return true;
                 }
             }
 
             supportingTokens = rpd.getSignedSupportingTokens();
-            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            if (hasTokens(supportingTokens, countOptional)) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - signed supporting tokens found");
                 return true;
             }
 
             supportingTokens = rpd.getEndorsingSupportingTokens();
-            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            if (hasTokens(supportingTokens, countOptional)) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - endorsing supporting tokens found");
                 return true;
             }
 
             supportingTokens = rpd.getSignedEndorsingSupportingTokens();
-            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            if (hasTokens(supportingTokens, countOptional)) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - signed endorsing supporting tokens found");
                 return true;
             }
 
             supportingTokens = rpd.getEncryptedSupportingTokens();
-            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            if (hasTokens(supportingTokens, countOptional)) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - encrypted supporting tokens found");
                 return true;
             }
 
             supportingTokens = rpd.getSignedEncryptedSupportingTokens();
-            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            if (hasTokens(supportingTokens, countOptional)) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - signed encrypted supporting tokens found");
                 return true;
             }
 
             supportingTokens = rpd.getEndorsingEncryptedSupportingTokens();
-            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            if (hasTokens(supportingTokens, countOptional)) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - endorsing encrypted supporting tokens found");
                 return true;
             }
 
             supportingTokens = rpd.getSignedEndorsingEncryptedSupportingTokens();
-            if (supportingTokens != null && supportingTokens.getTokens().size() != 0) {
+            if (hasTokens(supportingTokens, countOptional)) {
                 log.debug("RampartUtil.isSecHeaderRequired: TRUE - signed endorsing encrypted supporting tokens found");
                 return true;
             }

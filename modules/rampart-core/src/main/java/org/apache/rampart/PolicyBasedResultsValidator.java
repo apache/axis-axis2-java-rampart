@@ -334,10 +334,14 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 //Check presence of a UsernameToken
                 WSSecurityEngineResult utResult = fetchActionResult(results, WSConstants.UT);
                
-                if (utResult == null && !ut.isOptional()) {
+                if (utResult == null) {
+                    if (ut.isOptional()) {
+                        // RAMPART-286: the policy allows the token to be absent.
+                        continue;
+                    }
                     throw new RampartException("usernameTokenMissing");
                 }
-               
+
                 org.apache.wss4j.dom.message.token.UsernameToken wssUt = (org.apache.wss4j.dom.message.token.UsernameToken) utResult.get(WSSecurityEngineResult.TAG_USERNAME_TOKEN);
                
                 if(ut.isNoPassword() && wssUt.getPassword() != null) {

@@ -24,11 +24,11 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
-import org.apache.neethi.Constants;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.SP12Constants;
 import org.apache.ws.secpolicy.model.SignedEncryptedElements;
+import org.apache.ws.secpolicy.model.AbstractSecurityAssertion;
 
 public class SignedElementsBuilder implements AssertionBuilder<OMElement> {
 
@@ -42,11 +42,7 @@ public class SignedElementsBuilder implements AssertionBuilder<OMElement> {
             signedEncryptedElements.setXPathVersion(attrXPathVersion.getAttributeValue());
         }
         
-        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
-		if (isOptional != null) {
-			signedEncryptedElements.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
-		}
+        signedEncryptedElements.setOptional(AbstractSecurityAssertion.readOptionalAttribute(element));
         
         for (Iterator iterator = element.getChildElements(); iterator.hasNext();) {
             processElement((OMElement) iterator.next(), signedEncryptedElements);            

@@ -236,25 +236,36 @@ public class RampartEngine {
         ValidatorData data = new ValidatorData(rmd);
 
 		SOAPHeader header = rmd.getMsgContext().getEnvelope().getHeader();
-		if(header == null) {
-		    throw new RampartException("missingSOAPHeader");
-		}
-		
-        ArrayList headerBlocks = header.getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
 		SOAPHeaderBlock secHeader = null;
-		//Issue is axiom - a returned collection must not be null
-		if(headerBlocks != null) {
-    		Iterator headerBlocksIterator = headerBlocks.iterator();
-    		while (headerBlocksIterator.hasNext()) {
-    			SOAPHeaderBlock elem = (SOAPHeaderBlock) headerBlocksIterator.next();
-    			if(elem.getLocalName().equals(WSConstants.WSSE_LN)) {
-    				secHeader = elem;
-    				break;
-    			}
-    		}
+		if(header != null) {
+            ArrayList headerBlocks = header.getHeaderBlocksWithNSURI(WSConstants.WSSE_NS);
+            //Issue is axiom - a returned collection must not be null
+            if(headerBlocks != null) {
+                Iterator headerBlocksIterator = headerBlocks.iterator();
+                while (headerBlocksIterator.hasNext()) {
+                    SOAPHeaderBlock elem = (SOAPHeaderBlock) headerBlocksIterator.next();
+                    if(elem.getLocalName().equals(WSConstants.WSSE_LN)) {
+                        secHeader = elem;
+                        break;
+                    }
+                }
+            }
 		}
-		
+
 		if(secHeader == null) {
+		    // RAMPART-286: when every security requirement in the policy is marked
+		    // wsp:Optional, a message with no security header is a permitted
+		    // alternative, not a fault. A header that is present is still processed.
+		    if (!RampartUtil.isSecHeaderRequired(rpd, rmd.isInitiator(), true, false)) {
+		        log.debug("RampartEngine: No security header and none required; policy is all optional");
+		        SOAPEnvelope env = Axis2Util.getSOAPEnvelopeFromDOMDocument(rmd.getDocument(), true);
+		        msgCtx.setEnvelope(env);
+		        Axis2Util.useDOOM(false);
+		        return null;
+		    }
+		    if(header == null) {
+		        throw new RampartException("missingSOAPHeader");
+		    }
 		    if (log.isDebugEnabled()) {
 		        log.debug("RampartEngine: No security header found in received message");
 		    }

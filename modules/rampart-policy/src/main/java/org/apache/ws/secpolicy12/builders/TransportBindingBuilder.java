@@ -73,6 +73,7 @@ public class TransportBindingBuilder implements AssertionBuilder<OMElement> {
                 
             } else if (name.equals(SP12Constants.INCLUDE_TIMESTAMP)) {
                 parent.setIncludeTimestamp(true);
+                parent.setIncludeTimestampOptional(primitive.isOptional());
                 
             } else if (name.equals(SP12Constants.LAYOUT)) {
                 parent.setLayout((Layout) primitive);

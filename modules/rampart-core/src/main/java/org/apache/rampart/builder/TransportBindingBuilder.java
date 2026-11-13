@@ -104,6 +104,9 @@ public class TransportBindingBuilder extends BindingBuilder {
 
                     Token token = (Token) signedSupportingToken;
                     if (token instanceof UsernameToken) {
+                        if (isOptionalUsernameTokenWithoutUser(rmd, token)) {
+                            continue;
+                        }
                         WSSecUsernameToken utBuilder = addUsernameToken(rmd, (UsernameToken) token);
 
                         utBuilder.prepare();

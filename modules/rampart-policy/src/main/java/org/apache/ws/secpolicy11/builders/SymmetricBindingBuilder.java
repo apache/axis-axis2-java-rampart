@@ -75,6 +75,7 @@ public class SymmetricBindingBuilder implements AssertionBuilder<OMElement> {
 	                
 	            } else if (SP11Constants.INCLUDE_TIMESTAMP.equals(name)) {
 	                symmetricBinding.setIncludeTimestamp(true);
+	                symmetricBinding.setIncludeTimestampOptional(assertion.isOptional());
 	                
 	            } else if (SP11Constants.PROTECTION_TOKEN.equals(name)) {
 	                symmetricBinding.setProtectionToken((ProtectionToken) assertion);

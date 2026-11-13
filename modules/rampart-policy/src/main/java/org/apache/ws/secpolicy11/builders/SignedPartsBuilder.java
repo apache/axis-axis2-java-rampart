@@ -23,22 +23,18 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.AssertionBuilderFactory;
-import org.apache.neethi.Constants;
 import org.apache.neethi.builders.AssertionBuilder;
 import org.apache.ws.secpolicy.SP11Constants;
 import org.apache.ws.secpolicy.SPConstants;
 import org.apache.ws.secpolicy.model.Header;
+import org.apache.ws.secpolicy.model.AbstractSecurityAssertion;
 import org.apache.ws.secpolicy.model.SignedEncryptedParts;
 
 public class SignedPartsBuilder implements AssertionBuilder<OMElement> {
         
     public Assertion build(OMElement element, AssertionBuilderFactory factory) throws IllegalArgumentException {
         SignedEncryptedParts signedEncryptedParts = new SignedEncryptedParts(true, SPConstants.SP_V11);
-        OMAttribute isOptional = element.getAttribute(Constants.Q_ELEM_OPTIONAL_ATTR);
-		if (isOptional != null) {
-			signedEncryptedParts.setOptional(Boolean.valueOf(isOptional.getAttributeValue())
-					.booleanValue());
-		}
+        signedEncryptedParts.setOptional(AbstractSecurityAssertion.readOptionalAttribute(element));
         for (Iterator iterator = element.getChildElements(); iterator.hasNext();) {
             processElement((OMElement) iterator.next(), signedEncryptedParts);
         }
