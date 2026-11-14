@@ -71,6 +71,7 @@
                         <configuration>
                             <modules>addressing,rampart,rahas</modules>
                             <outputDirectory>target/test-resources/rampart_client_repo</outputDirectory>
+                            <axis2xml>src/test/resources/conf/axis2.xml</axis2xml>
                         </configuration>
                     </execution>
                     <execution>

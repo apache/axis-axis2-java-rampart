@@ -141,12 +141,16 @@
     <transportSender name="http"
                      class="org.apache.axis2.transport.http.impl.httpclient5.HTTPClient5TransportSender">
         <parameter name="PROTOCOL" locked="false">HTTP/1.1</parameter>
-        <parameter name="Transfer-Encoding" locked="false">chunked</parameter>
+        <!-- Not chunked: the servlet answers before the terminating chunk arrives, and
+             Jetty 12 then closes the connection as unconsumed, so the next pooled
+             request fails with a broken pipe. Content-Length avoids the race. -->
     </transportSender>
     <transportSender name="https"
                      class="org.apache.axis2.transport.http.impl.httpclient5.HTTPClient5TransportSender">
         <parameter name="PROTOCOL" locked="false">HTTP/1.1</parameter>
-        <parameter name="Transfer-Encoding" locked="false">chunked</parameter>
+        <!-- Not chunked: the servlet answers before the terminating chunk arrives, and
+             Jetty 12 then closes the connection as unconsumed, so the next pooled
+             request fails with a broken pipe. Content-Length avoids the race. -->
     </transportSender>
     <!-- <transportSender name="jms"
                      class="org.apache.axis2.transport.jms.JMSSender"/> -->
