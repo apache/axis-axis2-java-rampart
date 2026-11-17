@@ -385,13 +385,15 @@ public class RampartMessageData {
             }
 
             
+            SOAPEnvelope envelope = null;
             if(this.policyData != null) {
 
                 // Get the SOAP envelope as document, then create a security
                 // header and insert into the document (Envelope)
                 // WE SHOULD ONLY DO THE CONVERTION IF THERE IS AN APPLICABLE POLICY
                 this.document = Axis2Util.getDocumentFromSOAPEnvelope(msgCtx.getEnvelope(), true);
-                msgCtx.setEnvelope((SOAPEnvelope)this.document.getDocumentElement());
+                envelope = (SOAPEnvelope)this.document.getDocumentElement();
+                msgCtx.setEnvelope(envelope);
 
                 this.soapConstants = WSSecurityUtil.getSOAPConstants(this.document.getDocumentElement());
 
@@ -538,6 +540,11 @@ public class RampartMessageData {
             }
             
             if(this.sender && this.policyData != null) {
+                // RAMPART-419: an envelope without a soap:Header makes WSS4J create one as a
+                // plain DOM element. The Axiom DOM envelope then has a Header child that is not
+                // a SOAPHeader, so getHeader() still returns null and anything that asks for
+                // the header afterwards adds a second one. Create it as a SOAPHeader first.
+                envelope.getOrCreateHeader();
                 this.secHeader = new WSSecHeader(this.document);
                 secHeader.insertSecurityHeader();
 		// RAMPART-261
