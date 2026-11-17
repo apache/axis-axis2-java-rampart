@@ -1,0 +1,60 @@
+<wsp:Policy wsu:Id="ContentEncryptedOnly" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+	<wsp:ExactlyOne>
+		<wsp:All>
+			<!-- RAMPART-421: the only protection asked for is content encryption of two
+			     headers. No timestamp, no signed parts, no encrypted parts. -->
+			<sp:AsymmetricBinding xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+				<wsp:Policy>
+					<sp:InitiatorToken>
+						<wsp:Policy>
+							<sp:X509Token sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient">
+								<wsp:Policy>
+									<sp:WssX509V3Token10/>
+								</wsp:Policy>
+							</sp:X509Token>
+						</wsp:Policy>
+					</sp:InitiatorToken>
+					<sp:RecipientToken>
+						<wsp:Policy>
+							<sp:X509Token sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never">
+								<wsp:Policy>
+									<sp:WssX509V3Token10/>
+								</wsp:Policy>
+							</sp:X509Token>
+						</wsp:Policy>
+					</sp:RecipientToken>
+					<sp:AlgorithmSuite>
+						<wsp:Policy>
+							<sp:Basic128/>
+						</wsp:Policy>
+					</sp:AlgorithmSuite>
+				</wsp:Policy>
+			</sp:AsymmetricBinding>
+			<sp:ContentEncryptedElements xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+				<sp:XPath xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">/soapenv:Envelope/soapenv:Header/wsa:To</sp:XPath>
+				<sp:XPath xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">/soapenv:Envelope/soapenv:Header/wsa:Action</sp:XPath>
+			</sp:ContentEncryptedElements>
+
+			<ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
+				<ramp:user>alice</ramp:user>
+				<ramp:encryptionUser>bob</ramp:encryptionUser>
+				<ramp:passwordCallbackClass>org.apache.rampart.TestCBHandler</ramp:passwordCallbackClass>
+
+				<ramp:signatureCrypto>
+					<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
+						<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12</ramp:property>
+						<ramp:property name="org.apache.ws.security.crypto.merlin.file">test-resources/keys/interop2024.pkcs12</ramp:property>
+						<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">password</ramp:property>
+					</ramp:crypto>
+				</ramp:signatureCrypto>
+				<ramp:encryptionCypto>
+					<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
+						<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">pkcs12</ramp:property>
+						<ramp:property name="org.apache.ws.security.crypto.merlin.file">test-resources/keys/interop2024.pkcs12</ramp:property>
+						<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">password</ramp:property>
+					</ramp:crypto>
+				</ramp:encryptionCypto>
+			</ramp:RampartConfig>
+		</wsp:All>
+	</wsp:ExactlyOne>
+</wsp:Policy>

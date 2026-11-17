@@ -1743,9 +1743,11 @@ public class RampartUtil {
 
         // Checking for encrypted parts and elements
         if ((rpd.isEncryptBody() && (countOptional || !rpd.isEncryptBodyOptional()))
-                || rpd.getEncryptedParts().size() != 0 || rpd.getEncryptedElements().size() != 0 ) {
+                || rpd.getEncryptedParts().size() != 0 || rpd.getEncryptedElements().size() != 0
+            || rpd.getContentEncryptedElements().size() != 0) { // RAMPART-421
             log.debug("RampartUtil.isSecHeaderRequired: TRUE - encryption required (encryptBody=" + rpd.isEncryptBody() +
-                      ", encryptedParts=" + rpd.getEncryptedParts().size() + ", encryptedElements=" + rpd.getEncryptedElements().size() + ")");
+                      ", encryptedParts=" + rpd.getEncryptedParts().size() + ", encryptedElements=" + rpd.getEncryptedElements().size()
+                      + ", contentEncryptedElements=" + rpd.getContentEncryptedElements().size() + ")");
             return true;
         } else {
             log.debug("RampartUtil.isSecHeaderRequired: No encryption required");

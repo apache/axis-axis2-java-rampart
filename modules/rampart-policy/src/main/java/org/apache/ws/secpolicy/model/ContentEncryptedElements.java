@@ -19,6 +19,7 @@ package org.apache.ws.secpolicy.model;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -94,6 +95,13 @@ public class ContentEncryptedElements extends AbstractSecurityAssertion {
             xpathExpression = iterator.next();
             // <sp:XPath ..>
             writeStartElement(writer, prefix, SPConstants.XPATH_EXPR, namespaceURI);
+
+            // RAMPART-421: the expression is only meaningful with the prefixes it
+            // was declared with, as SignedEncryptedElements already serializes.
+            for (Map.Entry<String, String> declared : declaredNamespaces.entrySet()) {
+                writer.writeNamespace(declared.getKey(), declared.getValue());
+            }
+
             writer.writeCharacters(xpathExpression);
             writer.writeEndElement();
         }
