@@ -27,7 +27,7 @@
             <h3>Setting up a Security Token Service</h3>
         <p>Security Token Service can be set up as per WS-Trust specification using Rampart. The default security token service shipped with the rampart distribution is contained in the rampart-trust.mar module. It can issue SCT tokens and SAML tokens. Sample05 contains a client that connects to the default STS and obtain a SAML token. The services.xml in the sample contains "saml-issuer-config" parameter that is used to configure the default SAML issuer.</p>
         <strong>STS with a custom issuer</strong>
-        <p>First the default rampart.mar has to be removed from the modules. Then write you own issuer implementing the <code>"org.apache.rahas.TokenIssuer"</code> interface. Let's say that your issuer is <code>"org.custom.MyIssuer"</code>. Then create a Axis2 service archive with the following in the services.xml. Drop the archive into the repository and you have a STS with a CustomToken issuer.</p>
+        <p>Nothing has to be removed from the modules directory. The default STS is the RequestSecurityToken operation that the rahas module adds to every service it is engaged to, so a service with its own issuer simply does not engage rahas. Write your own issuer implementing the <code>"org.apache.rahas.TokenIssuer"</code> interface. Let's say that your issuer is <code>"org.custom.MyIssuer"</code>. Then create an Axis2 service archive with the following in the services.xml. The issuer class can be packaged inside the service archive: issuers, validators, renewers and cancelers are loaded with the service's class loader. Drop the archive into the repository and you have a STS with a custom token issuer.</p>
 
         <pre>
 

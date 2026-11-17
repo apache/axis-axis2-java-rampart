@@ -39,20 +39,26 @@ public class STSMessageReceiver extends AbstractInOutMessageReceiver {
                     .getParameter(TokenRequestDispatcherConfig.CONFIG_PARAM_KEY);
             Parameter paramFile = inMessage
                     .getParameter(TokenRequestDispatcherConfig.CONFIG_FILE_KEY);
-            TokenRequestDispatcher dispatcher;
+            TokenRequestDispatcherConfig config;
             if (param != null) {
-                dispatcher = new TokenRequestDispatcher(param
+                config = TokenRequestDispatcherConfig.load(param
                         .getParameterElement().getFirstChildWithName(
                                 new QName("token-dispatcher-configuration")));
             } else if (paramFile != null) {
-                dispatcher = new TokenRequestDispatcher((String) paramFile
+                config = TokenRequestDispatcherConfig.load((String) paramFile
                         .getValue());
             } else {
-                dispatcher = new TokenRequestDispatcher(
+                config = TokenRequestDispatcherConfig.load(
                         (OMElement) inMessage
                                 .getProperty(TokenRequestDispatcherConfig.CONFIG_PARAM_KEY));
             }
-            
+            // RAMPART-397: a custom issuer may live in the service archive, which only
+            // the service class loader can see.
+            if (inMessage.getAxisService() != null) {
+                config.setClassLoader(inMessage.getAxisService().getClassLoader());
+            }
+            TokenRequestDispatcher dispatcher = new TokenRequestDispatcher(config);
+
             SOAPEnvelope responseEnv = dispatcher.handle(inMessage, outMessage);
 			outMessage.setEnvelope(responseEnv);
         } catch (TrustException e) {

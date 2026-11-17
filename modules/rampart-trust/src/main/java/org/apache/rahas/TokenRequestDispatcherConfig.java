@@ -54,6 +54,28 @@ public class TokenRequestDispatcherConfig {
     private String defaultValidatorClassName;
     private String defaultRenewerClassName;
 
+    private ClassLoader classLoader;
+
+    /**
+     * Sets the class loader used to load the issuer, validator, renewer and canceler
+     * classes. RAMPART-397: a custom implementation packaged inside the STS service
+     * archive is only visible to that service's class loader, not to the loader of
+     * this class, so {@link STSMessageReceiver} passes the service class loader here.
+     * When none is set, the loader of this class is used.
+     */
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    private Object instantiate(String className) throws Exception {
+        ClassLoader loader = classLoader != null ? classLoader : this.getClass().getClassLoader();
+        return Loader.loadClass(loader, className).getDeclaredConstructor().newInstance();
+    }
+
     public static TokenRequestDispatcherConfig load(OMElement configElem) throws TrustException {
 
         if (!DISPATCHER_CONFIG.equals(configElem.getQName())) {
@@ -389,8 +411,7 @@ public class TokenRequestDispatcherConfig {
      * @return TokenIssuer
      */
     private TokenIssuer createIssuer(String issuerClassName) throws Exception {
-        TokenIssuer issuer = (TokenIssuer) Loader.loadClass(this.getClass().getClassLoader(), 
-                                                                    issuerClassName).newInstance();
+        TokenIssuer issuer = (TokenIssuer) instantiate(issuerClassName);
         issuer.setConfigurationElement((OMElement) this.configElements.get(issuerClassName));
         issuer.setConfigurationFile((String) this.configFiles.get(issuerClassName));
         issuer.setConfigurationParamName((String) this.configParamNames.get(issuerClassName));
@@ -398,8 +419,7 @@ public class TokenRequestDispatcherConfig {
     }
 
     private TokenCanceler createCanceler(String cancelerClassName) throws Exception {
-        TokenCanceler canceler = (TokenCanceler) Loader.loadClass(this.getClass().getClassLoader(),
-                                                                   cancelerClassName).newInstance();
+        TokenCanceler canceler = (TokenCanceler) instantiate(cancelerClassName);
         canceler.setConfigurationElement((OMElement) this.configElements.get(cancelerClassName));
         canceler.setConfigurationFile((String) this.configFiles.get(cancelerClassName));
         canceler.setConfigurationParamName((String) this.configParamNames.get(cancelerClassName));
@@ -407,8 +427,7 @@ public class TokenRequestDispatcherConfig {
     }
     
     private TokenValidator createValidator(String validatorClassName) throws Exception {
-        TokenValidator validator = (TokenValidator) Loader.loadClass(this.getClass().getClassLoader(),
-                                                                validatorClassName).newInstance();
+        TokenValidator validator = (TokenValidator) instantiate(validatorClassName);
         validator.setConfigurationElement((OMElement) this.configElements.get(validatorClassName));
         validator.setConfigurationFile((String) this.configFiles.get(validatorClassName));
         validator.setConfigurationParamName((String) this.configParamNames.get(validatorClassName));
@@ -416,8 +435,7 @@ public class TokenRequestDispatcherConfig {
     }
     
     private TokenRenewer createRenewer (String renewerClassName) throws Exception {
-        TokenRenewer renewer = (TokenRenewer) Loader.loadClass(this.getClass().getClassLoader(),
-                                                                    renewerClassName).newInstance();
+        TokenRenewer renewer = (TokenRenewer) instantiate(renewerClassName);
         renewer.setConfigurationElement((OMElement) this.configElements.get(renewerClassName));
         renewer.setConfigurationFile((String) this.configFiles.get(renewerClassName));
         renewer.setConfigurationParamName((String) this.configParamNames.get(renewerClassName));
