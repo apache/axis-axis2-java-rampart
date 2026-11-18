@@ -294,7 +294,11 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 encr.setSymmetricEncAlgorithm(algorithmSuite.getEncryption());
                 // SymmKey is already encrypted, no need to do it again
                 encr.setEncryptSymmKey(false);
-                if (!rmd.isInitiator() && tok instanceof EncryptedKeyToken) {
+                if (encryptionToken instanceof IssuedToken) {
+                    // RAMPART-362: reference the SAML assertion with a wsse:KeyIdentifier,
+                    // see RampartUtil.getSAMLKeyIdentifierValueType
+                    encr.setCustomReferenceValue(RampartUtil.getSAMLKeyIdentifierValueType(tok));
+                } else if (!rmd.isInitiator() && tok instanceof EncryptedKeyToken) {
                     // TODO was encr.setUseKeyIdentifier(true); - verify
                     encr.setEncKeyIdDirectId(true);
                     encr.setCustomReferenceValue(((EncryptedKeyToken)tok).getSHA1());
@@ -726,8 +730,12 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                     RampartUtil.setEncryptionUser(rmd, encr);
                     encr.setEncryptSymmKey(false);
                     encr.setSymmetricEncAlgorithm(rpd.getAlgorithmSuite().getEncryption());
-                    // Use key identifier in the KeyInfo in server side
-                    if (!rmd.isInitiator()) {
+                    if (encrToken instanceof IssuedToken) {
+                        // RAMPART-362: reference the SAML assertion with a wsse:KeyIdentifier,
+                        // see RampartUtil.getSAMLKeyIdentifierValueType
+                        encr.setCustomReferenceValue(RampartUtil.getSAMLKeyIdentifierValueType(encrTok));
+                    } else if (!rmd.isInitiator()) {
+                        // Use key identifier in the KeyInfo in server side
                         if(encrTok instanceof EncryptedKeyToken) {
                             // TODO was encr.setUseKeyIdentifier(true); verify
                             encr.setEncKeyIdDirectId(true);

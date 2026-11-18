@@ -2053,6 +2053,26 @@ public class RampartUtil {
     }
 
     /**
+     * Returns the wsse:KeyIdentifier ValueType that references the given SAML assertion
+     * token: SAMLAssertionID for a SAML 1.x assertion, SAMLID for a SAML 2.0 assertion.
+     * <p>
+     * RAMPART-362: the SAML Token Profile references an assertion with a KeyIdentifier,
+     * not with a wsse:Reference URI. A wsse:Reference is a local reference, and a
+     * recipient cannot resolve it when the assertion is not in the message, which is the
+     * case for a response secured with an AlwaysToRecipient issued token.
+     *
+     * @param token the issued SAML token
+     * @return the KeyIdentifier ValueType for the assertion's SAML version
+     */
+    public static String getSAMLKeyIdentifierValueType(Token token) {
+        if (token != null && token.getToken() != null
+                && WSConstants.SAML2_NS.equals(token.getToken().getQName().getNamespaceURI())) {
+            return WSConstants.WSS_SAML2_KI_VALUE_TYPE;
+        }
+        return WSConstants.WSS_SAML_KI_VALUE_TYPE;
+    }
+
+    /**
      * Sets encryption crypto file or crypto reference key to signature crypto file or signature
      * crypto reference.
      * @param msgContext The message context to get signature crypto properties and encryption properties

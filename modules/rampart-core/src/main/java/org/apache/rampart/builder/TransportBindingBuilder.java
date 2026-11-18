@@ -552,11 +552,13 @@ public class TransportBindingBuilder extends BindingBuilder {
 		    tokId = tokId.substring(1);
                 }
                 sig.setCustomTokenId(tokId);
-                sig.setCustomTokenValueType(RampartUtil.getSAML10AssertionNamespace());
+                // RAMPART-362: reference the SAML assertion with a wsse:KeyIdentifier,
+                // see RampartUtil.getSAMLKeyIdentifierValueType
+                sig.setCustomTokenValueType(RampartUtil.getSAMLKeyIdentifierValueType(tok));
                 sig.setSecretKey(tok.getSecret());
                 sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
                 sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
-                sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                sig.setKeyIdentifierType(WSConstants.CUSTOM_KEY_IDENTIFIER);
                 sig.prepare(RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), rmd.getCustomClassLoader()));
 
                 sig.getParts().addAll(sigParts);

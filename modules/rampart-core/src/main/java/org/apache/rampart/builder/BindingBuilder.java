@@ -696,9 +696,10 @@ public abstract class BindingBuilder {
                     }
 
                 } else if (policyToken instanceof IssuedToken) {
-
-                    sig.setCustomTokenValueType(RampartUtil.getSAML10AssertionNamespace());
-                    sig.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+                    // RAMPART-362: reference the SAML assertion with a wsse:KeyIdentifier,
+                    // see RampartUtil.getSAMLKeyIdentifierValueType
+                    sig.setCustomTokenValueType(RampartUtil.getSAMLKeyIdentifierValueType(tok));
+                    sig.setKeyIdentifierType(WSConstants.CUSTOM_KEY_IDENTIFIER);
                 }
                 
                 String sigTokId; 
