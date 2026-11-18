@@ -56,5 +56,13 @@
         <li><a href="http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/ws-secureconversation-1.3-os.pdf">
         WS Secure Conversation 1.3</a></li>
     </ul>
+  <h2>WS-I Basic Security Profile</h2>
+    <ul>
+        <li><a href="https://www.ws-i.org/profiles/basicsecurityprofile-1.1.html">
+        Basic Security Profile 1.1</a>: WSS4J, which Rampart is built on, enforces the
+        profile's rules on every received message by default. They are stricter than the
+        WS-Security specifications they profile. See <code>disableBSPEnforcement</code> in the
+        <a href="rampartconfig-guide.html">Rampart configuration guide</a>.</li>
+    </ul>
   </body>
  </document>
