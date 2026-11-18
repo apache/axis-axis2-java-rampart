@@ -218,6 +218,35 @@ public class SAMLTokenIssuer implements TokenIssuer {
 
 
 
+    /**
+     * Builds the subject NameIdentifier for the authenticated principal. The
+     * configured {@link SAMLCallbackHandler} is offered a
+     * {@link SAMLNameIdentifierCallback} first so that deployments can pick the
+     * value and Format; when no handler is configured, or the handler leaves the
+     * NameIdentifier unset, the principal name is used with the email address
+     * format.
+     */
+    private NameIdentifier createSubjectNameIdentifier(SAMLTokenIssuerConfig config, RahasData data)
+            throws TrustException {
+        String principalName = data.getPrincipal().getName();
+
+        SAMLCallbackHandler handler = CommonUtil.getSAMLCallbackHandler(config, data);
+        if (handler != null) {
+            SAMLNameIdentifierCallback cb = new SAMLNameIdentifierCallback(data);
+            cb.setUserId(principalName);
+            try {
+                handler.handle(cb);
+            } catch (SAMLException e) {
+                throw new TrustException("errorCallingSAMLCallback", e);
+            }
+            if (cb.getNameId() != null) {
+                return cb.getNameId();
+            }
+        }
+
+        return SAMLUtils.createNamedIdentifier(principalName, NameIdentifier.EMAIL);
+    }
+
     private Assertion createBearerAssertion(SAMLTokenIssuerConfig config,
                                             Document doc, Crypto crypto, Instant creationTime,
                                             Instant expirationTime, RahasData data) throws TrustException {
@@ -226,21 +255,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
         Assertion assertion;
         // In the case where the principal is a UT
         if (principal instanceof WSUsernameTokenPrincipalImpl) {
-            NameIdentifier nameId = null;
-            if (config.getCallbackHandler() != null) {
-                SAMLNameIdentifierCallback cb = new SAMLNameIdentifierCallback(data);
-                cb.setUserId(principal.getName());
-                SAMLCallbackHandler callbackHandler = config.getCallbackHandler();
-                try {
-                    callbackHandler.handle(cb);
-                } catch (SAMLException e) {
-                    throw new TrustException("unableToRetrieveCallbackHandler", e);
-                }
-                nameId = cb.getNameId();
-            } else {
-
-                nameId = SAMLUtils.createNamedIdentifier(principal.getName(), NameIdentifier.EMAIL);
-            }
+            NameIdentifier nameId = createSubjectNameIdentifier(config, data);
 
             assertion = createAuthAssertion(RahasConstants.SAML11_SUBJECT_CONFIRMATION_BEARER,
                     nameId, null, config, crypto, creationTime,
@@ -263,8 +278,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
                 // TODO what if principal is null ?
                 NameIdentifier nameIdentifier = null;
                 if (data.getPrincipal() != null) {
-                    String subjectNameId = data.getPrincipal().getName();
-                    nameIdentifier =SAMLUtils.createNamedIdentifier(subjectNameId, NameIdentifier.EMAIL);
+                    nameIdentifier = createSubjectNameIdentifier(config, data);
                 }
 
                 /**
@@ -324,9 +338,7 @@ public class SAMLTokenIssuer implements TokenIssuer {
                  *   </KeyInfo>
                  */
 
-                String subjectNameId = data.getPrincipal().getName();
-                
-                NameIdentifier nameId = SAMLUtils.createNamedIdentifier(subjectNameId, NameIdentifier.EMAIL);
+                NameIdentifier nameId = createSubjectNameIdentifier(config, data);
 
                 // Create the ds:KeyValue element with the ds:X509Data
                 X509Certificate clientCert = data.getClientCert();

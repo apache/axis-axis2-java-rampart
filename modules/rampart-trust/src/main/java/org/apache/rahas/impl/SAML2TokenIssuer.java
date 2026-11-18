@@ -414,7 +414,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
 
         // Set the subject name identifier
         if (data.getPrincipal() != null) {
-            setSubjectNamedIdentifierData(subject, data.getPrincipal().getName(), NameID.EMAIL);
+            subject.setNameID(createSubjectNameID(data));
         }
 
         // Create KeyInfo
@@ -480,7 +480,7 @@ public class SAML2TokenIssuer implements TokenIssuer {
         Subject subject = (Subject)CommonUtil.buildXMLObject(Subject.DEFAULT_ELEMENT_NAME);
 
         //Create NameID and attach it to the subject
-        setSubjectNamedIdentifierData(subject, data.getPrincipal().getName(), NameID.EMAIL);
+        subject.setNameID(createSubjectNameID(data));
 
         //Build the Subject Confirmation
         SubjectConfirmation subjectConfirmation
@@ -710,6 +710,37 @@ public class SAML2TokenIssuer implements TokenIssuer {
         log.debug("SAML2.0 authentication statement is constructed successfully.");
 
         return authenticationStatement;
+    }
+
+    /**
+     * Builds the subject NameID for the authenticated principal. The configured
+     * {@link SAMLCallbackHandler} is offered a {@link SAMLNameIdentifierCallback}
+     * first so that deployments can pick the NameID value and Format; when no
+     * handler is configured, or the handler leaves the SAML 2.0 NameID unset,
+     * the principal name is used with the email address format, as the SAML 1.1
+     * issuer does.
+     * @param data The RST data, which carries the principal.
+     * @return The NameID to attach to the subject.
+     * @throws TrustException If the handler fails or the NameID cannot be built.
+     */
+    protected NameID createSubjectNameID(RahasData data) throws TrustException {
+        String principalName = data.getPrincipal().getName();
+
+        SAMLCallbackHandler handler = CommonUtil.getSAMLCallbackHandler(this.tokenIssuerConfiguration, data);
+        if (handler != null) {
+            SAMLNameIdentifierCallback cb = new SAMLNameIdentifierCallback(data);
+            cb.setUserId(principalName);
+            try {
+                handler.handle(cb);
+            } catch (Exception e) {
+                throw new TrustException("errorCallingSAMLCallback", e);
+            }
+            if (cb.getSAML2NameID() != null) {
+                return cb.getSAML2NameID();
+            }
+        }
+
+        return SAML2Utils.createNamedIdentifier(principalName, NameID.EMAIL);
     }
 
     /**

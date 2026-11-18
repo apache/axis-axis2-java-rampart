@@ -26,6 +26,14 @@
     <h1>Setting up a Security Token Service</h1>
             <h3>Setting up a Security Token Service</h3>
         <p>Security Token Service can be set up as per WS-Trust specification using Rampart. The default security token service shipped with the rampart distribution is contained in the rampart-trust.mar module. It can issue SCT tokens and SAML tokens. Sample05 contains a client that connects to the default STS and obtain a SAML token. The services.xml in the sample contains "saml-issuer-config" parameter that is used to configure the default SAML issuer.</p>
+        <strong>Subject NameID and attributes</strong>
+        <p>The default SAML issuers put the authenticated principal into the assertion's subject, as a <code>saml:NameIdentifier</code> (SAML 1.1) or a <code>saml2:NameID</code> (SAML 2.0), using the email address format. To choose the value or the Format yourself, or to add attributes, register a class implementing <code>org.apache.rahas.impl.util.SAMLCallbackHandler</code> in the saml-issuer-config:</p>
+
+        <pre>
+&lt;dataCallbackHandlerClass&gt;org.custom.MySAMLCallbackHandler&lt;/dataCallbackHandlerClass&gt;
+</pre>
+        <p>The handler receives a <code>SAMLNameIdentifierCallback</code> for the subject and a <code>SAMLAttributeCallback</code> for the attribute statement; check <code>getCallbackType()</code> and ignore the ones you do not handle. For a SAML 2.0 assertion set the NameID with <code>setSAML2NameID()</code>; for SAML 1.1 use <code>setNameId()</code>. The default is used when the handler leaves it unset.</p>
+
         <strong>STS with a custom issuer</strong>
         <p>Nothing has to be removed from the modules directory. The default STS is the RequestSecurityToken operation that the rahas module adds to every service it is engaged to, so a service with its own issuer simply does not engage rahas. Write your own issuer implementing the <code>"org.apache.rahas.TokenIssuer"</code> interface. Let's say that your issuer is <code>"org.custom.MyIssuer"</code>. Then create an Axis2 service archive with the following in the services.xml. The issuer class can be packaged inside the service archive: issuers, validators, renewers and cancelers are loaded with the service's class loader. Drop the archive into the repository and you have a STS with a custom token issuer.</p>
 
