@@ -83,7 +83,10 @@ public abstract class BindingBuilder {
     protected String mainSigId = null;
     
     protected ArrayList<String> encryptedTokensIdList = new ArrayList<String>();
-    
+
+    /** wsu:Ids of the wsse11:SignatureConfirmation elements added to this message. */
+    protected List<String> signatureConfirmationIds = new ArrayList<String>();
+
     protected Element timestampElement;
     
     protected Element mainRefListElement;
@@ -845,6 +848,7 @@ public abstract class BindingBuilder {
                 wsc.setSignatureValue(sigVal);
                 wsc.prepare();
                 RampartUtil.appendChildToSecHeader(rmd, wsc.getSignatureConfirmationElement());
+                signatureConfirmationIds.add(wsc.getId());
                 if (sigParts != null) {
                     sigParts.add(new WSEncryptionPart(wsc.getId()));
                 }
@@ -853,9 +857,21 @@ public abstract class BindingBuilder {
             //No Sig value
             wsc.prepare();
             RampartUtil.appendChildToSecHeader(rmd, wsc.getSignatureConfirmationElement());
+            signatureConfirmationIds.add(wsc.getId());
             if(sigParts != null) {
                 sigParts.add(new WSEncryptionPart(wsc.getId()));
             }
+        }
+    }
+
+    /**
+     * RAMPART-330: WS-SecurityPolicy 6.4 [Signature Protection] requires the signature
+     * confirmation elements to be encrypted whenever the primary signature is. Call this
+     * wherever the signature is added to the parts to encrypt.
+     */
+    protected void addSignatureConfirmationsToEncrypt(List<WSEncryptionPart> encrParts) {
+        for (String id : signatureConfirmationIds) {
+            encrParts.add(new WSEncryptionPart(id, "Element"));
         }
     }
     private void checkForX509PkiPath(WSSecSignature sig, Token token){

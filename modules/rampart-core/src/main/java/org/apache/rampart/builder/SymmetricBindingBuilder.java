@@ -426,6 +426,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                 //Now encrypt the signature using the above token
                 if(rpd.isSignatureProtection()) {
                     secondEncrParts.add(new WSEncryptionPart(this.mainSigId, "Element"));
+                    addSignatureConfirmationsToEncrypt(secondEncrParts);
                 }
                 
                 if(rmd.isInitiator()) {
@@ -647,6 +648,7 @@ public class SymmetricBindingBuilder extends BindingBuilder {
         if(rpd.isSignatureProtection() && this.mainSigId != null) {
             //Now encrypt the signature using the above token
             encrParts.add(new WSEncryptionPart(this.mainSigId, "Element"));
+            addSignatureConfirmationsToEncrypt(encrParts);
         }
         
         if(rmd.isInitiator()) {

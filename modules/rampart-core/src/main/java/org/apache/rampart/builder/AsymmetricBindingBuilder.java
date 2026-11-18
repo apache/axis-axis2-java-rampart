@@ -308,7 +308,8 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 // Now encrypt the signature using the above token
                 secondEncrParts.add(new WSEncryptionPart(this.mainSigId,
                         "Element"));
-                
+                addSignatureConfirmationsToEncrypt(secondEncrParts);
+
                 if(rmd.isInitiator()) {
                     for (String anEncryptedTokensIdList : encryptedTokensIdList) {
                         secondEncrParts.add(new WSEncryptionPart(anEncryptedTokensIdList, "Element"));
@@ -480,6 +481,7 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
         //Check for signature protection
         if(rpd.isSignatureProtection() && this.mainSigId != null) {
             encrParts.add(new WSEncryptionPart(RampartUtil.addWsuIdToElement((OMElement)this.signatureElement), "Element"));
+            addSignatureConfirmationsToEncrypt(encrParts);
         }
         
         if(rmd.isInitiator()) {
