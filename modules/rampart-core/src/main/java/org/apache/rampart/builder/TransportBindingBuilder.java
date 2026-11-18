@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.TrustException;
+import org.apache.wss4j.common.derivedKey.ConversationConstants;
 import org.apache.rampart.RampartConstants;
 import org.apache.rampart.RampartException;
 import org.apache.rampart.RampartMessageData;
@@ -698,8 +699,17 @@ public class TransportBindingBuilder extends BindingBuilder {
         } else {
             try {
                 WSSecSignature sig = new WSSecSignature(rmd.getSecHeader());
-                sig.setCustomTokenId(tok.getId().substring(1));
-                sig.setCustomTokenValueType(RampartUtil.getSAML10AssertionNamespace());
+                String tokId = tok.getId();
+                if (tokId.startsWith("#")) {
+                    tokId = tokId.substring(1);
+                }
+                sig.setCustomTokenId(tokId);
+                // The wsse:Reference to a wsc:SecurityContextToken carries the SCT value
+                // type of the conversation version in use. This used to be the SAML 1.x
+                // assertion value type, which a strict peer rejects for an SCT.
+                sig.setCustomTokenValueType(
+                        ConversationConstants.VERSION_05_12 == rmd.getSecConvVersion()
+                                ? WSConstants.WSC_SCT_05_12 : WSConstants.WSC_SCT);
                 sig.setSecretKey(tok.getSecret());
                 sig.setSignatureAlgorithm(algorithmSuite.getAsymmetricSignature());
                 sig.setSignatureAlgorithm(algorithmSuite.getSymmetricSignature());
