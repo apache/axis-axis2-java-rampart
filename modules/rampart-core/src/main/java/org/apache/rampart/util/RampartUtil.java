@@ -26,6 +26,7 @@ import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.client.Options;
+import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.dataretrieval.DRConstants;
 import org.apache.axis2.dataretrieval.client.MexClient;
@@ -787,6 +788,49 @@ public class RampartUtil {
      * @return Return the identifier of the obtained token
      * @throws RampartException If the arguments are malformed.
      */
+    /**
+     * HTTP transport properties the token request to the STS inherits from the
+     * service request it is made on behalf of (RAMPART-450). The STS client builds
+     * its own Options, so without this a proxy or timeout set on the client is
+     * silently dropped for the first, token-issuing call. Only connection-level
+     * settings are listed: the service's HTTP credentials, custom headers and
+     * cookies belong to the service, and the Rampart policy properties must not
+     * override the issuer policy the STS client sets itself.
+     */
+    private static final String[] INHERITED_TRANSPORT_PROPERTIES = {
+            HTTPConstants.PROXY,
+            HTTPConstants.SO_TIMEOUT,
+            HTTPConstants.CONNECTION_TIMEOUT,
+            HTTPConstants.CHUNKED,
+            HTTPConstants.HTTP_PROTOCOL_VERSION,
+            HTTPConstants.USER_AGENT,
+            HTTPConstants.COOKIE_POLICY,
+            HTTPConstants.MC_GZIP_REQUEST,
+            HTTPConstants.MC_ACCEPT_GZIP,
+            HTTPConstants.REUSE_HTTP_CLIENT,
+            HTTPConstants.CACHED_HTTP_CLIENT,
+            HTTPConstants.MULTITHREAD_HTTP_CONNECTION_MANAGER
+    };
+
+    /**
+     * Copies the transport settings of the service request into the Options used
+     * for the token request to the STS.
+     * @param msgContext The service request's message context.
+     * @param stsOptions The Options the STS client will use.
+     */
+    public static void inheritTransportSettings(MessageContext msgContext, Options stsOptions) {
+        for (String name : INHERITED_TRANSPORT_PROPERTIES) {
+            Object value = msgContext.getProperty(name);
+            if (value != null) {
+                stsOptions.setProperty(name, value);
+            }
+        }
+        Options serviceOptions = msgContext.getOptions();
+        if (serviceOptions != null) {
+            stsOptions.setTimeOutInMilliSeconds(serviceOptions.getTimeOutInMilliSeconds());
+        }
+    }
+
     public static String getToken(RampartMessageData rmd, OMElement rstTemplate,
             String issuerEpr, String action, Policy issuerPolicy) throws RampartException {
 
@@ -830,9 +874,10 @@ public class RampartUtil {
                 }
                 
                 Options options = new Options();
-                
+
                 options.setUserName(rmd.getMsgContext().getOptions().getUserName());
                 options.setPassword(rmd.getMsgContext().getOptions().getPassword());
+                inheritTransportSettings(msgContext, options);
                 
                 /* The commons httpclient 3.x code isn't compatible with 4.x
                    and there doesn't seem to be test coverage for it.
