@@ -455,9 +455,13 @@ public class SymmetricBindingBuilder extends BindingBuilder {
                         encr.prepare(RampartUtil.getEncryptionCrypto(rpd
                                 .getRampartConfig(), rmd.getCustomClassLoader()), key);
                                        
-                        secondRefList = encr.encryptForRef(null, encrParts, key);
+                        // RAMPART-289: encrypt the signature and the encrypted supporting
+                        // tokens, not the body parts again. encrParts belongs to the first
+                        // encryption; passing it here wrapped the body a second time and
+                        // left the tokens in the clear.
+                        secondRefList = encr.encryptForRef(null, secondEncrParts, key);
                         RampartUtil.insertSiblingAfter(
-                                rmd, 
+                                rmd,
                                 encrTokenElement,
                                 secondRefList);
                     } catch (WSSecurityException e) {

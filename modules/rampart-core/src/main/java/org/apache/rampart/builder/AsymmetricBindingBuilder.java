@@ -296,8 +296,12 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
             				+", Signature tool :" + (t2 - t1) );
             }
 
-            // Check for signature protection
-            if (rpd.isSignatureProtection() && this.mainSigId != null) {
+            // Check for signature protection and encryption of supporting tokens.
+            // RAMPART-289: the encrypted supporting tokens are added after the
+            // signature, so they need this second encryption even when the
+            // signature itself stays in the clear.
+            boolean protectSignature = rpd.isSignatureProtection() && this.mainSigId != null;
+            if (protectSignature || (rmd.isInitiator() && encryptedTokensIdList.size() > 0)) {
             	long t3 = 0, t4 = 0;
             	if(tlog.isDebugEnabled()){
             		t3 = System.currentTimeMillis();
@@ -306,9 +310,11 @@ public class AsymmetricBindingBuilder extends BindingBuilder {
                 List<WSEncryptionPart> secondEncrParts = new ArrayList<WSEncryptionPart>();
 
                 // Now encrypt the signature using the above token
-                secondEncrParts.add(new WSEncryptionPart(this.mainSigId,
-                        "Element"));
-                addSignatureConfirmationsToEncrypt(secondEncrParts);
+                if (protectSignature) {
+                    secondEncrParts.add(new WSEncryptionPart(this.mainSigId,
+                            "Element"));
+                    addSignatureConfirmationsToEncrypt(secondEncrParts);
+                }
 
                 if(rmd.isInitiator()) {
                     for (String anEncryptedTokensIdList : encryptedTokensIdList) {

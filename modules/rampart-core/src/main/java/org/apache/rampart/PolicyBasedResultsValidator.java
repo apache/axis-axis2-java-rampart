@@ -249,12 +249,13 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
        
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
        
-        SupportingToken sgndSupTokens = rpd.getSignedSupportingTokens();
-        SupportingToken sgndEndorSupTokens = rpd.getSignedEndorsingSupportingTokens();
-       
+        // RAMPART-289: a signature over nothing but signed (encrypted) supporting
+        // tokens is expected, not an unexpected signature.
         if(sig && signatureParts.size() == 0
-                && (sgndSupTokens == null || sgndSupTokens.getTokens().size() == 0)
-                 && (sgndEndorSupTokens == null || sgndEndorSupTokens.getTokens().size() == 0)) {
+                && !hasTokens(rpd.getSignedSupportingTokens())
+                && !hasTokens(rpd.getSignedEndorsingSupportingTokens())
+                && !hasTokens(rpd.getSignedEncryptedSupportingTokens())
+                && !hasTokens(rpd.getSignedEndorsingEncryptedSupportingTokens())) {
            
             //Unexpected signature
             throw new RampartException("unexprectedSignature");
@@ -291,6 +292,31 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         }
     }
 
+    private static boolean hasTokens(SupportingToken supportingToken) {
+        return supportingToken != null && supportingToken.getTokens().size() > 0;
+    }
+
+    /**
+     * Whether the element with the given wsu:Id was revealed by decryption. The
+     * data reference's own wsu:Id is that of the EncryptedData, so the decrypted
+     * element itself is compared.
+     */
+    private boolean isElementDecrypted(List<WSSecurityEngineResult> results, String wsuId) {
+        if (wsuId == null) {
+            return false;
+        }
+        for (Object ref : getEncryptedReferences(results)) {
+            WSDataRef dataRef = (WSDataRef) ref;
+            if (dataRef == null || dataRef.getProtectedElement() == null) {
+                continue;
+            }
+            if (wsuId.equals(dataRef.getProtectedElement().getAttributeNS(WSConstants.WSU_NS, "Id"))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @param data contains RampartMessageData
      * @param results Used to handle SupportingTokens
@@ -298,7 +324,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
      */
     protected void validateSupportingTokens(ValidatorData data, List<WSSecurityEngineResult> results)
     throws RampartException {
-       
+
         //Check for UsernameToken
         RampartPolicyData rpd = data.getRampartMessageData().getPolicyData();
         RampartMessageData rmd = data.getRampartMessageData();
@@ -312,6 +338,12 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         handleSupportingTokens(rmd, results, signedEndSuppToken);
         SupportingToken endSuppToken = rpd.getEndorsingSupportingTokens();
         handleSupportingTokens(rmd, results, endSuppToken);
+        // RAMPART-289: the encrypted kinds were never validated, so a missing or
+        // clear-text token went unnoticed.
+        handleSupportingTokens(rmd, results, rpd.getEncryptedSupportingTokens());
+        handleSupportingTokens(rmd, results, rpd.getSignedEncryptedSupportingTokens());
+        handleSupportingTokens(rmd, results, rpd.getEndorsingEncryptedSupportingTokens());
+        handleSupportingTokens(rmd, results, rpd.getSignedEndorsingEncryptedSupportingTokens());
     }
 
     /**
@@ -333,7 +365,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 UsernameToken ut = (UsernameToken) token;
                 //Check presence of a UsernameToken
                 WSSecurityEngineResult utResult = fetchActionResult(results, WSConstants.UT);
-               
+                if (utResult == null && ut.isNoPassword()) {
+                    // WSS4J files a UsernameToken without a password under its own action.
+                    utResult = fetchActionResult(results, WSConstants.UT_NOPASSWORD);
+                }
+
                 if (utResult == null) {
                     if (ut.isOptional()) {
                         // RAMPART-286: the policy allows the token to be absent.
@@ -343,19 +379,26 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                 }
 
                 org.apache.wss4j.dom.message.token.UsernameToken wssUt = (org.apache.wss4j.dom.message.token.UsernameToken) utResult.get(WSSecurityEngineResult.TAG_USERNAME_TOKEN);
-               
-                if(ut.isNoPassword() && wssUt.getPassword() != null) {
-                throw new RampartException("invalidUsernameTokenType");
+
+                if (ut.isNoPassword()) {
+                    if (wssUt.getPassword() != null) {
+                        throw new RampartException("invalidUsernameTokenType");
+                    }
+                } else if (ut.isHashPassword()) {
+                    if (!wssUt.isHashed()) {
+                        throw new RampartException("invalidUsernameTokenType");
+                    }
+                } else if (wssUt.getPassword() == null ||
+                        !WSConstants.PASSWORD_TEXT.equals(wssUt.getPasswordType())) {
+                    throw new RampartException("invalidUsernameTokenType");
                 }
-               
-            if(ut.isHashPassword() && !wssUt.isHashed()) {
-                throw new RampartException("invalidUsernameTokenType");
-                } else if (!ut.isHashPassword() && (wssUt.getPassword() == null ||
-                        !wssUt.getPasswordType().equals(WSConstants.PASSWORD_TEXT))) {
-                throw new RampartException("invalidUsernameTokenType");
+
+                // An encrypted supporting token must have arrived encrypted: the
+                // decrypted references carry the wsu:Id of the token they revealed.
+                if (suppTok.isEncryptedToken() && !isElementDecrypted(results, wssUt.getID())) {
+                    throw new RampartException("encryptedPartMissing",
+                            new String[]{WSConstants.WSSE_NS + ":" + WSConstants.USERNAME_TOKEN_LN});
                 }
-               
-               
 
             } else if (token instanceof IssuedToken) {
                 WSSecurityEngineResult samlResult = fetchActionResult(results, WSConstants.ST_SIGNED);
@@ -1021,9 +1064,11 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
         }
        
         SupportingToken endSuppToken = rpd.getEndorsingSupportingTokens();
-        return isUsernameTokenPresent(endSuppToken);
-
-
+        return isUsernameTokenPresent(endSuppToken)
+                || isUsernameTokenPresent(rpd.getEncryptedSupportingTokens())
+                || isUsernameTokenPresent(rpd.getSignedEncryptedSupportingTokens())
+                || isUsernameTokenPresent(rpd.getEndorsingEncryptedSupportingTokens())
+                || isUsernameTokenPresent(rpd.getSignedEndorsingEncryptedSupportingTokens());
     }
    
     protected boolean isUsernameTokenPresent(SupportingToken suppTok) {
