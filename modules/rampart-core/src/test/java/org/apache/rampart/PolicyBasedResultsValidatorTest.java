@@ -44,7 +44,13 @@ import javax.security.auth.callback.CallbackHandler;
 
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.CryptoType;
+import org.apache.wss4j.common.bsp.BSPEnforcer;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.engine.WSSConfig;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
+import org.apache.ws.secpolicy.SPConstants;
+import org.apache.ws.secpolicy.model.SupportingToken;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -159,6 +165,94 @@ public class PolicyBasedResultsValidatorTest extends TestCase {
         X509Certificate certB = generateSelfSignedCert();
         assertFalse("different cert must return false",
                 v.callIsCertificateInKeyStore(new StubCrypto(new X509Certificate[]{certB}), certA));
+    }
+
+    // -----------------------------------------------------------------------
+    // UsernameToken password type (RAMPART-463)
+    // -----------------------------------------------------------------------
+
+    private static final String WSSE_NS =
+            "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+    private static final String WSU_NS =
+            "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+    private static final String UT_PROFILE_NS =
+            "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#";
+
+    /**
+     * Runs the supporting-token check for a policy asking for a clear-text (or,
+     * with <code>hashPassword</code>, a digest) UsernameToken against a received
+     * token whose wsse:Password carries the given attributes. The token is parsed
+     * by WSS4J with BSP enforcement off, as under disableBSPEnforcement.
+     */
+    private void validateUsernameToken(String passwordAttributes, boolean hashPassword)
+            throws Exception {
+        // Nonce and Created are there because WSS4J will not parse a digest without them.
+        String xml = "<wsse:UsernameToken xmlns:wsse='" + WSSE_NS + "' xmlns:wsu='" + WSU_NS + "'>"
+                + "<wsse:Username>alice</wsse:Username>"
+                + "<wsse:Password" + passwordAttributes + ">c2VjcmV0</wsse:Password>"
+                + "<wsse:Nonce>bm9uY2U=</wsse:Nonce>"
+                + "<wsu:Created>2026-01-01T00:00:00Z</wsu:Created>"
+                + "</wsse:UsernameToken>";
+        // Parsing a digest password needs the XML security library initialised.
+        WSSConfig.init();
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        dbf.setNamespaceAware(true);
+        Element element = dbf.newDocumentBuilder()
+                .parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)))
+                .getDocumentElement();
+        org.apache.wss4j.dom.message.token.UsernameToken received =
+                new org.apache.wss4j.dom.message.token.UsernameToken(
+                        element, false, new BSPEnforcer(true));
+
+        org.apache.ws.secpolicy.model.UsernameToken policyToken =
+                new org.apache.ws.secpolicy.model.UsernameToken(SPConstants.SP_V12);
+        policyToken.setHashPassword(hashPassword);
+        SupportingToken supportingTokens =
+                new SupportingToken(SPConstants.SUPPORTING_TOKEN_SUPPORTING, SPConstants.SP_V12);
+        supportingTokens.addToken(policyToken);
+
+        WSSecurityEngineResult result = new WSSecurityEngineResult(WSConstants.UT, received);
+        new Validator().handleSupportingTokens(
+                null, Collections.singletonList(result), supportingTokens);
+    }
+
+    private void assertUsernameTokenRejected(String passwordAttributes, boolean hashPassword)
+            throws Exception {
+        try {
+            validateUsernameToken(passwordAttributes, hashPassword);
+            fail("expected the UsernameToken to be rejected");
+        } catch (RampartException expected) {
+            // WSS4J reports the same condition differently; only Rampart's verdict matters.
+        }
+    }
+
+    /** RAMPART-463: this used to end in a NullPointerException. */
+    public void testPasswordWithoutTypeIsClearText() throws Exception {
+        validateUsernameToken("", false);
+    }
+
+    public void testPasswordWithEmptyTypeIsClearText() throws Exception {
+        validateUsernameToken(" Type=''", false);
+    }
+
+    public void testPasswordTextTypeIsClearText() throws Exception {
+        validateUsernameToken(" Type='" + UT_PROFILE_NS + "PasswordText'", false);
+    }
+
+    /** A digest must not pass where the policy asks for clear text. */
+    public void testDigestRejectedWhereClearTextRequired() throws Exception {
+        assertUsernameTokenRejected(" Type='" + UT_PROFILE_NS + "PasswordDigest'", false);
+    }
+
+    /** Nor may an unknown type be waved through as clear text. */
+    public void testUnknownTypeRejectedWhereClearTextRequired() throws Exception {
+        assertUsernameTokenRejected(" Type='urn:example:other'", false);
+    }
+
+    /** An untyped password is clear text, so it cannot satisfy a HashPassword policy. */
+    public void testPasswordWithoutTypeRejectedWhereDigestRequired() throws Exception {
+        assertUsernameTokenRejected("", true);
     }
 
     // -----------------------------------------------------------------------

@@ -347,6 +347,23 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
     }
 
     /**
+     * Whether the received UsernameToken carries a clear-text password.
+     * <p>
+     * RAMPART-463: the Type attribute of wsse:Password is optional in the
+     * UsernameToken Profile and its absence means PasswordText. Such a token only
+     * gets this far when disableBSPEnforcement is set (BSP R4201 rejects it
+     * otherwise), and WSS4J has by then verified it as clear text, so a missing
+     * Type must be read the same way here.
+     */
+    static boolean isPlainTextPassword(org.apache.wss4j.dom.message.token.UsernameToken wssUt) {
+        if (wssUt.getPassword() == null) {
+            return false;
+        }
+        String type = wssUt.getPasswordType();
+        return type == null || type.trim().isEmpty() || WSConstants.PASSWORD_TEXT.equals(type);
+    }
+
+    /**
      * @param rmd Rampart configuration Object
      * @param results unused
      * @param suppTok Defines an ArrayList of tokens
@@ -388,8 +405,7 @@ public class PolicyBasedResultsValidator implements ExtendedPolicyValidatorCallb
                     if (!wssUt.isHashed()) {
                         throw new RampartException("invalidUsernameTokenType");
                     }
-                } else if (wssUt.getPassword() == null ||
-                        !WSConstants.PASSWORD_TEXT.equals(wssUt.getPasswordType())) {
+                } else if (!isPlainTextPassword(wssUt)) {
                     throw new RampartException("invalidUsernameTokenType");
                 }
 
